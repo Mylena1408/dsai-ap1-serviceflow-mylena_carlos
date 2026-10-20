@@ -14,6 +14,10 @@ const domain = vi.hoisted(() => ({
   updateSector: vi.fn(),
   updateService: vi.fn(),
   updateUser: vi.fn(),
+  createDocumentRequirement: vi.fn(),
+  updateDocumentRequirement: vi.fn(),
+  moveDocumentRequirement: vi.fn(),
+  deactivateDocumentRequirement: vi.fn(),
 }));
 const nextNavigation = vi.hoisted(() => ({
   redirect: vi.fn((path: string): never => {
@@ -44,12 +48,22 @@ vi.mock("@/modules/services", () => ({
   setServiceActive: domain.setServiceActive,
   updateService: domain.updateService,
 }));
+vi.mock("@/modules/document-requirements", () => ({
+  createDocumentRequirement: domain.createDocumentRequirement,
+  updateDocumentRequirement: domain.updateDocumentRequirement,
+  moveDocumentRequirement: domain.moveDocumentRequirement,
+  deactivateDocumentRequirement: domain.deactivateDocumentRequirement,
+}));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 
 import {
   type AdminUpdateState,
   createCategoryAction,
+  createDocumentRequirementAction,
+  deactivateDocumentRequirementAction,
+  moveDocumentRequirementAction,
+  updateDocumentRequirementAction,
   createSectorAction,
   createServiceAction,
   createUserAction,
@@ -291,6 +305,144 @@ describe("administrative Server Actions", () => {
       ),
       "error",
       "Não foi possível criar o registro. Tente novamente.",
+    );
+  });
+});
+
+describe("document requirement Server Actions", () => {
+  function requirementForm(values: Record<string, string>, formats: string[]): FormData {
+    const data = formData(values);
+    for (const format of formats) data.append("acceptedFormats", format);
+    return data;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    for (const operation of Object.values(domain)) operation.mockResolvedValue({});
+  });
+
+  it("creates a requirement with only the editable fields and the service from the form", async () => {
+    await expectCreate(
+      createDocumentRequirementAction(
+        { status: "error", message: "" },
+        requirementForm(
+          {
+            serviceId: "service-id",
+            name: "Requerimento de férias",
+            isRequired: "true",
+            position: "99",
+            isActive: "false",
+          },
+          ["PDF", "DOCX"],
+        ),
+      ),
+      "success",
+      "Registro criado.",
+    );
+
+    expect(domain.createDocumentRequirement).toHaveBeenCalledWith("service-id", {
+      name: "Requerimento de férias",
+      isRequired: true,
+      acceptedFormats: ["PDF", "DOCX"],
+    });
+  });
+
+  it("updates without letting the form choose service, position or state", async () => {
+    await expectUpdate(
+      updateDocumentRequirementAction(
+        { status: "error", message: "" },
+        requirementForm(
+          {
+            id: "requirement-id",
+            serviceId: "other-service",
+            name: "Documento de autorização",
+            isRequired: "false",
+            position: "0",
+            isActive: "true",
+          },
+          ["TXT"],
+        ),
+      ),
+      "success",
+      "Alterações salvas.",
+    );
+
+    expect(domain.updateDocumentRequirement).toHaveBeenCalledWith("requirement-id", {
+      name: "Documento de autorização",
+      isRequired: false,
+      acceptedFormats: ["TXT"],
+    });
+  });
+
+  it("passes unexpected flag values to server validation instead of coercing them", async () => {
+    await createDocumentRequirementAction(
+      { status: "error", message: "" },
+      requirementForm({ serviceId: "service-id", name: "Doc", isRequired: "yes" }, []),
+    );
+
+    expect(domain.createDocumentRequirement).toHaveBeenCalledWith("service-id", {
+      name: "Doc",
+      isRequired: "yes",
+      acceptedFormats: [],
+    });
+  });
+
+  it("moves and deactivates through redirecting forms in the services section", async () => {
+    await expectRedirect(
+      moveDocumentRequirementAction(
+        formData({ id: "requirement-id", direction: "up", section: "services" }),
+      ),
+      "/admin?section=services&notice=updated&entity=documentRequirements",
+    );
+    await expectRedirect(
+      deactivateDocumentRequirementAction(
+        formData({ id: "requirement-id", section: "services", isActive: "true" }),
+      ),
+      "/admin?section=services&notice=status&entity=documentRequirements",
+    );
+
+    expect(domain.moveDocumentRequirement).toHaveBeenCalledWith("requirement-id", "up");
+    expect(domain.deactivateDocumentRequirement).toHaveBeenCalledWith("requirement-id");
+    expect(nextCache.revalidatePath).toHaveBeenCalledTimes(2);
+  });
+
+  it("maps domain errors to fixed messages", async () => {
+    domain.createDocumentRequirement.mockRejectedValueOnce(new ConflictError());
+    await expectCreate(
+      createDocumentRequirementAction(
+        { status: "error", message: "" },
+        requirementForm({ serviceId: "service-id", name: "Duplicado", isRequired: "true" }, ["PDF"]),
+      ),
+      "error",
+      "Já existe um registro com esses dados ou uma opção selecionada não está disponível.",
+    );
+
+    domain.updateDocumentRequirement.mockRejectedValueOnce(new ValidationError([]));
+    await expectUpdate(
+      updateDocumentRequirementAction(
+        { status: "error", message: "" },
+        requirementForm({ id: "requirement-id", name: "", isRequired: "true" }, []),
+      ),
+      "error",
+      "Confira os campos: há valores ausentes ou inválidos.",
+    );
+
+    domain.moveDocumentRequirement.mockRejectedValueOnce(new ConflictError());
+    await expectRedirect(
+      moveDocumentRequirementAction(
+        formData({ id: "requirement-id", direction: "down", section: "services" }),
+      ),
+      "/admin?section=services&error=dependency&entity=documentRequirements",
+    );
+
+    domain.deactivateDocumentRequirement.mockRejectedValueOnce(
+      new Error("sensitive database details"),
+    );
+    await expect(
+      deactivateDocumentRequirementAction(formData({ id: "requirement-id", section: "services" })),
+    ).rejects.toThrow("sensitive database details");
+    expect(nextNavigation.redirect).not.toHaveBeenCalledWith(
+      expect.stringContaining("sensitive"),
     );
   });
 });

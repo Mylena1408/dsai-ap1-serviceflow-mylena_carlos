@@ -19,6 +19,12 @@ enum RequestStatus {
   COMPLETED
 }
 
+enum DocumentFormat {
+  PDF
+  DOCX
+  TXT
+}
+
 model Sector {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.Citext
@@ -55,6 +61,7 @@ model User {
   sector                      Sector?                 @relation(fields: [sectorId], references: [id], onDelete: Restrict)
   requests                    Request[]              @relation("UserRequests")
   requestStatusEvents         RequestStatusEvent[]   @relation("RequestStatusEventActor")
+  uploadedAttachments         RequestAttachment[]    @relation("RequestAttachmentUploader")
 }
 
 model Service {
@@ -70,6 +77,7 @@ model Service {
   category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   sector   Sector   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
   requests Request[]
+  documentRequirements ServiceDocumentRequirement[]
 }
 
 model Request {
@@ -92,6 +100,7 @@ model Request {
   service    Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   sector     Sector              @relation(fields: [sectorId], references: [id], onDelete: Restrict)
   events     RequestStatusEvent[]
+  attachments RequestAttachment[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -107,4 +116,48 @@ model RequestStatusEvent {
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor   User    @relation("RequestStatusEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+}
+
+// Name uniqueness among active requirements of a service and row-level CHECK
+// constraints are created in SQL by migration 20261016120000_document_requirements_and_attachments.
+model ServiceDocumentRequirement {
+  id              String           @id @default(uuid()) @db.Uuid
+  serviceId       String           @db.Uuid
+  name            String           @db.Citext
+  isRequired      Boolean
+  acceptedFormats DocumentFormat[]
+  position        Int
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now()) @db.Timestamptz
+  updatedAt       DateTime         @updatedAt @db.Timestamptz
+
+  service     Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  attachments RequestAttachment[]
+
+  @@index([serviceId])
+}
+
+// Attachments are immutable metadata; file content lives in private object storage.
+model RequestAttachment {
+  id                          String         @id @default(uuid()) @db.Uuid
+  requestId                   String         @db.Uuid
+  requirementId               String         @db.Uuid
+  requirementNameSnapshot     String
+  requirementRequiredSnapshot Boolean
+  originalFilename            String
+  detectedFormat              DocumentFormat
+  contentType                 String
+  sizeBytes                   Int
+  sha256                      String         @db.Char(64)
+  storageKey                  String
+  uploadedById                String         @db.Uuid
+  createdAt                   DateTime       @default(now()) @db.Timestamptz
+
+  request     Request                    @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  requirement ServiceDocumentRequirement @relation(fields: [requirementId], references: [id], onDelete: Restrict)
+  uploadedBy  User                       @relation("RequestAttachmentUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@unique([requestId, requirementId])
+  @@index([requirementId])
+  @@index([uploadedById])
 }

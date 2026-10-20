@@ -55,6 +55,9 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "currentPassword",
   "newPassword",
   "confirmPassword",
+  "attachments",
+  "isRequired",
+  "acceptedFormats",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

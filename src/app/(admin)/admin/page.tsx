@@ -9,10 +9,19 @@ import { requireConfigurationAdministrator } from "@/server/authorization";
 import { listSectors } from "@/modules/sectors";
 import { listServices } from "@/modules/services";
 import { listUsers } from "@/modules/users";
+import {
+  MAX_ACTIVE_DOCUMENT_REQUIREMENTS,
+  listDocumentRequirements,
+} from "@/modules/document-requirements";
 import { AdminCreateForm } from "./create-form";
 import { AdminRecordEditor } from "./record-editor";
+import { DocumentRequirementsEditor } from "./document-requirements-editor";
 import {
   createCategoryAction,
+  createDocumentRequirementAction,
+  deactivateDocumentRequirementAction,
+  moveDocumentRequirementAction,
+  updateDocumentRequirementAction,
   createSectorAction,
   createServiceAction,
   createUserAction,
@@ -80,13 +89,14 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ error, notice, section }, sectors, categories, users, services] =
+  const [{ error, notice, section }, sectors, categories, users, services, documentRequirements] =
     await Promise.all([
       searchParams,
       listSectors(),
       listCategories(),
       listUsers(),
       listServices(),
+      listDocumentRequirements(),
     ]);
   const message = announcement(error, notice);
   const selectedSection = selectedAdminSection(section);
@@ -316,7 +326,25 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               section={selectedSection}
               toggleAction={toggleServiceAction}
               updateAction={updateServiceAction}
-            />
+            >
+              <DocumentRequirementsEditor
+                createAction={createDocumentRequirementAction}
+                deactivateAction={deactivateDocumentRequirementAction}
+                maxActive={MAX_ACTIVE_DOCUMENT_REQUIREMENTS}
+                moveAction={moveDocumentRequirementAction}
+                requirements={documentRequirements
+                  .filter((requirement) => requirement.serviceId === service.id)
+                  .map((requirement) => ({
+                    id: requirement.id,
+                    name: requirement.name,
+                    isRequired: requirement.isRequired,
+                    acceptedFormats: requirement.acceptedFormats,
+                    isActive: requirement.isActive,
+                  }))}
+                serviceId={service.id}
+                updateAction={updateDocumentRequirementAction}
+              />
+            </AdminRecordEditor>
           ))}
         </ul>
         </section>

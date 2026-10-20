@@ -3,7 +3,7 @@
 **Entrega:** Catálogo configurável e ciclo básico de solicitações  
 **SPEC principal:** `SPEC/2026-09-30-catalogo-e-solicitacoes.md`  
 **SPEC de contexto:** `SPEC/2026-09-30-visao-geral.md`  
-**Estado:** SF-001 a SF-025 concluídas; SF-026 incompleta (8.903/100.000 linhas em medição oficial de 2026-10-06); SF-027 concluída após validação dos procedimentos documentados; SF-028 revisada, mas não concluída por dependência incompleta; SF-029 implementada e testada manualmente, com suite automatizada de integração pendente.
+**Estado:** SF-001 a SF-025 concluídas; SF-026 incompleta (8.903/100.000 linhas em medição oficial de 2026-10-06); SF-027 concluída após validação dos procedimentos documentados; SF-028 revisada, mas não concluída por dependência incompleta; SF-029 implementada e testada manualmente, com suite automatizada de integração pendente. SF-030 a SF-036 (documentos exigidos por serviço, alteração de SPEC de 2026-10-16) registradas; SF-030 com decisão técnica concluída e provisionamento pendente; SF-031 concluída em 2026-10-20 (migration aplicada e integração aprovada em banco de teste PostgreSQL 17.11 local); SF-033 implementada e validada em testes unitários (2026-10-19), não concluída: adaptador real sem teste contra bucket e critérios do fluxo dependentes da SF-034/SF-035; SF-032 concluída em 2026-10-20 (integração aprovada no mesmo banco de teste); SF-034 a SF-036 não iniciadas.
 
 ## Regras de execução
 
@@ -305,3 +305,78 @@
 - **Critérios de conclusão:** Os três perfis podem alterar a própria senha após validar a atual; nova senha tem pelo menos 12 caracteres e confirmação idêntica; servidor obtém a conta exclusivamente da sessão e recusa `userId`/campos extras; somente hash Argon2id é persistido; erros não expõem credenciais; sessão continua autenticada; falhas de validação não alteram hash; a nova senha autentica em login posterior.
 - **Testes relacionados:** Testes unitários de schema/Server Action; integração PostgreSQL real para ADMIN/REQUESTER/ATTENDANT, senha atual incorreta, regra de 12 caracteres, confirmação, ID forjado, hash persistido, sessão ativa e autenticação subsequente. Unitários (79), typecheck, lint e build passaram; integração ainda não validada devido a bloqueios registrados em NOTES.md. Os testes E2E têm 1 cenário, aprovado na execução anterior à SF-029 e não reexecutado nesta etapa.
 - **SPEC:** `SPEC/2026-09-30-catalogo-e-solicitacoes.md`, seções 3, 4, 7, 15, 16 e 20.
+
+## Documentos exigidos por serviço — alteração de SPEC de 2026-10-16
+
+Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo inicial; a alteração de 2026-10-16 passa a autorizá-los somente no recorte da seção 21. Nenhuma destas tarefas foi iniciada. Os critérios `CA-DOC-xx` citados estão na seção 21.12.
+
+### SF-030 — Confirmar e preparar armazenamento privado de documentos
+
+- **Estado:** Parcialmente concluída em 2026-10-16. **Concluído:** verificação na documentação oficial da Vercel, do Supabase e do Next.js; confirmação do bucket privado do Supabase Storage; limites mantidos com cálculo de margem; `bodySizeLimit` definido; fluxos de upload, compensação e download; nomes de buckets e variáveis definidos (SPEC 21.15). **Pendente (ação do responsável pelas contas Supabase/Vercel):** criar os buckets privados por ambiente, com produção em projeto Supabase exclusivo; gerar chaves secretas `sb_secret_` dedicadas; cadastrar as variáveis na Vercel e nos ambientes locais; testar que a leitura anônima do bucket é negada. Nesta etapa não foram criados credenciais, buckets ou variáveis, nem alterados os arquivos `.env*.example`, por restrição explícita da sessão.
+- **Observação de dependência:** a SF-031 (schema) depende apenas da decisão técnica, já concluída. O provisionamento pendente bloqueia somente os testes do adaptador real (SF-033) e o uso em ambientes reais (SF-034 em diante).
+- **Objetivo:** Confirmar o provedor recomendado (bucket privado do Supabase Storage) ou registrar a alternativa escolhida; criar buckets privados separados para desenvolvimento, teste e produção; definir nomes de variáveis de ambiente server-side; reconfirmar na documentação vigente do Vercel os limites de corpo de requisição/resposta usados na seção 21.6.
+- **Arquivos/módulos esperados:** `.env.example`/`.env.test.example` apenas com nomes de variáveis e valores vazios, README (configuração), `NOTES.md`.
+- **Dependências:** Aprovação da seção 21 da SPEC.
+- **Critérios de conclusão:** Buckets não públicos; credencial somente em variáveis de ambiente fora do repositório e sem prefixo `NEXT_PUBLIC_`; ambiente de teste isolado da produção; decisão e limites confirmados registrados em `NOTES.md`; nenhuma dependência adicionada sem justificativa registrada. Atende CA-DOC-21.
+- **Testes relacionados:** Verificação manual documentada de que leitura anônima do bucket é negada (pendente); scan de segredos antes do commit. Na etapa de 2026-10-16 nenhum teste automatizado foi executado, por ser etapa sem código.
+- **SPEC:** Seções 21.6, 21.8, 21.14 e 21.15.
+
+### SF-031 — Modelar requisitos documentais e anexos
+
+- **Estado:** **Concluída em 2026-10-20.** Implementada em 2026-10-16. Em 2026-10-20 a migration `20261016120000_document_requirements_and_attachments` foi aplicada pelo `migrate deploy` do setup de integração no banco de teste local `serviceflow_test` (PostgreSQL 17.11, mesma versão da produção, locale ICU `en-US`), e `tests/integration/document-schema.test.ts` passou (10/10). Nenhum banco de desenvolvimento ou produção foi usado; a migration **ainda não foi aplicada no banco principal** (passo separado, aguardando autorização).
+- **Objetivo:** Criar `ServiceDocumentRequirement` e `RequestAttachment` com relações, unicidade `(request_id, requirement_id)`, unicidade case-insensitive de nome entre requisitos ativos do mesmo serviço e restrições que impeçam exclusão física de registros referenciados.
+- **Arquivos/módulos esperados:** `prisma/schema.prisma`, nova migration aditiva em `prisma/migrations/`.
+- **Dependências:** SF-030.
+- **Critérios de conclusão:** Migration aditiva aplicada no banco de teste sem alterar dados existentes; nenhuma linha de setor, serviço ou requisito criada pela migration (CA-DOC-04); campos de metadados completos conforme seção 21.9.
+- **Testes relacionados:** `prisma validate`; integração de restrições relacionais e unicidade. Criados `tests/integration/document-schema.test.ts` (10 casos: metadados, unicidade parcial case-insensitive, CHECKs, FKs inexistentes, exclusão física bloqueada e preservação após editar/desativar requisito e serviço — 10 aprovados em 2026-10-20; o registro anterior citava 11 casos, mas o arquivo tem 10) e `tests/unit/prisma/migrations.test.ts` (2 casos: nenhuma migration insere dados; migration nova é aditiva — aprovados). `tests/integration/fixtures.ts` passou a limpar anexos e requisitos antes das tabelas referenciadas.
+- **SPEC:** Seção 21.9.
+
+### SF-032 — Implementar configuração de requisitos documentais por serviço
+
+- **Estado:** **Concluída em 2026-10-20.** Implementada em 2026-10-19: módulo `src/modules/document-requirements/` (criar, editar, Subir/Descer e desativar, somente ADMIN, em transação serializável), esquema de entrada em `src/shared/validation/`, Server Actions e bloco "Documentos exigidos" em cada serviço do painel administrativo. Em 2026-10-20, `tests/integration/document-requirements.test.ts` passou (16/16) no banco de teste local PostgreSQL 17.11 com ICU `en-US`, comprovando CA-DOC-01 a 03; CA-DOC-04 tem cobertura unitária em `tests/unit/prisma/migrations.test.ts`. Decisões aprovadas: sem reativação (não prevista na SPEC); inativos exibidos como histórico, sem editar ou mover; configuração permitida em serviço inativo; Subir no primeiro e Descer no último sem efeito e sem erro, com os botões ocultos.
+- **Objetivo:** Operações administrativas server-side e interface no painel de serviços para criar, editar, reordenar e desativar requisitos (nome, obrigatoriedade, formatos aceitos), com limite de 5 ativos por serviço.
+- **Arquivos/módulos esperados:** `src/modules/services/` (ou módulo dedicado), `src/shared/validation/`, `src/app/(admin)/admin/`, `tests/unit/`, `tests/integration/`.
+- **Dependências:** SF-031, SF-010, SF-014.
+- **Critérios de conclusão:** CA-DOC-01, CA-DOC-02, CA-DOC-03 e CA-DOC-04.
+- **Testes relacionados:** Unitários de validação; integração de CRUD, unicidade, limite e autorização por perfil. Criados em 2026-10-19: `tests/unit/modules/document-requirements/policy.test.ts` (20 casos) e 5 casos novos em `tests/unit/admin-actions.test.ts`, aprovados; `tests/integration/document-requirements.test.ts` (16 casos), aprovados em 2026-10-20. Resultado em 2026-10-20: integração 26/26 (SF-031 + SF-032) e `referential-integrity.test.ts` 3/3; `npm run test:unit` 174 aprovados (26 arquivos); lint, typecheck, build e `prisma validate` aprovados.
+- **SPEC:** Seções 21.2 e 21.3.
+
+### SF-033 — Implementar validação de arquivos e adaptador de armazenamento
+
+- **Estado:** Implementada em 2026-10-19 e validada em testes unitários; **não concluída**. **Concluído:** detecção do tipo real, limites, sanitização (nome acima de 255 caracteres é rejeitado, não truncado), SHA-256, chave opaca, adaptador em memória e adaptador HTTP do Supabase Storage com `fetch` simulado, configuração por variáveis com recusa de bucket de teste sem sufixo `-test`, erros fixos sem nome, conteúdo, chave ou credencial. **Pendente:** (a) testar o adaptador real contra um bucket `-test` provisionado (depende do provisionamento da SF-030); (b) CA-DOC-09, CA-DOC-11 e CA-DOC-20 só ficam comprovados "no servidor" quando as funções forem usadas pela Server Action de abertura (SF-034) e pela rota de download (SF-035).
+- **Objetivo:** Detecção do tipo real (PDF, DOCX sem macros, TXT UTF-8), limites de tamanho/quantidade, sanitização de nome, cálculo de SHA-256, geração de chave opaca e adaptador de armazenamento (real e de teste) com mensagens de erro fixas e sem registro de conteúdo, nome original ou chave em logs.
+- **Arquivos/módulos esperados:** módulo server-side de anexos em `src/modules/` e `src/server/`, `tests/unit/` com fixtures sintéticas geradas nos testes.
+- **Dependências:** SF-030.
+- **Critérios de conclusão:** CA-DOC-09, CA-DOC-10, CA-DOC-11, CA-DOC-20 e CA-DOC-22.
+- **Testes relacionados:** Unitários de assinaturas, DOCX com macros, ZIP não DOCX, TXT inválido, extensão divergente, limites, sanitização e mensagens sem dados sensíveis. Criados em 2026-10-19: `tests/unit/modules/attachments/file-type.test.ts`, `tests/unit/modules/attachments/policy.test.ts` e `tests/unit/server/storage/storage.test.ts` (68 casos novos), com fixtures sintéticas geradas em memória por `tests/unit/modules/attachments/synthetic-files.ts`. Resultado: `npm run test:unit` 149 aprovados (25 arquivos); lint, typecheck e build aprovados.
+- **SPEC:** Seções 21.6, 21.7, 21.8 e 21.10.
+
+### SF-034 — Implementar abertura de solicitação com documentos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Exibir os documentos solicitados no detalhe do serviço; aceitar um arquivo por requisito; validar no servidor com a configuração vigente; gravar objetos, criar solicitação, evento inicial e anexos atomicamente, com compensação em falha. Manter inalterado o fluxo de serviços sem requisitos. Ajustar o limite de corpo das Server Actions de forma compatível com a seção 21.6.
+- **Arquivos/módulos esperados:** `src/modules/requests/`, `src/app/(requester)/catalog/[serviceId]/`, `src/app/(requester)/requests/actions.ts`, `next.config.ts`, `tests/unit/`, `tests/integration/`.
+- **Dependências:** SF-032, SF-033, SF-017.
+- **Critérios de conclusão:** CA-DOC-05, CA-DOC-06, CA-DOC-07, CA-DOC-08, CA-DOC-12 e CA-DOC-13.
+- **Testes relacionados:** Integração de abertura com e sem requisitos, obrigatórios ausentes, requisito de outro serviço/inativo, duplicidade, rejeição sem persistência, compensação e campos forjados pelo cliente.
+- **SPEC:** Seção 21.4.
+
+### SF-035 — Implementar consulta e download autorizados de anexos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Listar metadados dos anexos no detalhe da solicitação (solicitante e atendente) e servir o download por rota autorizada server-side, sem URL pública ou permanente e com os cabeçalhos definidos.
+- **Arquivos/módulos esperados:** `src/server/authorization/`, rota de download em `src/app/`, páginas de detalhe do solicitante e do atendente, `tests/unit/`, `tests/integration/`.
+- **Dependências:** SF-034, SF-018, SF-020.
+- **Critérios de conclusão:** CA-DOC-14, CA-DOC-15, CA-DOC-16, CA-DOC-17, CA-DOC-18 e CA-DOC-19.
+- **Testes relacionados:** Autorização por perfil, setor (inclusive após mudança de setor), propriedade, inativo e não autenticado; anexo de outra solicitação; integridade por SHA-256; cabeçalhos; preservação após editar/desativar requisito, serviço, categoria e setor.
+- **SPEC:** Seções 21.5 e 21.11.
+
+### SF-036 — Testes E2E e revisão da funcionalidade de documentos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Cobrir no navegador o percurso da seção 21.13 e revisar escopo, segurança, segredos, logs, fixtures e documentação (README, NOTES, diário, sessões).
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-035.
+- **Critérios de conclusão:** Todos os CA-DOC-01 a CA-DOC-22 verificados e registrados; suites unitária, integração e E2E, typecheck, lint e build executadas com resultados reais registrados.
+- **Testes relacionados:** E2E do administrador, solicitante e atendente; negação de acesso direto por usuário não autorizado.
+- **SPEC:** Seções 21.12 e 21.13.

@@ -2,6 +2,7 @@
 
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import type { AdminUpdateState } from "./actions";
 
 type UpdateAction = (
@@ -50,6 +51,8 @@ type RecordEditorProps = {
   section?: string;
   sectors?: Choice[];
   categories?: Choice[];
+  // Extra record content shown below the details while not editing.
+  children?: ReactNode;
 };
 
 const initialState: AdminUpdateState = {
@@ -187,6 +190,7 @@ export function AdminRecordEditor({
   section = "overview",
   sectors = [],
   categories = [],
+  children,
 }: RecordEditorProps) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -259,6 +263,7 @@ export function AdminRecordEditor({
                 <span className="editor-success" role="status">{feedback}</span>
               ) : null}
             </div>
+            {children}
           </>
         )}
       </div>

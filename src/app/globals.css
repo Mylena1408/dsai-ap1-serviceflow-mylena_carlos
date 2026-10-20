@@ -603,6 +603,77 @@ p {
   margin: 0;
 }
 
+.requirements-panel {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #e8eef0;
+}
+
+.requirements-panel h3,
+.requirements-panel h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.requirements-panel h4 {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.requirement-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.requirement-item {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e5ecee;
+  border-radius: 11px;
+  background: #fbfcfc;
+}
+
+.requirement-item .entity-details {
+  margin-bottom: 8px;
+}
+
+.requirement-actions {
+  flex-wrap: wrap;
+}
+
+.format-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.format-options legend {
+  margin-bottom: 7px;
+  padding: 0;
+  color: #354c5a;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.format-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.format-options input[type="checkbox"] {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+}
+
 .status-badge {
   display: inline-flex;
   min-height: 26px;

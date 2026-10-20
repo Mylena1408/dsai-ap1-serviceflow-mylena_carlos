@@ -58,6 +58,7 @@ O perfil é um campo obrigatório e exclusivo do usuário: `ADMIN`, `REQUESTER` 
 - Transição de status de Aberta para Em atendimento e de Em atendimento para Concluída.
 - Histórico de criação e de todas as transições de status, com ator e instante.
 - Interface web responsiva suficiente para executar os fluxos acima.
+- Requisitos documentais configuráveis por serviço e anexos de documentos PDF, DOCX e TXT na abertura de solicitações, com consulta e download autorizados, conforme a alteração aprovada de 2026-10-16 (seção 21).
 
 ## 5. Fora de escopo
 
@@ -66,7 +67,7 @@ Não fazem parte desta entrega:
 - SLA, prazos de atendimento, alertas ou priorização;
 - aprovação;
 - campos personalizados;
-- anexos;
+- anexos — **item fora do escopo inicial; passa a ser autorizado, nos limites da seção 21, pela alteração aprovada de 2026-10-16**. Anexos fora daquele recorte (por exemplo, em comentários, após a abertura ou por atendentes) continuam fora de escopo;
 - comentários ou conversas;
 - notificações;
 - dashboard ou relatórios;
@@ -318,6 +319,7 @@ A gravação do evento e a atualização de status pertencem à mesma transaçã
 - [ ] Um usuário autenticado de cada perfil (`ADMIN`, `REQUESTER` e `ATTENDANT`) consegue alterar somente a própria senha, informando a senha atual, uma nova senha com no mínimo 12 caracteres e sua confirmação idêntica.
 - [ ] Senha atual incorreta, nova senha abaixo do mínimo ou confirmação divergente não altera a credencial persistida; a operação identifica a conta apenas pela sessão server-side e não aceita `userId` enviado pelo cliente.
 - [ ] Após alteração válida, somente o hash Argon2id da nova senha é persistido, a senha em texto puro não é registrada nem exibida, a sessão permanece autenticada e a nova senha permite autenticação subsequente.
+- [ ] Os critérios de aceitação de documentos exigidos por serviço (CA-DOC-01 a CA-DOC-22, seção 21.12) são atendidos.
 - [ ] A suíte automatizada cobre as regras de negócio, autorização, persistência e o percurso web completo definido nesta SPEC.
 
 ## 16. Estratégia de testes
@@ -359,6 +361,10 @@ Usar PostgreSQL de teste e testar persistência, relações, restrições e tran
 
 Cobrir no navegador: autenticação de usuários provisionados, configuração pelo administrador, publicação de serviço, abertura e acompanhamento pelo solicitante, atendimento e conclusão por atendente autorizado, negação de operações proibidas e alteração da própria senha com confirmação de sucesso sem logout e rejeição de senha atual incorreta ou confirmação divergente.
 
+### Documentos exigidos por serviço
+
+A estratégia de testes específica dos requisitos documentais e anexos (unitários, integração, autorização e E2E) está definida na seção 21.13 e complementa as subseções acima.
+
 ## 17. Decisões técnicas iniciais
 
 - Aplicação web em **Next.js (App Router) e TypeScript**, organizada como monólito modular.
@@ -386,7 +392,8 @@ Cada item abaixo permanece fora desta entrega e requer SPEC própria antes de im
 - fluxos configuráveis por serviço e etapas adicionais;
 - aprovação, responsáveis e decisões de aprovação;
 - campos personalizados e validação específica de serviços;
-- comentários, conversas e anexos;
+- comentários e conversas; anexos fora do recorte aprovado na seção 21 (anexos em comentários, inclusão ou substituição após a abertura, anexos enviados por atendentes, outros formatos e arquivos acima dos limites definidos);
+- ferramentas MCP de consulta a documentos (requisito futuro registrado na seção 21.11);
 - SLA, vencimento, prioridades e alertas;
 - notificações por canais internos ou provedores externos;
 - dashboard, indicadores e relatórios;
@@ -419,3 +426,281 @@ A SPEC não possuía política de senha além de exigir valor não vazio nos flu
 ### Critérios de aceitação e testes adicionados
 
 Os três critérios de autogerenciamento estão incluídos na seção 15. As seções 16 (testes unitários, integração, autorização e E2E) foram ampliadas para verificar perfis permitidos, identidade exclusivamente server-side, hash persistido, ausência de alteração nos casos inválidos, permanência da sessão e novo login com a senha alterada.
+
+## 21. Alteração aprovada — 2026-10-16 — Documentos exigidos por serviço
+
+### 21.1 Registro da mudança de escopo
+
+Anexos estavam **explicitamente fora do escopo inicial** desta SPEC (seções 5 e 19). Esta alteração passa a **autorizá-los** no recorte descrito a seguir: o administrador configura, por serviço, os documentos exigidos; o solicitante anexa os arquivos correspondentes na abertura da solicitação; atendentes autorizados e o próprio solicitante consultam e baixam esses arquivos. O foco inicial de uso são serviços de RH, mas a capacidade é genérica e vale para qualquer serviço cadastrado.
+
+Esta alteração complementa as seções 4, 5, 15, 16 e 19. Não altera o ciclo de status (seção 9), a matriz de autorização existente (seção 10) nem as demais regras, exceto onde indicado abaixo. Nenhuma implementação foi realizada no registro desta alteração.
+
+### 21.2 Requisitos documentais por serviço (configuração)
+
+1. Somente `ADMIN` pode criar, editar, reordenar e desativar requisitos documentais de um serviço. A autorização é verificada no servidor.
+2. Cada requisito documental pertence a exatamente um serviço e possui:
+   - **nome**: obrigatório, não vazio após remoção de espaços periféricos, máximo de 120 caracteres; único entre os requisitos ativos do mesmo serviço, sem distinção entre maiúsculas e minúsculas;
+   - **obrigatoriedade**: obrigatório ou opcional, definido pelo administrador;
+   - **formatos aceitos**: subconjunto não vazio de `PDF`, `DOCX` e `TXT`;
+   - **ordem de exibição** e estado **ativo/inativo**.
+3. A configuração é específica de cada serviço. Não há requisitos herdados de setor ou categoria, nem conjunto padrão para todos os serviços de um setor.
+4. Um serviço pode ter **zero** requisitos documentais. Nesse caso, a abertura funciona exatamente como antes desta alteração e não aceita anexos.
+5. Um serviço pode ter no máximo **5 requisitos ativos** (justificativa na seção 21.6).
+6. Requisitos são desativados logicamente. Requisito referenciado por anexo não pode ser apagado fisicamente.
+7. Criar, editar ou desativar requisitos afeta somente solicitações futuras. Solicitações existentes e seus anexos não são alterados.
+8. Nenhum setor, serviço ou requisito documental é cadastrado no código de produção, em migrations ou em seeds obrigatórios.
+
+### 21.3 Exemplos configuráveis para serviços de RH
+
+Os exemplos abaixo ilustram como uma organização **pode** configurar serviços de RH. Não são dados do sistema, não são criados automaticamente e sua obrigatoriedade não é fixada no código: o administrador decide, por serviço, quais documentos existem e quais são obrigatórios ou opcionais. Os serviços de RH não são presumidos iguais entre si.
+
+| Serviço de exemplo | Documentos de exemplo |
+| --- | --- |
+| Férias | Requerimento de férias; documento de autorização |
+| Declaração | Solicitação da declaração; documento de identificação, quando necessário |
+| Alteração cadastral | Formulário de alteração; comprovante relacionado ao dado alterado |
+| Escalas | Documento da escala; formulário de solicitação de alteração |
+| Outros serviços | Documentos definidos pelo administrador |
+
+Esses exemplos podem ser usados em testes e demonstrações apenas com conteúdo sintético.
+
+### 21.4 Abertura de solicitação com anexos
+
+1. Ao consultar um serviço com requisitos ativos, o solicitante vê a lista de documentos solicitados, com nome, indicação de obrigatório/opcional e formatos aceitos.
+2. O solicitante pode anexar **um arquivo por requisito**. Cada arquivo é associado pelo cliente a um requisito do serviço; o servidor valida essa associação.
+3. Antes de aceitar a solicitação, o servidor, com a configuração recarregada do banco:
+   - confirma as regras já existentes de abertura (seções 7, 11 e 13);
+   - confirma que cada arquivo referencia um requisito **ativo do próprio serviço** e que não há dois arquivos para o mesmo requisito;
+   - rejeita qualquer arquivo enviado para serviço sem requisitos ativos;
+   - confirma que todos os requisitos **obrigatórios** ativos possuem arquivo;
+   - valida quantidade, tamanho individual, tamanho total, nome do arquivo e **tipo real** do conteúdo (seção 21.7), e que o formato detectado está entre os aceitos pelo requisito.
+4. Se qualquer validação falhar, a solicitação **não é criada**, nenhum anexo é vinculado e nenhum evento de histórico é registrado. A resposta informa o problema com mensagem fixa, sem ecoar conteúdo de arquivo.
+5. Se a configuração do serviço mudar entre a exibição do formulário e o envio, prevalece a configuração vigente no servidor; o envio inconsistente é rejeitado e o solicitante deve recarregar o formulário.
+6. A criação da solicitação, do evento inicial e dos registros de anexo ocorre em uma única transação de banco. Os objetos são gravados no armazenamento antes dessa transação; se ela falhar, a aplicação tenta remover os objetos gravados (compensação). Nunca pode existir registro de anexo apontando para objeto inexistente; objeto órfão decorrente de falha da compensação não pode ser acessível por nenhuma rota e deve ser identificável para limpeza operacional.
+7. Anexos não podem ser incluídos, substituídos ou removidos depois da abertura nesta alteração.
+8. O cliente não define identificador do anexo, chave de armazenamento, tipo detectado, tamanho, hash, autor do envio, datas ou snapshots do requisito.
+
+### 21.5 Atendimento e consulta dos anexos
+
+1. Anexos ficam vinculados à solicitação e são imutáveis pela aplicação.
+2. Autorização de leitura de metadados e download, verificada no servidor em **cada** requisição, com usuário autenticado e ativo:
+
+| Perfil | Listar metadados e baixar anexos |
+| --- | --- |
+| Atendente | Somente se `Request.sector_id` da solicitação for o seu setor atual (mesma regra da seção 10) |
+| Solicitante | Somente anexos das solicitações que ele abriu |
+| Administrador | Negado (o perfil não possui acesso operacional, seção 10) |
+| Não autenticado ou inativo | Negado |
+
+3. O download ocorre por rota da aplicação que recebe somente identificadores, carrega solicitação e anexo do banco, confirma que o anexo pertence à solicitação e aplica a autorização acima antes de ler o objeto. Usuário não autorizado que acesse a rota diretamente recebe a mesma resposta de recurso não encontrado/negado definida na seção 10, sem revelar a existência do anexo.
+4. Não são usadas URLs públicas nem URLs permanentes para documentos. A chave de armazenamento nunca é enviada ao cliente.
+5. A resposta de download usa `Content-Type` derivado do formato detectado (não do informado no envio), `Content-Disposition: attachment` com nome sanitizado, `X-Content-Type-Options: nosniff` e `Cache-Control: private, no-store`.
+6. Desativar ou editar o serviço, seus requisitos, sua categoria ou seu setor não apaga anexos, não altera seus metadados e não muda o histórico das solicitações anteriores. Os anexos de solicitações existentes continuam consultáveis pelos mesmos perfis autorizados, inclusive após conclusão.
+
+### 21.6 Limites de tamanho e quantidade
+
+| Limite | Valor | Justificativa |
+| --- | --- | --- |
+| Requisitos ativos por serviço | 5 | Os exemplos de RH usam 2 documentos; 5 dá margem sem permitir formulários extensos e limita a quantidade de arquivos por envio |
+| Arquivos por solicitação | 5 (no máximo um por requisito) | Decorre do limite de requisitos |
+| Tamanho por arquivo | 2 MiB (2.097.152 bytes) | Suficiente para formulários e documentos digitalizados comuns em PDF/DOCX/TXT; mantém o download pela rota autorizada abaixo do limite de corpo de resposta das funções do Vercel |
+| Tamanho total por solicitação | 4 MiB (4.194.304 bytes) | O envio passa por função do Vercel, cujo corpo de requisição é limitado a cerca de 4,5 MB; 4 MiB deixa margem para a descrição (até 10.000 caracteres) e o overhead do `multipart/form-data` |
+| Arquivo vazio | Rejeitado | Arquivo sem conteúdo não comprova documento |
+| Nome original do arquivo | Até 255 caracteres após sanitização | Evita nomes abusivos; o nome é apenas informativo |
+
+Os limites são validados no servidor (fonte de verdade) e informados na interface. O limite de corpo das Server Actions (1 MB por padrão no Next.js) deverá ser ajustado de forma compatível na implementação. Os limites da plataforma de hospedagem foram reconfirmados na SF-030 em 2026-10-16 e mantidos sem alteração; o cálculo de margem e o valor de configuração definido estão na seção 21.15. Arquivos maiores exigiriam upload direto ao armazenamento e uma nova alteração de SPEC.
+
+### 21.7 Validação do tipo real do arquivo
+
+A extensão e o MIME informados pelo navegador não são suficientes e não decidem a aceitação. O servidor inspeciona o conteúdo:
+
+- **PDF**: o conteúdo começa com a assinatura `%PDF-`.
+- **DOCX**: o conteúdo é um ZIP válido (assinatura `PK\x03\x04`) contendo `[Content_Types].xml` e `word/document.xml`, cujo tipo do documento principal é o de documento Word sem macros. Documentos com macros (`.docm` ou tipo `macroEnabled`) são rejeitados. A inspeção deve limitar o número de entradas e o tamanho descompactado lido, para evitar abuso de compressão.
+- **TXT**: conteúdo UTF-8 válido (BOM opcional), sem bytes nulos e sem caracteres de controle além de tabulação, CR e LF.
+
+A extensão do nome do arquivo (`.pdf`, `.docx`, `.txt`, sem distinção de maiúsculas) deve corresponder ao formato detectado, e o formato detectado deve constar entre os aceitos pelo requisito. Qualquer divergência rejeita o envio. Varredura antivírus não faz parte desta alteração e fica registrada como risco/possível evolução.
+
+### 21.8 Armazenamento
+
+**Infraestrutura analisada em 2026-10-16:** aplicação Next.js 16 publicada no Vercel; PostgreSQL hospedado no Supabase acessado via Prisma; nenhuma infraestrutura de armazenamento de arquivos; o sistema de arquivos das funções do Vercel é efêmero e não pode guardar documentos.
+
+**Solução recomendada:** bucket **privado** do **Supabase Storage**, no mesmo provedor já usado pelo banco.
+
+- O bucket não é público. O acesso ocorre **somente no servidor**, com credencial de serviço armazenada em variável de ambiente do Vercel e dos ambientes locais, nunca versionada e nunca exposta ao cliente (sem prefixo `NEXT_PUBLIC_`).
+- O download é intermediado pela rota autorizada da seção 21.5; o cliente não recebe URL do armazenamento. URLs assinadas não são usadas nesta alteração.
+- Ambientes de desenvolvimento, teste e produção usam buckets distintos. Testes de integração não podem usar o bucket de produção; podem usar um bucket isolado de teste ou um adaptador de armazenamento em memória/local, desde que o adaptador real tenha cobertura específica.
+- O acesso ao armazenamento fica atrás de uma interface própria (adaptador) para não acoplar regras de negócio ao provedor.
+- A integração deve preferir a API HTTP do provedor sem nova dependência; se uma dependência se mostrar necessária, ela deve ser justificada e registrada antes de ser adicionada.
+- A política de backup e recuperação ainda pendente (seção 18) passa a abranger também os objetos do bucket.
+
+**Alternativas consideradas:** (a) conteúdo em coluna binária no PostgreSQL — sem novo serviço e com transação única, mas aumenta banco e backups e consome a cota do banco; fica como alternativa caso o Supabase Storage seja inviável; (b) Vercel Blob — exigiria um novo provedor e a confirmação de suporte a armazenamento privado com o mesmo nível de controle; (c) sistema de arquivos local — incompatível com o Vercel.
+
+A escolha do provedor foi confirmada na SF-030 em 2026-10-16 (seção 21.15). Qualquer mudança futura de provedor deve atender às regras desta seção e da seção 21.5 e ser registrada como alteração desta SPEC.
+
+### 21.9 Metadados e entidades
+
+**Requisito documental (`ServiceDocumentRequirement`):** `id`, `service_id`, `name`, `is_required`, `accepted_formats` (subconjunto não vazio de `PDF`, `DOCX`, `TXT`), `position`, `is_active`, `created_at`, `updated_at`. Relação `Service 1:N ServiceDocumentRequirement`.
+
+**Anexo da solicitação (`RequestAttachment`):** registro imutável com
+
+- `id` (UUID), `request_id`, `requirement_id` (referência ao requisito de origem);
+- `requirement_name_snapshot` e `requirement_required_snapshot` (como o requisito estava na abertura);
+- `original_filename` (sanitizado), `detected_format`, `content_type` (derivado do formato detectado), `size_bytes`, `sha256`;
+- `storage_key` (opaca, gerada pelo servidor a partir de identificadores aleatórios, sem nome de arquivo nem dados pessoais);
+- `uploaded_by_id` (o solicitante da sessão), `created_at`.
+
+Relações: `Request 1:N RequestAttachment`, `ServiceDocumentRequirement 1:N RequestAttachment`, `User 1:N RequestAttachment` como autor do envio. Restrições relacionais impedem referências inexistentes e exclusão física de registros referenciados. Deve existir unicidade de `(request_id, requirement_id)`.
+
+### 21.10 Logs e privacidade
+
+- O conteúdo dos arquivos nunca é registrado em logs, mensagens de erro, respostas de erro ou telemetria.
+- Logs não incluem nome original do arquivo, chave de armazenamento nem credenciais do armazenamento. Podem incluir identificadores, formato detectado, tamanho e código de erro.
+- Erros do provedor de armazenamento são convertidos em mensagens fixas, seguindo o padrão de erros existente.
+- Fixtures de testes usam somente conteúdo sintético gerado nos próprios testes (por exemplo, PDF mínimo, DOCX mínimo e TXT fictício). Não incluir dados pessoais nem documentos reais no repositório.
+
+### 21.11 Integração MCP (requisito futuro, não implementado)
+
+MCP não é implementado nesta alteração. Fica registrado como requisito para qualquer SPEC futura: ferramentas MCP que consultem ou baixem documentos devem usar as mesmas operações server-side e as mesmas verificações desta SPEC — usuário autenticado e ativo, perfil, propriedade pelo solicitante e setor atual do atendente. Uma ferramenta MCP não pode usar credencial de serviço do armazenamento, acesso direto ao banco ou qualquer outro caminho que contorne a autorização por perfil, propriedade ou setor, nem ampliar o acesso de um perfil.
+
+### 21.12 Critérios de aceitação
+
+- [ ] **CA-DOC-01** — Um administrador consegue criar, editar, reordenar e desativar requisitos documentais de um serviço, definindo nome, obrigatoriedade e formatos aceitos entre PDF, DOCX e TXT; solicitante, atendente e usuário não autenticado são negados no servidor.
+- [ ] **CA-DOC-02** — O servidor rejeita requisito com nome vazio ou acima de 120 caracteres, nome duplicado entre requisitos ativos do mesmo serviço (sem distinção de maiúsculas), formatos vazios ou fora de PDF/DOCX/TXT e um sexto requisito ativo no mesmo serviço.
+- [ ] **CA-DOC-03** — Requisitos de um serviço não aparecem nem são aceitos em outro serviço, inclusive de mesmo setor ou categoria.
+- [ ] **CA-DOC-04** — Não há setores, serviços ou requisitos documentais criados por código de produção, migration ou seed obrigatório.
+- [ ] **CA-DOC-05** — Um serviço sem requisitos ativos permite abrir solicitação sem anexos, com o mesmo comportamento anterior à alteração, e rejeita qualquer arquivo enviado.
+- [ ] **CA-DOC-06** — Ao abrir um serviço com requisitos, o solicitante vê cada documento com nome, obrigatoriedade e formatos aceitos.
+- [ ] **CA-DOC-07** — A solicitação não é criada quando falta arquivo para requisito obrigatório; é criada quando todos os obrigatórios estão presentes, mesmo sem os opcionais.
+- [ ] **CA-DOC-08** — O servidor rejeita arquivo associado a requisito inexistente, inativo ou de outro serviço, e dois arquivos para o mesmo requisito.
+- [ ] **CA-DOC-09** — O servidor aceita PDF, DOCX e TXT válidos quando o formato é aceito pelo requisito, e rejeita formato não aceito pelo requisito.
+- [ ] **CA-DOC-10** — Arquivo com extensão ou MIME informado que não corresponde ao conteúdo real (por exemplo, executável renomeado para `.pdf`, `.docm` renomeado para `.docx`, binário renomeado para `.txt`) é rejeitado.
+- [ ] **CA-DOC-11** — Arquivo vazio, arquivo acima de 2 MiB, total acima de 4 MiB ou mais de 5 arquivos são rejeitados no servidor, independentemente da validação da interface.
+- [ ] **CA-DOC-12** — Em qualquer rejeição, nenhuma solicitação, evento ou registro de anexo é persistido, e objetos eventualmente gravados no armazenamento são removidos pela compensação ou ficam inacessíveis por qualquer rota.
+- [ ] **CA-DOC-13** — Em envio aceito, a solicitação, o evento inicial e os anexos são persistidos de forma atômica; cada anexo tem metadados completos (seção 21.9) e o cliente não consegue definir chave, tipo detectado, tamanho, hash, autor ou datas.
+- [ ] **CA-DOC-14** — Um atendente ativo do setor registrado na solicitação lista e baixa seus anexos; o conteúdo baixado é idêntico ao enviado (mesmo SHA-256).
+- [ ] **CA-DOC-15** — O solicitante lista e baixa somente anexos das próprias solicitações.
+- [ ] **CA-DOC-16** — Atendente de outro setor, outro solicitante, administrador, usuário inativo e usuário não autenticado não obtêm metadados nem conteúdo, inclusive acessando diretamente a rota de download com identificadores válidos, e recebem resposta que não revela a existência do anexo.
+- [ ] **CA-DOC-17** — A rota recusa anexo cujo identificador não pertence à solicitação informada na URL.
+- [ ] **CA-DOC-18** — Nenhuma resposta ao cliente contém URL pública, URL permanente ou chave do armazenamento; downloads retornam `Content-Disposition: attachment`, `X-Content-Type-Options: nosniff` e `Cache-Control: private, no-store`.
+- [ ] **CA-DOC-19** — Editar ou desativar requisito, serviço, categoria ou setor não remove anexos, não altera seus metadados e snapshots e não impede o acesso autorizado aos anexos de solicitações anteriores.
+- [ ] **CA-DOC-20** — Logs e mensagens de erro produzidos nos fluxos de envio e download não contêm conteúdo de arquivo, nome original, chave de armazenamento ou credencial do armazenamento.
+- [ ] **CA-DOC-21** — O armazenamento usado é privado, acessado apenas pelo servidor com credencial fora do repositório, e os ambientes de teste não usam o armazenamento de produção.
+- [ ] **CA-DOC-22** — As fixtures de teste contêm somente conteúdo sintético, sem dados pessoais ou documentos reais.
+
+### 21.13 Estratégia de testes
+
+**Unitários:** validação de requisito (nome, formatos, limite de 5); detecção de tipo real para PDF, DOCX, DOCX com macros, ZIP que não é DOCX, TXT válido, TXT com bytes nulos ou UTF-8 inválido, e extensão divergente; limites de tamanho e quantidade; sanitização do nome de arquivo; regra de correspondência arquivo/requisito e obrigatórios; política de autorização de anexos para os três perfis e para usuários inativos; ausência de dados sensíveis em mensagens de erro.
+
+**Integração (PostgreSQL de teste e armazenamento isolado ou adaptador de teste):** CRUD de requisitos com unicidade e limite; abertura com e sem requisitos; rejeições sem persistência; atomicidade e compensação quando a transação falha após gravar objetos; snapshots preservados após editar/desativar requisito e serviço; impossibilidade de exclusão física de requisito referenciado; integridade do conteúdo por SHA-256.
+
+**Autorização:** download e listagem por atendente do setor, atendente de outro setor (inclusive após mudança de setor), solicitante dono, outro solicitante, administrador, inativo e não autenticado; anexo de outra solicitação na URL; tentativa de forjar chave de armazenamento, tipo, autor ou requisito de outro serviço.
+
+**E2E:** administrador configura requisitos de um serviço de exemplo; solicitante vê a lista, é impedido de enviar sem documento obrigatório e envia com sucesso; atendente do setor baixa o anexo; acesso direto à rota por usuário não autorizado é negado.
+
+### 21.14 Dependências e pontos em aberto para a implementação
+
+- ~~Confirmar o provedor de armazenamento (seção 21.8)~~ — confirmado na SF-030 (seção 21.15). Permanece pendente criar os buckets privados por ambiente e configurar as credenciais fora do repositório (seção 21.15.7).
+- Migration aditiva para as novas entidades, sem alterar dados existentes.
+- Ajuste do limite de corpo das Server Actions compatível com a seção 21.6, reconfirmando os limites vigentes do Vercel.
+- Definição de procedimento operacional para limpeza de objetos órfãos e inclusão do bucket na política de backup e recuperação.
+- Retenção e exclusão de documentos permanecem fora de escopo e seguem como ponto futuro da seção 19.
+
+### 21.15 Confirmação técnica do armazenamento (SF-030 — 2026-10-16)
+
+Esta subseção registra a verificação feita na SF-030 contra a documentação oficial vigente. Ela **confirma** a recomendação da seção 21.8 e **mantém** os limites da seção 21.6. Não altera requisitos funcionais. Nada foi implementado nem provisionado.
+
+#### 21.15.1 Fatos verificados
+
+| Fato | Fonte oficial | Consequência |
+| --- | --- | --- |
+| O corpo de **requisição e de resposta** de uma Vercel Function é limitado a **4,5 MB**; acima disso a função retorna `413 FUNCTION_PAYLOAD_TOO_LARGE` | Vercel — *Functions Limits* (atualizada em 2026-08-24) | O envio de todos os arquivos de uma solicitação, somado a descrição e overhead, precisa caber em 4,5 MB |
+| Respostas em streaming não estão sujeitas a esse limite; para envios maiores, a Vercel recomenda upload direto do navegador ao armazenamento | Vercel KB — *How do I bypass the 4.5MB body size limit* | Download de até 2 MiB cabe na resposta mesmo sem streaming; upload direto só seria necessário com limites maiores |
+| Server Actions aceitam por padrão 1 MB; `serverActions.bodySizeLimit` conta o corpo HTTP bruto, inclusive o overhead do `multipart/form-data` (estimativa da documentação: 10–20 KB) | Next.js 16.3.8 — `serverActions.md` e guia de Server Actions (em `node_modules/next/dist/docs/`) | É necessário configurar `bodySizeLimit` acima de 4 MiB e abaixo de 4,5 MB |
+| Buckets são privados por padrão; em bucket privado o download só ocorre pelo endpoint autenticado (`/storage/v1/object/authenticated/{bucket}/{path}`) ou por URL assinada temporária | Supabase — *Storage Buckets*, *Serving assets* | Sem URL pública; o servidor baixa pelo endpoint autenticado |
+| O bucket pode ter `fileSizeLimit` e `allowedMimeTypes`; uploads fora das restrições são rejeitados | Supabase — *Creating buckets*; *File limits* (limite global de 50 MB no plano Free) | Restrição no bucket serve como defesa adicional; o limite global não restringe os 2 MiB |
+| Chaves secretas (`sb_secret_...`) e a `service_role` legada ignoram RLS e dão acesso irrestrito às APIs de Storage **de todo o projeto**; chaves secretas não funcionam em navegador (resposta 401); a `service_role` legada está em descontinuação até o fim de 2026; podem existir várias chaves secretas revogáveis individualmente | Supabase — *API keys*; *Storage Access Control* | Usar chave secreta nova e exclusiva do componente; bucket separado **não** isola a credencial dentro do mesmo projeto |
+| Sem políticas RLS em `storage.objects`, o Storage não permite operações para clientes não privilegiados | Supabase — *Storage Access Control* | Não criar políticas RLS para o bucket; somente o servidor acessa |
+| Variáveis do tipo **Secret** na Vercel são somente escrita após salvas, podem ter valor distinto por ambiente e são mascaradas nos logs de build | Vercel — *Config and Secret environment variables* (atualizada em 2026-08-28) | A credencial do armazenamento deve ser cadastrada como Secret, com valor próprio em Production |
+
+#### 21.15.2 Decisão arquitetural confirmada
+
+- **Armazenamento:** Supabase Storage, bucket **privado**, sem políticas RLS para `anon`/`authenticated`, acessado **somente** por código server-side (runtime Node.js) com **chave secreta** `sb_secret_` dedicada ao ServiceFlow. A `service_role` legada não deve ser usada.
+- **Upload intermediado pelo servidor:** o navegador envia os arquivos à Server Action de abertura; o servidor valida tudo antes de gravar no armazenamento. Não há upload direto do navegador ao Storage.
+- **Download intermediado pelo servidor:** rota da aplicação autoriza e repassa o conteúdo; o cliente nunca recebe URL do Storage.
+- **Alternativas rejeitadas:** upload direto com URL de upload assinada (válida por até 2 horas segundo a documentação do Supabase) — exigiria validar o conteúdo depois de gravado, geraria órfãos por desenho e entregaria um token ao cliente, sem necessidade porque os limites cabem no corpo da função; download por URL assinada — funciona para qualquer portador do link durante a validade e pode vazar por histórico ou compartilhamento, sem necessidade porque 2 MiB cabem na resposta da função; PostgreSQL `bytea` e Vercel Blob mantidos como alternativas, conforme a seção 21.8.
+
+#### 21.15.3 Verificação dos limites (sem alteração)
+
+Considerando o limite da Vercel de forma conservadora como 4.500.000 bytes (a documentação escreve "4.5 MB" sem definir se é base decimal ou binária):
+
+| Componente | Pior caso |
+| --- | --- |
+| Arquivos (total) | 4.194.304 bytes (4 MiB) |
+| Descrição (10.000 unidades de texto; até 3 bytes UTF-8 cada) | 30.000 bytes |
+| Overhead multipart, nomes de arquivo, identificadores e campos | ~20.000 bytes (estimativa da documentação do Next.js) |
+| **Total estimado** | **~4.244.304 bytes** |
+
+- **Configuração definida para a SF-034:** `serverActions.bodySizeLimit` = **4.456.448 bytes** (`'4.25mb'`, 4,25 MiB). Fica abaixo de 4.500.000 bytes e deixa 262.144 bytes acima dos 4 MiB de arquivos para descrição e overhead.
+- Download de um arquivo de até 2 MiB fica abaixo do limite de resposta; streaming é permitido, mas não é exigido.
+- **Conclusão:** os limites de 2 MiB por arquivo, 4 MiB por solicitação, 5 arquivos e 5 requisitos ativos são compatíveis e **não foram alterados**. Como o limite da Server Action barra o corpo antes da validação de negócio, a interface deve validar os tamanhos antes do envio, para dar mensagem útil; a validação do servidor continua sendo a fonte de verdade.
+
+#### 21.15.4 Fluxo de upload, validação e persistência
+
+1. A Server Action de abertura (runtime Node.js) confirma sessão, usuário ativo e perfil `REQUESTER` antes de ler os arquivos.
+2. Lê o `FormData`, rejeita quantidade acima de 5, arquivo vazio, arquivo acima de 2 MiB e total acima de 4 MiB.
+3. Carrega serviço, categoria, setor e requisitos ativos do banco; valida a correspondência arquivo/requisito e os obrigatórios (seção 21.4).
+4. Para cada arquivo: lê os bytes, detecta o tipo real (seção 21.7), confere extensão e formatos aceitos, sanitiza o nome e calcula o SHA-256. Nenhum dado é gravado até aqui.
+5. Gera no servidor o UUID da solicitação e de cada anexo. A chave de armazenamento é `requests/{requestId}/{attachmentId}`, sem nome de arquivo ou dado pessoal.
+6. Grava cada objeto no bucket com a chave secreta, `Content-Type` derivado do formato detectado e **sem sobrescrita** (upsert desligado).
+7. Abre a transação de banco: rechecagem da disponibilidade do serviço (como hoje), criação da solicitação, do evento inicial e dos anexos.
+8. Sucesso: confirma a transação e retorna somente dados de exibição.
+
+#### 21.15.5 Falhas e compensação
+
+- **Falha antes do passo 6:** nada é gravado.
+- **Falha ao gravar um objeto:** remove os objetos já gravados nessa tentativa, não abre a transação e retorna mensagem fixa.
+- **Falha da transação:** remove os objetos gravados nessa tentativa (compensação) e retorna mensagem fixa.
+- **Falha da compensação:** o erro é registrado somente com um identificador de correlação, a quantidade de objetos e o código do erro, sem chave de armazenamento, nome de arquivo ou conteúdo. O objeto fica **inacessível**, porque a rota de download só lê objetos referenciados por um registro de anexo no banco.
+- **Limpeza de órfãos:** procedimento operacional, a ser implementado em tarefa posterior, que lista objetos sob `requests/` cujo `requestId` não exista no banco e que tenham mais de 24 horas (para não atingir criações em andamento) e os remove. Não remove objetos referenciados.
+- **Invariante:** como os objetos são gravados antes do commit, não existe registro de anexo apontando para objeto inexistente.
+
+#### 21.15.6 Fluxo de download
+
+1. Rota GET da aplicação (runtime Node.js, sem cache) recebe somente `requestId` e `attachmentId`.
+2. Confirma sessão e usuário ativo, carrega a solicitação e o anexo **filtrando pelos dois identificadores**, e aplica a autorização da seção 21.5 (propriedade do solicitante ou setor atual do atendente). Em qualquer negação responde da mesma forma que um recurso inexistente.
+3. Lê o objeto pelo endpoint autenticado do Storage com a chave secreta, confere o tamanho com o metadado e devolve o conteúdo com os cabeçalhos da seção 21.5. Divergência ou erro do Storage gera resposta de erro fixa, sem detalhes do provedor.
+
+#### 21.15.7 Separação de ambientes e credenciais
+
+- Como a chave secreta dá acesso a **todos** os buckets do projeto Supabase, a credencial de produção precisa ficar em um **projeto Supabase exclusivo de produção** (ou outro arranjo que impeça uma credencial não produtiva de ler os documentos de produção). Desenvolvimento e teste podem compartilhar um projeto não produtivo, com buckets distintos.
+- Nomes de bucket definidos: `serviceflow-documents` (produção), `serviceflow-documents-dev` (desenvolvimento), `serviceflow-documents-test` (teste). O adaptador de teste deve recusar bucket cujo nome não termine em `-test`, seguindo a proteção já usada para o banco `_test`.
+- Configuração de cada bucket: `public = false`; `fileSizeLimit` = 2 MiB; `allowedMimeTypes` = `application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `text/plain`. Essas restrições são defesa adicional; a validação de conteúdo do servidor continua obrigatória porque a documentação não informa se o Storage inspeciona o conteúdo ou só o `Content-Type`.
+- Variáveis de ambiente server-side (nomes definidos; serão adicionados aos arquivos de exemplo somente na tarefa de implementação, com valores vazios): `DOCUMENT_STORAGE_URL` (Config), `DOCUMENT_STORAGE_BUCKET` (Config) e `DOCUMENT_STORAGE_SECRET_KEY` (**Secret**, valor distinto em Production). Para testes: `TEST_DOCUMENT_STORAGE_URL`, `TEST_DOCUMENT_STORAGE_BUCKET` e `TEST_DOCUMENT_STORAGE_SECRET_KEY`, sem fallback para as variáveis de produção/desenvolvimento. Nenhuma pode ter prefixo `NEXT_PUBLIC_`.
+- Testes automatizados usam por padrão o adaptador em memória; testes do adaptador real rodam somente quando as variáveis `TEST_DOCUMENT_STORAGE_*` estiverem configuradas.
+- O módulo que lê a chave secreta só pode ser importado por código server-side.
+
+#### 21.15.8 Dependência
+
+O upload, o download e a remoção de objetos devem usar a API HTTP do Storage via `fetch`, sem nova dependência. Rotas observadas: `POST /storage/v1/object/{bucket}/{path}` (upload, documentada na referência de self-hosting do Storage) e `GET /storage/v1/object/authenticated/{bucket}/{path}` (download, documentada no guia *Serving assets*). A rota de remoção e os detalhes de cabeçalho devem ser confirmados na SF-033. Se a API HTTP se mostrar inviável, a adoção de `@supabase/supabase-js` deve ser justificada e registrada antes.
+
+#### 21.15.9 Limitações da verificação
+
+- O provisionamento **não foi feito**: buckets, chaves secretas e variáveis de ambiente não foram criados, e a negação de leitura anônima não foi testada contra um bucket real. Isso exige acesso às contas Supabase e Vercel pelo responsável e fica pendente na SF-030.
+- Não foi possível verificar o estado atual das contas: se produção já usa um projeto Supabase separado e qual o plano contratado.
+- A documentação da Vercel não define se "4.5 MB" é base decimal ou binária; adotou-se o valor menor (4.500.000 bytes).
+- A documentação do Supabase não informa se `allowedMimeTypes` verifica o conteúdo ou apenas o `Content-Type`.
+- A rota HTTP de upload foi confirmada na referência de self-hosting, não na referência da plataforma hospedada; a rota de remoção não foi confirmada.
+
+#### 21.15.10 Fontes oficiais consultadas em 2026-10-16
+
+- Vercel — Functions Limits: https://vercel.com/docs/functions/limitations
+- Vercel — How do I bypass the 4.5MB body size limit of Vercel Functions: https://vercel.com/kb/guide/how-to-bypass-vercel-body-size-limit-serverless-functions
+- Vercel — Config and Secret environment variables: https://vercel.com/docs/environment-variables/sensitive-environment-variables
+- Supabase — Storage Buckets (fundamentals): https://supabase.com/docs/guides/storage/buckets/fundamentals
+- Supabase — Creating buckets: https://supabase.com/docs/guides/storage/buckets/creating-buckets
+- Supabase — File limits: https://supabase.com/docs/guides/storage/uploads/file-limits
+- Supabase — Storage Access Control: https://supabase.com/docs/guides/storage/security/access-control
+- Supabase — Serving assets from Storage: https://supabase.com/docs/guides/storage/serving/downloads
+- Supabase — Understanding API keys: https://supabase.com/docs/guides/api/api-keys
+- Supabase — Self-hosting Storage API, Upload a new object: https://supabase.com/docs/reference/self-hosting-storage/upload-a-new-object
+- Next.js 16.3.8 (local, versão instalada) — `node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/serverActions.md` e `node_modules/next/dist/docs/01-app/02-guides/server-actions.md`

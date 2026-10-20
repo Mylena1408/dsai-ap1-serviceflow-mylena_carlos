@@ -112,6 +112,26 @@ export const serviceInputSchema = z
   })
   .strict();
 
+export const documentFormatSchema = z.enum(["PDF", "DOCX", "TXT"]);
+
+// SPEC 21.2: name up to 120 characters, required/optional flag and a non-empty
+// subset of PDF, DOCX and TXT. Service, position and state never come from input.
+export const documentRequirementInputSchema = z
+  .object({
+    name: nonEmptyTextSchema.max(120),
+    isRequired: z.boolean(),
+    acceptedFormats: z
+      .array(documentFormatSchema)
+      .min(1)
+      .max(3)
+      .refine((formats) => new Set(formats).size === formats.length, {
+        message: "Accepted formats must not repeat.",
+      }),
+  })
+  .strict();
+
+export const documentRequirementMoveSchema = z.enum(["up", "down"]);
+
 export const requestCreationInputSchema = z
   .object({
     serviceId: uuidSchema,
@@ -133,6 +153,8 @@ export type OwnPasswordChangeInput = z.output<typeof ownPasswordChangeInputSchem
 export type SectorInput = z.output<typeof sectorInputSchema>;
 export type CategoryInput = z.output<typeof categoryInputSchema>;
 export type ServiceInput = z.output<typeof serviceInputSchema>;
+export type DocumentRequirementInput = z.output<typeof documentRequirementInputSchema>;
+export type DocumentRequirementMove = z.output<typeof documentRequirementMoveSchema>;
 export type RequestCreationInput = z.output<typeof requestCreationInputSchema>;
 export type RequestStatusTransitionInput = z.output<
   typeof requestStatusTransitionInputSchema

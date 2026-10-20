@@ -25,13 +25,33 @@ import {
   setServiceActive,
   updateService,
 } from "@/modules/services";
+import {
+  createDocumentRequirement,
+  deactivateDocumentRequirement,
+  moveDocumentRequirement,
+  updateDocumentRequirement,
+} from "@/modules/document-requirements";
 
-type Entity = "sectors" | "categories" | "users" | "services";
+type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements";
 type AdminSection = "overview" | "users" | "sectors" | "categories" | "services";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
   return typeof value === "string" ? value : "";
+}
+
+// Only the editable requirement fields are read; service, position and state never
+// come from the form. Unexpected values are passed through for server validation.
+function documentRequirementFields(formData: FormData) {
+  const isRequired = field(formData, "isRequired");
+
+  return {
+    name: field(formData, "name"),
+    isRequired: isRequired === "true" ? true : isRequired === "false" ? false : isRequired,
+    acceptedFormats: formData
+      .getAll("acceptedFormats")
+      .filter((value): value is string => typeof value === "string"),
+  };
 }
 
 function activeState(formData: FormData): boolean {
@@ -308,4 +328,57 @@ export async function toggleServiceAction(formData: FormData): Promise<never> {
     reportFailure("services", section, error);
   }
   return finish("services", "status", section);
+}
+
+export async function createDocumentRequirementAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await createDocumentRequirement(
+      field(formData, "serviceId"),
+      documentRequirementFields(formData),
+    );
+  } catch (error) {
+    return createFailure(error);
+  }
+  return finishCreate();
+}
+
+export async function updateDocumentRequirementAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await updateDocumentRequirement(
+      field(formData, "id"),
+      documentRequirementFields(formData),
+    );
+  } catch (error) {
+    return updateFailure(error);
+  }
+  return finishUpdate();
+}
+
+export async function moveDocumentRequirementAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await moveDocumentRequirement(
+      field(formData, "id"),
+      field(formData, "direction"),
+    );
+  } catch (error) {
+    reportFailure("documentRequirements", section, error);
+  }
+  return finish("documentRequirements", "updated", section);
+}
+
+export async function deactivateDocumentRequirementAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await deactivateDocumentRequirement(field(formData, "id"));
+  } catch (error) {
+    reportFailure("documentRequirements", section, error);
+  }
+  return finish("documentRequirements", "status", section);
 }
