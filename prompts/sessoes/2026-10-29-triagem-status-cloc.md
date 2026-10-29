@@ -29,3 +29,7 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 
 - Commit `4007a82` com a documentação de 2026-10-27; testes reexecutados (ver diário).
 - Criado `SPEC/2026-10-29-estado-inicial.md` como linha de base do projeto.
+
+> QUERO QUE DEMARQUE O TEMPO USADO NESTE PROJETO
+
+- Criado `diario/tempo-do-projeto.md` (total mínimo de 23h06 entre 30/09 e 29/10).
