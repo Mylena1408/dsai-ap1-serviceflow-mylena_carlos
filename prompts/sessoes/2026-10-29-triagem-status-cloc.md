@@ -18,3 +18,14 @@
 ## Resultado
 
 Ver `SPEC/2026-10-29-relatorio-triagem.md`.
+
+## Prompts seguintes
+
+> fÇ o comit do di 27, TAMBEM CONTA PARA A DOCUMENTAÇÃO
+
+> RODE OS TESTES POSTERIORMENTE
+
+> FAÇA UM COMMIT SOBRE O ESTADO INICIAL DO PROJETO
+
+- Commit `4007a82` com a documentação de 2026-10-27; testes reexecutados (ver diário).
+- Criado `SPEC/2026-10-29-estado-inicial.md` como linha de base do projeto.
