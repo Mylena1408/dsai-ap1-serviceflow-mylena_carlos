@@ -319,3 +319,20 @@
 - **Isolamento durante os testes:** `DATABASE_URL` foi sobrescrito só no processo por um endereço inexistente; o setup global aplica migrations apenas no `TEST_DATABASE_URL`, e os testes de documentos substituem `@/server/db` pelo cliente dos fixtures.
 - **Resultados (PostgreSQL 17.11):** `document-schema.test.ts` 10/10 e `document-requirements.test.ts` 16/16 (26/26, nenhuma correção de código necessária); `referential-integrity.test.ts` 3/3; `npm run lint` ok; `npm run typecheck` ok; `npm run test:unit` 174 aprovados (26 arquivos); `npm run build` ok; `npx prisma validate` ok; `git diff --check` ok. A suíte de integração completa não foi executada nesta etapa.
 - **Estado:** SF-031 e SF-032 concluídas. Pendente e fora destas tarefas: aplicar a migration no banco principal (com backup já gerado) e decidir se a instância PostgreSQL 18 de teste (porta 5433, `%LOCALAPPDATA%\serviceflow-testdb`) pode ser parada e removida. Sem commit/push. SF-034 não iniciada.
+
+## Contagem de linhas com cloc (2026-10-27)
+
+- **Método:** cloc v2.10 via `npx cloc`, executado com o Perl do Git Bash (o PowerShell não tem Perl). Exclusões: `node_modules`, `.next`, `.git`, `coverage`, `playwright-report`, `test-results` e `package-lock.json`. O diretório atual não é um repositório Git, então **não** foi usado `--vcs=git`; o resultado não é diretamente comparável à medição oficial de 2026-10-06 (que excluía prompts, documentação e arquivos não rastreados).
+- **Código executável (TypeScript + JavaScript): 10.852 linhas** em 119 arquivos — `src/` 4.823 (58 arquivos); `tests/` 5.794 (53); `scripts/` 147 (2); configs da raiz 88 (6). Ficaram de fora CSS (877), SQL das migrations (175), schema Prisma (137) e TOML (1), por serem estilo ou declarativos.
+- **Total bruto do cloc: 372.965 linhas de código** (161 arquivos; mais 2.210 em branco e 86 comentários, 375.261 físicas): JSON 358.946; TypeScript 10.844; Markdown 1.977; CSS 877; SQL 175; Prisma 137; JavaScript 8; TOML 1.
+- **Distorção:** 358.869 linhas vêm de quatro logs de sessão do Copilot em `prompts/sessoes/*.json`, que não são código. Sem eles, o projeto tem **14.096 linhas de código** (16.392 com linhas em branco e comentários).
+- Apenas medição; nenhum arquivo de código foi alterado.
+
+## SPEC de refatoração arquitetural registrada (2026-10-27)
+
+- **Arquivo:** `SPEC/2026-10-27-refatoracao-arquitetural.md`, status "Registrada — aguardando aprovação". Tarefas SF-037 a SF-043 em `TASKS.md`.
+- **Decisão proposta:** manter o monólito modular (SPEC principal, seção 17) e organizar cada módulo em `domain/`, `application/`, `infrastructure/` e `ui/`, com `index.ts` como API pública e dependências apontando para dentro. Microsserviços, workspaces, eventos/outbox e schema Prisma em vários arquivos ficaram fora de escopo: não há necessidade atual e exigiriam dependências ou mudanças de banco.
+- **Motivos levantados na análise do código:** casos de uso com Prisma embutido e tipos `Prisma.*` na API pública; `admin/page.tsx` (356 linhas) e `admin/actions.ts` (384) concentrando todas as entidades; todos os schemas em `src/shared/validation/index.ts`; imports internos entre módulos (`requests → services/policy`, `users → auth/password`) sem verificação.
+- **Restrições fixadas:** sem mudança de comportamento, banco, dependências, rotas ou mensagens; asserções dos testes existentes intocáveis (só caminhos de import/`vi.mock` podem mudar); o parâmetro `database: PrismaClient` das APIs públicas é mantido porque os testes de integração o usam; fronteiras impostas com `no-restricted-imports` do ESLint já instalado.
+- **Ordem (aprovada em 2026-10-27):** SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043. A SPEC passou a "Aprovada em 2026-10-27" (seção 15.1); `TASKS.md` atualizado nas dependências de SF-034, SF-037, SF-039 e SF-040.
+- Etapa apenas documental: nenhum código, teste, banco ou dependência alterado; nenhum teste executado.

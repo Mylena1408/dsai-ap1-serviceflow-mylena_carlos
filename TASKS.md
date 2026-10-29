@@ -3,7 +3,7 @@
 **Entrega:** Catálogo configurável e ciclo básico de solicitações  
 **SPEC principal:** `SPEC/2026-09-30-catalogo-e-solicitacoes.md`  
 **SPEC de contexto:** `SPEC/2026-09-30-visao-geral.md`  
-**Estado:** SF-001 a SF-025 concluídas; SF-026 incompleta (8.903/100.000 linhas em medição oficial de 2026-10-06); SF-027 concluída após validação dos procedimentos documentados; SF-028 revisada, mas não concluída por dependência incompleta; SF-029 implementada e testada manualmente, com suite automatizada de integração pendente. SF-030 a SF-036 (documentos exigidos por serviço, alteração de SPEC de 2026-10-16) registradas; SF-030 com decisão técnica concluída e provisionamento pendente; SF-031 concluída em 2026-10-20 (migration aplicada e integração aprovada em banco de teste PostgreSQL 17.11 local); SF-033 implementada e validada em testes unitários (2026-10-19), não concluída: adaptador real sem teste contra bucket e critérios do fluxo dependentes da SF-034/SF-035; SF-032 concluída em 2026-10-20 (integração aprovada no mesmo banco de teste); SF-034 a SF-036 não iniciadas.
+**Estado:** SF-001 a SF-025 concluídas; SF-026 incompleta (8.903/100.000 linhas em medição oficial de 2026-10-06); SF-027 concluída após validação dos procedimentos documentados; SF-028 revisada, mas não concluída por dependência incompleta; SF-029 implementada e testada manualmente, com suite automatizada de integração pendente. SF-030 a SF-036 (documentos exigidos por serviço, alteração de SPEC de 2026-10-16) registradas; SF-030 com decisão técnica concluída e provisionamento pendente; SF-031 concluída em 2026-10-20 (migration aplicada e integração aprovada em banco de teste PostgreSQL 17.11 local); SF-033 implementada e validada em testes unitários (2026-10-19), não concluída: adaptador real sem teste contra bucket e critérios do fluxo dependentes da SF-034/SF-035; SF-032 concluída em 2026-10-20 (integração aprovada no mesmo banco de teste); SF-034 a SF-036 não iniciadas. SF-037 a SF-043 (refatoração arquitetural, SPEC de 2026-10-27) registradas e não iniciadas; SPEC aprovada em 2026-10-27. Ordem aprovada: SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043.
 
 ## Regras de execução
 
@@ -356,7 +356,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Estado:** Não iniciada.
 - **Objetivo:** Exibir os documentos solicitados no detalhe do serviço; aceitar um arquivo por requisito; validar no servidor com a configuração vigente; gravar objetos, criar solicitação, evento inicial e anexos atomicamente, com compensação em falha. Manter inalterado o fluxo de serviços sem requisitos. Ajustar o limite de corpo das Server Actions de forma compatível com a seção 21.6.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, `src/app/(requester)/catalog/[serviceId]/`, `src/app/(requester)/requests/actions.ts`, `next.config.ts`, `tests/unit/`, `tests/integration/`.
-- **Dependências:** SF-032, SF-033, SF-017.
+- **Dependências:** SF-032, SF-033, SF-017 e SF-038 (ordem aprovada em 2026-10-27: a abertura com documentos é implementada já na estrutura em camadas do piloto `requests`; ver `SPEC/2026-10-27-refatoracao-arquitetural.md`, seção 15).
 - **Critérios de conclusão:** CA-DOC-05, CA-DOC-06, CA-DOC-07, CA-DOC-08, CA-DOC-12 e CA-DOC-13.
 - **Testes relacionados:** Integração de abertura com e sem requisitos, obrigatórios ausentes, requisito de outro serviço/inativo, duplicidade, rejeição sem persistência, compensação e campos forjados pelo cliente.
 - **SPEC:** Seção 21.4.
@@ -380,3 +380,79 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-DOC-01 a CA-DOC-22 verificados e registrados; suites unitária, integração e E2E, typecheck, lint e build executadas com resultados reais registrados.
 - **Testes relacionados:** E2E do administrador, solicitante e atendente; negação de acesso direto por usuário não autorizado.
 - **SPEC:** Seções 21.12 e 21.13.
+
+## Refatoração arquitetural — SPEC de 2026-10-27
+
+**SPEC:** `SPEC/2026-10-27-refatoracao-arquitetural.md` (aprovada em 2026-10-27). Nenhuma tarefa desta seção altera comportamento, esquema do banco ou dependências.
+
+**Ordem aprovada em 2026-10-27:** SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043. As SF-037 e SF-038 vêm antes da SF-034 para que a abertura com documentos seja escrita na estrutura nova; as SF-039 a SF-043 ficam depois da SF-036 para não refatorar `attachments`, `services` e a área administrativa enquanto a funcionalidade de documentos está em andamento. O código novo das SF-034 a SF-036 segue as seções 5 a 8 da SPEC de refatoração.
+
+### SF-037 — Impor fronteiras entre módulos no lint
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Configurar `no-restricted-imports` em `eslint.config.mjs` para bloquear imports de partes internas de outros módulos a partir de `src/` (exceto `tests/**`), e trocar os acoplamentos existentes (`requests → services/policy`, `users → auth/password`) pela API pública do módulo de destino.
+- **Arquivos/módulos esperados:** `eslint.config.mjs`, `src/modules/services/index.ts`, `src/modules/auth/` (API pública), `src/modules/requests/index.ts`, `src/modules/users/index.ts`.
+- **Dependências:** Aprovação da SPEC (concedida em 2026-10-27).
+- **Critérios de conclusão:** CA-ARQ-03 e CA-ARQ-04 (para a regra entre módulos); suítes e lint passando.
+- **Testes relacionados:** Verificação manual de lint com arquivo temporário de import proibido; suíte unitária completa.
+- **SPEC:** Seções 6.2 e 6.3.
+
+### SF-038 — Migrar o módulo piloto `requests` para camadas
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Separar `requests` em `domain/`, `application/` e `infrastructure/`; definir o padrão de repositório, de transação (mesmo isolamento) e o utilitário único de tradução de erros Prisma; manter a API pública e o parâmetro `database`. Registrar o padrão em `NOTES.md`.
+- **Arquivos/módulos esperados:** `src/modules/requests/**`, utilitário de erros Prisma em infraestrutura, `tests/unit/` (casos de uso com repositório em memória).
+- **Dependências:** SF-037.
+- **Critérios de conclusão:** CA-ARQ-02, CA-ARQ-05, CA-ARQ-06 e CA-ARQ-07 para `requests`; testes de integração de criação, consultas, fila e transições aprovados sem alterar asserções.
+- **Testes relacionados:** Unitários novos dos casos de uso; `requests-*.test.ts`, `authorization/matrix.test.ts` e E2E.
+- **SPEC:** Seções 5, 7, 10 e 11.
+
+### SF-039 — Migrar os módulos de catálogo e organização
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Aplicar o padrão da SF-038 a `services` (inclusive `catalog.ts`), `categories`, `sectors` e `document-requirements`, uma subtarefa por módulo, com as suítes passando ao final de cada uma.
+- **Arquivos/módulos esperados:** `src/modules/{services,categories,sectors,document-requirements}/**`, `tests/unit/`.
+- **Dependências:** SF-038 e SF-036 (ordem aprovada em 2026-10-27).
+- **Critérios de conclusão:** CA-ARQ-01, CA-ARQ-02, CA-ARQ-05 e CA-ARQ-07 para os quatro módulos.
+- **Testes relacionados:** Unitários novos; `services`, `catalog`, `categories`, `sectors`, `document-requirements`, `referential-integrity` e E2E.
+- **SPEC:** Seções 5, 7 e 10.
+
+### SF-040 — Migrar os módulos de identidade e anexos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Aplicar o padrão a `users`, `auth` e `attachments`, sem alterar o comportamento de login, sessão, bootstrap do administrador, troca de senha e validação de arquivos.
+- **Arquivos/módulos esperados:** `src/modules/{users,auth,attachments}/**`, `tests/unit/`.
+- **Dependências:** SF-039 (ordem aprovada); SF-036 concluída, para que `attachments` não seja refatorado durante a funcionalidade de documentos.
+- **Critérios de conclusão:** CA-ARQ-01, CA-ARQ-02, CA-ARQ-05 e CA-ARQ-07 para os três módulos.
+- **Testes relacionados:** `auth`, `bootstrap-admin`, `change-own-password`, `users`, testes unitários de anexos e E2E.
+- **SPEC:** Seções 5, 7 e 10.
+
+### SF-041 — Distribuir schemas de validação pelos módulos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Mover os schemas específicos de `src/shared/validation` para o `application/` de cada módulo, deixando em `shared` apenas os genéricos, com as mesmas mensagens e caminhos de erro.
+- **Arquivos/módulos esperados:** `src/shared/validation/index.ts`, `src/modules/*/application/`, imports em `src/app/**`.
+- **Dependências:** SF-039, SF-040.
+- **Critérios de conclusão:** CA-ARQ-08.
+- **Testes relacionados:** `tests/unit/shared/validation/schemas.test.ts` (só imports podem mudar), testes de Server Actions.
+- **SPEC:** Seção 8.
+
+### SF-042 — Dividir a área administrativa por entidade
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Separar `src/app/(admin)/admin/page.tsx` e `actions.ts` em arquivos por entidade, mantendo a URL `/admin`, os textos, a ordem dos blocos e os nomes exportados por `actions.ts`. Consultar `node_modules/next/dist/docs/` antes de alterar.
+- **Arquivos/módulos esperados:** `src/app/(admin)/admin/**`, eventualmente `src/modules/*/ui/`.
+- **Dependências:** SF-041.
+- **Critérios de conclusão:** CA-ARQ-09.
+- **Testes relacionados:** `tests/unit/admin-actions.test.ts`, `tests/integration/admin-actions.test.ts`, E2E.
+- **SPEC:** Seção 9.
+
+### SF-043 — Fechar a refatoração e validar
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Apertar a regra de lint para o estado final (camadas e módulos), remover reexportações transitórias, conferir que esquema, migrations e dependências não mudaram, medir com cloc por módulo e registrar resultados.
+- **Arquivos/módulos esperados:** `eslint.config.mjs`, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-042.
+- **Critérios de conclusão:** CA-ARQ-01 a CA-ARQ-12 verificados e registrados.
+- **Testes relacionados:** Suítes unitária, de integração e E2E; `npm run typecheck`, `npm run lint`, `npm run build`; verificação manual de lint.
+- **SPEC:** Seções 12 e 13.
