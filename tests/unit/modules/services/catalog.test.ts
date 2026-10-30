@@ -12,7 +12,7 @@ vi.mock("@/server/authorization", () => ({
 import {
   groupPublishedServices,
   type PublishedService,
-} from "@/modules/services/catalog";
+} from "@/modules/services/domain/service";
 
 function service(
   id: string,

@@ -13,7 +13,6 @@ const moduleBoundaryMessage =
 
 // Deep imports that existed before SF-037. Removed as each module is migrated (SF-040, SF-043).
 const transitionalDeepImports = [
-  "!@/modules/services/catalog",
   "!@/modules/auth/change-own-password",
   "!@/modules/auth/components",
   "!@/modules/auth/components/*",

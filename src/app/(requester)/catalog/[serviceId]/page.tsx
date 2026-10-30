@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPublishedService } from "@/modules/services/catalog";
+import { getPublishedService } from "@/modules/services";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { createRequestAction } from "../../requests/actions";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { groupPublishedServices, listPublishedServices } from "@/modules/services/catalog";
+import { groupPublishedServices, listPublishedServices } from "@/modules/services";
 import { requireRequesterPageAccess } from "../page-access";
 
 export default async function CatalogPage() {

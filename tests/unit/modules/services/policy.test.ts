@@ -3,7 +3,7 @@ import { ConflictError, NotFoundError } from "@/server/errors";
 import {
   assertServiceCanReceiveRequests,
   assertServiceRelationships,
-} from "@/modules/services/policy";
+} from "@/modules/services/domain/relationships";
 
 describe("service availability policy", () => {
   const activeRelations = {

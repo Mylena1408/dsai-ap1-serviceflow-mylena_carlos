@@ -19,7 +19,7 @@ vi.mock("@/server/authorization", () => ({
 import {
   getPublishedService,
   listPublishedServices,
-} from "@/modules/services/catalog";
+} from "@/modules/services";
 
 describe("published service catalog", () => {
   it("returns only services with active service, category, and sector and includes current details", async () => {

@@ -32,7 +32,7 @@ import {
 import {
   getPublishedService,
   listPublishedServices,
-} from "@/modules/services/catalog";
+} from "@/modules/services";
 import {
   createRequest,
   getAttendantRequest,
