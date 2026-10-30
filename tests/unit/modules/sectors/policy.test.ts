@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ConflictError } from "@/server/errors";
-import { assertSectorCanBeDeactivated } from "@/modules/sectors/policy";
+import { assertSectorCanBeDeactivated } from "@/modules/sectors/domain/deactivation";
 
 describe("sector deactivation policy", () => {
   it("allows deactivation only when no active user, service, or pending request depends on it", () => {

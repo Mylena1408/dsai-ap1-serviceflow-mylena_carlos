@@ -1,8 +1,8 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import {
-  translatePrismaError,
-  type TranslatedPrismaErrorCode,
-} from "@/server/db/prisma-errors";
+  runSerializableTransaction,
+  type PersistenceErrorPolicy,
+} from "@/server/db/serializable-transaction";
 import type { RequestWithHistory } from "../domain/request";
 import type {
   RequestQueryRepository,
@@ -124,30 +124,18 @@ function createPrismaRequestTransaction(
   };
 }
 
-/**
- * Serializable transaction runner. Translates only the Prisma error codes listed by
- * the caller and wraps non-Error throwables with `fallbackMessage`, as before SF-038.
- */
+/** Serializable transaction runner that translates errors according to `policy`. */
 export function createPrismaRequestTransactionRunner(
   database: PrismaClient,
-  options: { translate: readonly TranslatedPrismaErrorCode[]; fallbackMessage: string },
+  policy: PersistenceErrorPolicy,
 ): RequestTransactionRunner {
   return {
-    async run(work) {
-      try {
-        return await database.$transaction(
-          (transaction) => work(createPrismaRequestTransaction(transaction)),
-          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-        );
-      } catch (error) {
-        const translated = translatePrismaError(error, options.translate);
-
-        if (translated) {
-          throw translated;
-        }
-
-        throw error instanceof Error ? error : new Error(options.fallbackMessage);
-      }
+    run(work) {
+      return runSerializableTransaction(
+        database,
+        (transaction) => work(createPrismaRequestTransaction(transaction)),
+        policy,
+      );
     },
   };
 }
