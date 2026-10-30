@@ -35,10 +35,19 @@ async function signOut(page: Page): Promise<void> {
   await expect(page).toHaveURL(/\/login/);
 }
 
+async function openAdminSection(page: Page, name: string): Promise<void> {
+  await page
+    .getByRole("navigation", { name: "Seções administrativas" })
+    .getByRole("link", { name, exact: true })
+    .click();
+  await expect(page.getByRole("region", { name })).toBeVisible();
+}
+
 async function createUser(
   page: Page,
   input: { name: string; email: string; role: "REQUESTER" | "ATTENDANT"; sector?: string },
 ): Promise<void> {
+  await openAdminSection(page, "Usuários");
   const form = page.getByRole("region", { name: "Usuários" }).locator("form").first();
   await form.locator('[name="name"]').fill(input.name);
   await form.locator('[name="email"]').fill(input.email);
@@ -48,7 +57,7 @@ async function createUser(
     await form.locator('[name="sectorId"]').selectOption({ label: input.sector });
   }
   await form.getByRole("button", { name: "Criar usuário" }).click();
-  await expect(page.getByRole("status")).toHaveText("Registro criado.");
+  await expect(form.getByRole("status")).toHaveText("Registro criado.");
   await expect(
     page.getByRole("region", { name: "Usuários" }).locator("ul").getByText(input.email, {
       exact: true,
@@ -60,13 +69,14 @@ async function createService(
   page: Page,
   input: { name: string; sector: string },
 ): Promise<void> {
+  await openAdminSection(page, "Serviços");
   const form = page.getByRole("region", { name: "Serviços" }).locator("form").first();
   await form.locator('[name="name"]').fill(input.name);
   await form.locator('[name="description"]').fill(`${input.name} details`);
   await form.locator('[name="categoryId"]').selectOption({ label: category });
   await form.locator('[name="sectorId"]').selectOption({ label: input.sector });
   await form.getByRole("button", { name: "Criar serviço" }).click();
-  await expect(page.getByRole("status")).toHaveText("Registro criado.");
+  await expect(form.getByRole("status")).toHaveText("Registro criado.");
   await expect(
     page.getByRole("region", { name: "Serviços" }).locator("ul").getByText(input.name, {
       exact: true,
@@ -97,6 +107,7 @@ test("bootstraps login, configures services, handles requests and denies cross-s
   await expect(page).toHaveURL(/\/admin/);
   await expect(page.getByRole("heading", { name: "Administração" })).toBeVisible();
 
+  await openAdminSection(page, "Setores");
   const sectorSection = page.getByRole("region", { name: "Setores" });
   await sectorSection.getByLabel("Novo setor").fill(sectorA);
   await sectorSection.getByRole("button", { name: "Criar setor" }).click();
@@ -106,6 +117,7 @@ test("bootstraps login, configures services, handles requests and denies cross-s
   await sectorSection.getByRole("button", { name: "Criar setor" }).click();
   await expect(page.getByRole("status")).toHaveText("Registro criado.");
 
+  await openAdminSection(page, "Categorias");
   const categorySection = page.getByRole("region", { name: "Categorias" });
   await categorySection.getByLabel("Nova categoria").fill(category);
   await categorySection.getByRole("button", { name: "Criar categoria" }).click();
@@ -117,9 +129,15 @@ test("bootstraps login, configures services, handles requests and denies cross-s
     role: "REQUESTER",
   });
   const userSection = page.getByRole("region", { name: "Usuários" });
-  const requesterRow = userSection.locator("ul > li").filter({
-    hasText: requesterAEmail,
-  });
+  // The row shows the e-mail as text when read-only and inside an input while editing.
+  const requesterRow = userSection
+    .locator("ul > li")
+    .filter({ hasText: requesterAEmail })
+    .or(
+      userSection.locator("ul > li").filter({
+        has: page.locator(`input[name="email"][value="${requesterAEmail}"]`),
+      }),
+    );
   await requesterRow.getByRole("button", { name: "Editar" }).click();
   await requesterRow.locator('[name="name"]').fill("Temporary requester name");
   await requesterRow.getByRole("button", { name: "Cancelar" }).click();

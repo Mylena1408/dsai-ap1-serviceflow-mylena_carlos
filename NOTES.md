@@ -347,3 +347,15 @@
 - **Linha de base:** tag anotada `baseline-ap2` no commit `410c07b` (código idêntico ao `20cf0e4`), publicada no GitHub.
 - **Dependências:** permitidas quando necessárias, com justificativa registrada nesta nota antes ou junto da inclusão (`AGENTS.md`, regra 11). A refatoração em si não adiciona dependências (CA-ARQ-10).
 - **Repositório local:** a pasta de trabalho passou a ser um repositório Git ligado a `origin/main` (antes era uma cópia sem `.git`); nenhum arquivo foi alterado na conversão.
+
+## Fase 0 — ambiente de testes e linha de base (2026-10-29)
+
+- **Node:** o Node padrão da máquina é 18.20.8, abaixo do `engines` (>= 20.9). Todos os comandos rodam com `volta run --node 22` (22.23.4). Nenhuma configuração de versão foi versionada.
+- **Banco de teste:** PostgreSQL 17.10 portátil via pacote `embedded-postgres@17.10.0-beta.17`, instalado **fora do repositório** (pasta irmã `../pgtest`), porta 54329, banco `serviceflow_test`, codificação UTF8 com ICU `en-US`. Não altera `package.json` (CA-ARQ-10). O diretório temporário da sessão não serviu: o Windows recusou o caminho longo (`0xC0000106`).
+- **Configuração local:** `.env.test.local` (ignorado pelo Git) com `TEST_DATABASE_URL` apontando para esse banco; a senha é local e exclusiva de teste.
+- **Defeito pré-existente em `playwright.config.ts`:** sem `.env`/`.env.local`, `process.env.DATABASE_URL ??= developmentEnvironment.DATABASE_URL` grava a string `"undefined"`, e a verificação de isolamento falha com `DATABASE_URL must be valid...`. Contorno usado: definir `DATABASE_URL` com um banco de desenvolvimento diferente (`serviceflow_dev`) só na execução do E2E. Não corrigido agora para não alterar comportamento durante a refatoração; fica para SPEC futura.
+- **E2E quebrado desde 2026-10-06:** o commit `041082f` ("moderniza interface") transformou `/admin` em abas (`?section=`) com "Visão geral" por padrão, e o E2E de 2026-10-05 não foi atualizado. Ajustes feitos em `tests/e2e/service-request-flow.spec.ts`, **sem mudar textos esperados nem o fluxo verificado**:
+  1. novo auxiliar `openAdminSection`, que clica na aba antes de usar Setores, Categorias, Usuários e Serviços;
+  2. a linha do usuário em edição passa a ser localizada também pelo campo `email` (no modo de edição o e-mail não aparece como texto);
+  3. a mensagem "Registro criado." é procurada dentro do formulário de criação, porque a página passou a ter duas regiões `status` simultâneas (criação e edição).
+- **Linha de base verificada (código de `baseline-ap2`):** lint OK; typecheck OK; unitários 26 arquivos / 174 testes OK; integração 19 arquivos / 94 testes OK (inclui os testes da SF-029, pendentes desde 2026-10-06); E2E 1/1 OK após o ajuste acima; build OK.
