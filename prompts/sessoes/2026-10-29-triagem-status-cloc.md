@@ -53,3 +53,9 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 > crie umbanco de dados fictício para testar as funcionalidades do sistema
 
 - SPEC 22.6 e 22.7, SF-045: `npm run seed:demo` com catálogo e banco fictício.
+
+> quais as camadas podem ser implementadas para o sistema ter 100.000linhas de código? me indique os passos e os relatorios necessarios
+
+> salve o relatório na pasta SPEC e faça o commit
+
+- Salvo em `SPEC/2026-10-30-camadas-para-100k.md`.
