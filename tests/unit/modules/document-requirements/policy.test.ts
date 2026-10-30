@@ -4,7 +4,7 @@ import {
   assertCanAddActiveRequirement,
   nextRequirementPosition,
   planRequirementMove,
-} from "@/modules/document-requirements/policy";
+} from "@/modules/document-requirements/domain/requirement-order";
 import { ConflictError, ValidationError, toErrorResponse } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import {

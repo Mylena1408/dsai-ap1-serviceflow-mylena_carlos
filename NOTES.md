@@ -396,3 +396,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **E2E:** rodar com `DATABASE_URL` de desenvolvimento diferente do banco de teste (ver fase 0), por exemplo `serviceflow_dev` na mesma porta.
 - **Memória:** em 2026-10-29 o processo foi encerrado pelo Claude Code por memória crítica do sistema com a sessão ociosa. Para impedir esse encerramento, iniciar o Claude Code com `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1` no ambiente (não tem efeito se definido dentro da sessão).
 - **Push:** a autenticação do GitHub expirou durante a sessão; commits desde `57d10cc` aguardam `git push origin main` com login interativo.
+
+## SF-039 — Catálogo e organização em camadas (2026-10-29)
+
+- **Módulos:** `sectors` (`d870dbc`), `categories` (`8a5e8b6`), `services` com catálogo (`3150db7`) e `document-requirements`, cada um com todas as suítes aprovadas antes do commit.
+- **Reuso:** `src/server/db/serializable-transaction.ts` concentra a transação `Serializable` e o tratamento de erros (`runSerializableTransaction`, `rethrowPersistenceError`); `requests` também passou a usá-lo. Cada repositório declara os mesmos códigos de antes (P2002/P2025/P2003) e a mesma mensagem de fallback.
+- **Catálogo:** `services/catalog.ts` foi absorvido: `groupPublishedServices` e `PublishedService` no `domain/service.ts`, consultas em `application/catalog-queries.ts`, Prisma em `infrastructure/`. As páginas `/catalog` e `/catalog/[serviceId]` importam de `@/modules/services`; a exceção `services/catalog` saiu de `eslint.config.mjs`.
+- **`listServices`:** o tipo público continua sendo o registro de serviço sem relações, mas a consulta mantém `include: { category, sector }`, como antes, porque o objeto retornado em tempo de execução não pode mudar.
+- **Testes existentes alterados (só imports):** `tests/unit/modules/{sectors,categories,services,document-requirements}/policy.test.ts`, `tests/unit/modules/services/catalog.test.ts`, `tests/integration/catalog.test.ts`, `tests/integration/authorization/matrix.test.ts`.
+- **Testes novos:** casos de uso dos quatro módulos com repositórios em memória e o auxiliar `tests/unit/support/in-memory-transaction.ts` (rollback e IDs determinísticos).
+- **cloc por módulo (antes → depois):** `services` 266 → 341; `categories` 126 → 172; `sectors` 148 → 196; `document-requirements` 221 → 330.
+- **Medição acumulada (`scripts/cloc-diff.sh`):** `added` 1.897; `removed` 660; saldo líquido 1.237.
+- **Resultados:** lint, typecheck e build OK; unitários 206/206 (34 arquivos); integração 94/94; E2E 1/1.
