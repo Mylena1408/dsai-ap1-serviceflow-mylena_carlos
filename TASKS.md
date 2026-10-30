@@ -479,3 +479,15 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Testes relacionados:** Integração (idempotência e recusa de banco de teste), E2E do fluxo solicitante → atendente com o catálogo de demonstração.
 - **SPEC:** Seções 22.6 e 22.7 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
 
+## Fonte única de horário — alteração de SPEC de 2026-10-30
+
+### SF-046 — Usar o relógio do banco em todo o histórico de solicitações
+
+- **Estado:** Em andamento.
+- **Objetivo:** Ler o horário do banco dentro da transação e usá-lo em `createdAt`, `updatedAt`, `completedAt` e `occurredAt` na abertura e nas transições.
+- **Arquivos/módulos esperados:** `src/modules/requests/{application,infrastructure}`, testes unitários e de integração.
+- **Dependências:** SF-043.
+- **Critérios de conclusão:** CA-HOR-01 a CA-HOR-04.
+- **Testes relacionados:** Unitários dos casos de uso, `requests-transitions`, `requests-create` e novo teste com relógio da aplicação deslocado.
+- **SPEC:** Seção 23 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
+

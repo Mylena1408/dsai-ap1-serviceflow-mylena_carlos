@@ -778,3 +778,34 @@ Solicitado pela responsável para testar as funcionalidades com dados. O mesmo c
 
 - [ ] **CA-DEMO-07** — Após `npm run seed:demo`, o Solicitante de demonstração vê as três categorias com três serviços cada no catálogo, abre uma solicitação e ela aparece na fila do Atendente de demonstração; executar o comando duas vezes não duplica registros.
 
+## 23. Alteração aprovada — 2026-10-30 — Fonte única de horário do histórico
+
+Solicitada pela responsável depois do diagnóstico registrado em `NOTES.md` (SF-045): o relógio do PostgreSQL estava 9–11 ms à frente do relógio da aplicação, e o histórico misturava as duas fontes.
+
+### 23.1 Problema
+
+- O evento de abertura e o `createdAt` da solicitação usam o relógio do **banco** (valor padrão `now()`).
+- O `updatedAt` da criação é preenchido pelo Prisma com o relógio da **aplicação**.
+- As transições usam o relógio da **aplicação** (`new Date()`) em `updatedAt`, `completedAt` e `occurredAt`.
+- Como o histórico é ordenado por `occurredAt`, uma diferença entre os relógios pode colocar uma transição **antes** da abertura e produzir `updatedAt` anterior a `createdAt`. Em produção (Vercel × Supabase) a diferença pode ser maior que a observada localmente.
+
+### 23.2 Regra
+
+1. Todo horário de solicitação e de evento de status vem do **relógio do banco de dados**, lido dentro da própria transação da operação (`now()`, que é o mesmo valor para toda a transação).
+2. Na abertura, `createdAt`, `updatedAt` e o `occurredAt` do evento inicial recebem o mesmo horário.
+3. Em cada transição, `updatedAt`, o `occurredAt` do evento e, na conclusão, `completedAt` recebem o mesmo horário.
+4. Nenhum horário de solicitação ou evento é calculado com o relógio da aplicação.
+5. Não há mudança de schema, migration, regra de negócio, mensagem ou tela.
+
+### 23.3 Fora de escopo
+
+- Horários de setores, categorias, serviços, usuários e documentos exigidos (`updatedAt` desses registros), que não fazem parte do histórico.
+- Os dados fictícios de `npm run seed:demo`, que já gravam horários explícitos e coerentes.
+
+### 23.4 Critérios de aceitação
+
+- [ ] **CA-HOR-01** — Na abertura, `createdAt`, `updatedAt` e o `occurredAt` do evento inicial são iguais.
+- [ ] **CA-HOR-02** — Em cada transição, `updatedAt` e o `occurredAt` do evento são iguais, e `completedAt` também na conclusão.
+- [ ] **CA-HOR-03** — Com o relógio da aplicação deslocado em relação ao banco (simulado no teste), o histórico continua em ordem e nenhum horário é anterior ao da etapa anterior.
+- [ ] **CA-HOR-04** — `tests/integration/requests-transitions.test.ts` passa sem alteração de asserções, assim como as demais suítes.
+
