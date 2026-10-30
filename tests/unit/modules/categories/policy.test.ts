@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ConflictError } from "@/server/errors";
-import { assertCategoryCanBeDeactivated } from "@/modules/categories/policy";
+import { assertCategoryCanBeDeactivated } from "@/modules/categories/domain/deactivation";
 
 describe("category deactivation policy", () => {
   it("allows deactivation without active services", () => {
