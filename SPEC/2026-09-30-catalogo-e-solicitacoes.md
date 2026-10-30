@@ -747,3 +747,22 @@ Alteração solicitada pela responsável pelo projeto para uso didático. Ela **
 - [ ] **CA-DEMO-04** — Um perfil inválido enviado ao login de demonstração é recusado sem criar sessão.
 - [ ] **CA-DEMO-05** — As contas de demonstração não autenticam pelo formulário de e-mail e senha.
 - [ ] **CA-DEMO-06** — O login por e-mail e senha continua funcionando para as demais contas; lint, typecheck, build e as suítes unitária, de integração e E2E passam.
+
+### 22.6 Catálogo de demonstração (aprovado em 2026-10-30)
+
+Solicitado pela responsável depois de verificar que o catálogo de um banco novo fica vazio.
+
+- O comando `npm run seed:demo` cadastra um catálogo de exemplo **somente quando executado**; nada é criado automaticamente na inicialização, e o sistema continua genérico (`AGENTS.md`).
+- Categorias: **TI**, **RH** e **Manutenção**, cada uma com três serviços (nomes e descrições na tabela abaixo).
+- Setor responsável de todos os serviços: **"Setor de demonstração"** (o mesmo do Atendente de demonstração), para que uma solicitação aberta pelo Solicitante de demonstração apareça na fila do Atendente de demonstração.
+- O comando é idempotente: executado de novo, não duplica setor, categorias nem serviços; reativa itens de demonstração desativados.
+- Recusa bancos cujo nome termina em `_test`.
+
+| Categoria | Serviços |
+|---|---|
+| TI | Criação de conta de acesso; Redefinição de senha de sistema; Solicitação de equipamento |
+| RH | Declaração de vínculo; Solicitação de férias; Atualização cadastral |
+| Manutenção | Reparo elétrico; Manutenção de ar-condicionado; Reparo de mobiliário |
+
+- [ ] **CA-DEMO-07** — Após `npm run seed:demo`, o Solicitante de demonstração vê as três categorias com três serviços cada no catálogo, abre uma solicitação e ela aparece na fila do Atendente de demonstração; executar o comando duas vezes não duplica registros.
+

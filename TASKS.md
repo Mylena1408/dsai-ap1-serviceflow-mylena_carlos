@@ -469,3 +469,13 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Testes relacionados:** Unitários do caso de uso, integração das contas de demonstração, E2E dos três botões e suítes existentes.
 - **SPEC:** Seção 22 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
 
+### SF-045 — Catálogo de demonstração
+
+- **Estado:** Em andamento.
+- **Objetivo:** Comando `npm run seed:demo` que cadastra, de forma idempotente, as categorias TI, RH e Manutenção com três serviços cada, todos no "Setor de demonstração".
+- **Arquivos/módulos esperados:** `scripts/demo-catalog.ts`, `scripts/seed-demo-catalog.ts`, `package.json` (apenas o script `seed:demo`), testes de integração e E2E.
+- **Dependências:** SF-044.
+- **Critérios de conclusão:** CA-DEMO-07.
+- **Testes relacionados:** Integração (idempotência e recusa de banco de teste), E2E do fluxo solicitante → atendente com o catálogo de demonstração.
+- **SPEC:** Seção 22.6 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
+
