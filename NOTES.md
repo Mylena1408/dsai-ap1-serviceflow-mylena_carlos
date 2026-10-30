@@ -441,3 +441,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes novos:** `tests/unit/modules/auth/application/demo-sign-in.test.ts`, `tests/integration/demo-accounts.test.ts` (5 casos) e `tests/e2e/demo-sign-in.spec.ts`.
 - **Operação local:** o Next 16 não permite dois `next dev` na mesma pasta; para rodar o E2E é preciso parar o servidor de desenvolvimento. Com `.env.local` presente, o E2E não precisa mais do `DATABASE_URL` na linha de comando.
 - **Resultados:** lint, typecheck e build OK; unitários 224/224; integração 99/99; E2E 2/2.
+
+## SF-045 — Catálogo e banco fictício de demonstração (2026-10-30)
+
+- **Comando:** `npm run seed:demo` (`scripts/seed-demo-data.ts` → `scripts/demo-data.ts`). Lê `.env.local`/`.env` antes de abrir o banco, recusa bancos `_test` e roda numa transação `Serializable` (tempo limite de 30 s; os hashes Argon2 são calculados antes da transação).
+- **Conteúdo:** categorias TI, RH e Manutenção com 3 serviços cada, todos no "Setor de demonstração"; as 3 contas de demonstração e 4 pessoas fictícias (`@exemplo.test`, domínio reservado); 12 solicitações em `OPEN`, `IN_PROGRESS` e `COMPLETED`, com datas nos dias anteriores e histórico coerente; documentos exigidos em "Solicitação de férias" e "Atualização cadastral".
+- **Sem senhas no repositório:** todos os usuários fictícios recebem hash de valor aleatório descartado; o acesso é pelos botões de demonstração.
+- **Idempotência:** setor, categorias, serviços e usuários são buscados pelo nome/e-mail e reativados se preciso; solicitações só são criadas se as pessoas fictícias ainda não tiverem nenhuma; documentos exigidos só em serviço sem nenhum.
+- **`package.json`:** acrescentado apenas o script `seed:demo` (sem dependências).
+- **Defeito latente corrigido:** `scripts/prepare-e2e.ts` não apagava `RequestAttachment` nem `ServiceDocumentRequirement` (tabelas da SF-031); bastava existir um documento exigido no banco de teste para o preparo do E2E falhar por chave estrangeira. A limpeza agora segue a mesma ordem de `tests/integration/fixtures.ts`.
+- **E2E e hidratação:** clicar nos botões de demonstração antes de o React hidratar a página não faz nada. Os testes E2E esperam `networkidle` antes do clique.
+- **Diferença de relógio Node × PostgreSQL (achado importante):** medido com `SELECT clock_timestamp()` comparado a `Date.now()`, o PostgreSQL local está 9–11 ms à frente do Node nesta máquina, mesmo após reiniciar o banco. `tests/integration/requests-transitions.test.ts` falha em 2 casos por isso: o evento de abertura usa o relógio do banco (`occurredAt` padrão `now()`) e as transições usam o relógio da aplicação (`new Date()`). **Isso é um defeito latente do produto:** em produção (Vercel × Supabase), uma diferença de relógio maior pode inverter a ordem do histórico. Correção sugerida, para nova SPEC: usar uma única fonte de horário para todos os eventos (por exemplo, o relógio do banco também nas transições). Não corrigido nesta tarefa.
+- **Resultados:** lint, typecheck e build OK; unitários 224/224; integração 102/104 (as 2 falhas acima); E2E 3/3.

@@ -471,7 +471,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-045 — Catálogo e banco fictício de demonstração
 
-- **Estado:** Em andamento.
+- **Estado:** **Concluída em 2026-10-30.** `npm run seed:demo` (`scripts/demo-data.ts`) carrega catálogo (3 categorias, 9 serviços), 7 usuários sem senha utilizável, 12 solicitações com histórico e 3 documentos exigidos, sem duplicar em novas execuções. CA-DEMO-07 e CA-DEMO-08 verificados por integração (5 casos) e E2E. Corrigido `scripts/prepare-e2e.ts`, que não limpava anexos e documentos exigidos. Integração 102/104: as 2 falhas de `requests-transitions` vêm da diferença de relógio Node × PostgreSQL desta máquina (ver `NOTES.md`), não desta tarefa.
 - **Objetivo:** Comando `npm run seed:demo` que cadastra, de forma idempotente, as categorias TI, RH e Manutenção com três serviços cada (todos no "Setor de demonstração"), usuários fictícios, doze solicitações com histórico e documentos exigidos (seções 22.6 e 22.7).
 - **Arquivos/módulos esperados:** `scripts/demo-data.ts`, `scripts/seed-demo-data.ts`, `package.json` (apenas o script `seed:demo`), testes de integração e E2E.
 - **Dependências:** SF-044.

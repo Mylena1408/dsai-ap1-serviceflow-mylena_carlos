@@ -11,6 +11,7 @@ const profiles = [
 test("enters each profile from the login buttons without e-mail or password", async ({ page }) => {
   for (const profile of profiles) {
     await page.goto("/login");
+    await page.waitForLoadState("networkidle"); // buttons only work after hydration
     await expect(page.getByLabel("E-mail")).toBeHidden();
     await page.getByRole("button", { name: profile.button }).click();
 

@@ -47,3 +47,9 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 > desabilite a necessidade de entrada usando e-mail e senha, é uma representação didática e deve ter a tela,porém sem habilitação que restringir acesso
 
 - Decisões: botões por perfil; em todos os ambientes, inclusive Vercel. SPEC seção 22 e SF-044 implementadas.
+
+> certo, funciona e não ha catalogo de serviços, coloque um catalogo de serviço
+
+> crie umbanco de dados fictício para testar as funcionalidades do sistema
+
+- SPEC 22.6 e 22.7, SF-045: `npm run seed:demo` com catálogo e banco fictício.
