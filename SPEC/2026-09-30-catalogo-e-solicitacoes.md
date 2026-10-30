@@ -764,5 +764,17 @@ Solicitado pela responsável depois de verificar que o catálogo de um banco nov
 | RH | Declaração de vínculo; Solicitação de férias; Atualização cadastral |
 | Manutenção | Reparo elétrico; Manutenção de ar-condicionado; Reparo de mobiliário |
 
+### 22.7 Banco fictício de demonstração (aprovado em 2026-10-30)
+
+Solicitado pela responsável para testar as funcionalidades com dados. O mesmo comando `npm run seed:demo` passa a carregar, além do catálogo da seção 22.6:
+
+- **Contas de demonstração** dos três perfis (seção 22.2), caso ainda não existam, para que as solicitações possam ser atribuídas a elas.
+- **Usuários fictícios:** solicitantes Ana Souza, Bruno Lima e Carla Mendes e o atendente Diego Rocha (no "Setor de demonstração"), com e-mails no domínio reservado `exemplo.test`. Todos recebem senha aleatória descartada, como as contas de demonstração: o repositório não contém senhas.
+- **Solicitações fictícias:** doze solicitações distribuídas entre os serviços de demonstração e os status `OPEN`, `IN_PROGRESS` e `COMPLETED`, com datas nos dias anteriores e histórico coerente (evento de abertura pelo solicitante; início e conclusão pelo atendente). Parte delas pertence ao Solicitante de demonstração.
+- **Documentos exigidos:** "Solicitação de férias" exige "Formulário de férias" (PDF); "Atualização cadastral" exige "Comprovante de residência" (PDF ou DOCX) e aceita "Certidão de dependente" (PDF, opcional).
+- As solicitações e os documentos exigidos só são criados na primeira execução; nas seguintes, o comando não duplica nada.
+
+- [ ] **CA-DEMO-08** — Após `npm run seed:demo`, o Solicitante de demonstração vê as próprias solicitações com status e histórico; o Atendente de demonstração vê na fila solicitações abertas, em atendimento e concluídas; o Administrador vê os usuários fictícios e os documentos exigidos; executar o comando de novo não duplica registros.
+
 - [ ] **CA-DEMO-07** — Após `npm run seed:demo`, o Solicitante de demonstração vê as três categorias com três serviços cada no catálogo, abre uma solicitação e ela aparece na fila do Atendente de demonstração; executar o comando duas vezes não duplica registros.
 
