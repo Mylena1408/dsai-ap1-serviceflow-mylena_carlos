@@ -389,3 +389,10 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - `cloc --git --diff baseline-ap2 HEAD` subcontou neste Windows (58 `added`); a comparação de pastas extraídas com `git archive` deu 897. O protocolo da seção 3.2 do plano passou a usar `sh scripts/cloc-diff.sh`, que mostra `src`, `tests`, `scripts`, o total e o saldo líquido.
 - **Medição após SF-038:** `added` 897 (aplicação 452, testes 445); `removed` 231; saldo líquido 666. Parte do `added` em `src` é código realocado de `requests/index.ts` para as camadas; o saldo líquido mostra o que é realmente novo.
+
+## Operação do banco de teste local (2026-10-29)
+
+- **Iniciar:** em `../pgtest`, executar `volta run --node 22 node start.mjs` e aguardar `READY postgres on 54329`. O script reaproveita os dados existentes em `../pgtest/data`.
+- **E2E:** rodar com `DATABASE_URL` de desenvolvimento diferente do banco de teste (ver fase 0), por exemplo `serviceflow_dev` na mesma porta.
+- **Memória:** em 2026-10-29 o processo foi encerrado pelo Claude Code por memória crítica do sistema com a sessão ociosa. Para impedir esse encerramento, iniciar o Claude Code com `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1` no ambiente (não tem efeito se definido dentro da sessão).
+- **Push:** a autenticação do GitHub expirou durante a sessão; commits desde `57d10cc` aguardam `git push origin main` com login interativo.
