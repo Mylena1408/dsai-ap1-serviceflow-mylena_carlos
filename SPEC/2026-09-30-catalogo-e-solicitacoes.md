@@ -704,3 +704,46 @@ O upload, o download e a remoção de objetos devem usar a API HTTP do Storage v
 - Supabase — Understanding API keys: https://supabase.com/docs/guides/api/api-keys
 - Supabase — Self-hosting Storage API, Upload a new object: https://supabase.com/docs/reference/self-hosting-storage/upload-a-new-object
 - Next.js 16.3.8 (local, versão instalada) — `node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/serverActions.md` e `node_modules/next/dist/docs/01-app/02-guides/server-actions.md`
+
+## 22. Alteração aprovada — 2026-10-29 — Modo de demonstração sem senha
+
+Alteração solicitada pela responsável pelo projeto para uso didático. Ela **altera** as regras de autenticação das seções anteriores conforme descrito aqui; o restante da SPEC permanece válido.
+
+### 22.1 Decisões aprovadas
+
+1. A tela `/login` continua existindo, mas o acesso **não exige e-mail nem senha**.
+2. A tela oferece três botões: **Entrar como Administrador**, **Entrar como Solicitante** e **Entrar como Atendente**. Cada botão inicia uma sessão com uma conta de demonstração do perfil escolhido.
+3. Vale **em todos os ambientes**, inclusive na publicação da Vercel. Não há variável de ambiente para desligar o modo.
+4. O formulário de e-mail e senha permanece disponível na mesma tela, como alternativa secundária, para contas criadas no painel administrativo e para os testes existentes.
+
+### 22.2 Contas de demonstração
+
+| Perfil | Nome | E-mail |
+|---|---|---|
+| `ADMIN` | Administrador (demonstração) | `demo.administrador@serviceflow.demo` |
+| `REQUESTER` | Solicitante (demonstração) | `demo.solicitante@serviceflow.demo` |
+| `ATTENDANT` | Atendente (demonstração) | `demo.atendente@serviceflow.demo` |
+
+- São usuários reais do banco, criados no primeiro acesso de cada perfil. Os acessos seguintes reutilizam a mesma conta e a reativam, restauram o perfil e, no caso do atendente, o setor, se tiverem sido alterados no painel.
+- O atendente de demonstração pertence ao setor ativo **"Setor de demonstração"**, criado no primeiro acesso se não existir.
+- A senha dessas contas é um hash Argon2id de um valor aleatório descartado: elas não podem ser usadas pelo formulário de e-mail e senha.
+- O sistema continua genérico: nenhum setor ou serviço além do setor de demonstração é criado automaticamente.
+
+### 22.3 O que não muda
+
+- Autorização por perfil e por setor no servidor, sessões JWT, recarga do usuário a cada leitura de sessão e todas as regras de negócio.
+- O bootstrap do primeiro administrador continua disponível.
+
+### 22.4 Riscos aceitos
+
+- Na Vercel, **qualquer pessoa com o endereço entra como administrador** e pode ver, criar, alterar e desativar dados. A publicação deve conter somente dados fictícios.
+- O perfil passa a ser escolhido pelo cliente no login de demonstração. A asserção "does not expose role or sector as credential fields" de `tests/unit/modules/auth/config.test.ts`, que protegia o contrário, é atualizada por esta alteração.
+
+### 22.5 Critérios de aceitação
+
+- [ ] **CA-DEMO-01** — `/login` exibe os três botões; cada um leva à área do perfil (`/admin`, `/catalog`, `/queue`) sem pedir e-mail ou senha.
+- [ ] **CA-DEMO-02** — Repetir o acesso de um perfil reutiliza a mesma conta (nenhum usuário duplicado).
+- [ ] **CA-DEMO-03** — O atendente de demonstração fica vinculado a um setor ativo e vê a fila desse setor.
+- [ ] **CA-DEMO-04** — Um perfil inválido enviado ao login de demonstração é recusado sem criar sessão.
+- [ ] **CA-DEMO-05** — As contas de demonstração não autenticam pelo formulário de e-mail e senha.
+- [ ] **CA-DEMO-06** — O login por e-mail e senha continua funcionando para as demais contas; lint, typecheck, build e as suítes unitária, de integração e E2E passam.

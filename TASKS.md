@@ -456,3 +456,16 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ARQ-01 a CA-ARQ-12 verificados e registrados.
 - **Testes relacionados:** Suítes unitária, de integração e E2E; `npm run typecheck`, `npm run lint`, `npm run build`; verificação manual de lint.
 - **SPEC:** Seções 12 e 13.
+
+## Modo de demonstração — alteração de SPEC de 2026-10-29
+
+### SF-044 — Implementar o modo de demonstração sem senha
+
+- **Estado:** Em andamento.
+- **Objetivo:** Botões de acesso por perfil na tela `/login`, sem e-mail e senha, com contas de demonstração criadas e reutilizadas no servidor, em todos os ambientes.
+- **Arquivos/módulos esperados:** `src/modules/auth/{domain,application,infrastructure,ui}`, `src/app/login/page.tsx`, testes unitários, de integração e E2E.
+- **Dependências:** SF-040 (módulo `auth` em camadas).
+- **Critérios de conclusão:** CA-DEMO-01 a CA-DEMO-06.
+- **Testes relacionados:** Unitários do caso de uso, integração das contas de demonstração, E2E dos três botões e suítes existentes.
+- **SPEC:** Seção 22 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
+
