@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LoginForm } from "@/modules/auth";
+import { DemoSignInButtons, LoginForm } from "@/modules/auth";
 
 export default function LoginPage() {
   return (
@@ -9,10 +9,14 @@ export default function LoginPage() {
           <span className="brand-mark" aria-hidden="true">S</span>
           ServiceFlow
         </Link>
-        <p className="eyebrow">Acesso seguro</p>
+        <p className="eyebrow">Modo demonstração</p>
         <h1 id="login-title">Entre na sua conta</h1>
-        <p>Use suas credenciais para acessar o catálogo e acompanhar os serviços.</p>
-        <LoginForm />
+        <p>Escolha um perfil para explorar o ServiceFlow. Não é preciso e-mail nem senha.</p>
+        <DemoSignInButtons />
+        <details className="login-credentials">
+          <summary>Entrar com e-mail e senha</summary>
+          <LoginForm />
+        </details>
       </section>
     </main>
   );

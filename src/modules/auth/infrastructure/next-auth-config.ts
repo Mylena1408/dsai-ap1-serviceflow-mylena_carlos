@@ -2,12 +2,18 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { sessionFromToken, refreshSessionToken } from "./next-auth-session";
 import { authenticateCredentials } from "./prisma-credentials";
+import { signInAsDemoUser } from "./prisma-demo-accounts";
 
 const isProduction = process.env.NODE_ENV === "production";
 
 export const authCredentialFields = {
   email: { label: "E-mail", type: "email" },
   password: { label: "Senha", type: "password" },
+};
+
+// Demonstration sign-in by role, without e-mail or password (SPEC 2026-09-30, section 22).
+export const demoCredentialFields = {
+  role: { label: "Perfil", type: "text" },
 };
 
 export const authConfig = {
@@ -38,6 +44,12 @@ export const authConfig = {
           email: credentials?.email,
           password: credentials?.password,
         }),
+    }),
+    Credentials({
+      id: "demo",
+      name: "Demonstração",
+      credentials: demoCredentialFields,
+      authorize: (credentials) => signInAsDemoUser({ role: credentials?.role }),
     }),
   ],
   callbacks: {

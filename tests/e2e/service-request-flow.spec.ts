@@ -18,12 +18,14 @@ const privateDescriptionB = `${unique}-private-request-b`;
 
 async function signIn(page: Page, email: string, password: string): Promise<void> {
   await page.goto("/login");
+  // The e-mail and password form is secondary to the demonstration buttons (SPEC section 22).
+  await page.getByText("Entrar com e-mail e senha").click();
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
   const credentialsResponse = page.waitForResponse((response) =>
     response.url().includes("/api/auth/callback/credentials"),
   );
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   const response = await credentialsResponse;
   const result = (await response.json()) as { error?: string };
   expect(response.ok()).toBe(true);

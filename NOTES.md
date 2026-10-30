@@ -428,3 +428,16 @@ Padrão a replicar nas SF-039 e SF-040:
 - **cloc por módulo (antes → depois):** `users` 323 → 394; `auth` 459 → 597; `attachments` 317 → 338.
 - **Medição acumulada:** `added` 3.159; `removed` 1.425; saldo líquido 1.734.
 - **Resultados:** lint, typecheck e build OK; unitários 219/219 (36 arquivos); integração 94/94; E2E 1/1.
+
+## SF-044 — Modo de demonstração sem senha (2026-10-30)
+
+- **Decisão da responsável (2026-10-29):** tela de login com botões por perfil, sem e-mail e senha, **em todos os ambientes, inclusive na Vercel**. O risco de qualquer pessoa com o link entrar como administrador foi apresentado e aceito; registrado na seção 22.4 da SPEC principal.
+- **Implementação:** `auth/domain/demo-accounts.ts` (contas fixas por perfil e nome do setor), `application/demo-sign-in.ts` (valida o perfil com Zod estrito; inválido → `null`), `infrastructure/prisma-demo-accounts.ts` (cria ou restaura a conta e o "Setor de demonstração" numa transação `Serializable`), provedor `Credentials` com `id: "demo"` em `next-auth-config.ts` e componente `ui/demo-sign-in-buttons.tsx`.
+- **Senha das contas de demonstração:** hash Argon2id de 32 bytes aleatórios descartados; não autenticam pelo formulário (testado).
+- **Formulário de e-mail e senha:** mantido dentro de `<details>` ("Entrar com e-mail e senha"), para contas reais e para o E2E existente.
+- **Restauração:** cada acesso de demonstração reativa a conta e restaura nome, perfil e setor. Isso ignora, só para essas três contas, as regras administrativas de desativação (por exemplo, "último atendente com pendências").
+- **Bootstrap:** depois do primeiro acesso como administrador de demonstração já existe um `ADMIN`, então `npm run bootstrap:admin` passa a recusar com "já existe um administrador".
+- **Testes alterados:** `tests/unit/modules/auth/config.test.ts` — a asserção "does not expose role or sector as credential fields" foi substituída por outra que exige os provedores `credentials` e `demo` e um campo `role` (a SPEC mudou essa regra). O `id` do provedor é lido de `options.id`, onde o Auth.js o guarda antes de inicializar. `tests/e2e/service-request-flow.spec.ts` — o auxiliar de login abre o bloco "Entrar com e-mail e senha" e clica no botão "Entrar" com `exact: true`.
+- **Testes novos:** `tests/unit/modules/auth/application/demo-sign-in.test.ts`, `tests/integration/demo-accounts.test.ts` (5 casos) e `tests/e2e/demo-sign-in.spec.ts`.
+- **Operação local:** o Next 16 não permite dois `next dev` na mesma pasta; para rodar o E2E é preciso parar o servidor de desenvolvimento. Com `.env.local` presente, o E2E não precisa mais do `DATABASE_URL` na linha de comando.
+- **Resultados:** lint, typecheck e build OK; unitários 224/224; integração 99/99; E2E 2/2.

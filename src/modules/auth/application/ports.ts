@@ -50,3 +50,12 @@ export interface AdministratorBootstrapStore {
   /** Runs work with serializable isolation; a lost race with an existing administrator becomes a conflict. */
   run<T>(work: (transaction: AdministratorBootstrapTransaction) => Promise<T>): Promise<T>;
 }
+
+export interface DemoAccountStore {
+  /** Creates or restores the demonstration account of `role` and returns its identity. */
+  ensureDemoUser(role: "ADMIN" | "REQUESTER" | "ATTENDANT"): Promise<{
+    id: string;
+    name: string;
+    email: string;
+  }>;
+}
