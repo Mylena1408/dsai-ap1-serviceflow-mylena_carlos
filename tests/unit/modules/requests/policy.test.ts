@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  assertRequestStatusTransition,
-  buildRequestSnapshot,
-} from "@/modules/requests/policy";
+import { buildRequestSnapshot } from "@/modules/requests/domain/snapshot";
+import { assertRequestStatusTransition } from "@/modules/requests/domain/status-transition";
 
 describe("request snapshot construction", () => {
   it("copies current service/category/sector data and trusts the supplied server actor ID", () => {

@@ -368,3 +368,19 @@
 - **Acoplamentos trocados:** `requests` → `@/modules/services` (que já exportava `assertServiceCanReceiveRequests`); `users` → `@/modules/auth`, com novo `src/modules/auth/index.ts` exportando `hashPassword` e `verifyPassword`.
 - **Verificação manual (CA-ARQ-04):** arquivos temporários com 3 imports proibidos (`@/modules/services/policy` e `../services/policy` em `requests`; `@/modules/requests/policy` em `src/app`) geraram 3 erros; os permitidos (`@/modules/services`, `./policy`, `../policy` em subpasta do próprio módulo, `@/modules/services/catalog` transitório) não geraram erro. Segunda rodada com `@/modules/auth/password` e `../users/policy`: 5 de 5 bloqueados. Arquivos removidos em seguida.
 - **Resultados:** lint, typecheck e build OK; unitários 174/174; integração 94/94; E2E 1/1. Nenhuma asserção ou mock de teste alterado. `package.json` e Prisma intocados.
+
+## SF-038 — Piloto `requests` em camadas: padrão adotado (2026-10-29)
+
+Padrão a replicar nas SF-039 e SF-040:
+
+- **`domain/`**: tipos de domínio escritos à mão (`RequestRecord`, `RequestWithHistory`, `RequestStatus` como união de strings) e regras puras (`buildRequestSnapshot`, `assertRequestStatusTransition`). Pode usar `@/server/errors`. Sem Prisma, Next, React ou I/O.
+- **`application/`**: `ports.ts` com as interfaces e um arquivo por grupo de casos de uso. Cada caso de uso recebe o repositório (ou o executor de transação) **como parâmetro** — sem contêiner de injeção. Autorização e validação continuam no caso de uso (`@/server/authorization`, `@/server/validation`, schemas de `@/shared/validation` até a SF-041).
+- **Transação (decisão do ponto em aberto da seção 15.2):** port `RequestTransactionRunner.run(work)`, em que `work` recebe um `RequestTransaction` com as operações permitidas dentro da transação. A implementação Prisma usa `$transaction` com `Serializable`, como antes. Os casos de uso não sabem que existe Prisma.
+- **Tradução de erros:** utilitário único `translatePrismaError(error, codes)` em `src/server/db/prisma-errors.ts` (P2002 → `ConflictError`; P2003 e P2025 → `NotFoundError`; P2034 → `ConflictError`). Cada ponto de uso lista **só os códigos que já traduzia**, para não mudar comportamento: criação traduz P2003/P2025; transição traduz P2034. O executor também preserva a mensagem de fallback para valores lançados que não são `Error`.
+- **`infrastructure/`**: repositórios Prisma com as mesmas consultas, `include` e ordenação de antes. O mapeamento linha → domínio é uma função tipada (`toDomain`): o TypeScript garante que a linha do Prisma é compatível com o tipo de domínio, e o objeto devolvido em tempo de execução é o mesmo de antes (evita alterar resultados comparados por testes de integração).
+- **`index.ts`**: ponto de composição. Mantém nomes, assinaturas e o parâmetro `database: PrismaClient = prisma` (seção 7). Reexporta tipos e regras de domínio usados por outras partes.
+- **Testes:** repositório e executor em memória em `tests/unit/modules/requests/in-memory-requests.ts`; o executor restaura o estado quando o trabalho lança erro, simulando o rollback. `@/server/authorization` é simulado; `assertRole` vem do `policy.ts` real.
+- **Teste existente alterado:** apenas os imports de `tests/unit/modules/requests/policy.test.ts` (`@/modules/requests/policy` → `domain/snapshot` e `domain/status-transition`). Asserções intactas.
+- **Correção durante a tarefa:** um teste novo esperava `ConflictError` para serviço inativo; a regra real de `services` responde `NotFoundError` (esconde o serviço). A expectativa do teste novo foi corrigida; o código não mudou.
+- **cloc do módulo:** antes 290 linhas em 2 arquivos (`index.ts` 254, `policy.ts` 36); depois 489 em 9 arquivos. Testes novos: 4 arquivos de teste e 1 auxiliar.
+- **Resultados:** lint, typecheck e build OK; unitários 191/191 (30 arquivos); integração 94/94; E2E 1/1.
