@@ -1,0 +1,259 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 29/10/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Ultimo commit do dia : 6fc3ca8 (enviado ao GitHub; local e remoto iguais)
+Linha de base (tag)  : baseline-ap2 -> commit 410c07b (codigo identico ao 20cf0e4)
+Responsavel          : Mylena (com Claude Code)
+Registro detalhado   : NOTES.md, TASKS.md, diario/2026-10-29.md,
+                       prompts/sessoes/2026-10-29-triagem-status-cloc.md
+
+-------------------------------------------------------------------------------
+ 1. RESUMO DO DIA
+-------------------------------------------------------------------------------
+
+- Triagem do projeto, documentacao de 27/10 commitada e linha de base registrada.
+- Plano para chegar a 100.000 linhas executaveis NOVAS (cloc --diff) aprovado.
+- Ambiente de testes completo montado (PostgreSQL de teste local); integracao e
+  E2E voltaram a rodar.
+- Refatoracao arquitetural (monolito modular em camadas) iniciada:
+  SF-037, SF-038 e SF-039 CONCLUIDAS. Faltam SF-040 a SF-043.
+- Nenhuma funcionalidade nova; nenhum comportamento alterado; schema do banco,
+  migrations e package.json intactos.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Commit  | Status | Mudanca
+----+---------+--------+--------------------------------------------------------
+ 1  | 4dd3055 | [OK]   | SPEC/2026-10-29-relatorio-triagem.md: status das
+    |         |        | tarefas, testes executados, contagem cloc (10.852
+    |         |        | linhas executaveis TS/JS), o que nao e executavel.
+ 2  | 4007a82 | [OK]   | Documentacao de 27/10 que so existia localmente:
+    |         |        | SPEC de refatoracao, diario, sessao, NOTES e TASKS.
+ 3  | ccb810a | [OK]   | SPEC/2026-10-29-estado-inicial.md: retrato do projeto
+    |         |        | antes da refatoracao (linha de base).
+ 4  | add8603 | [OK]   | diario/tempo-do-projeto.md: tempo usado no projeto
+    |         |        | (minimo de 23h06 entre 30/09 e 29/10).
+ 5  | 410c07b | [OK]   | SPEC/2026-10-29-plano-escala-100k.md: plano para
+    |         |        | 100.000 linhas novas (16 funcionalidades, 6 fases).
+    |         |        | -> tag baseline-ap2 criada neste commit.
+ 6  | 5612ed7 | [OK]   | Decisoes aprovadas no plano (secao 9); nova ordem:
+    |         |        | refatoracao SF-037..SF-043 ANTES de SF-034..SF-036.
+ 7  | 745b32f | [OK]   | Fase 0: E2E estava quebrado desde 06/10 (admin virou
+    |         |        | abas). Ajustada so a navegacao/localizadores do teste,
+    |         |        | sem mudar textos esperados.
+ 8  | 57d10cc | [OK]   | SF-037: lint impede imports internos entre modulos.
+ 9  | 78cea09 | [OK]   | SF-038: modulo requests em camadas (piloto);
+    |         |        | tradutor unico de erros Prisma.
+ 10 | 2ba8174 | [OK]   | scripts/cloc-diff.sh: medicao oficial contra a
+    |         |        | baseline-ap2.
+ 11 | 830c2dc | [OK]   | Registro: banco de teste encerrado por falta de
+    |         |        | memoria; como reiniciar.
+ 12 | d870dbc | [OK]   | SF-039: modulo sectors em camadas; executor
+    |         |        | Serializable compartilhado em src/server/db.
+ 13 | 8a5e8b6 | [OK]   | SF-039: modulo categories em camadas.
+ 14 | 3150db7 | [OK]   | SF-039: modulo services + catalogo em camadas.
+ 15 | 6fc3ca8 | [OK]   | SF-039: modulo document-requirements em camadas;
+    |         |        | fechamento da SF-039.
+
+NAO commitado: esta pasta MUDANCAS_NO_PROJETO_DIA/ (criada no fim do dia).
+
+-------------------------------------------------------------------------------
+ 3. ESTADO DOS TESTES (ultima execucao, commit 6fc3ca8)
+-------------------------------------------------------------------------------
+
+ lint ............ OK
+ typecheck ....... OK
+ build ........... OK
+ unitarios ....... 206/206 (34 arquivos)   [antes do dia: 174]
+ integracao ...... 94/94   (19 arquivos)   [nao rodava desde 20/10]
+ E2E ............. 1/1                     [quebrado desde 06/10; corrigido]
+
+-------------------------------------------------------------------------------
+ 4. MEDICAO DA META (somente linhas "added")
+-------------------------------------------------------------------------------
+
+Comando:  sh scripts/cloc-diff.sh        (compara baseline-ap2 com HEAD)
+
+ added ............ 1.897   (meta: 100.000)
+ removed .......... 660
+ saldo liquido .... 1.237   (added - removed)
+
+Atencao: NAO usar "cloc --git --diff" no Windows; ele subconta (deu 58 onde o
+correto era 897). O script extrai as versoes com git archive e compara pastas.
+Parte do "added" da refatoracao e codigo realocado; por isso o script mostra
+tambem o saldo liquido.
+
+-------------------------------------------------------------------------------
+ 5. COMO PREPARAR A MAQUINA (outro desenvolvedor)
+-------------------------------------------------------------------------------
+
+1) Node.js >= 20.9 (o projeto foi testado com 22.23.4).
+   Nesta maquina o Node padrao e 18; todos os comandos foram rodados com:
+       volta run --node 22 <comando>
+   Em outra maquina, basta ter Node 20.9+ no PATH.
+
+2) Clonar e instalar:
+       git clone https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+       cd dsai-ap1-serviceflow-mylena_carlos
+       npm ci
+       npx prisma generate
+
+   No Windows, clonar em caminho CURTO. Caminhos longos quebram o git, o cloc e
+   o PostgreSQL portatil (erro 0xC0000106).
+
+3) Banco PostgreSQL de TESTE (nome deve terminar em _test):
+   Opcao A - PostgreSQL ja instalado: criar o banco serviceflow_test.
+   Opcao B - PostgreSQL portatil usado aqui (fora do repositorio):
+       mkdir ../pgtest && cd ../pgtest
+       npm init -y
+       npm install embedded-postgres@17.10.0-beta.17
+       criar ../pgtest/start.mjs com o conteudo abaixo
+       node start.mjs          -> aguardar "READY postgres on 54329"
+
+   ---- start.mjs ----------------------------------------------------------
+   import EmbeddedPostgres from "embedded-postgres";
+   import { existsSync } from "node:fs";
+   const dir = new URL("./data", import.meta.url).pathname.replace(/^\/(\w:)/, "$1");
+   const pg = new EmbeddedPostgres({
+     databaseDir: dir, user: "serviceflow", password: "<senha-local-de-teste>",
+     port: 54329, persistent: true,
+     initdbFlags: ["--encoding=UTF8", "--locale-provider=icu", "--icu-locale=en-US", "--locale=C"],
+   });
+   if (!existsSync(dir)) await pg.initialise();
+   await pg.start();
+   try { await pg.createDatabase("serviceflow_test"); } catch { /* ja existe */ }
+   console.log("READY postgres on 54329");
+   const stop = async () => { await pg.stop(); process.exit(0); };
+   process.on("SIGINT", stop); process.on("SIGTERM", stop);
+   setInterval(() => {}, 1 << 30);
+   -------------------------------------------------------------------------
+   Os dados ficam em ../pgtest/data e sao reaproveitados ao reiniciar.
+   O processo precisa continuar aberto enquanto os testes rodam.
+
+4) Criar .env.test.local na raiz do projeto (NAO versionar; ja esta no
+   .gitignore):
+       TEST_DATABASE_URL=postgresql://USUARIO:SENHA@127.0.0.1:54329/serviceflow_test?schema=public
+   Use credenciais locais de teste. Nunca aponte para o banco de producao.
+
+5) Rodar tudo:
+       npm run lint
+       npm run typecheck
+       npm run test:unit
+       npm run test:integration
+       DATABASE_URL=postgresql://USUARIO:SENHA@127.0.0.1:54329/serviceflow_dev npm run test:e2e
+       npx playwright install chromium     (so na primeira vez)
+       AUTH_SECRET=qualquer-valor DATABASE_URL=postgresql://u:p@localhost:5432/x npm run build
+
+   Por que DATABASE_URL no E2E: defeito antigo em playwright.config.ts - sem
+   .env, ele grava a palavra "undefined" no DATABASE_URL e recusa rodar. Basta
+   informar uma URL de desenvolvimento DIFERENTE do banco de teste.
+   (Registrado em NOTES.md; nao corrigido para nao mudar comportamento.)
+
+-------------------------------------------------------------------------------
+ 6. ARQUITETURA ADOTADA (padrao a seguir nas proximas tarefas)
+-------------------------------------------------------------------------------
+
+src/modules/<modulo>/
+  domain/          tipos e regras puras. Sem Prisma, Next, React ou I/O.
+  application/     ports.ts (interfaces) + casos de uso. Recebem repositorio
+                   ou executor de transacao por PARAMETRO. Sem Prisma.
+  infrastructure/  implementacao Prisma dos ports.
+  index.ts         API publica: monta casos de uso + Prisma. Mantem o
+                   parametro "database: PrismaClient = prisma" (os testes de
+                   integracao usam).
+
+Infraestrutura comum:
+  src/server/db/prisma-errors.ts           tabela UNICA de traducao de erros
+                                           (P2002, P2003, P2025, P2034).
+  src/server/db/serializable-transaction.ts  transacao Serializable +
+                                           traducao + mensagem de fallback.
+
+Regras obrigatorias:
+  - Outro modulo so e importado por @/modules/<modulo> (o lint bloqueia o
+    resto, inclusive caminhos relativos para outro modulo).
+  - Cada repositorio declara SO os codigos Prisma que ja traduzia antes.
+  - Asserções de testes existentes NAO podem mudar. So caminhos de import.
+  - Cada caso de uso migrado precisa de teste unitario com repositorio em
+    memoria (sucesso + erro). Auxiliar: tests/unit/support/in-memory-transaction.ts
+  - Exemplos completos: src/modules/sectors (simples) e src/modules/requests
+    (transacoes mais complexas).
+
+Situacao dos modulos:
+  requests ............... MIGRADO (SF-038)
+  sectors ................ MIGRADO (SF-039)
+  categories ............. MIGRADO (SF-039)
+  services (+ catalogo) .. MIGRADO (SF-039)
+  document-requirements .. MIGRADO (SF-039)
+  users .................. PENDENTE (SF-040)
+  auth ................... PENDENTE (SF-040)
+  attachments ............ PENDENTE (SF-040)
+
+-------------------------------------------------------------------------------
+ 7. PROXIMOS PASSOS (em ordem)
+-------------------------------------------------------------------------------
+
+[ ] SF-040 - migrar users, auth e attachments para camadas.
+      Cuidados:
+      - Nao alterar login, sessao, bootstrap do 1o administrador, troca de
+        senha nem validacao de arquivos.
+      - tests/unit/change-password-action.test.ts usa
+        vi.mock("@/modules/auth/change-own-password"); se a action passar a
+        importar de @/modules/auth, atualizar o caminho do vi.mock (permitido).
+      - auth.ts (raiz) importa @/modules/auth/config; cuidado com import
+        circular entre auth.ts, src/server/auth e o index do modulo.
+      - Componentes React do auth (login-form, sign-out-button,
+        change-password-form) vao para src/modules/auth/ui/.
+      - bootstrap-admin traduz P2034 de forma propria: preservar.
+      - src/server/storage importa attachments/policy (excecao transitoria).
+      - Ao terminar, remover do eslint.config.mjs as excecoes
+        "auth/change-own-password", "auth/components" e "attachments/policy".
+
+[ ] SF-041 - mover os schemas Zod especificos de src/shared/validation para o
+      application/ de cada modulo, mantendo mensagens e caminhos de erro.
+      Em shared ficam so os genericos (id, nome, ativo, e-mail).
+
+[ ] SF-042 - dividir src/app/(admin)/admin/page.tsx e actions.ts por
+      entidade, SEM mudar a URL /admin, textos, ordem dos blocos ou nomes
+      exportados por actions.ts. Ler node_modules/next/dist/docs/ antes
+      (Next 16 tem mudancas de API).
+
+[ ] SF-043 - fechar a refatoracao: regra de lint para camadas
+      (domain/application sem Prisma/Next/React), remover reexportacoes
+      transitorias, conferir que schema/migrations/package.json nao mudaram,
+      cloc por modulo e verificacao de CA-ARQ-01 a CA-ARQ-12.
+
+[ ] SF-034 a SF-036 - abertura de solicitacao com documentos, download de
+      anexos e E2E (ja na estrutura nova).
+
+[ ] Fases 2 a 5 do plano (itens 3 a 16): cada funcionalidade precisa de
+      SPEC propria em SPEC/ ANTES do codigo (AGENTS.md).
+
+A cada tarefa: rodar TODAS as suites, registrar em NOTES.md / TASKS.md /
+diario / prompts/sessoes, rodar scripts/cloc-diff.sh e commitar.
+
+-------------------------------------------------------------------------------
+ 8. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- Defeito em playwright.config.ts ("undefined" em DATABASE_URL) - nao
+  corrigido; fica para SPEC futura.
+- Migration 20261016120000 (documentos) aplicada so no banco de teste, NAO no
+  banco principal (aguarda autorizacao).
+- SF-030: buckets privados e chaves do armazenamento de documentos ainda nao
+  provisionados (depende do responsavel pelas contas Supabase/Vercel).
+- SF-026 (meta de linhas) continua incompleta: a meta e cumprida pelo plano,
+  nunca com codigo artificial.
+- O GitHub pode pedir login de novo no push (git-credential-manager). Fazer o
+  push manualmente quando isso acontecer.
+- O PostgreSQL de teste pode ser encerrado se faltar memoria. Reiniciar com
+  "node start.mjs" na pasta ../pgtest.
+- Nunca commitar .env, .env.local ou .env.test.local.
+
+===============================================================================
