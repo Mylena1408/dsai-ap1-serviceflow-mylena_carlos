@@ -384,3 +384,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Correção durante a tarefa:** um teste novo esperava `ConflictError` para serviço inativo; a regra real de `services` responde `NotFoundError` (esconde o serviço). A expectativa do teste novo foi corrigida; o código não mudou.
 - **cloc do módulo:** antes 290 linhas em 2 arquivos (`index.ts` 254, `policy.ts` 36); depois 489 em 9 arquivos. Testes novos: 4 arquivos de teste e 1 auxiliar.
 - **Resultados:** lint, typecheck e build OK; unitários 191/191 (30 arquivos); integração 94/94; E2E 1/1.
+
+## Medição revisada: `scripts/cloc-diff.sh` (2026-10-29)
+
+- `cloc --git --diff baseline-ap2 HEAD` subcontou neste Windows (58 `added`); a comparação de pastas extraídas com `git archive` deu 897. O protocolo da seção 3.2 do plano passou a usar `sh scripts/cloc-diff.sh`, que mostra `src`, `tests`, `scripts`, o total e o saldo líquido.
+- **Medição após SF-038:** `added` 897 (aplicação 452, testes 445); `removed` 231; saldo líquido 666. Parte do `added` em `src` é código realocado de `requests/index.ts` para as camadas; o saldo líquido mostra o que é realmente novo.

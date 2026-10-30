@@ -27,14 +27,16 @@ Teste realizado com cloc 2.10: um arquivo apenas movido de pasta é contado como
 ### 3.2 Procedimento proposto
 
 1. Criar a tag `baseline-ap2` no commit atual (código idêntico ao `20cf0e4`).
-2. Medir sempre com o mesmo comando:
+2. Medir sempre com o script `scripts/cloc-diff.sh` (revisado em 2026-10-29):
 
    ```
-   cloc --git --diff baseline-ap2 HEAD --include-lang=TypeScript,JavaScript --exclude-dir=node_modules,.next,prompts --not-match-f="(lock|\.min\.|\.d\.ts$)"
+   sh scripts/cloc-diff.sh            # baseline-ap2 → HEAD
    ```
+
+   O script extrai as duas versões com `git archive` e roda `cloc --diff` entre as pastas, separando `src`, `tests` e `scripts`. O comando `cloc --git --diff` foi descartado: neste ambiente Windows ele contou 58 linhas `added` onde a comparação por pastas mostrou 897.
 
 3. **Métrica:** linhas `added` em TypeScript/JavaScript, cobrindo `src/`, `tests/` e `scripts/`.
-4. Reportar `modified` e `removed` separadamente, para demonstrar que não houve rotatividade artificial.
+4. Reportar `modified`, `removed` e o **saldo líquido** (`added` − `removed`). O cloc reconhece arquivos inteiros movidos (`same`), mas código movido de dentro de um arquivo para outro aparece como `removed` + `added`; o saldo mostra quanto é realmente novo.
 5. Excluídos: CSS, SQL, schema Prisma, Markdown, JSON e arquivos `.d.ts` (não executáveis).
 6. Trabalhar em um clone com caminho curto. No diretório temporário do Windows, `cloc --vcs=git` falhou ao abrir arquivos por limite de tamanho de caminho.
 7. Registrar em `NOTES.md` a medição ao fim de cada SPEC implementada.
