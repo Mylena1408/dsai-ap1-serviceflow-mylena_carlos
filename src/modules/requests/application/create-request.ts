@@ -1,7 +1,7 @@
 import { requireRequestCreator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { requestCreationInputSchema } from "@/shared/validation";
+import { requestCreationInputSchema } from "./request-schemas";
 import { assertServiceCanReceiveRequests } from "@/modules/services";
 import type { RequestWithHistory } from "../domain/request";
 import { buildRequestSnapshot } from "../domain/snapshot";

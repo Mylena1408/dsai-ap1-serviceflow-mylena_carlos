@@ -7,10 +7,7 @@ import {
 } from "@/modules/document-requirements/domain/requirement-order";
 import { ConflictError, ValidationError, toErrorResponse } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import {
-  documentRequirementInputSchema,
-  documentRequirementMoveSchema,
-} from "@/shared/validation";
+import { documentRequirementInputSchema, documentRequirementMoveSchema } from "@/modules/document-requirements/application/document-requirement-schemas";
 
 function validRequirement(overrides: Record<string, unknown> = {}) {
   return {

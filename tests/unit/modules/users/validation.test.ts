@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  userCreationInputSchema,
-  userUpdateInputSchema,
-} from "@/shared/validation";
+import { userCreationInputSchema, userUpdateInputSchema } from "@/modules/users/application/user-schemas";
 
 const sectorId = "2a3bd10c-0f81-4c89-bf18-0e8991d7d402";
 

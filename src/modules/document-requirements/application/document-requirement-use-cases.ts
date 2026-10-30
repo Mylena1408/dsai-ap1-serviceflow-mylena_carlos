@@ -1,11 +1,8 @@
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import {
-  documentRequirementInputSchema,
-  documentRequirementMoveSchema,
-  entityIdSchema,
-} from "@/shared/validation";
+import { entityIdSchema } from "@/shared/validation";
+import { documentRequirementInputSchema, documentRequirementMoveSchema } from "./document-requirement-schemas";
 import type { DocumentRequirementRecord } from "../domain/document-requirement";
 import {
   assertCanAddActiveRequirement,

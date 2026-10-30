@@ -1,12 +1,8 @@
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import {
-  activeStateSchema,
-  entityIdSchema,
-  userCreationInputSchema,
-  userUpdateInputSchema,
-} from "@/shared/validation";
+import { activeStateSchema, entityIdSchema } from "@/shared/validation";
+import { userCreationInputSchema, userUpdateInputSchema } from "./user-schemas";
 import type { ManagedUser, UserRole, UserState } from "../domain/user";
 import {
   assertAdministratorCanRetire,

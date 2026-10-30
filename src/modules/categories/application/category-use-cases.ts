@@ -1,11 +1,8 @@
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import {
-  activeStateSchema,
-  categoryInputSchema,
-  entityIdSchema,
-} from "@/shared/validation";
+import { activeStateSchema, entityIdSchema } from "@/shared/validation";
+import { categoryInputSchema } from "./category-schemas";
 import type { CategoryRecord } from "../domain/category";
 import { assertCategoryCanBeDeactivated } from "../domain/deactivation";
 import type { CategoryRepository, CategoryTransactionRunner } from "./ports";

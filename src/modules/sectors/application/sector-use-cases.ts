@@ -1,11 +1,8 @@
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import {
-  activeStateSchema,
-  entityIdSchema,
-  sectorInputSchema,
-} from "@/shared/validation";
+import { activeStateSchema, entityIdSchema } from "@/shared/validation";
+import { sectorInputSchema } from "./sector-schemas";
 import { assertSectorCanBeDeactivated } from "../domain/deactivation";
 import type { SectorRecord } from "../domain/sector";
 import type { SectorRepository, SectorTransactionRunner } from "./ports";

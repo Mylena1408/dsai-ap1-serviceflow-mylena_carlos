@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hashPassword, verifyPassword } from "../../../../src/modules/auth/infrastructure/argon2-password";
-import { ownPasswordChangeInputSchema } from "@/shared/validation";
+import { ownPasswordChangeInputSchema } from "@/modules/auth/application/password-schemas";
 
 describe("Argon2id password helpers", () => {
   it("stores passwords as Argon2id hashes and verifies credentials", async () => {

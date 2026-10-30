@@ -1,7 +1,7 @@
 import { requireStatusChangeActor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { requestStatusTransitionInputSchema } from "@/shared/validation";
+import { requestStatusTransitionInputSchema } from "./request-schemas";
 import type { RequestWithHistory } from "../domain/request";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";

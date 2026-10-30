@@ -1,16 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
-  categoryInputSchema,
   activeStateInputSchema,
   entityIdSchema,
   emailSchema,
   nameSchema,
+} from "../../../../src/shared/validation";
+import { categoryInputSchema } from "../../../../src/modules/categories/application/category-schemas";
+import {
   requestCreationInputSchema,
   requestStatusTransitionInputSchema,
-  sectorInputSchema,
-  serviceInputSchema,
-  userProfileInputSchema,
-} from "../../../../src/shared/validation";
+} from "../../../../src/modules/requests/application/request-schemas";
+import { sectorInputSchema } from "../../../../src/modules/sectors/application/sector-schemas";
+import { serviceInputSchema } from "../../../../src/modules/services/application/service-schemas";
+import { userProfileInputSchema } from "../../../../src/modules/users/application/user-schemas";
 import { validateInput } from "../../../../src/server/validation";
 
 const validUuid = "2a3bd10c-0f81-4c89-bf18-0e8991d7d402";

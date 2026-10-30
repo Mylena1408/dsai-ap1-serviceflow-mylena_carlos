@@ -1,8 +1,9 @@
 import { ConflictError } from "@/server/errors";
-import type { DocumentRequirementMove } from "@/shared/validation";
 
 // SPEC 21.2 item 5: at most five active requirements per service.
 export const MAX_ACTIVE_DOCUMENT_REQUIREMENTS = 5;
+
+export type RequirementMoveDirection = "up" | "down";
 
 export interface OrderedRequirement {
   id: string;
@@ -29,7 +30,7 @@ export function nextRequirementPosition(existing: readonly OrderedRequirement[])
 export function planRequirementMove(
   activeRequirements: readonly OrderedRequirement[],
   requirementId: string,
-  direction: DocumentRequirementMove,
+  direction: RequirementMoveDirection,
 ): OrderedRequirement[] {
   const ordered = [...activeRequirements].sort(compareRequirementOrder);
   const index = ordered.findIndex((requirement) => requirement.id === requirementId);

@@ -1,7 +1,7 @@
 import { requireCurrentActor } from "@/server/authorization";
 import { AuthenticationError, ConflictError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { ownPasswordChangeInputSchema } from "@/shared/validation";
+import { ownPasswordChangeInputSchema } from "./password-schemas";
 import type { AuthUserRepository, PasswordHasher } from "./ports";
 
 export class CurrentPasswordMismatchError extends Error {

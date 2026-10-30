@@ -9,7 +9,7 @@ import {
   toErrorResponse,
 } from "../../../../src/server/errors";
 import { validateInput } from "../../../../src/server/validation";
-import { requestCreationInputSchema } from "../../../../src/shared/validation";
+import { requestCreationInputSchema } from "../../../../src/modules/requests/application/request-schemas";
 
 describe("application errors", () => {
   it.each([

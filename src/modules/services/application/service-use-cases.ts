@@ -1,11 +1,8 @@
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import {
-  activeStateSchema,
-  entityIdSchema,
-  serviceInputSchema,
-} from "@/shared/validation";
+import { activeStateSchema, entityIdSchema } from "@/shared/validation";
+import { serviceInputSchema } from "./service-schemas";
 import { assertServiceRelationships } from "../domain/relationships";
 import type { ServiceRecord } from "../domain/service";
 import type { ServiceRepository, ServiceTransactionRunner } from "./ports";
