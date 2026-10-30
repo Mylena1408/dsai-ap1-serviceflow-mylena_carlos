@@ -1,0 +1,191 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 30/10/2026
+ (inclui o fim da noite de 29/10, depois do resumo anterior)
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-10-29_mudancas.txt (commit 520f98c)
+Linha de base   : tag baseline-ap2 -> commit 410c07b
+Registro detalhado : NOTES.md, TASKS.md, diario/2026-10-29.md, diario/2026-10-30.md,
+                     prompts/sessoes/2026-10-29-triagem-status-cloc.md
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- REFATORACAO ARQUITETURAL ENCERRADA: SF-040, SF-041, SF-042 e SF-043
+  concluidas. Os 8 modulos estao em camadas (domain, application,
+  infrastructure, ui) e o lint impede violar as fronteiras.
+- MODO DEMONSTRACAO (SF-044): a tela de login nao pede mais e-mail nem senha;
+  tem os botoes "Entrar como Administrador / Solicitante / Atendente".
+  Vale em TODOS os ambientes, inclusive na Vercel (risco aceito).
+- BANCO FICTICIO (SF-045): "npm run seed:demo" carrega catalogo (TI, RH,
+  Manutencao), usuarios ficticios, 12 solicitacoes e documentos exigidos.
+- DEFEITO CORRIGIDO (SF-046): o historico misturava o relogio do banco e o
+  da aplicacao; agora usa so o relogio do banco.
+- Relatorio "SPEC/2026-10-30-camadas-para-100k.md" com o caminho ate a meta.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Commit  | Status | Mudanca
+----+---------+--------+--------------------------------------------------------
+ 1  | 4b1755a | [OK]   | SF-040: attachments e users em camadas.
+ 2  | eb92762 | [OK]   | SF-040: auth em camadas; formulario de troca de senha
+    |         |        | recebe a action por propriedade; fim das excecoes
+    |         |        | transitorias do lint.
+ 3  | fecc93f | [OK]   | SPEC secao 22: modo demonstracao sem senha.
+ 4  | 377c1c3 | [OK]   | SF-044: botoes de acesso por perfil no login.
+ 5  | b39b934 | [OK]   | SPEC secao 22.6: catalogo de demonstracao.
+ 6  | 808a874 | [OK]   | SPEC secao 22.7: banco ficticio.
+ 7  | ec642dc | [OK]   | SF-045: npm run seed:demo; correcao do prepare-e2e
+    |         |        | (nao limpava tabelas de documentos).
+ 8  | 658c7da | [OK]   | SF-041: schemas de validacao distribuidos pelos
+    |         |        | modulos; shared/validation so com genericos.
+ 9  | 36d3bf8 | [OK]   | Relatorio de camadas para 100 mil linhas.
+ 10 | 437e2b6 | [OK]   | SF-042: area administrativa dividida por entidade
+    |         |        | (page.tsx 356 -> 160 linhas; actions.ts 384 -> 29).
+ 11 | 322186d | [OK]   | SF-043: lint por camada; CA-ARQ-01 a 12 verificados;
+    |         |        | SPEC de refatoracao marcada como concluida.
+ 12 | 28d476d | [OK]   | SPEC secao 23: fonte unica de horario do historico.
+ 13 | 46d2d69 | [OK]   | SF-046: relogio do banco em todo o historico.
+
+-------------------------------------------------------------------------------
+ 3. ESTADO DOS TESTES (validacao final, commit 46d2d69)
+-------------------------------------------------------------------------------
+
+ lint ............ OK
+ typecheck ....... OK
+ build ........... OK
+ unitarios ....... 226/226 (37 arquivos)    [inicio de 29/10: 174]
+ integracao ...... 106/106 (22 arquivos), em 3 execucoes seguidas
+ E2E ............. 3/3 (fluxo completo, botoes de demonstracao, dados
+                   ficticios por perfil)
+
+-------------------------------------------------------------------------------
+ 4. MEDICAO DA META (somente linhas "added")
+-------------------------------------------------------------------------------
+
+Comando:  sh scripts/cloc-diff.sh        (baseline-ap2 -> HEAD)
+
+ added ............ 5.600   (meta: 100.000 -> 5,6%)
+ removed .......... 2.542
+ saldo liquido .... 3.058   (added - removed)
+
+A refatoracao moveu codigo de arquivos antigos para as camadas; por isso ha
+muitas linhas "removed" em src/. O saldo liquido mostra o que e realmente novo.
+
+-------------------------------------------------------------------------------
+ 5. COMO USAR O SISTEMA LOCALMENTE (outro desenvolvedor)
+-------------------------------------------------------------------------------
+
+Pre-requisitos e banco de teste: ver MUDANCAS_NO_PROJETO_DIA/2026-10-29_mudancas.txt
+(secao 5: Node 22 via "volta run --node 22", PostgreSQL portatil em
+../pgtest, .env.test.local).
+
+Novidades de 30/10:
+
+1) Banco de DESENVOLVIMENTO separado do de teste:
+     - criar o banco serviceflow_dev no mesmo PostgreSQL;
+     - criar .env.local (NAO versionar; ja esta no .gitignore) com:
+         NODE_ENV=development
+         DATABASE_URL=postgresql://USUARIO:SENHA@127.0.0.1:54329/serviceflow_dev
+         AUTH_SECRET=<gerar com: node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))">
+     - aplicar as migrations:  npx prisma migrate deploy
+
+2) Dados ficticios (opcional, recomendado):
+       npm run seed:demo
+   Pode ser executado varias vezes sem duplicar nada. Recusa bancos _test.
+
+3) Subir e acessar:
+       npm run dev   ->  http://localhost:3000
+   Clicar em "Entrar como Administrador", "Entrar como Solicitante" ou
+   "Entrar como Atendente". Nao ha senha. "Sair" volta para o login.
+   O formulario de e-mail e senha continua em "Entrar com e-mail e senha"
+   (para contas criadas no painel).
+
+4) Rodar os testes:
+       npm run lint && npm run typecheck && npm run test:unit
+       npm run test:integration
+       npm run test:e2e        <- PARE o "npm run dev" antes: o Next 16 nao
+                                  permite dois servidores na mesma pasta.
+   Com .env.local presente, o E2E nao precisa mais de DATABASE_URL na
+   linha de comando.
+
+-------------------------------------------------------------------------------
+ 6. ARQUITETURA FINAL (apos a SF-043)
+-------------------------------------------------------------------------------
+
+src/modules/<modulo>/
+  domain/          tipos e regras puras.
+                   Lint proibe: Prisma, banco, Next, next-auth, React e
+                   importar application/infrastructure/ui.
+  application/     casos de uso, ports e schemas de entrada (<nome>-schemas.ts).
+                   Lint proibe: Prisma, banco, Next, next-auth, React e
+                   importar infrastructure/ui.
+  infrastructure/  implementacoes Prisma dos ports.
+  ui/              componentes React (so o modulo auth tem). Lint proibe banco.
+  index.ts         API publica; outros modulos e src/app so importam daqui.
+
+Comuns:
+  src/server/db/prisma-errors.ts            unico lugar que traduz erros Prisma.
+  src/server/db/serializable-transaction.ts transacao Serializable comum.
+  src/shared/validation                     so schemas genericos.
+
+Area administrativa:
+  src/app/(admin)/admin/page.tsx            compoe as secoes.
+  src/app/(admin)/admin/_sections/<entidade>/{actions.ts, *-section.tsx}
+  src/app/(admin)/admin/_shared/action-helpers.ts
+  src/app/(admin)/admin/actions.ts          reexporta as actions (mesmo caminho).
+
+Pontos de composicao fora de src/ (importam arquivos internos de proposito):
+  auth.ts                   -> evita ciclo de imports com o Auth.js.
+  scripts/bootstrap-admin.ts e scripts/prepare-e2e.ts -> carregam o .env
+                               antes de abrir o banco.
+
+-------------------------------------------------------------------------------
+ 7. PROXIMOS PASSOS (em ordem)
+-------------------------------------------------------------------------------
+
+[ ] SF-034 - abertura de solicitacao com documentos (SPEC secao 21).
+[ ] SF-035 - consulta e download autorizados de anexos.
+[ ] SF-036 - testes E2E e revisao da funcionalidade de documentos.
+      Atencao: SF-030 (buckets privados e chaves do Supabase) ainda nao foi
+      provisionada; os testes usam o adaptador de armazenamento em memoria.
+
+[ ] Plano de 100 mil linhas (SPEC/2026-10-30-camadas-para-100k.md):
+      passo 1  eventos de dominio + outbox; jobs agendados; adaptadores
+      passo 3  atribuicao, comentarios, SLA, busca e paginacao
+      passo 4  campos personalizados -> fluxos -> aprovacoes
+      passo 5  autorizacao configuravel -> notificacoes -> auditoria -> relatorios
+      passo 6  API publica -> MCP -> multiplas organizacoes
+   Cada item precisa de SPEC propria ANTES do codigo e de relatorio de fase.
+
+Ciclo de cada tarefa: SPEC -> TASKS.md -> implementar em camadas -> TODAS as
+suites -> scripts/cloc-diff.sh -> NOTES.md + diario + sessao -> commit + push.
+
+-------------------------------------------------------------------------------
+ 8. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- SEGURANCA: com o modo demonstracao, quem tiver o link da Vercel entra como
+  administrador. Usar la somente dados ficticios.
+- Depois do primeiro acesso como Administrador de demonstracao,
+  "npm run bootstrap:admin" recusa (ja existe administrador). E esperado.
+- Botoes de demonstracao so funcionam depois que a pagina termina de carregar
+  (hidratacao do React); os testes E2E esperam "networkidle".
+- Defeito antigo em playwright.config.ts (grava "undefined" em DATABASE_URL
+  sem .env) continua sem correcao; com .env.local ele nao aparece.
+- Migration de documentos (20261016120000) aplicada so nos bancos de teste e
+  de desenvolvimento local; nao no banco principal.
+- O push para o GitHub pode pedir login de novo (git-credential-manager) ou
+  falhar por rede; nesse caso repetir "git push origin main".
+- O PostgreSQL de teste pode ser encerrado por falta de memoria; reiniciar com
+  "node start.mjs" em ../pgtest.
+- Nunca commitar .env, .env.local ou .env.test.local.
+
+===============================================================================
