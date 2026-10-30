@@ -3,7 +3,7 @@
 **Entrega:** Catálogo configurável e ciclo básico de solicitações  
 **SPEC principal:** `SPEC/2026-09-30-catalogo-e-solicitacoes.md`  
 **SPEC de contexto:** `SPEC/2026-09-30-visao-geral.md`  
-**Estado:** SF-001 a SF-025 concluídas; SF-026 incompleta (8.903/100.000 linhas em medição oficial de 2026-10-06); SF-027 concluída após validação dos procedimentos documentados; SF-028 revisada, mas não concluída por dependência incompleta; SF-029 implementada e testada manualmente, com suite automatizada de integração pendente. SF-030 a SF-036 (documentos exigidos por serviço, alteração de SPEC de 2026-10-16) registradas; SF-030 com decisão técnica concluída e provisionamento pendente; SF-031 concluída em 2026-10-20 (migration aplicada e integração aprovada em banco de teste PostgreSQL 17.11 local); SF-033 implementada e validada em testes unitários (2026-10-19), não concluída: adaptador real sem teste contra bucket e critérios do fluxo dependentes da SF-034/SF-035; SF-032 concluída em 2026-10-20 (integração aprovada no mesmo banco de teste); SF-034 a SF-036 não iniciadas. SF-037 a SF-043 (refatoração arquitetural, SPEC de 2026-10-27) registradas e não iniciadas; SPEC aprovada em 2026-10-27. Ordem aprovada: SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043.
+**Estado:** SF-001 a SF-025 concluídas; SF-026 incompleta (8.903/100.000 linhas em medição oficial de 2026-10-06); SF-027 concluída após validação dos procedimentos documentados; SF-028 revisada, mas não concluída por dependência incompleta; SF-029 implementada e testada manualmente, com suite automatizada de integração pendente. SF-030 a SF-036 (documentos exigidos por serviço, alteração de SPEC de 2026-10-16) registradas; SF-030 com decisão técnica concluída e provisionamento pendente; SF-031 concluída em 2026-10-20 (migration aplicada e integração aprovada em banco de teste PostgreSQL 17.11 local); SF-033 implementada e validada em testes unitários (2026-10-19), não concluída: adaptador real sem teste contra bucket e critérios do fluxo dependentes da SF-034/SF-035; SF-032 concluída em 2026-10-20 (integração aprovada no mesmo banco de teste); SF-034 a SF-036 não iniciadas. SF-037 a SF-043 (refatoração arquitetural, SPEC de 2026-10-27) registradas e não iniciadas; SPEC aprovada em 2026-10-27. Ordem revisada em 2026-10-29: SF-037 → SF-038 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043 → SF-034 → SF-035 → SF-036. Plano de escala para 100.000 linhas aprovado em 2026-10-29 (`SPEC/2026-10-29-plano-escala-100k.md`); linha de base `baseline-ap2`.
 
 ## Regras de execução
 
@@ -356,7 +356,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Estado:** Não iniciada.
 - **Objetivo:** Exibir os documentos solicitados no detalhe do serviço; aceitar um arquivo por requisito; validar no servidor com a configuração vigente; gravar objetos, criar solicitação, evento inicial e anexos atomicamente, com compensação em falha. Manter inalterado o fluxo de serviços sem requisitos. Ajustar o limite de corpo das Server Actions de forma compatível com a seção 21.6.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, `src/app/(requester)/catalog/[serviceId]/`, `src/app/(requester)/requests/actions.ts`, `next.config.ts`, `tests/unit/`, `tests/integration/`.
-- **Dependências:** SF-032, SF-033, SF-017 e SF-038 (ordem aprovada em 2026-10-27: a abertura com documentos é implementada já na estrutura em camadas do piloto `requests`; ver `SPEC/2026-10-27-refatoracao-arquitetural.md`, seção 15).
+- **Dependências:** SF-032, SF-033, SF-017 e SF-043 (ordem revisada em 2026-10-29: a abertura com documentos é implementada depois de concluída toda a refatoração em camadas).
 - **Critérios de conclusão:** CA-DOC-05, CA-DOC-06, CA-DOC-07, CA-DOC-08, CA-DOC-12 e CA-DOC-13.
 - **Testes relacionados:** Integração de abertura com e sem requisitos, obrigatórios ausentes, requisito de outro serviço/inativo, duplicidade, rejeição sem persistência, compensação e campos forjados pelo cliente.
 - **SPEC:** Seção 21.4.
@@ -385,7 +385,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 **SPEC:** `SPEC/2026-10-27-refatoracao-arquitetural.md` (aprovada em 2026-10-27). Nenhuma tarefa desta seção altera comportamento, esquema do banco ou dependências.
 
-**Ordem aprovada em 2026-10-27:** SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043. As SF-037 e SF-038 vêm antes da SF-034 para que a abertura com documentos seja escrita na estrutura nova; as SF-039 a SF-043 ficam depois da SF-036 para não refatorar `attachments`, `services` e a área administrativa enquanto a funcionalidade de documentos está em andamento. O código novo das SF-034 a SF-036 segue as seções 5 a 8 da SPEC de refatoração.
+**Ordem revisada em 2026-10-29:** SF-037 → SF-038 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043 → SF-034 → SF-035 → SF-036. A refatoração é concluída por inteiro antes da funcionalidade de documentos, para que todo código novo nasça na estrutura em camadas (decisão registrada em `SPEC/2026-10-29-plano-escala-100k.md`, seção 9). A ordem de 2026-10-27 (SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → …) foi substituída.
 
 ### SF-037 — Impor fronteiras entre módulos no lint
 
@@ -412,7 +412,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Estado:** Não iniciada.
 - **Objetivo:** Aplicar o padrão da SF-038 a `services` (inclusive `catalog.ts`), `categories`, `sectors` e `document-requirements`, uma subtarefa por módulo, com as suítes passando ao final de cada uma.
 - **Arquivos/módulos esperados:** `src/modules/{services,categories,sectors,document-requirements}/**`, `tests/unit/`.
-- **Dependências:** SF-038 e SF-036 (ordem aprovada em 2026-10-27).
+- **Dependências:** SF-038 (ordem revisada em 2026-10-29; antes dependia também da SF-036).
 - **Critérios de conclusão:** CA-ARQ-01, CA-ARQ-02, CA-ARQ-05 e CA-ARQ-07 para os quatro módulos.
 - **Testes relacionados:** Unitários novos; `services`, `catalog`, `categories`, `sectors`, `document-requirements`, `referential-integrity` e E2E.
 - **SPEC:** Seções 5, 7 e 10.
@@ -422,7 +422,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Estado:** Não iniciada.
 - **Objetivo:** Aplicar o padrão a `users`, `auth` e `attachments`, sem alterar o comportamento de login, sessão, bootstrap do administrador, troca de senha e validação de arquivos.
 - **Arquivos/módulos esperados:** `src/modules/{users,auth,attachments}/**`, `tests/unit/`.
-- **Dependências:** SF-039 (ordem aprovada); SF-036 concluída, para que `attachments` não seja refatorado durante a funcionalidade de documentos.
+- **Dependências:** SF-039 (ordem revisada em 2026-10-29; a dependência da SF-036 foi removida, pois a funcionalidade de documentos passa a ser feita depois da refatoração).
 - **Critérios de conclusão:** CA-ARQ-01, CA-ARQ-02, CA-ARQ-05 e CA-ARQ-07 para os três módulos.
 - **Testes relacionados:** `auth`, `bootstrap-admin`, `change-own-password`, `users`, testes unitários de anexos e E2E.
 - **SPEC:** Seções 5, 7 e 10.

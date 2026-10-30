@@ -180,23 +180,25 @@ Cada etapa termina com todas as suítes passando. Não há etapa que deixe o pro
 | Risco | Mitigação |
 |---|---|
 | Mudança sutil de comportamento transacional (isolamento, ordem de escrita) | Manter o mesmo nível de isolamento; os testes de integração de concorrência e de transição devem passar sem alteração |
-| Refatoração simultânea a SF-034–SF-036, que mexem em `requests` e `attachments` | Decidir a ordem antes de iniciar (seção 15) |
+| Refatoração simultânea a SF-034–SF-036, que mexem em `requests` e `attachments` | Refatoração completa antes das SF-034–SF-036 (seção 15.1, revisada em 2026-10-29) |
 | Mensagens ou caminhos de erro alterados ao mover schemas | Testes de `shared/validation` e de Server Actions com asserções inalteradas |
 | Crescimento de abstrações sem uso | Port só existe se houver implementação e caso de uso que o utilizem |
 
 ## 15. Ordem de execução e pontos em aberto
 
-### 15.1 Ordem em relação a SF-034–SF-036 (decidida em 2026-10-27)
+### 15.1 Ordem em relação a SF-034–SF-036
 
-Ordem aprovada pela responsável pelo projeto:
+**Revisada em 2026-10-29** (decisão da responsável, registrada em `SPEC/2026-10-29-plano-escala-100k.md`, seção 9). A refatoração é feita por inteiro antes da funcionalidade de documentos:
 
 ```
-SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043
+SF-037 → SF-038 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043 → SF-034 → SF-035 → SF-036
 ```
 
-- **SF-037 (fronteiras) e SF-038 (piloto `requests`) antes da SF-034**, para que a abertura de solicitação com documentos seja implementada já na estrutura em camadas.
-- **SF-039 a SF-043 depois da SF-036**, para não refatorar `attachments`, `services` e a área administrativa enquanto a funcionalidade de documentos está em andamento.
-- O código novo das SF-034 a SF-036 segue as seções 5 a 8 desta SPEC (camadas, fronteiras, repositórios e validação no módulo). Código existente de módulos ainda não migrados só é reorganizado nas tarefas desta SPEC.
+- Toda a estrutura em camadas fica pronta antes de qualquer código novo, inclusive o das SF-034 a SF-036.
+- Como as tarefas não correm em paralelo, o risco de refatorar `attachments`, `services` e a área administrativa durante a funcionalidade de documentos deixa de existir.
+- O código novo das SF-034 a SF-036 segue as seções 5 a 8 desta SPEC.
+
+Ordem anterior, decidida em 2026-10-27 e substituída: SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043.
 
 ### 15.2 Em aberto
 

@@ -1,7 +1,7 @@
 # SPEC — Plano para escalar o ServiceFlow a 100.000 linhas executáveis novas
 
 **Data:** 2026-10-29  
-**Status:** Proposta — aguardando as decisões da seção 9  
+**Status:** Aprovada em 2026-10-29, com as decisões da seção 9  
 **Projeto:** ServiceFlow  
 **Linha de base:** `SPEC/2026-10-29-estado-inicial.md` (código do commit `20cf0e4`)  
 **Referências:** `SPEC/2026-09-30-visao-geral.md`, `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seção 19), `SPEC/2026-10-27-refatoracao-arquitetural.md`, `TASKS.md` (SF-026)
@@ -10,7 +10,7 @@
 
 Apresentar possibilidades para que o projeto cresça **100.000 linhas executáveis novas**, medidas com `cloc --diff` em relação à linha de base (linhas já existentes não contam), sem quebrar as funcionalidades atuais.
 
-Este documento **não autoriza implementação**. Cada funcionalidade listada exige SPEC própria, com critérios de aceitação, antes de ser implementada (`AGENTS.md`, regras 2 e 7).
+Este documento aprova a direção, as fases e as regras de medição, mas **não substitui as SPECs de funcionalidade**. Cada item da seção 5 exige SPEC própria, com critérios de aceitação, antes de ser implementado (`AGENTS.md`, regras 2 e 7). A exceção é o item 1, já especificado em `SPEC/2026-10-27-refatoracao-arquitetural.md`, e o item 2, especificado na seção 21 da SPEC principal.
 
 ## 2. Dimensão do desafio
 
@@ -103,13 +103,38 @@ Estimativas incluem aplicação e testes (unitário, integração e E2E); hoje o
 - **Multi-organização (item 16)** altera todas as consultas e é o maior risco de regressão; por isso fica na última fase.
 - **Estimativas:** são aproximações; a medição real ao fim de cada fase deve recalibrar o plano.
 
-## 9. Decisões pendentes
+## 9. Decisões tomadas (2026-10-29)
 
-1. Os testes contam para a meta? (Recomendado: sim, como na medição oficial da SF-026. Sem eles, a meta fica cerca de duas vezes mais distante.)
-2. Contar apenas `added` ou `added + modified`?
-3. Quais fases e itens são aprovados, em especial os itens 14 a 16?
-4. É permitido adicionar dependências quando necessário, com justificativa em `NOTES.md`?
-5. Criar a tag `baseline-ap2` no commit atual?
+Decisões da responsável pelo projeto:
+
+| # | Questão | Decisão |
+|---|---|---|
+| 1 | Arquitetura | **Opção A — monólito modular em camadas** (seção 4). |
+| 2 | Momento da refatoração | **Agora**: SF-037 a SF-043 são executadas em sequência, antes das SF-034 a SF-036. Substitui a ordem de 2026-10-27 (ver 9.1). |
+| 3 | Funcionalidades | **Itens 1 a 16 aceitos** (seção 5). Cada um ainda exige SPEC própria antes do código. |
+| 4 | Fases | **Fases 0 a 5 aceitas** (seção 6). |
+| 5 | Garantias | **Todas as garantias da seção 7 são obrigatórias.** |
+| 6 | Testes na meta | **Os testes contam** e devem ser documentados: cada SPEC registra em `NOTES.md` as linhas novas de aplicação e de testes separadamente, e quais suítes foram executadas. |
+| 7 | Métrica | **Somente `added`** do `cloc --diff`, entendido como as linhas novas de código. `modified` e `removed` são reportados, mas não somam. |
+| 8 | Dependências | **Permitidas quando necessárias**, conforme o `AGENTS.md` (regra 11): sem adicionar por conveniência, com justificativa registrada em `NOTES.md` antes ou junto da inclusão. |
+| 9 | Linha de base | **Tag `baseline-ap2` criada** no commit `410c07b` (código idêntico ao `20cf0e4`) e publicada no GitHub. |
+
+### 9.1 Nova ordem de execução
+
+```
+Fase 0 → SF-037 → SF-038 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043 → SF-034 → SF-035 → SF-036 → fases 2 a 5
+```
+
+- A refatoração completa vem primeiro, para que as SF-034 a SF-036 e todas as funcionalidades novas já nasçam na estrutura em camadas.
+- Consequência: `attachments` e `services` são refatorados antes da funcionalidade de documentos. O risco apontado na seção 14 da SPEC de refatoração deixa de existir, porque as tarefas não correm em paralelo.
+- A seção 15.1 de `SPEC/2026-10-27-refatoracao-arquitetural.md` e as dependências em `TASKS.md` foram atualizadas para refletir esta ordem.
+
+### 9.2 Fase 0 — itens obrigatórios antes da SF-037
+
+1. Tag `baseline-ap2` (concluído).
+2. Banco PostgreSQL de teste funcionando, para que integração e E2E rodem a cada tarefa. A forma escolhida é registrada em `NOTES.md`.
+3. Todas as suítes executadas sobre a linha de base, para comparação.
+4. Comando de medição da seção 3.2 executado sobre a linha de base (resultado esperado: 0 linhas `added`).
 
 ## 10. Critérios de aceitação deste plano
 

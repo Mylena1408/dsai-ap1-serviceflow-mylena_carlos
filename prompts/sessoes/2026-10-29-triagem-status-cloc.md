@@ -39,3 +39,7 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 > SALVE O RELATORIO NA PASTA SPEC E FAÇA O COMMIT
 
 - Relatório entregue e salvo em `SPEC/2026-10-29-plano-escala-100k.md`.
+
+> faça a A. monolito modular em camadas;a refatoração deve ser feita agora,aceitas as funcionalidades de 1 a 16, as fasese sugeridas todas aceitas, aborde todas as garantias para não quebrar o que funciona, adicione pacotes deacordo com o AGENTS.md especifica. Os testes contam e devem ser documentados, contar so added (compreendedo que são as linhas novas de codigo), pode adicionar dependências quando necessário e justificar em NOTES.md, pode criar a tag baseline-ap2 no atual commit,salve este relatorio com as escolhas feitas aqui
+
+- Decisões salvas no plano; tag `baseline-ap2` criada; ordem da refatoração revisada; início da fase 0 e da SF-037.

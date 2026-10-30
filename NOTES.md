@@ -336,3 +336,14 @@
 - **Restrições fixadas:** sem mudança de comportamento, banco, dependências, rotas ou mensagens; asserções dos testes existentes intocáveis (só caminhos de import/`vi.mock` podem mudar); o parâmetro `database: PrismaClient` das APIs públicas é mantido porque os testes de integração o usam; fronteiras impostas com `no-restricted-imports` do ESLint já instalado.
 - **Ordem (aprovada em 2026-10-27):** SF-037 → SF-038 → SF-034 → SF-035 → SF-036 → SF-039 → SF-040 → SF-041 → SF-042 → SF-043. A SPEC passou a "Aprovada em 2026-10-27" (seção 15.1); `TASKS.md` atualizado nas dependências de SF-034, SF-037, SF-039 e SF-040.
 - Etapa apenas documental: nenhum código, teste, banco ou dependência alterado; nenhum teste executado.
+
+## Plano de escala para 100.000 linhas aprovado (2026-10-29)
+
+- **SPEC:** `SPEC/2026-10-29-plano-escala-100k.md`, aprovada com decisões na seção 9.
+- **Arquitetura:** monólito modular em camadas (opção A), conforme `SPEC/2026-10-27-refatoracao-arquitetural.md`.
+- **Ordem revisada:** a refatoração (SF-037 a SF-043) é feita agora, por inteiro, antes das SF-034 a SF-036. A seção 15.1 da SPEC de refatoração e as dependências das SF-034, SF-039 e SF-040 em `TASKS.md` foram atualizadas.
+- **Escopo aceito:** itens 1 a 16 e fases 0 a 5 do plano. Cada item ainda exige SPEC própria antes do código.
+- **Medição:** somente linhas `added` do `cloc --git --diff baseline-ap2 HEAD` (TypeScript/JavaScript), com testes contando e documentados à parte da aplicação.
+- **Linha de base:** tag anotada `baseline-ap2` no commit `410c07b` (código idêntico ao `20cf0e4`), publicada no GitHub.
+- **Dependências:** permitidas quando necessárias, com justificativa registrada nesta nota antes ou junto da inclusão (`AGENTS.md`, regra 11). A refatoração em si não adiciona dependências (CA-ARQ-10).
+- **Repositório local:** a pasta de trabalho passou a ser um repositório Git ligado a `origin/main` (antes era uma cópia sem `.git`); nenhum arquivo foi alterado na conversão.
