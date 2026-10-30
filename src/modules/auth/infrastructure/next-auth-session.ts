@@ -1,11 +1,13 @@
-import type { PrismaClient, Role } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { prisma } from "@/server/db";
+import type { AuthRole } from "../application/ports";
+import { createPrismaAuthUserRepository } from "./prisma-auth-repository";
 
 const ROLES = new Set<string>(["ADMIN", "REQUESTER", "ATTENDANT"]);
 
-function isRole(value: unknown): value is Role {
+function isRole(value: unknown): value is AuthRole {
   return typeof value === "string" && ROLES.has(value);
 }
 
@@ -20,17 +22,7 @@ export async function refreshSessionToken(
     return invalidateSessionToken(token);
   }
 
-  const user = await database.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      sectorId: true,
-      isActive: true,
-    },
-  });
+  const user = await createPrismaAuthUserRepository(database).findSessionUser(id);
 
   if (!user?.isActive) {
     return invalidateSessionToken(token);

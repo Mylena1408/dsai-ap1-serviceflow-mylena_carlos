@@ -5,7 +5,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@/server/errors";
-import { verifyPassword } from "@/modules/auth/password";
+import { verifyPassword } from "@/modules/auth";
 import {
   createDomainCategory,
   createDomainRequest,

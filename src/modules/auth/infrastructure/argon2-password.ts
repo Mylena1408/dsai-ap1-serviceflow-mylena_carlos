@@ -1,4 +1,5 @@
 import argon2 from "argon2";
+import type { PasswordHasher } from "../application/ports";
 
 export async function hashPassword(password: string): Promise<string> {
   if (!password) {
@@ -21,3 +22,8 @@ export async function verifyPassword(passwordHash: string, password: string): Pr
     return false;
   }
 }
+
+export const argon2PasswordHasher: PasswordHasher = {
+  hash: hashPassword,
+  verify: verifyPassword,
+};

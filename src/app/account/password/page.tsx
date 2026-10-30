@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignOutButton } from "@/modules/auth/components/sign-out-button";
-import { ChangePasswordForm } from "@/modules/auth/components/change-password-form";
+import { ChangePasswordForm, SignOutButton } from "@/modules/auth";
 import { requireCurrentActor } from "@/server/authorization";
 import { AuthenticationError } from "@/server/errors";
 import type { AuthorizationActor } from "@/server/authorization";
+import { changeOwnPasswordAction } from "./actions";
 
 const homeByRole = {
   ADMIN: "/admin",
@@ -38,7 +38,7 @@ export default async function ChangePasswordPage() {
           <p className="eyebrow">Segurança da conta</p>
           <h1 id="password-title">Alterar senha</h1>
           <p>Confirme sua senha atual para definir uma nova senha com pelo menos 12 caracteres.</p>
-          <ChangePasswordForm cancelHref={homeByRole[actor.role]} />
+          <ChangePasswordForm action={changeOwnPasswordAction} cancelHref={homeByRole[actor.role]} />
         </section>
       </main>
     </>

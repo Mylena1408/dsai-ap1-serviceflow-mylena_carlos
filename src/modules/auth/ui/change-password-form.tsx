@@ -2,18 +2,30 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef } from "react";
-import { changeOwnPasswordAction, type PasswordChangeState } from "@/app/account/password/actions";
+
+export interface PasswordChangeState {
+  status: "success" | "error";
+  message: string;
+}
+
+export type PasswordChangeAction = (
+  previousState: PasswordChangeState,
+  formData: FormData,
+) => Promise<PasswordChangeState>;
 
 const initialState: PasswordChangeState = {
   status: "error",
   message: "",
 };
 
-export function ChangePasswordForm({ cancelHref }: { cancelHref: string }) {
-  const [state, formAction, isPending] = useActionState(
-    changeOwnPasswordAction,
-    initialState,
-  );
+export function ChangePasswordForm({
+  action,
+  cancelHref,
+}: {
+  action: PasswordChangeAction;
+  cancelHref: string;
+}) {
+  const [state, formAction, isPending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 

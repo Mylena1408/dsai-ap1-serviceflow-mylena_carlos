@@ -3,11 +3,11 @@ import { stdin, stdout } from "node:process";
 import { StringDecoder } from "node:string_decoder";
 import { loadEnvConfig } from "@next/env";
 import { PrismaClient } from "@prisma/client";
-import { bootstrapFirstAdmin } from "../src/modules/auth/bootstrap-admin";
+import { bootstrapFirstAdmin } from "../src/modules/auth/infrastructure/prisma-bootstrap-admin";
 import {
   BootstrapInputError,
   formatBootstrapFailure,
-} from "../src/modules/auth/bootstrap-admin-cli";
+} from "../src/modules/auth/application/bootstrap-admin-cli";
 import { parseDatabaseUrl } from "../src/server/config";
 
 async function readHiddenInput(prompt: string): Promise<string> {

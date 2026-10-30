@@ -1,6 +1,6 @@
 "use server";
 
-import { changeOwnPassword, CurrentPasswordMismatchError } from "@/modules/auth/change-own-password";
+import { changeOwnPassword, CurrentPasswordMismatchError } from "@/modules/auth";
 import { AuthenticationError, ValidationError } from "@/server/errors";
 
 export interface PasswordChangeState {

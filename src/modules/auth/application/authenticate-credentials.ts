@@ -1,8 +1,6 @@
-import type { PrismaClient } from "@prisma/client";
-import { prisma } from "@/server/db";
-import { emailSchema } from "@/shared/validation";
 import { z } from "zod";
-import { verifyPassword } from "./password";
+import { emailSchema } from "@/shared/validation";
+import type { AuthUserRepository, PasswordHasher } from "./ports";
 
 const credentialsSchema = z
   .object({
@@ -19,7 +17,8 @@ export interface AuthenticatedCredentials {
 
 export async function authenticateCredentials(
   credentials: unknown,
-  database: PrismaClient = prisma,
+  users: AuthUserRepository,
+  passwords: PasswordHasher,
 ): Promise<AuthenticatedCredentials | null> {
   const parsed = credentialsSchema.safeParse(credentials);
 
@@ -27,18 +26,9 @@ export async function authenticateCredentials(
     return null;
   }
 
-  const user = await database.user.findUnique({
-    where: { email: parsed.data.email },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      passwordHash: true,
-      isActive: true,
-    },
-  });
+  const user = await users.findCredentialUserByEmail(parsed.data.email);
 
-  if (!user?.isActive || !(await verifyPassword(user.passwordHash, parsed.data.password))) {
+  if (!user?.isActive || !(await passwords.verify(user.passwordHash, parsed.data.password))) {
     return null;
   }
 

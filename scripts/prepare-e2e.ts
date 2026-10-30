@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { getIsolatedTestDatabaseUrl } from "../tests/integration/database-url";
-import { bootstrapFirstAdmin } from "../src/modules/auth/bootstrap-admin";
+import { bootstrapFirstAdmin } from "../src/modules/auth/infrastructure/prisma-bootstrap-admin";
 
 const databaseUrl = getIsolatedTestDatabaseUrl();
 const prismaCli = resolve(process.cwd(), "node_modules", "prisma", "build", "index.js");

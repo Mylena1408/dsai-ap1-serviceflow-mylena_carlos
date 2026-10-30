@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { authenticateCredentials } from "./credentials";
-import { sessionFromToken, refreshSessionToken } from "./session";
+import { sessionFromToken, refreshSessionToken } from "./next-auth-session";
+import { authenticateCredentials } from "./prisma-credentials";
 
 const isProduction = process.env.NODE_ENV === "production";
 

@@ -1,10 +1,8 @@
-import type { PrismaClient } from "@prisma/client";
 import { requireCurrentActor } from "@/server/authorization";
 import { AuthenticationError, ConflictError } from "@/server/errors";
-import { prisma } from "@/server/db";
 import { validateInput } from "@/server/validation";
 import { ownPasswordChangeInputSchema } from "@/shared/validation";
-import { hashPassword, verifyPassword } from "./password";
+import type { AuthUserRepository, PasswordHasher } from "./ports";
 
 export class CurrentPasswordMismatchError extends Error {
   constructor() {
@@ -15,35 +13,30 @@ export class CurrentPasswordMismatchError extends Error {
 
 export async function changeOwnPassword(
   input: unknown,
-  database: PrismaClient = prisma,
+  users: AuthUserRepository,
+  passwords: PasswordHasher,
 ): Promise<void> {
   const actor = await requireCurrentActor();
   const parsed = validateInput(ownPasswordChangeInputSchema, input);
 
-  const user = await database.user.findUnique({
-    where: { id: actor.id },
-    select: { passwordHash: true, isActive: true },
-  });
+  const user = await users.findPasswordState(actor.id);
 
   if (!user?.isActive) {
     throw new AuthenticationError();
   }
 
-  if (!(await verifyPassword(user.passwordHash, parsed.currentPassword))) {
+  if (!(await passwords.verify(user.passwordHash, parsed.currentPassword))) {
     throw new CurrentPasswordMismatchError();
   }
 
-  const passwordHash = await hashPassword(parsed.newPassword);
-  const result = await database.user.updateMany({
-    where: {
-      id: actor.id,
-      passwordHash: user.passwordHash,
-      isActive: true,
-    },
-    data: { passwordHash },
+  const newHash = await passwords.hash(parsed.newPassword);
+  const changed = await users.replacePasswordHash({
+    userId: actor.id,
+    expectedHash: user.passwordHash,
+    newHash,
   });
 
-  if (result.count !== 1) {
+  if (changed !== 1) {
     throw new ConflictError();
   }
 }

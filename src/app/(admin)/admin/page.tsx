@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { SignOutButton } from "@/modules/auth/components/sign-out-button";
+import { SignOutButton } from "@/modules/auth";
 import {
   listCategories,
 } from "@/modules/categories";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { prisma } from "./fixtures";
-import { bootstrapFirstAdmin } from "@/modules/auth/bootstrap-admin";
-import { verifyPassword } from "@/modules/auth/password";
+import { bootstrapFirstAdmin } from "@/modules/auth/infrastructure/prisma-bootstrap-admin";
+import { verifyPassword } from "@/modules/auth/infrastructure/argon2-password";
 import { ConflictError, ValidationError } from "@/server/errors";
 
 describe("secure first administrator bootstrap", () => {

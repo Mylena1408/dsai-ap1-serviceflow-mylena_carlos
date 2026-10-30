@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SignOutButton } from "@/modules/auth/components/sign-out-button";
+import { SignOutButton } from "@/modules/auth";
 import type { ReactNode } from "react";
 
 export default function RequesterLayout({

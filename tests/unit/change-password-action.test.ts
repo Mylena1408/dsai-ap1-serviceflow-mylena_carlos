@@ -4,7 +4,7 @@ const { changeOwnPassword, CurrentPasswordMismatchError } = vi.hoisted(() => ({
   changeOwnPassword: vi.fn(),
   CurrentPasswordMismatchError: class CurrentPasswordMismatchError extends Error {},
 }));
-vi.mock("@/modules/auth/change-own-password", () => ({
+vi.mock("@/modules/auth", () => ({
   changeOwnPassword,
   CurrentPasswordMismatchError,
 }));

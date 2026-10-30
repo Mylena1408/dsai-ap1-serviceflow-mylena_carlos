@@ -3,7 +3,7 @@ import { ConflictError, ValidationError } from "@/server/errors";
 import {
   BootstrapInputError,
   formatBootstrapFailure,
-} from "@/modules/auth/bootstrap-admin-cli";
+} from "@/modules/auth/application/bootstrap-admin-cli";
 
 describe("bootstrap CLI output", () => {
   it("uses fixed messages that never echo unexpected errors or credential input", () => {

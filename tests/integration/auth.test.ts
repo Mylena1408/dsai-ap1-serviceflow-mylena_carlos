@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "./fixtures";
-import { authenticateCredentials } from "@/modules/auth/credentials";
-import { hashPassword } from "@/modules/auth/password";
-import { refreshSessionToken, sessionFromToken } from "@/modules/auth/session";
+import { authenticateCredentials } from "@/modules/auth/infrastructure/prisma-credentials";
+import { hashPassword } from "@/modules/auth/infrastructure/argon2-password";
+import { refreshSessionToken, sessionFromToken } from "@/modules/auth/infrastructure/next-auth-session";
 
 describe("local authentication and session refresh", () => {
   let passwordHash: string;

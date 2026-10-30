@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   authConfig,
   authCredentialFields,
-} from "../../../../src/modules/auth/config";
+} from "../../../../src/modules/auth/infrastructure/next-auth-config";
 
 describe("Auth.js configuration", () => {
   it("uses short-lived JWT sessions and secure HttpOnly session cookies", () => {

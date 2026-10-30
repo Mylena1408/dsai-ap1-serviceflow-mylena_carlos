@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "./fixtures";
 import type { AuthenticatedUser } from "@/server/auth";
-import { authenticateCredentials } from "@/modules/auth/credentials";
+import { authenticateCredentials } from "@/modules/auth";
 import {
   changeOwnPassword,
   CurrentPasswordMismatchError,
-} from "@/modules/auth/change-own-password";
-import { hashPassword, verifyPassword } from "@/modules/auth/password";
-import { refreshSessionToken, sessionFromToken } from "@/modules/auth/session";
+} from "@/modules/auth";
+import { hashPassword, verifyPassword } from "@/modules/auth";
+import { refreshSessionToken, sessionFromToken } from "@/modules/auth";
 import { ValidationError } from "@/server/errors";
 
 const session = vi.hoisted(() => ({

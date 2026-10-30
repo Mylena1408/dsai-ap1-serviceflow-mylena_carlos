@@ -408,3 +408,23 @@ Padrão a replicar nas SF-039 e SF-040:
 - **cloc por módulo (antes → depois):** `services` 266 → 341; `categories` 126 → 172; `sectors` 148 → 196; `document-requirements` 221 → 330.
 - **Medição acumulada (`scripts/cloc-diff.sh`):** `added` 1.897; `removed` 660; saldo líquido 1.237.
 - **Resultados:** lint, typecheck e build OK; unitários 206/206 (34 arquivos); integração 94/94; E2E 1/1.
+
+## SF-040 — Identidade e anexos em camadas (2026-10-29)
+
+- **`attachments`:** sem persistência, ficou com `domain/` (`file-type.ts`, `attachment-policy.ts`) e `index.ts`. `src/server/storage` importa `@/modules/attachments`.
+- **`users`:** padrão do piloto; o hash de senha entra no caso de uso como dependência (`UserCommandDependencies.hashPassword`), o que permite testar sem argon2. A composição usa `hashPassword` da API pública de `auth`.
+- **`auth`:**
+  - `application/`: `authenticate-credentials`, `change-own-password`, `bootstrap-admin`, `bootstrap-admin-cli` e `ports.ts` (`PasswordHasher`, `AuthUserRepository`, `AdministratorBootstrapStore`).
+  - `infrastructure/`: `argon2-password`, `prisma-auth-repository`, `next-auth-session`, `next-auth-config` e três composições enxutas: `prisma-credentials`, `prisma-password-change` e `prisma-bootstrap-admin`.
+  - `ui/`: os três componentes React. `ChangePasswordForm` passou a receber a Server Action pela propriedade `action` (padrão documentado em `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md`); antes o módulo importava de `src/app`, invertendo a dependência.
+- **Pontos de composição fora de `src/`:** `auth.ts` importa `@/modules/auth/infrastructure/next-auth-config` direto, porque exportar a configuração pelo `index` criaria o ciclo `index → change-own-password → @/server/authorization → @/server/auth → auth.ts`. `scripts/bootstrap-admin.ts` e `scripts/prepare-e2e.ts` importam `infrastructure/prisma-bootstrap-admin`, que não carrega `@/server/db`, para que o CLI continue lendo o `.env` antes de abrir o banco.
+- **Composições separadas por dependência:** importar o `index` de `auth` carrega a troca de senha e, por ela, o Auth.js. Por isso `authenticateCredentials`, `changeOwnPassword` e `bootstrapFirstAdmin` ficam em arquivos próprios; `auth.test` e `bootstrap-admin.test` importam esses arquivos, já que o Auth.js não carrega no Vitest (`Cannot find module next/server`). A primeira tentativa, com tudo no `index`, quebrou esses dois testes e foi corrigida assim, sem novos mocks.
+- **P2034 no bootstrap:** preservada a regra própria (conflito só quando já existe administrador; qualquer outro erro propaga sem alteração), agora em `createPrismaAdministratorBootstrapStore` usando o tradutor único.
+- **Lint:** a lista `transitionalDeepImports` ficou vazia; a SF-043 remove a estrutura.
+- **Testes existentes alterados:** caminhos de import em `tests/integration/{auth,bootstrap-admin,change-own-password,users}.test.ts`, `tests/unit/modules/{attachments,users,auth}/*.test.ts`; caminho do `vi.mock` em `tests/unit/change-password-action.test.ts` (`@/modules/auth/change-own-password` → `@/modules/auth`). Nenhuma asserção alterada.
+- **Testes novos:** `tests/unit/modules/users/application/user-use-cases.test.ts` e `tests/unit/modules/auth/application/auth-use-cases.test.ts`.
+- **Instabilidade observada:** numa execução, `requests-transitions.test.ts` falhou em 2 casos por ordem de horários (o `updatedAt` posterior saiu 5 ms menor que o anterior), compatível com um ajuste do relógio do sistema durante o teste. O módulo `requests` não mudou nesta tarefa; as 3 execuções seguintes passaram 94/94. O teste depende de relógios (Node e PostgreSQL) andarem sempre para frente.
+- **CLI:** `npm run bootstrap:admin` sem terminal responde "É necessário executar o bootstrap em um terminal interativo."; com banco `_test`, "Bootstrap não pode usar banco de testes.".
+- **cloc por módulo (antes → depois):** `users` 323 → 394; `auth` 459 → 597; `attachments` 317 → 338.
+- **Medição acumulada:** `added` 3.159; `removed` 1.425; saldo líquido 1.734.
+- **Resultados:** lint, typecheck e build OK; unitários 219/219 (36 arquivos); integração 94/94; E2E 1/1.
