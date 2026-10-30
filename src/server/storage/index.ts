@@ -1,4 +1,4 @@
-import { isAttachmentStorageKey } from "@/modules/attachments/policy";
+import { isAttachmentStorageKey } from "@/modules/attachments";
 import { InternalServerError } from "@/server/errors";
 
 // Private document storage behind an adapter (SPEC 21.8, 21.15). Server-side only: the

@@ -3,7 +3,7 @@ import { ConflictError } from "@/server/errors";
 import {
   assertAdministratorCanRetire,
   assertAttendantCanLeaveSector,
-} from "@/modules/users/policy";
+} from "@/modules/users/domain/user-rules";
 
 describe("user administration policy", () => {
   it("prevents retirement of the last active administrator", () => {

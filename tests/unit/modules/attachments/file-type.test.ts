@@ -3,7 +3,7 @@ import {
   DOCX_MAX_CONTENT_TYPES_BYTES,
   DOCX_MAX_ZIP_ENTRIES,
   detectDocumentFormat,
-} from "@/modules/attachments/file-type";
+} from "@/modules/attachments/domain/file-type";
 import {
   buildZip,
   macroEnabledDocx,

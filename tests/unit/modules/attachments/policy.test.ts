@@ -9,7 +9,7 @@ import {
   getFilenameFormat,
   inspectAttachment,
   sanitizeAttachmentFilename,
-} from "@/modules/attachments/policy";
+} from "@/modules/attachments/domain/attachment-policy";
 import { ValidationError, toErrorResponse } from "@/server/errors";
 import {
   macroEnabledDocx,
