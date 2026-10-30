@@ -69,3 +69,7 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 > faça a sf-043
 
 - SF-043 concluída; refatoração arquitetural encerrada.
+
+> especifique e corrija a fonte de horario do historico
+
+- SPEC seção 23 e SF-046 concluídas.

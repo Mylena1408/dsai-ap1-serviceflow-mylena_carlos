@@ -52,6 +52,20 @@ describe("createRequest use case", () => {
     expect(store.requests).toHaveLength(1);
   });
 
+  it("stamps the request and its first event with the database time (CA-HOR-01)", async () => {
+    const databaseTime = new Date("2026-10-30T08:15:00.000Z");
+    const store = createStore({ databaseTime, actors: [requester], services: [activeService()] });
+
+    const created = await createRequest(
+      { serviceId, description: "Need a new badge" },
+      createInMemoryTransactionRunner(store),
+    );
+
+    expect(created.createdAt).toEqual(databaseTime);
+    expect(created.updatedAt).toEqual(databaseTime);
+    expect(created.events[0].occurredAt).toEqual(databaseTime);
+  });
+
   it("hides an inactive service and leaves nothing behind", async () => {
     const store = createStore({
       actors: [requester],

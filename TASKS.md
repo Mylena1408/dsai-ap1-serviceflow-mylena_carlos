@@ -483,7 +483,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-046 — Usar o relógio do banco em todo o histórico de solicitações
 
-- **Estado:** Em andamento.
+- **Estado:** **Concluída em 2026-10-30.** Port `RequestTransaction.currentTime()` lê `now()` do banco na transação; abertura usa esse horário em `createdAt`, `updatedAt` e no evento inicial; transições, em `updatedAt`, `completedAt` e `occurredAt`; o parâmetro de relógio da aplicação foi removido. Novo teste de integração com o relógio da aplicação deslocado (±1 h) falha no código anterior e passa no novo. CA-HOR-01 a 04 verificados: unitários 226/226, integração 106/106 (três execuções), E2E 3/3, build OK.
 - **Objetivo:** Ler o horário do banco dentro da transação e usá-lo em `createdAt`, `updatedAt`, `completedAt` e `occurredAt` na abertura e nas transições.
 - **Arquivos/módulos esperados:** `src/modules/requests/{application,infrastructure}`, testes unitários e de integração.
 - **Dependências:** SF-043.

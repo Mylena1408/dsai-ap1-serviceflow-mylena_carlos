@@ -23,10 +23,10 @@ const attendant: StoredActor = {
   email: "attendant@example.test",
 };
 const transitionTime = new Date("2026-10-29T15:30:00.000Z");
-const clock = () => transitionTime;
 
 function seededStore(status: "OPEN" | "IN_PROGRESS" | "COMPLETED" = "OPEN") {
   return createStore({
+    databaseTime: transitionTime,
     actors: [attendant],
     services: [activeService()],
     requests: [storedRequest({ status })],
@@ -46,10 +46,10 @@ describe("transitionRequestStatus use case", () => {
     const store = seededStore();
     const runner = createInMemoryTransactionRunner(store);
 
-    const started = await transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, runner, clock);
+    const started = await transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, runner);
     expect(started).toMatchObject({ status: "IN_PROGRESS", updatedAt: transitionTime, completedAt: null });
 
-    const completed = await transitionRequestStatus({ requestId, toStatus: "COMPLETED" }, runner, clock);
+    const completed = await transitionRequestStatus({ requestId, toStatus: "COMPLETED" }, runner);
     expect(completed).toMatchObject({ status: "COMPLETED", completedAt: transitionTime });
     expect(completed.events.map(({ fromStatus, toStatus }) => [fromStatus, toStatus])).toEqual([
       ["OPEN", "IN_PROGRESS"],
@@ -57,11 +57,25 @@ describe("transitionRequestStatus use case", () => {
     ]);
   });
 
+  it("uses one database time per transition for the request and its event (CA-HOR-02)", async () => {
+    const store = seededStore();
+    const runner = createInMemoryTransactionRunner(store);
+
+    const started = await transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, runner);
+    store.databaseTime = new Date("2026-10-29T16:45:00.000Z");
+    const completed = await transitionRequestStatus({ requestId, toStatus: "COMPLETED" }, runner);
+
+    expect(started.events.at(-1)?.occurredAt).toEqual(started.updatedAt);
+    expect(completed.updatedAt).toEqual(store.databaseTime);
+    expect(completed.completedAt).toEqual(store.databaseTime);
+    expect(completed.events.at(-1)?.occurredAt).toEqual(store.databaseTime);
+  });
+
   it("rejects a transition that skips a state without recording an event", async () => {
     const store = seededStore("OPEN");
 
     await expect(
-      transitionRequestStatus({ requestId, toStatus: "COMPLETED" }, createInMemoryTransactionRunner(store), clock),
+      transitionRequestStatus({ requestId, toStatus: "COMPLETED" }, createInMemoryTransactionRunner(store)),
     ).rejects.toBeInstanceOf(ConflictError);
     expect(store.requests[0].status).toBe("OPEN");
     expect(store.events).toHaveLength(0);
@@ -72,7 +86,7 @@ describe("transitionRequestStatus use case", () => {
     store.actors[0] = { ...attendant, sectorId: "sector-2" };
 
     await expect(
-      transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, createInMemoryTransactionRunner(store), clock),
+      transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, createInMemoryTransactionRunner(store)),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -87,7 +101,7 @@ describe("transitionRequestStatus use case", () => {
     );
 
     await expect(
-      transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, runner, clock),
+      transitionRequestStatus({ requestId, toStatus: "IN_PROGRESS" }, runner),
     ).rejects.toBeInstanceOf(ConflictError);
     expect(store.events).toHaveLength(0);
   });

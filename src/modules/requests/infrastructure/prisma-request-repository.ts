@@ -71,6 +71,11 @@ function createPrismaRequestTransaction(
   transaction: Prisma.TransactionClient,
 ): RequestTransaction {
   return {
+    async currentTime() {
+      // now() is the transaction start time: the same value for every statement in it.
+      const [row] = await transaction.$queryRaw<Array<{ now: Date }>>`SELECT now() AS "now"`;
+      return row.now;
+    },
     findActor(actorId) {
       return transaction.user.findUnique({
         where: { id: actorId },
@@ -86,8 +91,11 @@ function createPrismaRequestTransaction(
         },
       });
     },
-    insertRequest(data) {
-      return transaction.request.create({ data, select: { id: true } });
+    insertRequest({ openedAt, ...data }) {
+      return transaction.request.create({
+        data: { ...data, createdAt: openedAt, updatedAt: openedAt },
+        select: { id: true },
+      });
     },
     findRequestState(requestId) {
       return transaction.request.findUnique({

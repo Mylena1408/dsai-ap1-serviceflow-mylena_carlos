@@ -15,6 +15,8 @@ export type StoredActor = TransactionActor & { name: string; email: string };
 type StoredEvent = Omit<RequestStatusEventRecord, "actor">;
 
 export interface InMemoryRequestStore {
+  /** Simulated database clock returned by currentTime(). */
+  databaseTime: Date;
   actors: StoredActor[];
   services: ServiceForRequest[];
   requests: RequestRecord[];
@@ -26,7 +28,7 @@ export const serviceId = "11111111-1111-4111-8111-111111111111";
 export const requestId = "22222222-2222-4222-8222-222222222222";
 
 export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryRequestStore {
-  return { actors: [], services: [], requests: [], events: [], ...seed };
+  return { databaseTime: fixedNow, actors: [], services: [], requests: [], events: [], ...seed };
 }
 
 export function activeService(overrides: Partial<ServiceForRequest> = {}): ServiceForRequest {
@@ -99,6 +101,9 @@ export function createInMemoryQueryRepository(store: InMemoryRequestStore): Requ
 
 function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransaction {
   return {
+    async currentTime() {
+      return store.databaseTime;
+    },
     async findActor(actorId) {
       const actor = store.actors.find(({ id }) => id === actorId);
       return actor
@@ -108,13 +113,13 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     async findServiceForRequest(serviceId) {
       return store.services.find(({ id }) => id === serviceId) ?? null;
     },
-    async insertRequest(data) {
+    async insertRequest({ openedAt, ...data }) {
       const id = `request-${store.requests.length + 1}`;
       store.requests.push({
         ...data,
         id,
-        createdAt: fixedNow,
-        updatedAt: fixedNow,
+        createdAt: openedAt,
+        updatedAt: openedAt,
         completedAt: null,
       });
       return { id };
@@ -143,7 +148,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         actorId: event.actorId,
         fromStatus: event.fromStatus,
         toStatus: event.toStatus,
-        occurredAt: event.occurredAt ?? fixedNow,
+        occurredAt: event.occurredAt,
       });
     },
     async getWithHistory(requestId) {

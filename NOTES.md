@@ -502,3 +502,13 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - **Validação final:** lint e typecheck sem erros; build OK; unitários 224/224 (37 arquivos); integração 104/104 (21 arquivos); E2E 3/3. Ressalva mantida: `requests-transitions` depende de os relógios do Node e do PostgreSQL coincidirem e falhou em execuções anteriores nesta máquina (ver SF-045).
 - **Refatoração encerrada.** Próxima etapa da ordem aprovada: corrigir a fonte única de horário do histórico (nova SPEC) e seguir para SF-034 a SF-036.
+
+## SF-046 — Fonte única de horário do histórico (2026-10-30)
+
+- **Decisão:** todos os horários de solicitação e de evento de status vêm do **relógio do banco**. Motivos: o banco já gerava `createdAt` e o evento de abertura; é um relógio só, mesmo com várias instâncias da aplicação na Vercel; e `now()` devolve o mesmo valor em toda a transação, então a solicitação e o evento ficam com horários idênticos.
+- **Implementação:** novo método `currentTime()` no port `RequestTransaction`; a implementação Prisma executa `SELECT now()` dentro da transação. `createRequest` usa esse valor em `createdAt`, `updatedAt` e no evento inicial (antes o `updatedAt` vinha do Prisma, com o relógio da aplicação). `transitionRequestStatus` usa-o em `updatedAt`, `completedAt` e `occurredAt`; o parâmetro `now` (relógio da aplicação) foi removido. `NewStatusEvent.occurredAt` passou a ser obrigatório.
+- **Sem mudança** de schema, migration, regra de negócio, mensagem ou tela.
+- **Prova:** `tests/integration/request-history-clock.test.ts` simula o relógio da aplicação 1 h adiantado e 1 h atrasado (só `Date` é simulado). Com as mudanças guardadas temporariamente (`git stash`), os 2 casos falharam no código anterior (`createdAt` ≠ `updatedAt` na abertura); com a correção, passam.
+- **Observação honesta:** na hora da validação final, a diferença medida entre os relógios do Node e do PostgreSQL estava em 0–1 ms (antes eram 9–11 ms). Por isso as três execuções verdes de `requests-transitions` não provam a correção sozinhas; a prova é o teste com relógio deslocado.
+- **Testes alterados:** só testes criados nesta sessão (`in-memory-requests.ts` ganhou `databaseTime`; os testes unitários de transição deixaram de passar o relógio). `requests-transitions.test.ts` e `requests-create.test.ts` não mudaram.
+- **Resultados:** lint, typecheck e build OK; unitários 226/226; integração 106/106 em três execuções seguidas; E2E 3/3.

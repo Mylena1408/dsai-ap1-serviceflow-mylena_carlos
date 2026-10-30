@@ -804,8 +804,8 @@ Solicitada pela responsável depois do diagnóstico registrado em `NOTES.md` (SF
 
 ### 23.4 Critérios de aceitação
 
-- [ ] **CA-HOR-01** — Na abertura, `createdAt`, `updatedAt` e o `occurredAt` do evento inicial são iguais.
-- [ ] **CA-HOR-02** — Em cada transição, `updatedAt` e o `occurredAt` do evento são iguais, e `completedAt` também na conclusão.
-- [ ] **CA-HOR-03** — Com o relógio da aplicação deslocado em relação ao banco (simulado no teste), o histórico continua em ordem e nenhum horário é anterior ao da etapa anterior.
-- [ ] **CA-HOR-04** — `tests/integration/requests-transitions.test.ts` passa sem alteração de asserções, assim como as demais suítes.
+- [x] **CA-HOR-01** — Na abertura, `createdAt`, `updatedAt` e o `occurredAt` do evento inicial são iguais. *Verificado em 2026-10-30: teste unitário e `tests/integration/request-history-clock.test.ts`.*
+- [x] **CA-HOR-02** — Em cada transição, `updatedAt` e o `occurredAt` do evento são iguais, e `completedAt` também na conclusão. *Verificado em 2026-10-30: teste unitário e teste de integração.*
+- [x] **CA-HOR-03** — Com o relógio da aplicação deslocado em relação ao banco (simulado no teste), o histórico continua em ordem e nenhum horário é anterior ao da etapa anterior. *Verificado em 2026-10-30: teste de integração com o relógio da aplicação 1 h adiantado e 1 h atrasado; falha no código anterior e passa no novo.*
+- [x] **CA-HOR-04** — `tests/integration/requests-transitions.test.ts` passa sem alteração de asserções, assim como as demais suítes. *Verificado em 2026-10-30: `requests-transitions` sem alteração; unitários 226/226, integração 106/106 em três execuções, E2E 3/3.*
 

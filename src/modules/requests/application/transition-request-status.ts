@@ -9,7 +9,6 @@ import type { RequestTransactionRunner } from "./ports";
 export async function transitionRequestStatus(
   input: unknown,
   transactions: RequestTransactionRunner,
-  now: () => Date = () => new Date(),
 ): Promise<RequestWithHistory> {
   const parsed = validateInput(requestStatusTransitionInputSchema, input);
   const authorizedActor = await requireStatusChangeActor(parsed.requestId);
@@ -35,7 +34,7 @@ export async function transitionRequestStatus(
     }
 
     assertRequestStatusTransition(currentRequest.status, parsed.toStatus);
-    const occurredAt = now();
+    const occurredAt = await transaction.currentTime();
     const changed = await transaction.updateStatusIfCurrent({
       requestId: parsed.requestId,
       sectorId: currentActor.sectorId,

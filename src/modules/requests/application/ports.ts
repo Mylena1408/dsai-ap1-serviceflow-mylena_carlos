@@ -31,7 +31,7 @@ export interface NewStatusEvent {
   actorId: string;
   fromStatus: RequestStatus | null;
   toStatus: RequestStatus;
-  occurredAt?: Date;
+  occurredAt: Date;
 }
 
 export interface StatusUpdate {
@@ -45,9 +45,16 @@ export interface StatusUpdate {
 
 /** Operations available inside a request transaction. */
 export interface RequestTransaction {
+  /**
+   * Database time of the current transaction. Every request and status event time comes
+   * from this single clock (SPEC 2026-09-30, section 23).
+   */
+  currentTime(): Promise<Date>;
   findActor(actorId: string): Promise<TransactionActor | null>;
   findServiceForRequest(serviceId: string): Promise<ServiceForRequest | null>;
-  insertRequest(data: RequestSnapshot & { description: string; status: RequestStatus }): Promise<{ id: string }>;
+  insertRequest(
+    data: RequestSnapshot & { description: string; status: RequestStatus; openedAt: Date },
+  ): Promise<{ id: string }>;
   findRequestState(requestId: string): Promise<{ status: RequestStatus; sectorId: string } | null>;
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;

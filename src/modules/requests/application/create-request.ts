@@ -37,10 +37,12 @@ export async function createRequest(
       sectorActive: service.sector.isActive,
     });
 
+    const openedAt = await transaction.currentTime();
     const created = await transaction.insertRequest({
       ...buildRequestSnapshot(currentActor.id, service),
       description: parsed.description,
       status: "OPEN",
+      openedAt,
     });
 
     await transaction.insertStatusEvent({
@@ -48,6 +50,7 @@ export async function createRequest(
       actorId: currentActor.id,
       fromStatus: null,
       toStatus: "OPEN",
+      occurredAt: openedAt,
     });
 
     return transaction.getWithHistory(created.id);
