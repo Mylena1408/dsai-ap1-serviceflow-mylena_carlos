@@ -65,3 +65,7 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 > continue com a SF-042
 
 - SF-041 (`658c7da`) e SF-042 concluídas.
+
+> faça a sf-043
+
+- SF-043 concluída; refatoração arquitetural encerrada.

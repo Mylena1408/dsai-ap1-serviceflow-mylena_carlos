@@ -1,7 +1,7 @@
 # SPEC — Refatoração arquitetural: módulos em camadas
 
 **Data:** 2026-10-27  
-**Status:** Aprovada em 2026-10-27  
+**Status:** Aprovada em 2026-10-27; **concluída em 2026-10-30** (SF-037 a SF-043; verificação na seção 12)  
 **Projeto:** ServiceFlow  
 **Referências:** `SPEC/2026-09-30-visao-geral.md`, `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seção 17)
 
@@ -155,18 +155,18 @@ Cada etapa termina com todas as suítes passando. Não há etapa que deixe o pro
 
 ## 12. Critérios de aceitação verificáveis
 
-- [ ] **CA-ARQ-01** — Todos os módulos de `src/modules/` seguem a estrutura da seção 5.1 (somente com as pastas necessárias).
-- [ ] **CA-ARQ-02** — Nenhum arquivo em `src/modules/*/domain/**` ou `src/modules/*/application/**` importa `@prisma/client`, `@/server/db`, `next/*` ou `react` (verificado por lint e por busca no código).
-- [ ] **CA-ARQ-03** — Nenhum arquivo fora de um módulo importa `@/modules/<módulo>/<subpasta>`, exceto em `tests/**` (verificado por lint).
-- [ ] **CA-ARQ-04** — `npm run lint` falha quando um import proibido é introduzido, e o teste manual da seção 6.3 está registrado em `NOTES.md`.
-- [ ] **CA-ARQ-05** — Não há consultas Prisma (`prisma.`, `database.`, `transaction.` com operações de modelo) em `src/app/**` nem em `application/` ou `domain/`.
-- [ ] **CA-ARQ-06** — A tradução de códigos de erro do Prisma existe em um único utilitário de infraestrutura.
-- [ ] **CA-ARQ-07** — Cada caso de uso migrado tem ao menos um teste unitário com repositório em memória cobrindo sucesso e um caminho de erro.
-- [ ] **CA-ARQ-08** — `src/shared/validation` contém apenas schemas genéricos; os específicos estão nos módulos, com as mesmas mensagens e caminhos de erro.
-- [ ] **CA-ARQ-09** — A área administrativa está dividida por entidade, a rota `/admin` permanece a mesma e o E2E passa sem alteração.
-- [ ] **CA-ARQ-10** — `prisma/schema.prisma`, `prisma/migrations/`, `package.json` e `package-lock.json` estão sem alteração.
-- [ ] **CA-ARQ-11** — As suítes unitária, de integração e E2E, `npm run typecheck`, `npm run lint` e `npm run build` passam, com resultados reais registrados. Nenhuma asserção existente foi alterada.
-- [ ] **CA-ARQ-12** — A contagem do cloc por módulo (antes e depois) está registrada em `NOTES.md`.
+- [x] **CA-ARQ-01** — Todos os módulos de `src/modules/` seguem a estrutura da seção 5.1 (somente com as pastas necessárias). *Verificado em 2026-10-30: oito módulos com `index.ts` e só as camadas necessárias (`attachments` só com `domain/`).*
+- [x] **CA-ARQ-02** — Nenhum arquivo em `src/modules/*/domain/**` ou `src/modules/*/application/**` importa `@prisma/client`, `@/server/db`, `next/*` ou `react` (verificado por lint e por busca no código). *Verificado em 2026-10-30: imposto por lint (seção 6.3) e busca sem ocorrências.*
+- [x] **CA-ARQ-03** — Nenhum arquivo fora de um módulo importa `@/modules/<módulo>/<subpasta>`, exceto em `tests/**` (verificado por lint). *Verificado em 2026-10-30: lint e busca sem ocorrências; `auth.ts` e `scripts/` são pontos de composição fora de `src/` (registrado em `NOTES.md`, SF-040).*
+- [x] **CA-ARQ-04** — `npm run lint` falha quando um import proibido é introduzido, e o teste manual da seção 6.3 está registrado em `NOTES.md`. *Verificado em 2026-10-30: verificação manual com 11 imports proibidos bloqueados e permitidos aceitos (`NOTES.md`, SF-043).*
+- [x] **CA-ARQ-05** — Não há consultas Prisma (`prisma.`, `database.`, `transaction.` com operações de modelo) em `src/app/**` nem em `application/` ou `domain/`. *Verificado em 2026-10-30: busca sem ocorrências.*
+- [x] **CA-ARQ-06** — A tradução de códigos de erro do Prisma existe em um único utilitário de infraestrutura. *Verificado em 2026-10-30: `src/server/db/prisma-errors.ts` é o único lugar que inspeciona `PrismaClientKnownRequestError`.*
+- [x] **CA-ARQ-07** — Cada caso de uso migrado tem ao menos um teste unitário com repositório em memória cobrindo sucesso e um caminho de erro. *Verificado em 2026-10-30: testes unitários com repositório em memória em todos os módulos com casos de uso.*
+- [x] **CA-ARQ-08** — `src/shared/validation` contém apenas schemas genéricos; os específicos estão nos módulos, com as mesmas mensagens e caminhos de erro. *Verificado em 2026-10-30: `src/shared/validation` só com schemas genéricos (SF-041).*
+- [x] **CA-ARQ-09** — A área administrativa está dividida por entidade, a rota `/admin` permanece a mesma e o E2E passa sem alteração. *Verificado em 2026-10-30: seções por entidade em `admin/_sections/`; `/admin` e E2E sem alteração de asserções (SF-042).*
+- [x] **CA-ARQ-10** — `prisma/schema.prisma`, `prisma/migrations/`, `package.json` e `package-lock.json` estão sem alteração. *Verificado em 2026-10-30: `prisma/` e `package-lock.json` idênticos à `baseline-ap2`; `package.json` só ganhou o script `seed:demo` da SF-045 (fora da refatoração, sem dependência).*
+- [x] **CA-ARQ-11** — As suítes unitária, de integração e E2E, `npm run typecheck`, `npm run lint` e `npm run build` passam, com resultados reais registrados. Nenhuma asserção existente foi alterada. *Verificado em 2026-10-30: na validação final: lint, typecheck, build, unitários 224/224, integração 104/104, E2E 3/3. Ressalva: `requests-transitions` é sensível à diferença de relógio Node × PostgreSQL desta máquina e falhou em execuções anteriores (`NOTES.md`, SF-045).*
+- [x] **CA-ARQ-12** — A contagem do cloc por módulo (antes e depois) está registrada em `NOTES.md`. *Verificado em 2026-10-30: tabela antes/depois em `NOTES.md` (SF-043).*
 
 ## 13. Estratégia de testes
 

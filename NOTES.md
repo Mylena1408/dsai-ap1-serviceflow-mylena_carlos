@@ -471,3 +471,34 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Sem mudança de texto:** os blocos JSX e as funções foram recortados do original por script; uma verificação automática confirmou que todo texto e atributo de `page.tsx` e `actions.ts` originais existe nos arquivos novos. Os componentes de interface compartilhados (`create-form`, `record-editor`, `document-requirements-editor`) não mudaram.
 - **Tamanho:** `page.tsx` 356 → 160 linhas físicas; `actions.ts` 384 → 29.
 - **Testes:** nenhum teste alterado. Lint, typecheck e build OK; unitários 224/224; integração 104/104 (o teste sensível à diferença de relógio passou nesta execução; o defeito continua registrado); E2E 3/3.
+
+## SF-043 — Fechamento da refatoração (2026-10-30)
+
+- **Regra de lint final (`eslint.config.mjs`):** para cada módulo é gerado um bloco por camada (`domain`, `application`, `infrastructure`, `ui`) e um para os arquivos da raiz (`index.ts`). Cada bloco repete as regras de fronteira entre módulos, porque no ESLint flat config uma regra configurada duas vezes para o mesmo arquivo é **substituída**, não somada.
+  - `domain/`: proíbe `@prisma/client`, `@/server/db`, `next`, `next-auth`, `react`, `react-dom` e caminhos relativos para `application`, `infrastructure` e `ui`.
+  - `application/`: as mesmas bibliotecas e caminhos relativos para `infrastructure` e `ui`.
+  - `ui/`: proíbe `@prisma/client`, `@/server/db` e caminhos relativos para `infrastructure`.
+  - `infrastructure/` e `index.ts`: só a fronteira entre módulos.
+  - A lista vazia de exceções transitórias foi removida; fora dos módulos vale só a proibição de `@/modules/*/**`.
+- **Verificação manual (CA-ARQ-04):** arquivos temporários em `sectors/{domain,application,ui,infrastructure}` com 11 imports proibidos (Prisma, banco, `next/navigation`, `react`, camada externa por caminho relativo e internos de outros módulos por alias e por caminho relativo) geraram 11 erros; os 6 permitidos (`@/server/errors`, `./sector`, `../domain/sector`, `@/modules/services`, `react` em `ui`, `@prisma/client` em `infrastructure`) não geraram erro. Arquivos removidos em seguida.
+- **CA-ARQ-10:** `prisma/` e `package-lock.json` idênticos à `baseline-ap2`. `package.json` só tem a entrada `seed:demo` (SF-045, funcionalidade aprovada à parte, sem dependência).
+- **CA-ARQ-06:** `PrismaClientKnownRequestError` só é inspecionado em `src/server/db/prisma-errors.ts`; os repositórios apenas listam os códigos que traduzem.
+- **cloc por área (TypeScript, linhas de código; antes = `baseline-ap2`, depois = SF-043):**
+
+| Área | Antes | Depois | Arquivos antes → depois |
+|---|---:|---:|---|
+| `modules/requests` | 290 | 500 | 2 → 10 |
+| `modules/services` | 266 | 349 | 3 → 8 |
+| `modules/categories` | 126 | 177 | 2 → 7 |
+| `modules/sectors` | 148 | 201 | 2 → 7 |
+| `modules/document-requirements` | 221 | 346 | 2 → 7 |
+| `modules/users` | 323 | 456 | 2 → 7 |
+| `modules/auth` (inclui o modo de demonstração da SF-044) | 459 | 781 | 10 → 21 |
+| `modules/attachments` | 317 | 338 | 2 → 3 |
+| `app/(admin)/admin` | 1.249 | 1.408 | 5 → 15 |
+| `server` | 595 | 647 | 8 → 10 |
+| `shared` | 140 | 9 | 1 → 1 |
+| **`src` (total)** | **4.823** | **5.905** | — |
+
+- **Validação final:** lint e typecheck sem erros; build OK; unitários 224/224 (37 arquivos); integração 104/104 (21 arquivos); E2E 3/3. Ressalva mantida: `requests-transitions` depende de os relógios do Node e do PostgreSQL coincidirem e falhou em execuções anteriores nesta máquina (ver SF-045).
+- **Refatoração encerrada.** Próxima etapa da ordem aprovada: corrigir a fonte única de horário do histórico (nova SPEC) e seguir para SF-034 a SF-036.
