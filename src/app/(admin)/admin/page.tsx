@@ -9,31 +9,12 @@ import { requireConfigurationAdministrator } from "@/server/authorization";
 import { listSectors } from "@/modules/sectors";
 import { listServices } from "@/modules/services";
 import { listUsers } from "@/modules/users";
-import {
-  MAX_ACTIVE_DOCUMENT_REQUIREMENTS,
-  listDocumentRequirements,
-} from "@/modules/document-requirements";
-import { AdminCreateForm } from "./create-form";
-import { AdminRecordEditor } from "./record-editor";
-import { DocumentRequirementsEditor } from "./document-requirements-editor";
-import {
-  createCategoryAction,
-  createDocumentRequirementAction,
-  deactivateDocumentRequirementAction,
-  moveDocumentRequirementAction,
-  updateDocumentRequirementAction,
-  createSectorAction,
-  createServiceAction,
-  createUserAction,
-  toggleCategoryAction,
-  toggleSectorAction,
-  toggleServiceAction,
-  toggleUserAction,
-  updateCategoryAction,
-  updateSectorAction,
-  updateServiceAction,
-  updateUserAction,
-} from "./actions";
+import { listDocumentRequirements } from "@/modules/document-requirements";
+import { CategoriesSection } from "./_sections/categories/categories-section";
+import { OverviewSection } from "./_sections/overview-section";
+import { SectorsSection } from "./_sections/sectors/sectors-section";
+import { ServicesSection } from "./_sections/services/services-section";
+import { UsersSection } from "./_sections/users/users-section";
 
 type AdminPageProps = {
   searchParams: Promise<{
@@ -139,215 +120,38 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       ) : null}
 
       {selectedSection === "overview" ? (
-        <section aria-labelledby="overview-heading" className="admin-overview">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Resumo da configuração</p>
-              <h2 id="overview-heading">Visão geral</h2>
-              <p className="section-description">Escolha um cadastro para consultar e gerenciar seus registros.</p>
-            </div>
-          </div>
-          <div className="admin-overview-grid">
-            {[
-              { id: "users", label: "Usuários", count: users.length, detail: "Perfis e acessos" },
-              { id: "sectors", label: "Setores", count: sectors.length, detail: "Equipes da organização" },
-              { id: "categories", label: "Categorias", count: categories.length, detail: "Grupos do catálogo" },
-              { id: "services", label: "Serviços", count: services.length, detail: "Opções disponíveis" },
-            ].map((item) => (
-              <Link
-                className="admin-overview-card"
-                href={`/admin?section=${item.id}`}
-                key={item.id}
-              >
-                <span className="eyebrow">{item.label}</span>
-                <strong>{item.count}</strong>
-                <span>{item.detail}</span>
-                <span className="admin-overview-link">Abrir cadastro <span aria-hidden="true">→</span></span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <OverviewSection
+          counts={{
+            users: users.length,
+            sectors: sectors.length,
+            categories: categories.length,
+            services: services.length,
+          }}
+        />
       ) : null}
 
       {selectedSection !== "overview" ? (
         <div className="admin-sections">
       {selectedSection === "sectors" ? (
-        <section className="admin-section" aria-labelledby="sectors-heading">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Estrutura organizacional</p>
-            <h2 id="sectors-heading">Setores</h2>
-            <p className="section-description">Organize as equipes responsáveis pelo atendimento.</p>
-          </div>
-        </div>
-        <AdminCreateForm action={createSectorAction} submitLabel="Criar setor">
-          <label>
-            Novo setor
-            <input name="name" required maxLength={200} />
-          </label>
-        </AdminCreateForm>
-        <ul className="entity-list">
-          {sectors.map((sector) => (
-            <AdminRecordEditor
-              key={sector.id}
-              record={{ kind: "sector", ...sector }}
-              section={selectedSection}
-              toggleAction={toggleSectorAction}
-              updateAction={updateSectorAction}
-            />
-          ))}
-        </ul>
-        </section>
+        <SectorsSection section={selectedSection} sectors={sectors} />
       ) : null}
 
       {selectedSection === "categories" ? (
-        <section className="admin-section" aria-labelledby="categories-heading">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Catálogo</p>
-            <h2 id="categories-heading">Categorias</h2>
-            <p className="section-description">Agrupe serviços em categorias fáceis de encontrar.</p>
-          </div>
-        </div>
-        <AdminCreateForm action={createCategoryAction} submitLabel="Criar categoria">
-          <label>
-            Nova categoria
-            <input name="name" required maxLength={200} />
-          </label>
-        </AdminCreateForm>
-        <ul className="entity-list">
-          {categories.map((category) => (
-            <AdminRecordEditor
-              key={category.id}
-              record={{ kind: "category", ...category }}
-              section={selectedSection}
-              toggleAction={toggleCategoryAction}
-              updateAction={updateCategoryAction}
-            />
-          ))}
-        </ul>
-        </section>
+        <CategoriesSection categories={categories} section={selectedSection} />
       ) : null}
 
       {selectedSection === "users" ? (
-        <section className="admin-section" aria-labelledby="users-heading">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Acessos e equipes</p>
-            <h2 id="users-heading">Usuários</h2>
-            <p className="section-description">Gerencie perfis, acessos e a associação de atendentes aos setores.</p>
-          </div>
-        </div>
-        <AdminCreateForm action={createUserAction} submitLabel="Criar usuário">
-          <label>Nome<input name="name" required /></label>
-          <label>E-mail<input name="email" type="email" required /></label>
-          <label>Senha inicial<input name="password" type="password" required /></label>
-          <label>
-            Perfil
-            <select name="role" defaultValue="REQUESTER" required>
-              <option value="ADMIN">Administrador</option>
-              <option value="REQUESTER">Solicitante</option>
-              <option value="ATTENDANT">Atendente</option>
-            </select>
-          </label>
-          <label>
-            Setor da equipe
-            <select name="sectorId" defaultValue="">
-              <option value="">Selecione se for atendente</option>
-              {sectors
-                .filter((sector) => sector.isActive)
-                .map((sector) => (
-                  <option key={sector.id} value={sector.id}>{sector.name}</option>
-                ))}
-            </select>
-            </label>
-        </AdminCreateForm>
-        <ul className="entity-list">
-          {users.map((user) => (
-            <AdminRecordEditor
-              key={user.id}
-              record={{ kind: "user", ...user }}
-              sectors={sectors}
-              section={selectedSection}
-              toggleAction={toggleUserAction}
-              updateAction={updateUserAction}
-            />
-          ))}
-        </ul>
-        </section>
+        <UsersSection section={selectedSection} sectors={sectors} users={users} />
       ) : null}
 
       {selectedSection === "services" ? (
-        <section className="admin-section" aria-labelledby="services-heading">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Oferta de serviços</p>
-            <h2 id="services-heading">Serviços</h2>
-            <p className="section-description">Configure o que as pessoas podem solicitar e qual equipe atende.</p>
-          </div>
-        </div>
-        <AdminCreateForm action={createServiceAction} submitLabel="Criar serviço">
-          <label>Nome<input name="name" required /></label>
-          <label className="wide-field">Descrição<textarea name="description" required /></label>
-          <label>
-            Categoria
-            <select name="categoryId" required defaultValue="">
-              <option value="" disabled>Selecione</option>
-              {categories.filter((category) => category.isActive).map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Setor
-            <select name="sectorId" required defaultValue="">
-              <option value="" disabled>Selecione</option>
-              {sectors.filter((sector) => sector.isActive).map((sector) => (
-                <option key={sector.id} value={sector.id}>{sector.name}</option>
-              ))}
-            </select>
-          </label>
-        </AdminCreateForm>
-        <ul className="entity-list">
-          {services.map((service) => (
-            <AdminRecordEditor
-              key={service.id}
-              record={{
-                kind: "service",
-                id: service.id,
-                name: service.name,
-                description: service.description,
-                categoryId: service.categoryId,
-                sectorId: service.sectorId,
-                isActive: service.isActive,
-              }}
-              categories={categories}
-              sectors={sectors}
-              section={selectedSection}
-              toggleAction={toggleServiceAction}
-              updateAction={updateServiceAction}
-            >
-              <DocumentRequirementsEditor
-                createAction={createDocumentRequirementAction}
-                deactivateAction={deactivateDocumentRequirementAction}
-                maxActive={MAX_ACTIVE_DOCUMENT_REQUIREMENTS}
-                moveAction={moveDocumentRequirementAction}
-                requirements={documentRequirements
-                  .filter((requirement) => requirement.serviceId === service.id)
-                  .map((requirement) => ({
-                    id: requirement.id,
-                    name: requirement.name,
-                    isRequired: requirement.isRequired,
-                    acceptedFormats: requirement.acceptedFormats,
-                    isActive: requirement.isActive,
-                  }))}
-                serviceId={service.id}
-                updateAction={updateDocumentRequirementAction}
-              />
-            </AdminRecordEditor>
-          ))}
-        </ul>
-        </section>
+        <ServicesSection
+          categories={categories}
+          documentRequirements={documentRequirements}
+          section={selectedSection}
+          sectors={sectors}
+          services={services}
+        />
       ) : null}
         </div>
       ) : null}

@@ -59,3 +59,9 @@ Ver `SPEC/2026-10-29-relatorio-triagem.md`.
 > salve o relatório na pasta SPEC e faça o commit
 
 - Salvo em `SPEC/2026-10-30-camadas-para-100k.md`.
+
+> continue com a SF-041
+
+> continue com a SF-042
+
+- SF-041 (`658c7da`) e SF-042 concluídas.

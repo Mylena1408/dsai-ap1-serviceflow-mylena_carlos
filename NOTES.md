@@ -462,3 +462,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **API pública:** os schemas não foram exportados pelos `index.ts`, porque nenhuma tela os usa (SPEC 2026-10-27, seção 8).
 - **Testes alterados (só imports):** `tests/unit/shared/validation/schemas.test.ts`, `tests/unit/server/errors/errors.test.ts`, `tests/unit/modules/{auth/password,document-requirements/policy,users/validation}.test.ts`. Conferido por diff que nenhuma linha fora de import mudou.
 - **Resultados:** lint, typecheck e build OK; unitários 224/224; E2E 3/3; integração 103/104 (falha restante em `requests-transitions` pela diferença de relógio Node × PostgreSQL já registrada).
+
+## SF-042 — Área administrativa dividida por entidade (2026-10-30)
+
+- **Estrutura:** `src/app/(admin)/admin/` passou a ter `_shared/action-helpers.ts` (leitura do `FormData`, mensagens de erro, `revalidatePath`/`redirect`) e `_sections/` com `overview-section.tsx` e uma pasta por entidade (`sectors`, `categories`, `users`, `services`), cada uma com `actions.ts` (`"use server"`) e o componente da seção. Os documentos exigidos ficam em `services`, porque são editados dentro de cada serviço.
+- **Pastas privadas:** o prefixo `_` faz o App Router ignorar `_shared` e `_sections` como rotas; a URL continua sendo só `/admin`.
+- **Compatibilidade:** `admin/actions.ts` continua no mesmo caminho, como arquivo `"use server"` que reexporta as 16 actions e o tipo `AdminUpdateState`. A documentação instalada do Next 16 não trata reexportação em arquivos `"use server"`; o `next build` aceitou, e os testes unitários e de integração que importam desse caminho passaram sem alteração.
+- **Sem mudança de texto:** os blocos JSX e as funções foram recortados do original por script; uma verificação automática confirmou que todo texto e atributo de `page.tsx` e `actions.ts` originais existe nos arquivos novos. Os componentes de interface compartilhados (`create-form`, `record-editor`, `document-requirements-editor`) não mudaram.
+- **Tamanho:** `page.tsx` 356 → 160 linhas físicas; `actions.ts` 384 → 29.
+- **Testes:** nenhum teste alterado. Lint, typecheck e build OK; unitários 224/224; integração 104/104 (o teste sensível à diferença de relógio passou nesta execução; o defeito continua registrado); E2E 3/3.
