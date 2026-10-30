@@ -17,7 +17,7 @@ import {
   userUpdateInputSchema,
 } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
-import { hashPassword } from "@/modules/auth/password";
+import { hashPassword } from "@/modules/auth";
 import {
   assertAdministratorCanRetire,
   assertAttendantCanLeaveSector,

@@ -17,7 +17,7 @@ import {
   requestStatusTransitionInputSchema,
 } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
-import { assertServiceCanReceiveRequests } from "@/modules/services/policy";
+import { assertServiceCanReceiveRequests } from "@/modules/services";
 import {
   assertRequestStatusTransition,
   buildRequestSnapshot,

@@ -359,3 +359,12 @@
   2. a linha do usuário em edição passa a ser localizada também pelo campo `email` (no modo de edição o e-mail não aparece como texto);
   3. a mensagem "Registro criado." é procurada dentro do formulário de criação, porque a página passou a ter duas regiões `status` simultâneas (criação e edição).
 - **Linha de base verificada (código de `baseline-ap2`):** lint OK; typecheck OK; unitários 26 arquivos / 174 testes OK; integração 19 arquivos / 94 testes OK (inclui os testes da SF-029, pendentes desde 2026-10-06); E2E 1/1 OK após o ajuste acima; build OK.
+
+## SF-037 — Fronteiras entre módulos (2026-10-29)
+
+- **Regra:** `eslint.config.mjs` gera, para cada pasta de `src/modules/`, um bloco `no-restricted-imports` que proíbe `@/modules/*/**` (interno de qualquer módulo via alias) e, por `regex`, caminhos relativos que chegam a **outro** módulo (`^(\.\./)+(<outros módulos>)(/|$)`). Subir dentro do próprio módulo (`../domain/x`) continua permitido, o que é necessário para as camadas da SF-038. A lista de módulos é lida do disco, então módulos novos entram automaticamente.
+- **Fora dos módulos** (`src/app`, `src/server`, `src/shared`, `scripts`): `@/modules/*/**` proibido, com exceções transitórias para os imports internos já existentes: `services/catalog`, `auth/change-own-password`, `auth/components` e `attachments/policy`. Elas permanecem porque testes usam `vi.mock("@/modules/auth/change-own-password")` e porque `auth`/`attachments` só são migrados na SF-040; a SF-043 remove a lista.
+- **Detalhe da sintaxe:** os padrões seguem gitignore; para reincluir `auth/components/*` foi preciso reincluir também a pasta `auth/components`.
+- **Acoplamentos trocados:** `requests` → `@/modules/services` (que já exportava `assertServiceCanReceiveRequests`); `users` → `@/modules/auth`, com novo `src/modules/auth/index.ts` exportando `hashPassword` e `verifyPassword`.
+- **Verificação manual (CA-ARQ-04):** arquivos temporários com 3 imports proibidos (`@/modules/services/policy` e `../services/policy` em `requests`; `@/modules/requests/policy` em `src/app`) geraram 3 erros; os permitidos (`@/modules/services`, `./policy`, `../policy` em subpasta do próprio módulo, `@/modules/services/catalog` transitório) não geraram erro. Segunda rodada com `@/modules/auth/password` e `../users/policy`: 5 de 5 bloqueados. Arquivos removidos em seguida.
+- **Resultados:** lint, typecheck e build OK; unitários 174/174; integração 94/94; E2E 1/1. Nenhuma asserção ou mock de teste alterado. `package.json` e Prisma intocados.
