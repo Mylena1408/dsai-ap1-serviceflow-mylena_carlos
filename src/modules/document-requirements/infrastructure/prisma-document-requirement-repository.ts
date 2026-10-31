@@ -20,6 +20,13 @@ export function createPrismaDocumentRequirementRepository(
       });
       return rows.map(toDomain);
     },
+    async listActiveForService(serviceId) {
+      const rows = await database.serviceDocumentRequirement.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+      });
+      return rows.map(toDomain);
+    },
   };
 }
 

@@ -1,10 +1,21 @@
 import { z } from "zod";
 import { entityIdSchema, nonEmptyTextSchema } from "@/shared/validation";
 
+// The client only links each file to a requirement; name and bytes are inspected on the
+// server and every stored attachment field is derived there (SPEC 21.4 item 8).
+const attachmentUploadSchema = z
+  .object({
+    requirementId: entityIdSchema,
+    name: z.string(),
+    bytes: z.instanceof(Uint8Array),
+  })
+  .strict();
+
 export const requestCreationInputSchema = z
   .object({
     serviceId: entityIdSchema,
     description: nonEmptyTextSchema.max(10_000),
+    attachments: z.array(attachmentUploadSchema).optional(),
   })
   .strict();
 

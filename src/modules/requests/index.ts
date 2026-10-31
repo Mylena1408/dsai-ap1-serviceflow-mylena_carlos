@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
+import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/storage";
 import * as createRequestUseCase from "./application/create-request";
 import * as queries from "./application/request-queries";
 import * as transitionUseCase from "./application/transition-request-status";
@@ -23,6 +24,7 @@ export type RequestWithHistoryForRequester = RequestWithHistory;
 export async function createRequest(
   input: unknown,
   database: PrismaClient = prisma,
+  storage: DocumentStorage = getApplicationDocumentStorage(),
 ): Promise<CreatedRequest> {
   return createRequestUseCase.createRequest(
     input,
@@ -30,6 +32,7 @@ export async function createRequest(
       translate: ["P2003", "P2025"],
       fallbackMessage: "Request creation failed.",
     }),
+    storage,
   );
 }
 

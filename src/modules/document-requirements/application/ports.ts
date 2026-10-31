@@ -7,6 +7,8 @@ import type { OrderedRequirement } from "../domain/requirement-order";
 export interface DocumentRequirementRepository {
   /** All requirements grouped by service, active first, in display order. */
   listAll(): Promise<DocumentRequirementRecord[]>;
+  /** Active requirements of one service, in display order. */
+  listActiveForService(serviceId: string): Promise<DocumentRequirementRecord[]>;
 }
 
 /** Operations available inside a document requirement transaction. */

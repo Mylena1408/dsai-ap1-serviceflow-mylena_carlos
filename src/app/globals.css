@@ -870,6 +870,26 @@ p {
   justify-self: start;
 }
 
+.document-fields {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+}
+
+.document-fields p,
+.document-field p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.document-field {
+  display: grid;
+  gap: 4px;
+}
+
 .service-detail p {
   margin-bottom: 8px;
 }

@@ -5,6 +5,7 @@ import { InternalServerError } from "@/server/errors";
 // secret key is read from server environment variables and never reaches the client.
 
 export type DocumentStorageFailure =
+  | "NOT_CONFIGURED"
   | "INVALID_KEY"
   | "ALREADY_EXISTS"
   | "NOT_FOUND"
@@ -101,6 +102,43 @@ export function getDocumentStorageConfig(
   }
 
   return { url: parsedUrl.origin, bucket, secretKey };
+}
+
+// Without DOCUMENT_STORAGE_* every operation fails with a fixed error, so requests with
+// files are refused and nothing is kept in a process-local store. Services without
+// document requirements never touch the storage.
+export function createUnavailableDocumentStorage(): DocumentStorage {
+  const unavailable = async (): Promise<never> => {
+    throw new DocumentStorageError("NOT_CONFIGURED");
+  };
+
+  return { put: unavailable, get: unavailable, remove: unavailable };
+}
+
+/**
+ * Storage of the running application, from DOCUMENT_STORAGE_* (SPEC 21.15.7). The
+ * configuration is read on first use, so operations that store no files never depend on it.
+ */
+export function getApplicationDocumentStorage(
+  env: Record<string, string | undefined> = process.env,
+): DocumentStorage {
+  let resolved: DocumentStorage | undefined;
+  const storage = () => {
+    if (!resolved) {
+      const config = getDocumentStorageConfig("application", env);
+      resolved = config
+        ? createSupabaseDocumentStorage(config)
+        : createUnavailableDocumentStorage();
+    }
+
+    return resolved;
+  };
+
+  return {
+    put: (key, bytes, contentType) => storage().put(key, bytes, contentType),
+    get: (key) => storage().get(key),
+    remove: (key) => storage().remove(key),
+  };
 }
 
 export function createMemoryDocumentStorage(): DocumentStorage & { readonly size: number } {

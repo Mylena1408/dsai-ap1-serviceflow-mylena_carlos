@@ -1,4 +1,5 @@
 import type {
+  NewRequestAttachment,
   RequestQueryRepository,
   RequestTransaction,
   RequestTransactionRunner,
@@ -10,8 +11,10 @@ import type {
   RequestStatusEventRecord,
   RequestWithHistory,
 } from "@/modules/requests/domain/request";
+import type { ActiveDocumentRequirement } from "@/modules/requests/domain/attachment-requirements";
 
 export type StoredActor = TransactionActor & { name: string; email: string };
+export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
 type StoredEvent = Omit<RequestStatusEventRecord, "actor">;
 
 export interface InMemoryRequestStore {
@@ -21,6 +24,8 @@ export interface InMemoryRequestStore {
   services: ServiceForRequest[];
   requests: RequestRecord[];
   events: StoredEvent[];
+  requirements: StoredRequirement[];
+  attachments: NewRequestAttachment[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -28,7 +33,16 @@ export const serviceId = "11111111-1111-4111-8111-111111111111";
 export const requestId = "22222222-2222-4222-8222-222222222222";
 
 export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryRequestStore {
-  return { databaseTime: fixedNow, actors: [], services: [], requests: [], events: [], ...seed };
+  return {
+    databaseTime: fixedNow,
+    actors: [],
+    services: [],
+    requests: [],
+    events: [],
+    requirements: [],
+    attachments: [],
+    ...seed,
+  };
 }
 
 export function activeService(overrides: Partial<ServiceForRequest> = {}): ServiceForRequest {
@@ -113,8 +127,12 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     async findServiceForRequest(serviceId) {
       return store.services.find(({ id }) => id === serviceId) ?? null;
     },
-    async insertRequest({ openedAt, ...data }) {
-      const id = `request-${store.requests.length + 1}`;
+    async listActiveRequirements(serviceId) {
+      return store.requirements
+        .filter((requirement) => requirement.serviceId === serviceId && requirement.isActive)
+        .map(({ id, name, isRequired, acceptedFormats }) => ({ id, name, isRequired, acceptedFormats }));
+    },
+    async insertRequest({ openedAt, id, ...data }) {
       store.requests.push({
         ...data,
         id,
@@ -140,6 +158,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       request.updatedAt = update.updatedAt;
       if (update.completedAt) request.completedAt = update.completedAt;
       return 1;
+    },
+    async insertAttachments(attachments) {
+      store.attachments.push(...attachments);
     },
     async insertStatusEvent(event) {
       store.events.push({

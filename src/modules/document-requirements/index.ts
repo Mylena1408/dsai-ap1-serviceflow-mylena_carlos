@@ -24,6 +24,16 @@ export async function listDocumentRequirements(
   return useCases.listDocumentRequirements(createPrismaDocumentRequirementRepository(database));
 }
 
+export async function listPublishedServiceRequirements(
+  serviceId: unknown,
+  database: PrismaClient = prisma,
+): Promise<DocumentRequirementRecord[]> {
+  return useCases.listPublishedServiceRequirements(
+    serviceId,
+    createPrismaDocumentRequirementRepository(database),
+  );
+}
+
 export async function createDocumentRequirement(
   serviceId: unknown,
   input: unknown,

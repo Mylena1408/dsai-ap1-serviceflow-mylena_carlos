@@ -1,4 +1,7 @@
-import { requireConfigurationAdministrator } from "@/server/authorization";
+import {
+  requireConfigurationAdministrator,
+  requirePublishedCatalogReader,
+} from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
@@ -25,6 +28,18 @@ export async function listDocumentRequirements(
   await requireConfigurationAdministrator();
 
   return repository.listAll();
+}
+
+// What the requester sees before opening a request (SPEC 21.4 item 1). Callers load the
+// published service first; the opening itself reloads the requirements on the server.
+export async function listPublishedServiceRequirements(
+  serviceId: unknown,
+  repository: DocumentRequirementRepository,
+): Promise<DocumentRequirementRecord[]> {
+  await requirePublishedCatalogReader();
+  const id = validateInput(entityIdSchema, serviceId);
+
+  return repository.listActiveForService(id);
 }
 
 export async function createDocumentRequirement(

@@ -1,58 +1,216 @@
+import { randomUUID } from "node:crypto";
+import {
+  assertAttachmentBatchLimits,
+  buildAttachmentStorageKey,
+  inspectAttachment,
+  type InspectedAttachment,
+} from "@/modules/attachments";
 import { requireRequestCreator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { requestCreationInputSchema } from "./request-schemas";
+import { requestCreationInputSchema, type RequestCreationInput } from "./request-schemas";
 import { assertServiceCanReceiveRequests } from "@/modules/services";
+import {
+  assertFormatStillAccepted,
+  matchAttachmentsToRequirements,
+  type ActiveDocumentRequirement,
+} from "../domain/attachment-requirements";
 import type { RequestWithHistory } from "../domain/request";
 import { buildRequestSnapshot } from "../domain/snapshot";
-import type { RequestTransactionRunner } from "./ports";
+import type {
+  AttachmentStorage,
+  RequestTransaction,
+  RequestTransactionRunner,
+  ServiceForRequest,
+} from "./ports";
 
+/** A validated file with its server-generated identifiers, ready to be stored. */
+interface PreparedAttachment extends InspectedAttachment {
+  id: string;
+  requirementId: string;
+  storageKey: string;
+  bytes: Uint8Array;
+}
+
+// Storage used when a request carries no files: nothing is ever written.
+const noStorage: AttachmentStorage = {
+  async put() {
+    throw new Error("Attachment storage was not provided.");
+  },
+  async remove() {},
+};
+
+/**
+ * Opens a request, with the files required by the service when it has active document
+ * requirements (SPEC 2026-09-30, sections 21.4 and 21.15.4). Objects are written before
+ * the transaction and removed again if it fails, so no attachment row ever points to a
+ * missing object.
+ */
 export async function createRequest(
   input: unknown,
   transactions: RequestTransactionRunner,
+  storage: AttachmentStorage = noStorage,
 ): Promise<RequestWithHistory> {
   const actor = await requireRequestCreator();
   const parsed = validateInput(requestCreationInputSchema, input);
+  const uploads = parsed.attachments ?? [];
+  const requestId = randomUUID();
 
-  return transactions.run(async (transaction) => {
-    const currentActor = await transaction.findActor(actor.id);
+  if (uploads.length === 0) {
+    return transactions.run((transaction) =>
+      openRequest(transaction, actor.id, parsed, requestId, []),
+    );
+  }
 
-    if (
-      !currentActor ||
-      !currentActor.isActive ||
-      currentActor.role !== "REQUESTER"
-    ) {
-      throw new NotFoundError();
-    }
+  assertAttachmentBatchLimits(uploads.map(({ bytes }) => ({ size: bytes.length })));
 
-    const service = await transaction.findServiceForRequest(parsed.serviceId);
-
-    if (!service) {
-      throw new NotFoundError();
-    }
-
-    assertServiceCanReceiveRequests({
-      isActive: service.isActive,
-      categoryActive: service.category.isActive,
-      sectorActive: service.sector.isActive,
-    });
-
-    const openedAt = await transaction.currentTime();
-    const created = await transaction.insertRequest({
-      ...buildRequestSnapshot(currentActor.id, service),
-      description: parsed.description,
-      status: "OPEN",
-      openedAt,
-    });
-
-    await transaction.insertStatusEvent({
-      requestId: created.id,
-      actorId: currentActor.id,
-      fromStatus: null,
-      toStatus: "OPEN",
-      occurredAt: openedAt,
-    });
-
-    return transaction.getWithHistory(created.id);
+  const requirements = await transactions.run(async (transaction) => {
+    const { service } = await loadOpeningContext(transaction, actor.id, parsed.serviceId);
+    return transaction.listActiveRequirements(service.id);
   });
+  const prepared = matchAttachmentsToRequirements(requirements, uploads).map(
+    ({ attachment, requirement }): PreparedAttachment => {
+      const id = randomUUID();
+
+      return {
+        ...inspectAttachment(attachment, requirement.acceptedFormats),
+        id,
+        requirementId: requirement.id,
+        storageKey: buildAttachmentStorageKey(requestId, id),
+        bytes: attachment.bytes,
+      };
+    },
+  );
+
+  const written: string[] = [];
+
+  try {
+    for (const attachment of prepared) {
+      await storage.put(attachment.storageKey, attachment.bytes, attachment.contentType);
+      written.push(attachment.storageKey);
+    }
+
+    return await transactions.run((transaction) =>
+      openRequest(transaction, actor.id, parsed, requestId, prepared),
+    );
+  } catch (error) {
+    await removeWrittenObjects(storage, written);
+    throw error;
+  }
+}
+
+async function loadOpeningContext(
+  transaction: RequestTransaction,
+  actorId: string,
+  serviceId: string,
+): Promise<{ actorId: string; service: ServiceForRequest }> {
+  const currentActor = await transaction.findActor(actorId);
+
+  if (
+    !currentActor ||
+    !currentActor.isActive ||
+    currentActor.role !== "REQUESTER"
+  ) {
+    throw new NotFoundError();
+  }
+
+  const service = await transaction.findServiceForRequest(serviceId);
+
+  if (!service) {
+    throw new NotFoundError();
+  }
+
+  assertServiceCanReceiveRequests({
+    isActive: service.isActive,
+    categoryActive: service.category.isActive,
+    sectorActive: service.sector.isActive,
+  });
+
+  return { actorId: currentActor.id, service };
+}
+
+async function openRequest(
+  transaction: RequestTransaction,
+  actorId: string,
+  parsed: RequestCreationInput,
+  requestId: string,
+  prepared: readonly PreparedAttachment[],
+): Promise<RequestWithHistory> {
+  const context = await loadOpeningContext(transaction, actorId, parsed.serviceId);
+
+  // The configuration in force when the transaction runs prevails (SPEC 21.4 item 5).
+  const requirements: ActiveDocumentRequirement[] = await transaction.listActiveRequirements(
+    context.service.id,
+  );
+  const matches = matchAttachmentsToRequirements(requirements, prepared);
+
+  for (const { attachment, requirement } of matches) {
+    assertFormatStillAccepted(requirement, attachment.detectedFormat);
+  }
+
+  const openedAt = await transaction.currentTime();
+  const created = await transaction.insertRequest({
+    ...buildRequestSnapshot(context.actorId, context.service),
+    id: requestId,
+    description: parsed.description,
+    status: "OPEN",
+    openedAt,
+  });
+
+  await transaction.insertStatusEvent({
+    requestId: created.id,
+    actorId: context.actorId,
+    fromStatus: null,
+    toStatus: "OPEN",
+    occurredAt: openedAt,
+  });
+
+  if (matches.length > 0) {
+    await transaction.insertAttachments(
+      matches.map(({ attachment, requirement }) => ({
+        id: attachment.id,
+        requestId: created.id,
+        requirementId: requirement.id,
+        requirementNameSnapshot: requirement.name,
+        requirementRequiredSnapshot: requirement.isRequired,
+        originalFilename: attachment.originalFilename,
+        detectedFormat: attachment.detectedFormat,
+        contentType: attachment.contentType,
+        sizeBytes: attachment.sizeBytes,
+        sha256: attachment.sha256,
+        storageKey: attachment.storageKey,
+        uploadedById: context.actorId,
+        createdAt: openedAt,
+      })),
+    );
+  }
+
+  return transaction.getWithHistory(created.id);
+}
+
+// Compensation (SPEC 21.15.5). A failed removal leaves an object that no route can read,
+// because downloads only follow attachment rows. The log carries only a correlation id,
+// the object count and the error code: never keys, file names or content.
+async function removeWrittenObjects(storage: AttachmentStorage, keys: readonly string[]) {
+  const failures: string[] = [];
+
+  for (const key of keys) {
+    try {
+      await storage.remove(key);
+    } catch (error) {
+      failures.push(
+        typeof error === "object" && error !== null && "reason" in error
+          ? String(error.reason)
+          : "UNKNOWN",
+      );
+    }
+  }
+
+  if (failures.length > 0) {
+    console.error("Attachment compensation failed.", {
+      correlationId: randomUUID(),
+      objects: failures.length,
+      reason: failures[0],
+    });
+  }
 }

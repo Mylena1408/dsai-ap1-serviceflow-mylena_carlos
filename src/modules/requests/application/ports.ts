@@ -1,3 +1,5 @@
+import type { DetectedDocumentFormat } from "@/modules/attachments";
+import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
 
@@ -43,6 +45,29 @@ export interface StatusUpdate {
   completedAt?: Date;
 }
 
+/** Attachment row; every field is derived on the server (SPEC 21.4 item 8, 21.9). */
+export interface NewRequestAttachment {
+  id: string;
+  requestId: string;
+  requirementId: string;
+  requirementNameSnapshot: string;
+  requirementRequiredSnapshot: boolean;
+  originalFilename: string;
+  detectedFormat: DetectedDocumentFormat;
+  contentType: string;
+  sizeBytes: number;
+  sha256: string;
+  storageKey: string;
+  uploadedById: string;
+  createdAt: Date;
+}
+
+/** Private object storage for attachment content (SPEC 21.8). */
+export interface AttachmentStorage {
+  put(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
+  remove(key: string): Promise<void>;
+}
+
 /** Operations available inside a request transaction. */
 export interface RequestTransaction {
   /**
@@ -52,9 +77,17 @@ export interface RequestTransaction {
   currentTime(): Promise<Date>;
   findActor(actorId: string): Promise<TransactionActor | null>;
   findServiceForRequest(serviceId: string): Promise<ServiceForRequest | null>;
+  /** Active document requirements of the service, in display order. */
+  listActiveRequirements(serviceId: string): Promise<ActiveDocumentRequirement[]>;
   insertRequest(
-    data: RequestSnapshot & { description: string; status: RequestStatus; openedAt: Date },
+    data: RequestSnapshot & {
+      id: string;
+      description: string;
+      status: RequestStatus;
+      openedAt: Date;
+    },
   ): Promise<{ id: string }>;
+  insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;
   findRequestState(requestId: string): Promise<{ status: RequestStatus; sectorId: string } | null>;
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;

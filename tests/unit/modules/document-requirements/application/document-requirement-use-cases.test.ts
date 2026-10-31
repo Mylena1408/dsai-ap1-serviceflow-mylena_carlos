@@ -7,13 +7,17 @@ import type {
 import type { DocumentRequirementRecord } from "@/modules/document-requirements/domain/document-requirement";
 import { createRollbackRunner, nextTestId, testNow } from "../../../support/in-memory-transaction";
 
-const authorization = vi.hoisted(() => ({ requireConfigurationAdministrator: vi.fn() }));
+const authorization = vi.hoisted(() => ({
+  requireConfigurationAdministrator: vi.fn(),
+  requirePublishedCatalogReader: vi.fn(),
+}));
 vi.mock("@/server/authorization", () => authorization);
 
 import {
   createDocumentRequirement,
   deactivateDocumentRequirement,
   listDocumentRequirements,
+  listPublishedServiceRequirements,
   moveDocumentRequirement,
   updateDocumentRequirement,
 } from "@/modules/document-requirements/application/document-requirement-use-cases";
@@ -69,6 +73,11 @@ function repository(store: Store): DocumentRequirementRepository {
   return {
     async listAll() {
       return [...store.requirements].sort((a, b) => a.position - b.position);
+    },
+    async listActiveForService(id) {
+      return store.requirements
+        .filter((item) => item.serviceId === id && item.isActive)
+        .sort((a, b) => a.position - b.position);
     },
   };
 }
@@ -150,6 +159,33 @@ describe("document requirement use cases", () => {
     ).rejects.toBeInstanceOf(ConflictError);
     await expect(moveDocumentRequirement(requirement.id, "down", runner(store))).rejects.toBeInstanceOf(
       ConflictError,
+    );
+  });
+
+  it("shows requesters only the active requirements of the requested service", async () => {
+    const otherServiceId = nextTestId();
+    const store: Store = { serviceIds: [serviceId, otherServiceId], requirements: [] };
+    const [first, second] = await seedRequirements(store, ["ID card", "Proof of address"]);
+    await createDocumentRequirement(otherServiceId, input("Other service file"), runner(store));
+    await deactivateDocumentRequirement(first.id, runner(store));
+    authorization.requirePublishedCatalogReader.mockResolvedValue({ id: "requester" });
+
+    const listed = await listPublishedServiceRequirements(serviceId, repository(store));
+
+    expect(listed.map(({ id }) => id)).toEqual([second.id]);
+    expect(authorization.requirePublishedCatalogReader).toHaveBeenCalledOnce();
+  });
+
+  it("checks the requester before listing and rejects malformed service ids", async () => {
+    const store: Store = { serviceIds: [serviceId], requirements: [] };
+    authorization.requirePublishedCatalogReader.mockRejectedValueOnce(new NotFoundError());
+    await expect(listPublishedServiceRequirements(serviceId, repository(store))).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
+
+    authorization.requirePublishedCatalogReader.mockResolvedValue({ id: "requester" });
+    await expect(listPublishedServiceRequirements("not-an-id", repository(store))).rejects.toBeInstanceOf(
+      ValidationError,
     );
   });
 });

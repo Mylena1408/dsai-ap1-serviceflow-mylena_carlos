@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, ValidationError } from "@/server/errors";
+import { DocumentStorageError } from "@/server/storage";
 
 const requests = vi.hoisted(() => ({
   createRequest: vi.fn(),
@@ -47,6 +48,7 @@ describe("requester Server Actions", () => {
     expect(requests.createRequest).toHaveBeenCalledWith({
       serviceId: "service-id",
       description: "Please help",
+      attachments: [],
     });
     expect(nextCache.revalidatePath).toHaveBeenCalledWith("/catalog");
     expect(nextCache.revalidatePath).toHaveBeenCalledWith("/requests");
@@ -76,5 +78,45 @@ describe("requester Server Actions", () => {
     expect(nextNavigation.redirect).not.toHaveBeenCalledWith(
       expect.stringContaining("sensitive database detail"),
     );
+  });
+
+  it("passes each selected file with its requirement and skips inputs left empty", async () => {
+    const data = formData({ serviceId: "service-id", description: "Please help" });
+    data.set("attachment:requirement-a", new File(["%PDF-1.4"], "form.pdf", { type: "application/pdf" }));
+    data.set("attachment:requirement-b", new File([], ""));
+    data.set("attachment:requirement-c", new File([], "empty.txt"));
+    data.set("attachmentKey", new File(["x"], "ignored.txt"));
+
+    await expect(createRequestAction(data)).rejects.toThrow(
+      "REDIRECT:/requests/request-id?notice=created",
+    );
+
+    expect(requests.createRequest).toHaveBeenCalledWith({
+      serviceId: "service-id",
+      description: "Please help",
+      attachments: [
+        {
+          requirementId: "requirement-a",
+          name: "form.pdf",
+          bytes: new Uint8Array(new TextEncoder().encode("%PDF-1.4")),
+        },
+        { requirementId: "requirement-c", name: "empty.txt", bytes: new Uint8Array() },
+      ],
+    });
+  });
+
+  it("maps document rejections and storage failures to their own feedback", async () => {
+    requests.createRequest.mockRejectedValueOnce(
+      new ValidationError([{ path: ["attachments"], code: "too_small" }]),
+    );
+    await expect(
+      createRequestAction(formData({ serviceId: "service-id", description: "Please help" })),
+    ).rejects.toThrow("REDIRECT:/catalog/service-id?error=attachments");
+
+    requests.createRequest.mockRejectedValueOnce(new DocumentStorageError("NOT_CONFIGURED"));
+    await expect(
+      createRequestAction(formData({ serviceId: "service-id", description: "Please help" })),
+    ).rejects.toThrow("REDIRECT:/catalog/service-id?error=documents-unavailable");
+    expect(nextCache.revalidatePath).not.toHaveBeenCalled();
   });
 });

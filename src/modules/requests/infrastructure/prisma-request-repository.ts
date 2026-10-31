@@ -91,11 +91,21 @@ function createPrismaRequestTransaction(
         },
       });
     },
+    listActiveRequirements(serviceId) {
+      return transaction.serviceDocumentRequirement.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: { id: true, name: true, isRequired: true, acceptedFormats: true },
+      });
+    },
     insertRequest({ openedAt, ...data }) {
       return transaction.request.create({
         data: { ...data, createdAt: openedAt, updatedAt: openedAt },
         select: { id: true },
       });
+    },
+    async insertAttachments(attachments) {
+      await transaction.requestAttachment.createMany({ data: attachments });
     },
     findRequestState(requestId) {
       return transaction.request.findUnique({
