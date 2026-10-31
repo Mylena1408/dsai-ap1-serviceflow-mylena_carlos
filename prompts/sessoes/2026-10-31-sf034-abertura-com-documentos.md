@@ -59,3 +59,9 @@ Resposta sem alteração de código: o SQLite não resolve na Vercel (disco temp
 2. Consulta à documentação do Supabase (API de buckets e envio da chave secreta).
 3. Script de provisionamento, testes com Supabase simulado e teste de integração do bucket real (pulado sem credenciais).
 4. Todas as suítes, registros e `MUDANCAS_NO_PROJETO_DIA/2026-10-31_mudancas.txt`. Resultado: `NOTES.md`, seção SF-030 (2026-10-31).
+
+## Continuação — SPEC de atribuição
+
+> podemos prosseuir construindo outro ponto de função que não se envolva com a questão do banco de dados?
+
+Escolha da responsável: atribuição (passo 3 do plano). SPEC escrita como proposta e aprovada com D1 a D5 conforme propostos; tarefas SF-047 a SF-052 registradas.

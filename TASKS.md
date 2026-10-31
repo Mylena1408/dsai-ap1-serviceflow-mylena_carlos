@@ -491,3 +491,66 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Testes relacionados:** Unitários dos casos de uso, `requests-transitions`, `requests-create` e novo teste com relógio da aplicação deslocado.
 - **SPEC:** Seção 23 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
 
+## Atribuição, cancelamento e reabertura — SPEC de 2026-10-31
+
+**Ordem:** SF-047 → SF-048 → SF-049 → SF-050 → SF-051 → SF-052.
+
+### SF-047 — Migration aditiva e regras de domínio da atribuição
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration somente aditiva (seção 6: `CANCELLED`, `assigneeId`, `cancelledAt`, `note`, `RequestAssignmentEvent`, `CHECK`s e índices) e regras puras de domínio: tabela de transições 5.6, responsável efetivo, permissões de assumir, liberar, transferir, cancelar e reabrir, prazo de 7 dias.
+- **Arquivos/módulos esperados:** `prisma/schema.prisma`, `prisma/migrations/`, `src/modules/requests/domain/`, `tests/unit/`, `tests/integration/`.
+- **Dependências:** SF-046.
+- **Critérios de conclusão:** CA-ATR-08 (domínio) e CA-ATR-13.
+- **Testes relacionados:** Unitários das regras nas bordas; integração da migration sobre dados existentes e dos `CHECK`s.
+- **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
+
+### SF-048 — Assumir, liberar e transferir
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso, repositório com atualização condicional (estado + responsável), eventos de atribuição e telas do atendente (fila com responsável; detalhe com Assumir, Liberar e Transferir).
+- **Arquivos/módulos esperados:** `src/modules/requests/{application,infrastructure}`, `src/app/(attendant)/queue/`, testes.
+- **Dependências:** SF-047.
+- **Critérios de conclusão:** CA-ATR-01 a CA-ATR-04, CA-ATR-11 e a parte de atribuição de CA-ATR-10 e CA-ATR-14.
+- **Testes relacionados:** Unitários dos casos de uso; integração com persistência, rejeições, concorrência e matriz de autorização.
+- **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
+
+### SF-049 — Responsável nas transições de status
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Regra 5.3: com responsável efetivo, só ele inicia e conclui; sem responsável, comportamento atual inalterado.
+- **Arquivos/módulos esperados:** `src/modules/requests/application/transition-request-status.ts`, repositório, testes.
+- **Dependências:** SF-048.
+- **Critérios de conclusão:** CA-ATR-05.
+- **Testes relacionados:** Testes existentes de transição sem alteração de asserções; novos casos com responsável efetivo e não efetivo.
+- **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
+
+### SF-050 — Cancelamento
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Cancelamento pelo solicitante (só `OPEN`, justificativa opcional) e pelo atendente do setor (`OPEN`/`IN_PROGRESS`, justificativa obrigatória); `cancelledAt` e evento com `note`; rótulo "Cancelada" nas telas.
+- **Arquivos/módulos esperados:** `src/modules/requests/`, telas do solicitante e do atendente, testes.
+- **Dependências:** SF-049.
+- **Critérios de conclusão:** CA-ATR-06, CA-ATR-07, CA-ATR-08 e a parte de cancelamento de CA-ATR-10 e CA-ATR-14.
+- **Testes relacionados:** Unitários e integração por perfil e estado; rejeições sem gravação.
+- **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
+
+### SF-051 — Reabertura
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Reabertura pelo solicitante de `COMPLETED` em até 7 dias (relógio do banco), com justificativa; volta a `OPEN`, `completedAt` nulo, responsável mantido.
+- **Arquivos/módulos esperados:** `src/modules/requests/`, detalhe do solicitante, testes.
+- **Dependências:** SF-050.
+- **Critérios de conclusão:** CA-ATR-09 e a parte de reabertura de CA-ATR-10 e CA-ATR-14.
+- **Testes relacionados:** Unitários do prazo nas bordas; integração com horário do banco simulado; rejeições.
+- **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
+
+### SF-052 — Linha do tempo, E2E e revisão
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Linha do tempo única (status, atribuições e justificativas) nos dois detalhes; E2E da seção 9 da SPEC; revisão de escopo, segurança e documentação.
+- **Arquivos/módulos esperados:** Telas de detalhe, `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-051.
+- **Critérios de conclusão:** CA-ATR-12 e todos os CA-ATR-01 a 14 registrados.
+- **Testes relacionados:** E2E do percurso; todas as suítes, lint, typecheck e build.
+- **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
