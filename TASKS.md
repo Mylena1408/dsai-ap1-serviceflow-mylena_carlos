@@ -561,7 +561,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-053 — Migration e domínio dos comentários
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Migration `20261031200000_request_comments` (tabela, índice, FKs `RESTRICT` e `CHECK` do texto) e regras puras em `src/modules/comments/domain/comment-policy.ts`. `body` acrescentado aos caminhos públicos de validação. CA-COM-09 verificado.
 - **Objetivo:** Migration aditiva (`RequestComment` com `CHECK` do texto e índice) e regras puras: quem lê, quem escreve, estados aceitos (C1), nota interna (C3), normalização do texto.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/comments/domain/`, testes.
 - **Dependências:** SF-052.

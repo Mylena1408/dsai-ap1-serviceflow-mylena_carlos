@@ -8,6 +8,7 @@ export const prisma = new PrismaClient({
 export async function resetTestFixtures(): Promise<void> {
   await prisma.$transaction([
     prisma.requestAttachment.deleteMany(),
+    prisma.requestComment.deleteMany(),
     prisma.requestAssignmentEvent.deleteMany(),
     prisma.requestStatusEvent.deleteMany(),
     prisma.request.deleteMany(),

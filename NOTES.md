@@ -697,3 +697,16 @@ Padrão a replicar nas SF-039 e SF-040:
 - **SPEC `2026-10-31-atribuicao-cancelamento-reabertura.md` concluída:** CA-ATR-01 a 14 verificados.
 - **Resultados:** lint, typecheck e build OK; unitários 315/315 (52 arquivos); integração 142/142 + 1 pulado (30 arquivos); E2E 5/5.
 - **Não publicado:** o site na Vercel continua na versão anterior à atribuição. O banco do Neon já tem as migrations.
+
+## SF-053 — Migration e domínio dos comentários (2026-10-31)
+
+- **Migration `20261031200000_request_comments`:** tabela `RequestComment` (`body`, `isInternal` com padrão falso, `createdAt`), índice `(requestId, createdAt)`, FKs `RESTRICT` e `CHECK` que exige texto sem espaços periféricos e com 1 a 5.000 caracteres.
+- **Falha durante o trabalho:** a primeira edição do schema não encontrou o texto esperado, porque o `prisma format` da SF-047 tinha realinhado as colunas. O comando seguiu e criou uma migration só com o `CHECK`, que foi apagada antes de qualquer uso. A edição foi refeita com expressão regular.
+- **Domínio (`src/modules/comments/domain/comment-policy.ts`):**
+  - quem participa: o solicitante dono ou um atendente ativo do setor atual; os demais recebem "não encontrado";
+  - notas internas só para atendentes (C3);
+  - comentários aceitos em aberta, em atendimento e concluída, e cancelada só para leitura (C1);
+  - texto de 1 a 5.000 caracteres.
+- `body` foi acrescentado a `PUBLIC_VALIDATION_PATHS`, para a tela mostrar a mensagem certa. É a mesma lição da SF-050.
+- **Testes:** 5 unitários e 2 de integração; limpeza de `fixtures.ts` e `prepare-e2e.ts` com a tabela nova.
+- **Resultados:** lint e typecheck OK; integração 144/144 + 1 pulado.

@@ -67,6 +67,7 @@ model User {
   assignmentEventsActed RequestAssignmentEvent[] @relation("RequestAssignmentEventActor")
   assignmentEventsFrom  RequestAssignmentEvent[] @relation("RequestAssignmentEventFrom")
   assignmentEventsTo    RequestAssignmentEvent[] @relation("RequestAssignmentEventTo")
+  comments              RequestComment[]         @relation("RequestCommentAuthor")
 }
 
 model Service {
@@ -110,6 +111,7 @@ model Request {
   events           RequestStatusEvent[]
   attachments      RequestAttachment[]
   assignmentEvents RequestAssignmentEvent[]
+  comments         RequestComment[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -187,4 +189,18 @@ model RequestAttachment {
   @@unique([requestId, requirementId])
   @@index([requirementId])
   @@index([uploadedById])
+}
+
+model RequestComment {
+  id         String   @id @default(uuid()) @db.Uuid
+  requestId  String   @db.Uuid
+  authorId   String   @db.Uuid
+  body       String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now()) @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  author  User    @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId, createdAt])
 }

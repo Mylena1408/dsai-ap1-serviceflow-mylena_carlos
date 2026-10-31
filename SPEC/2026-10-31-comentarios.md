@@ -79,7 +79,7 @@ Novo módulo `src/modules/comments` com `domain` (regras 5.1 a 5.4), `applicatio
 - [ ] **CA-COM-06** — Administrador, outro solicitante, atendente de outro setor, inativo e não autenticado não leem nem escrevem, sem revelar a solicitação.
 - [ ] **CA-COM-07** — Campos forjados (autor, horário, `isInternal` vindo do solicitante, outro `requestId` no corpo) são rejeitados ou ignorados conforme a regra 5.3.
 - [ ] **CA-COM-08** — Texto com HTML ou script aparece como texto, sem ser interpretado.
-- [ ] **CA-COM-09** — Migration aditiva; todas as suítes anteriores passam sem alteração de asserções.
+- [x] **CA-COM-09** — Migration aditiva; todas as suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-053): migration aditiva aplicada no banco de teste com dados existentes; `request-comment-schema.test.ts`; suítes anteriores sem alteração de asserções.*
 
 ## 9. Estratégia de testes
 

@@ -59,6 +59,7 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "isRequired",
   "acceptedFormats",
   "note",
+  "body",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

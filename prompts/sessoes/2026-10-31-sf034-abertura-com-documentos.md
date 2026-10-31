@@ -101,3 +101,5 @@ SF-052 concluída (ver `NOTES.md`, seção SF-052).
 > faça todas as etapas previstas
 
 Push e publicação da atribuição; complemento do resumo do dia; relatório da fase 1; SPEC de comentários escrita como proposta e aprovada (C1 a C3).
+
+SF-053 concluída (ver `NOTES.md`, seção SF-053).
