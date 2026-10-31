@@ -890,6 +890,10 @@ p {
   gap: 4px;
 }
 
+.history-note {
+  font-style: italic;
+}
+
 .lifecycle-form summary {
   cursor: pointer;
   font-weight: 600;

@@ -547,7 +547,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-052 — Linha do tempo, E2E e revisão
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Histórico único (`src/app/_components/request-timeline.tsx`) com status, atribuições e justificativas nos dois detalhes; E2E `tests/e2e/request-assignment.spec.ts` com o percurso da seção 9; README atualizado; revisão de escopo, segredos e logs. CA-ATR-01 a 14 verificados: SPEC concluída.
 - **Objetivo:** Linha do tempo única (status, atribuições e justificativas) nos dois detalhes; E2E da seção 9 da SPEC; revisão de escopo, segurança e documentação.
 - **Arquivos/módulos esperados:** Telas de detalhe, `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-051.

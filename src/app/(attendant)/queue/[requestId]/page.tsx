@@ -13,6 +13,7 @@ import { completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
+import { RequestTimeline } from "@/app/_components/request-timeline";
 
 type QueueRequestPageProps = {
   params: Promise<{ requestId: string }>;
@@ -109,25 +110,7 @@ export default async function QueueRequestPage({
         </form>
       ) : null}
       <RequestAttachments requestId={request.id} attachments={attachments} />
-      <section className="surface-card content-section" aria-labelledby="history-heading">
-        <p className="eyebrow">Rastreabilidade</p>
-        <h2 id="history-heading">Histórico</h2>
-        <ol className="history-list">
-          {request.events.map((event) => (
-            <li key={event.id}>
-              <p>
-                {event.fromStatus
-                  ? `${statusLabels[event.fromStatus]} → ${statusLabels[event.toStatus]}`
-                  : `Solicitação aberta: ${statusLabels[event.toStatus]}`}
-              </p>
-              <p>Atendente: {event.actor.name}</p>
-              <time dateTime={event.occurredAt.toISOString()}>
-                {event.occurredAt.toLocaleString("pt-BR")}
-              </time>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
     </main>
   );
 }

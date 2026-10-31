@@ -25,6 +25,14 @@ const requestWithHistory = {
   assignee: {
     select: { id: true, name: true, role: true, isActive: true, sectorId: true },
   },
+  assignmentEvents: {
+    orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+    include: {
+      actor: { select: { id: true, name: true } },
+      fromAssignee: { select: { id: true, name: true } },
+      toAssignee: { select: { id: true, name: true } },
+    },
+  },
 } satisfies Prisma.RequestInclude;
 
 const lifecycleUser = { id: true, role: true, isActive: true, sectorId: true } as const;

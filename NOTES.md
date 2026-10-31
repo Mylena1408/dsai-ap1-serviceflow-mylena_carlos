@@ -680,3 +680,20 @@ Padrão a replicar nas SF-039 e SF-040:
   - a mensagem de erro de estado passou a citar também o prazo encerrado.
 - **Testes:** 6 unitários do caso de uso, 1 da ação e 3 de integração. O teste de integração grava `completedAt = now() - intervalo` direto no banco, para medir as bordas com o mesmo relógio do servidor.
 - **Resultados:** lint, typecheck e build OK; unitários 313/313 (51 arquivos); integração 142/142 + 1 pulado (30 arquivos); E2E 4/4.
+
+## SF-052 — Histórico, E2E e revisão da atribuição (2026-10-31)
+
+- **Histórico único:** `RequestWithHistory` passou a trazer `assignmentEvents`, com nomes do ator, de origem e de destino. `src/app/_components/request-timeline.tsx` junta eventos de status e de atribuição em ordem cronológica; em caso de empate, o de status vem antes. Os textos de status são os mesmos de antes ("Solicitação aberta: Aberta", "Em atendimento → Concluída", verificados pelo E2E antigo). Atribuições aparecem como "Assumida por", "Transferida de … para …" e "Liberada por". As justificativas aparecem como "Justificativa: …".
+- **Rótulo do autor:** na tela do atendente, o autor do evento era "Atendente:". Passou a "Responsável pelo evento:", igual à tela do solicitante, porque o solicitante agora também gera eventos visíveis ao atendente (cancelar e reabrir).
+- **E2E (`request-assignment.spec.ts`):**
+  - o administrador cria um segundo atendente no "Setor de demonstração";
+  - o solicitante abre duas solicitações e cancela uma, com motivo;
+  - o atendente de demonstração assume e transfere, e depois disso não vê mais "Iniciar atendimento"; a cancelada não oferece "Assumir";
+  - o colega inicia e conclui;
+  - o solicitante vê o responsável, reabre com justificativa e confere as 6 primeiras linhas do histórico em ordem;
+  - a solicitação reaberta volta à fila do colega com "Responsável: você".
+  - Passou na primeira execução.
+- **Revisão:** sem segredos nos arquivos versionados (a senha do Neon não aparece em nenhum arquivo); nenhum log novo; nenhuma dependência nova; migrations só aditivas. Os testes antigos de transição e de abertura não foram alterados. README com os novos fluxos.
+- **SPEC `2026-10-31-atribuicao-cancelamento-reabertura.md` concluída:** CA-ATR-01 a 14 verificados.
+- **Resultados:** lint, typecheck e build OK; unitários 315/315 (52 arquivos); integração 142/142 + 1 pulado (30 arquivos); E2E 5/5.
+- **Não publicado:** o site na Vercel continua na versão anterior à atribuição. O banco do Neon já tem as migrations.

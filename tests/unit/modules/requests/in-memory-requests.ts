@@ -87,6 +87,11 @@ function lifecycleUser(store: InMemoryRequestStore, userId: string | null) {
   return user ? { id: user.id, role: user.role, isActive: user.isActive, sectorId: user.sectorId } : null;
 }
 
+function nameOf(store: InMemoryRequestStore, userId: string | null) {
+  const user = store.actors.find(({ id }) => id === userId);
+  return user ? { id: user.id, name: user.name } : null;
+}
+
 function assigneeOf(store: InMemoryRequestStore, userId: string | null) {
   const user = store.actors.find(({ id }) => id === userId);
   return user
@@ -108,6 +113,15 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
       }),
     service: { id: request.serviceId, isActive: service?.isActive ?? false },
     assignee: assigneeOf(store, request.assigneeId),
+    assignmentEvents: store.assignmentEvents
+      .filter(({ requestId }) => requestId === request.id)
+      .map((event, index) => ({
+        ...event,
+        id: `assignment-${index + 1}`,
+        actor: nameOf(store, event.actorId)!,
+        fromAssignee: nameOf(store, event.fromAssigneeId),
+        toAssignee: nameOf(store, event.toAssigneeId),
+      })),
   };
 }
 

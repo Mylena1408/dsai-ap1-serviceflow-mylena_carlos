@@ -121,7 +121,10 @@ A política operacional de backup e recuperação do PostgreSQL ainda precisa se
 - Administradores autenticados configuram usuários, setores, categorias e serviços em `/admin`.
 - Administradores, solicitantes e atendentes autenticados podem alterar somente a própria senha em `/account/password`.
 - Solicitantes autenticados consultam o catálogo publicado em `/catalog`, abrem solicitações a partir do detalhe do serviço e acompanham somente suas próprias solicitações em `/requests`.
-- Atendentes autenticados consultam a fila do setor em `/queue` e iniciam/concluem solicitações permitidas. O setor da fila é o snapshot registrado na abertura; não há atribuição individual.
+- Atendentes autenticados consultam a fila do setor em `/queue` e iniciam/concluem solicitações permitidas. O setor da fila é o snapshot registrado na abertura.
+- Atribuição (`SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`): um atendente **assume** uma solicitação do seu setor e pode **liberá-la** ou **transferi-la** a um colega ativo do mesmo setor. Com responsável, só ele inicia e conclui; sem responsável, qualquer atendente do setor.
+- Cancelamento e reabertura: o solicitante cancela a própria solicitação enquanto está aberta (motivo opcional); o atendente do setor cancela aberta ou em atendimento, com justificativa obrigatória. Cancelada é definitiva. O solicitante reabre uma solicitação concluída em até 7 dias, com justificativa, e ela volta para o mesmo responsável.
+- O histórico de cada solicitação mostra, em ordem, mudanças de status, atribuições e justificativas.
 - A rota inicial encaminha a sessão autenticada à interface do perfil obtido do servidor; o cliente não escolhe papel.
 - A abertura valida no servidor a disponibilidade atual do serviço, categoria e setor e grava snapshots e evento inicial junto da solicitação. Transições persistem status e evento de histórico atomicamente.
 - Administradores configuram, por serviço, até 5 documentos exigidos (PDF, DOCX ou TXT; obrigatórios ou opcionais). O solicitante anexa um arquivo por documento ao abrir a solicitação (até 2 MiB cada, 4 MiB no total); o servidor confere o conteúdo real de cada arquivo.

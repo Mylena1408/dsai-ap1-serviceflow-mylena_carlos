@@ -36,8 +36,22 @@ export interface RequestStatusEventRecord {
   };
 }
 
+export interface RequestAssignmentEventRecord {
+  id: string;
+  requestId: string;
+  actorId: string;
+  fromAssigneeId: string | null;
+  toAssigneeId: string | null;
+  occurredAt: Date;
+  actor: { id: string; name: string };
+  fromAssignee: { id: string; name: string } | null;
+  toAssignee: { id: string; name: string } | null;
+}
+
 export interface RequestWithHistory extends RequestRecord {
   events: RequestStatusEventRecord[];
+  /** Assume, release and transfer events (SPEC 2026-10-31, section 5.9). */
+  assignmentEvents: RequestAssignmentEventRecord[];
   service: {
     id: string;
     isActive: boolean;
