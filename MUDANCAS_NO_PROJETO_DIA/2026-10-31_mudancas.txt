@@ -148,3 +148,119 @@ Legenda: [OK] commitado e enviado ao GitHub   [LOCAL] so commitado
   sem .env) continua sem correcao.
 
 ===============================================================================
+
+===============================================================================
+ COMPLEMENTO - FIM DO DIA 31/10/2026 (depois do commit e6d880d)
+===============================================================================
+
+-------------------------------------------------------------------------------
+ C1. RESUMO
+-------------------------------------------------------------------------------
+
+- SITE PUBLICADO NA VERCEL (conta da Mylena, projeto topicos-especiais/
+  serviceflow): https://serviceflow-sand.vercel.app
+  Banco PostgreSQL Neon (criado no painel da Vercel), 7 migrations e dados
+  ficticios (seed:demo). Publicacao SO MANUAL (vercel deploy --prod), sem
+  ligacao automatica com o GitHub. QR code gerado a partir do link.
+- ATRIBUICAO, CANCELAMENTO E REABERTURA CONCLUIDOS (SF-047 a SF-052),
+  SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md (CA-ATR-01 a 14):
+    * atendente assume, libera e transfere dentro do setor;
+    * com responsavel, so ele inicia e conclui (sem responsavel, como antes);
+    * solicitante cancela so solicitacao aberta; atendente cancela aberta ou
+      em atendimento com justificativa; cancelada e definitiva;
+    * solicitante reabre concluida em ate 7 dias (relogio do banco), com
+      justificativa, voltando para o mesmo responsavel;
+    * historico unico com status, atribuicoes e justificativas.
+- O site publicado ja esta com a atribuicao (deploy final do dia).
+
+-------------------------------------------------------------------------------
+ C2. COMMITS (todos [OK] commitados e enviados ao GitHub)
+-------------------------------------------------------------------------------
+
+ #  | Commit  | Mudanca
+----+---------+----------------------------------------------------------------
+ 9  | 568d752 | Marca como enviados os commits do resumo da manha.
+ 10 | 1dfff4e | SPEC de atribuicao aprovada (D1 a D5); tarefas SF-047 a SF-052.
+ 11 | f7a056f | SF-047: migrations aditivas (CANCELLED separado) e regras de
+    |         | dominio (lifecycle.ts).
+ 12 | ed44bfb | vercel.json (framework nextjs; prisma generate no build) e
+    |         | registro da publicacao.
+ 13 | 73dc8a9 | SF-048: assumir, liberar e transferir; painel "Responsavel".
+ 14 | 114ead2 | SF-049: com responsavel, so ele inicia e conclui.
+ 15 | 781b3b9 | SF-050: cancelamento (solicitante e atendente).
+ 16 | 2811ee0 | SF-051: reabertura em ate 7 dias.
+ 17 | 9cd8aca | SF-052: historico unico, E2E e revisao; README.
+ 18 | (este)  | Este complemento.
+
+-------------------------------------------------------------------------------
+ C3. ESTADO DOS TESTES (validacao final, commit 9cd8aca)
+-------------------------------------------------------------------------------
+
+ lint, typecheck, build ... OK
+ unitarios ............... 315/315 (52 arquivos)   [inicio do dia: 226]
+ integracao .............. 142/142 (30 arquivos) + 1 PULADO (bucket real,
+                           sem credenciais)          [inicio do dia: 106]
+ E2E ..................... 5/5                       [inicio do dia: 3]
+ site publicado .......... verificado so com leitura: os tres perfis de
+                           demonstracao entram; a fila mostra o responsavel;
+                           o detalhe mostra o painel "Responsavel" e o
+                           historico.
+
+ Defeitos encontrados e corrigidos na tarde:
+ - SF-050: o campo "note" era removido dos erros publicos de validacao, e a
+   mensagem "informe a justificativa" nunca apareceria. Corrigido em
+   src/server/errors (PUBLIC_VALIDATION_PATHS).
+ - Primeira publicacao na Vercel falhou (framework nao definido; procurou
+   a pasta "dist"). Corrigido no vercel.json.
+ - "vercel link" alterou o .gitignore de forma que anulava as excecoes dos
+   .env.example; alteracao desfeita.
+
+-------------------------------------------------------------------------------
+ C4. MEDICAO DO DIA INTEIRO (cloc --diff via sh scripts/cloc-diff.sh)
+-------------------------------------------------------------------------------
+
+ HOJE (17650f0 -> 9cd8aca):
+   src ......... 1.453 added   (83 removed)
+   tests ....... 2.953 added   (4 removed)
+   scripts ..... 142 added
+   total ....... 4.548 added   (87 removed; saldo liquido 4.461)
+
+ META (baseline-ap2 -> 9cd8aca):
+   added ....... 10.109   (meta 100.000 -> 10,1%)
+   removed ..... 2.590
+
+ CODIGO EXECUTAVEL TOTAL NO REPOSITORIO (cloc em 9cd8aca):
+   src 7.266 + tests 10.363 + scripts 633 = 18.262 linhas
+
+-------------------------------------------------------------------------------
+ C5. COMO USAR (novidades da tarde)
+-------------------------------------------------------------------------------
+
+1) Banco local: depois de puxar estes commits, aplicar as migrations novas.
+   O Prisma CLI le so o .env; com as variaveis no .env.local:
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+2) Publicar de novo (so quem tem acesso a conta da Vercel):
+     npx vercel login           (uma vez por maquina)
+     npx vercel deploy --prod
+   Se houver migration nova, aplicar antes no banco Neon.
+
+3) Atribuicao: no detalhe da fila, "Assumir"; o responsavel ve "Liberar" e
+   "Transferir para". Solicitante: "Cancelar solicitacao" (aberta) e
+   "Reabrir solicitacao" (concluida ha ate 7 dias).
+
+-------------------------------------------------------------------------------
+ C6. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- SEGURANCA: no site publicado, quem tiver o link ou o QR code entra como
+  ADMINISTRADOR (modo demonstracao). So dados ficticios no banco Neon.
+- A senha do banco Neon foi colada na conversa de desenvolvimento (decisao
+  da responsavel: banco didatico). Trocar se o banco receber dado real.
+  Ela NAO esta em nenhum arquivo do repositorio.
+- SF-030 continua pendente: sem armazenamento de documentos, os servicos de
+  RH com documento obrigatorio recusam novas solicitacoes (local e Vercel).
+- Proximos passos do plano: relatorio da fase 1; comentarios e busca
+  (passo 3); eventos/outbox e jobs (passo 1) - cada um com SPEC antes.
+
+===============================================================================
