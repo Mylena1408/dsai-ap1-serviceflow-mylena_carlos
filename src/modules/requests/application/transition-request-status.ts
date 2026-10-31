@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { requestStatusTransitionInputSchema } from "./request-schemas";
 import type { RequestWithHistory } from "../domain/request";
+import { assertCanChangeStatusWithAssignee } from "../domain/lifecycle";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
 
@@ -24,7 +25,7 @@ export async function transitionRequestStatus(
       throw new NotFoundError();
     }
 
-    const currentRequest = await transaction.findRequestState(parsed.requestId);
+    const currentRequest = await transaction.findLifecycleState(parsed.requestId);
 
     if (
       !currentRequest ||
@@ -34,11 +35,15 @@ export async function transitionRequestStatus(
     }
 
     assertRequestStatusTransition(currentRequest.status, parsed.toStatus);
+    // With an effective assignee only that attendant starts or completes; without one,
+    // any attendant of the sector does, as before (SPEC 2026-10-31, section 5.3).
+    assertCanChangeStatusWithAssignee(currentActor.id, currentRequest);
     const occurredAt = await transaction.currentTime();
     const changed = await transaction.updateStatusIfCurrent({
       requestId: parsed.requestId,
       sectorId: currentActor.sectorId,
       expectedStatus: currentRequest.status,
+      expectedAssigneeId: currentRequest.assignee?.id ?? null,
       toStatus: parsed.toStatus,
       updatedAt: occurredAt,
       ...(parsed.toStatus === "COMPLETED" ? { completedAt: occurredAt } : {}),

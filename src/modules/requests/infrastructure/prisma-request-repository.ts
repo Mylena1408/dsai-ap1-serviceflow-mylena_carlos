@@ -119,18 +119,15 @@ function createPrismaRequestTransaction(
     async insertAttachments(attachments) {
       await transaction.requestAttachment.createMany({ data: attachments });
     },
-    findRequestState(requestId) {
-      return transaction.request.findUnique({
-        where: { id: requestId },
-        select: { status: true, sectorId: true },
-      });
-    },
     async updateStatusIfCurrent(update) {
       const result = await transaction.request.updateMany({
         where: {
           id: update.requestId,
           sectorId: update.sectorId,
           status: update.expectedStatus,
+          ...(update.expectedAssigneeId !== undefined
+            ? { assigneeId: update.expectedAssigneeId }
+            : {}),
         },
         data: {
           status: update.toStatus,

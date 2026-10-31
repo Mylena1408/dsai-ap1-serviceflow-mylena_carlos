@@ -77,3 +77,9 @@ Após a aprovação da SPEC: migrations, domínio e testes da SF-047. O `prisma 
 > de push nos 3 commits, faça as migrations da sf-047, siga para a sf-048
 
 Publicação na Vercel (ver `NOTES.md`, "Publicação na Vercel com banco Neon"); push de `1dfff4e`, `f7a056f` e `ed44bfb`; migrations no banco local; implementação da SF-048 (ver `NOTES.md`, seção SF-048).
+
+## Continuação — SF-049
+
+> faça um puch da sf-048 e siga para sf-049
+
+Push de `73dc8a9`; implementação da SF-049 (ver `NOTES.md`, seção SF-049).

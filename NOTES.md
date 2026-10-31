@@ -646,3 +646,12 @@ Padrão a replicar nas SF-039 e SF-040:
   - 6 de integração, entre eles a concorrência real com duas transações, executada 4 vezes com o mesmo resultado;
   - o dublê em memória ganhou os métodos novos.
 - **Resultados:** lint, typecheck e build OK; unitários 293/293 (47 arquivos); integração 131/131 + 1 pulado (27 arquivos); E2E 4/4.
+
+## SF-049 — Responsável nas transições de status (2026-10-31)
+
+- **Regra 5.3 (D2):** `transitionRequestStatus` passou a ler o estado com o responsável (`findLifecycleState`) e chama `assertCanChangeStatusWithAssignee`. Com responsável **efetivo**, só ele inicia e conclui (`ConflictError` para os colegas). Sem responsável, ou com responsável que saiu do setor ou foi desativado, qualquer atendente do setor age como antes.
+- **Concorrência:** `StatusUpdate` ganhou `expectedAssigneeId` opcional. A transição grava só se estado **e** responsável continuam os lidos, então um "Assumir" de outro atendente entre a leitura e a escrita gera conflito.
+- **`findRequestState` removido** da porta, do repositório e do dublê: ficou sem uso.
+- **Tela:** no detalhe do atendente, quando outro colega é o responsável, os botões "Iniciar atendimento" e "Concluir solicitação" dão lugar a "Somente o responsável, <nome>, pode iniciar ou concluir esta solicitação". O servidor continua sendo quem decide.
+- **Testes:** 4 unitários e 3 de integração novos, em arquivos próprios. `requests-transitions.test.ts` e `transition-request-status.test.ts` não foram alterados e passam (CA-ATR-05). O dublê em memória passou a respeitar `expectedAssigneeId`.
+- **Resultados:** lint, typecheck e build OK; unitários 297/297 (48 arquivos); integração 134/134 + 1 pulado (28 arquivos); E2E 4/4.

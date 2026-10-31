@@ -167,16 +167,13 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       });
       return { id };
     },
-    async findRequestState(requestId) {
-      const request = store.requests.find(({ id }) => id === requestId);
-      return request ? { status: request.status, sectorId: request.sectorId } : null;
-    },
     async updateStatusIfCurrent(update) {
       const request = store.requests.find(
-        ({ id, sectorId, status }) =>
+        ({ id, sectorId, status, assigneeId }) =>
           id === update.requestId &&
           sectorId === update.sectorId &&
-          status === update.expectedStatus,
+          status === update.expectedStatus &&
+          (update.expectedAssigneeId === undefined || assigneeId === update.expectedAssigneeId),
       );
       if (!request) return 0;
       request.status = update.toStatus;

@@ -517,7 +517,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-049 — Responsável nas transições de status
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. `transitionRequestStatus` aplica `assertCanChangeStatusWithAssignee` sobre o estado relido (com o responsável) e grava só se estado **e** responsável não mudaram; botões de iniciar e concluir trocados por aviso quando outro atendente é o responsável. CA-ATR-05 verificado.
 - **Objetivo:** Regra 5.3: com responsável efetivo, só ele inicia e conclui; sem responsável, comportamento atual inalterado.
 - **Arquivos/módulos esperados:** `src/modules/requests/application/transition-request-status.ts`, repositório, testes.
 - **Dependências:** SF-048.

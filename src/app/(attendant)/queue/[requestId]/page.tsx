@@ -58,6 +58,10 @@ export default async function QueueRequestPage({
     throw caught;
   }
 
+  // Section 5.3: with an effective assignee only that attendant starts or completes.
+  const assigneeId = effectiveAssigneeId(request);
+  const heldByColleague = assigneeId !== null && assigneeId !== actor.id;
+
   return (
     <main className="page-shell">
       <header className="detail-heading">
@@ -81,13 +85,18 @@ export default async function QueueRequestPage({
         <p className="request-description">{request.description}</p>
       </article>
       <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} />
-      {request.status === "OPEN" ? (
+      {heldByColleague && (request.status === "OPEN" || request.status === "IN_PROGRESS") ? (
+        <p className="content-section">
+          Somente o responsável, {request.assignee?.name}, pode iniciar ou concluir esta solicitação.
+        </p>
+      ) : null}
+      {request.status === "OPEN" && !heldByColleague ? (
         <form className="content-section" action={startRequestAction}>
           <input type="hidden" name="requestId" value={request.id} />
           <button type="submit">Iniciar atendimento</button>
         </form>
       ) : null}
-      {request.status === "IN_PROGRESS" ? (
+      {request.status === "IN_PROGRESS" && !heldByColleague ? (
         <form className="content-section" action={completeRequestAction}>
           <input type="hidden" name="requestId" value={request.id} />
           <button type="submit">Concluir solicitação</button>

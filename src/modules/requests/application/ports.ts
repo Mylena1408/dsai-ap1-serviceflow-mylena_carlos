@@ -46,6 +46,8 @@ export interface StatusUpdate {
   requestId: string;
   sectorId: string;
   expectedStatus: RequestStatus;
+  /** When given, the assignee must also be unchanged since the read (section 5.8). */
+  expectedAssigneeId?: string | null;
   toStatus: RequestStatus;
   updatedAt: Date;
   completedAt?: Date;
@@ -123,7 +125,6 @@ export interface RequestTransaction {
     },
   ): Promise<{ id: string }>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;
-  findRequestState(requestId: string): Promise<{ status: RequestStatus; sectorId: string } | null>;
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;
   insertStatusEvent(event: NewStatusEvent): Promise<void>;
