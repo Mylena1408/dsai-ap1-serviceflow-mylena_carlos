@@ -591,7 +591,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-056 — E2E e revisão dos comentários
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. E2E `tests/e2e/request-comments.spec.ts` (seção 9 da SPEC), README e revisão. CA-COM-01 a 09 verificados: SPEC concluída.
 - **Objetivo:** E2E da seção 9 da SPEC; revisão de escopo, segurança e documentação.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-055.

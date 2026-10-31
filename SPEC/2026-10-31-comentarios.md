@@ -1,7 +1,7 @@
 # SPEC — Comentários e conversas nas solicitações
 
 **Data:** 2026-10-31
-**Status:** Aprovada em 2026-10-31, com as decisões C1 a C3 da seção 11 conforme propostas
+**Status:** Aprovada em 2026-10-31, com as decisões C1 a C3 da seção 11 conforme propostas. **Concluída em 2026-10-31** (SF-053 a SF-056; CA-COM-01 a 09 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§6), `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seções 5, 10 e 19), `SPEC/2026-10-29-plano-escala-100k.md` (item 4), `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`
 

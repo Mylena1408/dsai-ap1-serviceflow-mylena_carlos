@@ -728,3 +728,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes existentes:** `attendant-actions.test.ts` e `requester-actions.test.ts` (e dois arquivos meus de hoje) falharam **ao carregar**, sem asserção quebrada. As ações agora importam `@/modules/comments`, que puxa o `next-auth`, e esses testes só isolavam `@/modules/requests`. A correção foi acrescentar uma linha `vi.mock("@/modules/comments", …)` em cada um; nenhuma asserção mudou.
 - **Testes novos:** 6 unitários dos casos de uso, 3 das ações e 5 de integração (conversa, texto inválido, cancelada, notas internas em lista e contagem, matriz de autorização com mudança de setor, marcação como texto).
 - **Resultados:** lint, typecheck e build OK; unitários 329/329 (55 arquivos); integração 149/149 + 1 pulado (32 arquivos); E2E 5/5.
+
+## SF-056 — E2E e revisão dos comentários (2026-10-31)
+
+- **E2E (`request-comments.spec.ts`):**
+  - o solicitante pergunta e envia um texto com `<b>`, que aparece como texto (nenhum elemento `b` na conversa);
+  - uma solicitação cancelada não mostra o formulário, só o aviso;
+  - o atendente vê a pergunta, responde e escreve uma nota interna; a fila mostra "4 comentários";
+  - o solicitante vê 3 comentários, sem a nota, que também não aparece no HTML da página; a lista mostra "3 comentários".
+  - Passou na primeira execução. Depois disso, a verificação da contagem na lista foi apertada para localizar o item pelo link da própria solicitação, em vez de procurar o texto na página inteira.
+- **Revisão:** sem segredos nos arquivos versionados; nenhum `console.*` nem `dangerouslySetInnerHTML` no módulo ou no componente; nenhuma dependência nova; migration só aditiva. README com o fluxo de conversa.
+- **SPEC `2026-10-31-comentarios.md` concluída:** CA-COM-01 a 09 verificados.
+- **Resultados:** lint, typecheck e build OK; unitários 329/329 (55 arquivos); integração 149/149 + 1 pulado (32 arquivos); E2E 6/6.
