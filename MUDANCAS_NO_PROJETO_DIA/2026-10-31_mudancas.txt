@@ -47,10 +47,10 @@ Legenda: [OK] commitado e enviado ao GitHub   [LOCAL] so commitado
  5  | fe73fbd | [OK]    | SF-036: E2E de documentos, revisao CA-DOC, README;
     |         |         | armazenamento em memoria so para o servidor de E2E.
  6  | bbe064f | [OK]    | Medicao de linhas apos a SF-036.
- 7  | df68e1f | [LOCAL] | SF-030: npm run storage:provision e teste do bucket
+ 7  | df68e1f | [OK]    | SF-030: npm run storage:provision e teste do bucket
     |         |         | real (pulado sem credenciais). Provisionamento real
     |         |         | NAO executado.
- 8  | (este)  | [LOCAL] | Este resumo e a medicao do dia.
+ 8  | e6d880d | [OK]    | Este resumo e a medicao do dia.
 
 -------------------------------------------------------------------------------
  3. ESTADO DOS TESTES (validacao final, commit df68e1f)
