@@ -568,3 +568,25 @@ Padrão a replicar nas SF-039 e SF-040:
   - a busca pela chave de armazenamento no HTML pegava o próprio link `/api/requests/<id>/...`. A verificação passou a procurar a chave completa `requests/<solicitação>/<anexo>`. A saída confirmou que só o link aparecia.
 - **Resultados:** lint, typecheck e build OK; unitários 263/263 (43 arquivos); integração 120/120 (24 arquivos); E2E 4/4. O aviso "The destination stream closed early" continua aparecendo no servidor de E2E, como antes da SF-034.
 - **Medição (`sh scripts/cloc-diff.sh`, commit `fe73fbd`):** 7.410 → 7.616 linhas `added` (+206), saldo líquido 5.069. Meta: 7,6% de 100.000. Com a SF-034 a SF-036, a funcionalidade de documentos somou 2.016 linhas `added` (de 5.600 para 7.616).
+
+## SF-030 — Preparação do armazenamento privado (2026-10-31)
+
+- **Pedido:** configurar o armazenamento de arquivos recomendado (SPEC 21.15) e testar.
+- **Bloqueio encontrado:** esta máquina não tem credenciais do Supabase (nenhuma variável `DOCUMENT_STORAGE_*` ou `TEST_DOCUMENT_STORAGE_*` nos `.env` locais; só os nomes foram conferidos, nunca os valores) e não tem o CLI do Supabase nem o da Vercel. **Os buckets reais não foram criados e nenhuma chave foi gerada.** Isso depende de quem tem acesso às contas.
+- **O que foi feito para deixar a configuração a um comando:**
+  - `scripts/document-storage-provisioning.ts` + `npm run storage:provision [-- test]`. Lê `DOCUMENT_STORAGE_*` (ou `TEST_DOCUMENT_STORAGE_*`) com as mesmas validações do adaptador: HTTPS, bucket `-test` no escopo de teste e chave `sb_secret_`. Em seguida:
+    1. cria o bucket, ou ajusta um existente, com `public=false`, `file_size_limit=2097152` e `allowed_mime_types` só de PDF, DOCX e TXT;
+    2. relê o bucket e para se a configuração não bater;
+    3. grava um objeto sintético com a mesma chave opaca da aplicação;
+    4. confirma que a leitura anônima pela URL pública e pela rota autenticada sem credencial é **negada**;
+    5. lê o objeto com a chave secreta, remove-o e confirma que sumiu.
+  - As mensagens só trazem códigos HTTP, nunca a chave. Nenhuma política RLS é criada (SPEC 21.15.2).
+  - `tests/integration/document-storage-supabase.test.ts`: o teste do adaptador real (pendente desde a SF-033), que roda o mesmo provisionamento contra o bucket de teste. Fica pulado (`skipIf`) sem `TEST_DOCUMENT_STORAGE_*`. `vitest.integration.config.ts` passou a carregar essas três variáveis do `.env.test.local`.
+- **API usada (conferida em 2026-10-31):** referência do Storage no site do Supabase: `POST /bucket` (`id`, `name`, `public`, `file_size_limit`, `allowed_mime_types`) e `PUT /bucket/{id}`. A página lista `HEAD /bucket/{id}` para detalhes e não mostra os campos aceitos no `PUT`. O script usa `GET /bucket/{id}`, comum no storage-api, e **relê a configuração e falha se ela não bater**, então uma diferença de API aparece como erro, não como bucket mal configurado. Chave no cabeçalho `apikey`, conforme o guia de chaves do Supabase ("Send publishable and secret keys on the `apikey` header, not on `Authorization: Bearer`"). Nada disso foi exercitado contra o Supabase real.
+- **Testes executados:** 5 unitários do provisionamento contra um Supabase simulado (bucket novo, bucket público corrigido, bucket que continua público → para antes de gravar, chave recusada sem ecoar a chave, falha de rede com mensagem fixa). O comando real, com e sem `test`, termina com código 1 e a mensagem "Configure ... antes de provisionar" (via `volta run` o código aparece como 126). Lint, typecheck e build OK; unitários 268/268; integração 120/120 + 1 pulado (o teste real); E2E 4/4.
+- **Sem dependência nova** (usa `fetch`, `@next/env` e `vite`, que já existiam). `package.json` ganhou só o script `storage:provision`.
+- **Para concluir a SF-030** (quem tem acesso às contas):
+  1. criar ou reativar o projeto Supabase e gerar uma chave secreta `sb_secret_` exclusiva do ServiceFlow (produção em projeto separado, SPEC 21.15.7);
+  2. preencher `DOCUMENT_STORAGE_*` em `.env.local` e `TEST_DOCUMENT_STORAGE_*` em `.env.test.local` (fora do Git);
+  3. rodar `npm run storage:provision` e `npm run storage:provision -- test`, e depois `npm run test:integration`, que deixa de pular o teste real;
+  4. cadastrar as variáveis na Vercel (a chave como Secret) e rodar o provisionamento com as de produção.

@@ -12,6 +12,7 @@
     "start": "next start",
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
+    "storage:provision": "tsx scripts/provision-document-storage.ts",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run --config vitest.unit.config.ts",

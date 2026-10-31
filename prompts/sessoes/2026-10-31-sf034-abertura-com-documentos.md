@@ -42,3 +42,20 @@ Ver `NOTES.md`, seção SF-034.
 3. Armazenamento em memória protegido para o servidor do E2E; E2E do percurso de documentos.
 4. Revisão dos critérios CA-DOC-01 a 22, de segredos, logs e fixtures; README.
 5. Todas as suítes; registro em SPEC, `TASKS.md`, `NOTES.md` e diário. Resultado: `NOTES.md`, seção SF-036.
+
+## Continuação — SQLite e publicação
+
+> é possivel construir um banco de dados com SQlite e rodar no projeto?
+
+> é para resolver o problema de banco de dados e conseguir coloca-lo em um servidor para que seja rodado via um link ou qr code
+
+Resposta sem alteração de código: o SQLite não resolve na Vercel (disco temporário) e exigiria reescrever recursos exclusivos do PostgreSQL (`citext`, listas de enum, CHECKs com expressão regular, transações Serializable). Recomendado manter o PostgreSQL (Supabase ou Neon), aplicar as migrations no banco principal e configurar as variáveis na Vercel.
+
+## Continuação — SF-030
+
+> faça a configuração de arquivos na sf-030 de acordo com o recomendado para o sistema e teste as modificações, inclua isso no MUDANCAS_NO_PROJETO_DIA e faça um commit sobre os resultados, independente se deu certo ou errado,documente. Ao final retorne com um relatorio para mim e me indique quantas linhas de códigos foram adicionados hoje (usando o cloc --diff) e quantos temos ao todo.
+
+1. Conferência das variáveis de ambiente (só nomes) e dos CLIs: sem credenciais do Supabase.
+2. Consulta à documentação do Supabase (API de buckets e envio da chave secreta).
+3. Script de provisionamento, testes com Supabase simulado e teste de integração do bucket real (pulado sem credenciais).
+4. Todas as suítes, registros e `MUDANCAS_NO_PROJETO_DIA/2026-10-31_mudancas.txt`. Resultado: `NOTES.md`, seção SF-030 (2026-10-31).

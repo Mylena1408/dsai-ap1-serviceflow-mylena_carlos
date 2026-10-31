@@ -71,6 +71,8 @@ DOCUMENT_STORAGE_SECRET_KEY=<chave sb_secret_ exclusiva do ServiceFlow>
 ```
 
 - Sem essas variáveis, serviços sem documentos exigidos funcionam normalmente, mas envios com arquivo são recusados com a mensagem "Não foi possível guardar os documentos agora". Isso inclui os serviços de RH do `npm run seed:demo`, que têm documento obrigatório.
+- Depois de configurar as variáveis, crie e verifique o bucket com `npm run storage:provision` (ou `npm run storage:provision -- test` para `TEST_DOCUMENT_STORAGE_*`). O comando deixa o bucket privado, com limite de 2 MiB e só PDF, DOCX e TXT. Em seguida grava um arquivo sintético, confirma que a leitura anônima é negada e o remove. Não cria políticas RLS.
+- Com `TEST_DOCUMENT_STORAGE_*` em `.env.test.local`, `npm run test:integration` também testa o adaptador real contra o bucket de teste; sem essas variáveis, esse teste é pulado.
 - Na Vercel, cadastre `DOCUMENT_STORAGE_SECRET_KEY` como variável **Secret**, com valor próprio em Production. A chave de produção deve pertencer a um projeto Supabase exclusivo de produção (seção 21.15.7).
 
 ## Autenticação

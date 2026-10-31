@@ -4,7 +4,15 @@ import { defineConfig } from "vitest/config";
 
 const testEnvironment = loadEnv("test", process.cwd(), "");
 
-for (const key of ["DATABASE_URL", "TEST_DATABASE_URL"] as const) {
+// TEST_DOCUMENT_STORAGE_* enable the real-bucket storage test (SPEC 21.15.7); without
+// them that test is skipped.
+for (const key of [
+  "DATABASE_URL",
+  "TEST_DATABASE_URL",
+  "TEST_DOCUMENT_STORAGE_URL",
+  "TEST_DOCUMENT_STORAGE_BUCKET",
+  "TEST_DOCUMENT_STORAGE_SECRET_KEY",
+] as const) {
   if (process.env[key] === undefined && testEnvironment[key] !== undefined) {
     process.env[key] = testEnvironment[key];
   }
