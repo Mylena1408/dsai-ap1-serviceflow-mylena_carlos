@@ -17,7 +17,7 @@ import {
 
 export { buildAttachmentContentDisposition } from "./domain/attachment";
 export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
-export { effectiveAssigneeId } from "./domain/lifecycle";
+export { effectiveAssigneeId, REOPEN_WINDOW_MS } from "./domain/lifecycle";
 export { buildRequestSnapshot } from "./domain/snapshot";
 export { assertRequestStatusTransition } from "./domain/status-transition";
 export type {
@@ -138,4 +138,8 @@ const lifecycleErrors = {
 
 export async function cancelRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return lifecycleActions.cancelRequest(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
+export async function reopenRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return lifecycleActions.reopenRequest(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
 }

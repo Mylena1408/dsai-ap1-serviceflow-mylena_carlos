@@ -666,3 +666,17 @@ Padrão a replicar nas SF-039 e SF-040:
   - atendente: "Cancelar solicitação" recolhível com justificativa obrigatória, oculto quando outro colega é o responsável.
 - **Testes:** 6 unitários do caso de uso, 3 das ações (em arquivo novo) e 5 de integração.
 - **Resultados:** lint, typecheck e build OK; unitários 306/306 (50 arquivos); integração 139/139 + 1 pulado (29 arquivos); E2E 4/4.
+
+## SF-051 — Reabertura (2026-10-31)
+
+- **`reopenRequest`** reutiliza `changeLifecycle` da SF-050:
+  - o domínio (`assertCanReopen`) recebe o horário do banco (`now()` da transação), e o prazo de 7 dias não depende do relógio da aplicação;
+  - a gravação usa `completedAt: null` e mantém o responsável (D5);
+  - o evento `COMPLETED → OPEN` guarda a justificativa.
+- **Tela do solicitante:**
+  - com a solicitação concluída e dentro do prazo, aparece "Reabrir solicitação" com o prazo final e um campo obrigatório;
+  - depois do prazo, aparece só o aviso de que terminou;
+  - o prazo exibido usa o relógio do servidor da aplicação, só como orientação; quem decide é o servidor, com o relógio do banco;
+  - a mensagem de erro de estado passou a citar também o prazo encerrado.
+- **Testes:** 6 unitários do caso de uso, 1 da ação e 3 de integração. O teste de integração grava `completedAt = now() - intervalo` direto no banco, para medir as bordas com o mesmo relógio do servidor.
+- **Resultados:** lint, typecheck e build OK; unitários 313/313 (51 arquivos); integração 142/142 + 1 pulado (30 arquivos); E2E 4/4.

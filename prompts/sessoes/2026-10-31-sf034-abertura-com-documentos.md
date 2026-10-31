@@ -89,3 +89,5 @@ Push de `73dc8a9`; implementação da SF-049 (ver `NOTES.md`, seção SF-049).
 > faça o push da sf-049 e siga para a sf-050,fs-051,sf-052
 
 Push de `114ead2`; SF-050 (ver `NOTES.md`, seção SF-050).
+
+SF-051 concluída (ver `NOTES.md`, seção SF-051).

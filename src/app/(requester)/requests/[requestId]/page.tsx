@@ -21,8 +21,11 @@ const statusLabels = REQUEST_STATUS_LABELS;
 function feedback(notice?: string, error?: string): string | null {
   if (notice === "created") return "Sua solicitação foi aberta.";
   if (notice === "cancelled") return "Sua solicitação foi cancelada.";
-  if (error === "note") return "O motivo pode ter no máximo 1.000 caracteres.";
-  if (error === "state") return "A solicitação mudou de estado e não pode mais ser alterada assim. Atualize a página.";
+  if (notice === "reopened") return "Sua solicitação foi reaberta.";
+  if (error === "note") return "Informe o motivo com até 1.000 caracteres (obrigatório para reabrir).";
+  if (error === "state") {
+    return "Não é possível fazer isso agora: a solicitação mudou de estado ou o prazo de reabertura terminou. Atualize a página.";
+  }
   if (error === "missing") return "Não foi possível alterar esta solicitação.";
   if (error) return "Não foi possível concluir a operação.";
   return null;
@@ -74,7 +77,7 @@ export default async function RequestPage({
         <p className="request-description">{request.description}</p>
       </article>
       <RequestAttachments requestId={request.id} attachments={attachments} />
-      <LifecyclePanel request={request} />
+      <LifecyclePanel request={request} now={new Date()} />
       <section className="surface-card content-section" aria-labelledby="history-heading">
         <p className="eyebrow">Rastreabilidade</p>
         <h2 id="history-heading">Histórico</h2>

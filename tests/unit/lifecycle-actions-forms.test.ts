@@ -22,7 +22,7 @@ vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 
 import { cancelRequestAction } from "@/app/(attendant)/queue/actions";
-import { cancelOwnRequestAction } from "@/app/(requester)/requests/actions";
+import { cancelOwnRequestAction, reopenOwnRequestAction } from "@/app/(requester)/requests/actions";
 
 function formData(values: Record<string, string>): FormData {
   const data = new FormData();
@@ -75,5 +75,17 @@ describe("cancellation Server Actions (SPEC 2026-10-31, section 5.4)", () => {
       "REDIRECT:/queue/request-id?error=note",
     );
     expect(nextCache.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("reopens with the reason and maps an expired window to the state feedback (SF-051)", async () => {
+    await expect(
+      reopenOwnRequestAction(formData({ requestId: "request-id", note: "Voltou", status: "OPEN" })),
+    ).rejects.toThrow("REDIRECT:/requests/request-id?notice=reopened");
+    expect(requests.reopenRequest).toHaveBeenCalledWith({ requestId: "request-id", note: "Voltou" });
+
+    requests.reopenRequest.mockRejectedValueOnce(new ConflictError());
+    await expect(reopenOwnRequestAction(formData({ requestId: "request-id" }))).rejects.toThrow(
+      "REDIRECT:/requests/request-id?error=state",
+    );
   });
 });

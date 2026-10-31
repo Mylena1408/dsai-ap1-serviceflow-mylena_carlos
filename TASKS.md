@@ -537,7 +537,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-051 — Reabertura
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Caso de uso `reopenRequest` (mesma estrutura do cancelamento), prazo de 7 dias medido com o relógio do banco, `completedAt` limpo e responsável mantido; formulário "Reabrir solicitação" no detalhe do solicitante, com o prazo exibido. CA-ATR-09 verificado; CA-ATR-10 e 14 na parte de reabertura.
 - **Objetivo:** Reabertura pelo solicitante de `COMPLETED` em até 7 dias (relógio do banco), com justificativa; volta a `OPEN`, `completedAt` nulo, responsável mantido.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, detalhe do solicitante, testes.
 - **Dependências:** SF-050.

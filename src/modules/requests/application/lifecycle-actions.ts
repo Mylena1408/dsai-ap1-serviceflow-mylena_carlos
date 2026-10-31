@@ -1,9 +1,15 @@
 import { requireCurrentActor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { assertCanCancel, normalizeNote, type LifecycleRequest, type LifecycleUser } from "../domain/lifecycle";
+import {
+  assertCanCancel,
+  assertCanReopen,
+  normalizeNote,
+  type LifecycleRequest,
+  type LifecycleUser,
+} from "../domain/lifecycle";
 import type { RequestStatus } from "../domain/request";
-import { requestCancellationInputSchema } from "./request-schemas";
+import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner, StatusUpdate } from "./ports";
 
 // Cancellation and reopening (SPEC 2026-10-31, sections 5.4 and 5.5). Requester and
@@ -77,5 +83,25 @@ export async function cancelRequest(
     note,
     decide: (actor, request) => assertCanCancel(actor, request, note),
     stamps: (now) => ({ cancelledAt: now }),
+  });
+}
+
+/**
+ * Section 5.5 (decisions D4 and D5): the requester reopens a completed request within 7 days
+ * of completion, measured with the database clock, with a reason. The request returns to
+ * OPEN with completedAt cleared and the assignee kept.
+ */
+export async function reopenRequest(
+  input: unknown,
+  transactions: RequestTransactionRunner,
+): Promise<void> {
+  const parsed = validateInput(requestReopeningInputSchema, input);
+  const note = normalizeNote(parsed.note);
+
+  await changeLifecycle(parsed.requestId, transactions, {
+    toStatus: "OPEN",
+    note,
+    decide: (actor, request, now) => assertCanReopen(actor, request, now, note),
+    stamps: () => ({ completedAt: null }),
   });
 }

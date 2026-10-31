@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { cancelRequest, createRequest } from "@/modules/requests";
+import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
 
@@ -104,4 +104,8 @@ async function runOnOwnRequest(
 
 export async function cancelOwnRequestAction(formData: FormData): Promise<never> {
   return runOnOwnRequest(formData, (requestId, note) => cancelRequest({ requestId, note }), "cancelled");
+}
+
+export async function reopenOwnRequestAction(formData: FormData): Promise<never> {
+  return runOnOwnRequest(formData, (requestId, note) => reopenRequest({ requestId, note }), "reopened");
 }
