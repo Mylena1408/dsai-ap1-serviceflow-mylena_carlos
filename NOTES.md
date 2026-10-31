@@ -567,3 +567,4 @@ Padrão a replicar nas SF-039 e SF-040:
   - `getByRole("alert")` também pegou o anunciador de rotas do Next;
   - a busca pela chave de armazenamento no HTML pegava o próprio link `/api/requests/<id>/...`. A verificação passou a procurar a chave completa `requests/<solicitação>/<anexo>`. A saída confirmou que só o link aparecia.
 - **Resultados:** lint, typecheck e build OK; unitários 263/263 (43 arquivos); integração 120/120 (24 arquivos); E2E 4/4. O aviso "The destination stream closed early" continua aparecendo no servidor de E2E, como antes da SF-034.
+- **Medição (`sh scripts/cloc-diff.sh`, commit `fe73fbd`):** 7.410 → 7.616 linhas `added` (+206), saldo líquido 5.069. Meta: 7,6% de 100.000. Com a SF-034 a SF-036, a funcionalidade de documentos somou 2.016 linhas `added` (de 5.600 para 7.616).
