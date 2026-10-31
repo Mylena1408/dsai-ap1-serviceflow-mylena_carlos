@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { listAttendantQueue } from "@/modules/requests";
 import { requireAttendantPageAccess } from "../page-access";
+import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
-const statusLabels = {
-  OPEN: "Aberta",
-  IN_PROGRESS: "Em atendimento",
-  COMPLETED: "Concluída",
-} as const;
+const statusLabels = REQUEST_STATUS_LABELS;
 
 export default async function AttendantQueuePage() {
   await requireAttendantPageAccess();

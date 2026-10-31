@@ -591,3 +591,24 @@ Padrão a replicar nas SF-039 e SF-040:
   3. rodar `npm run storage:provision` e `npm run storage:provision -- test`, e depois `npm run test:integration`, que deixa de pular o teste real;
   4. cadastrar as variáveis na Vercel (a chave como Secret) e rodar o provisionamento com as de produção.
 - **Medição (`sh scripts/cloc-diff.sh`, commit `df68e1f`):** 7.616 → 7.897 linhas `added` (+281), saldo líquido 5.350. No dia 31/10 (`17650f0` → `df68e1f`): 2.315 linhas `added` (src 689, tests 1.485, scripts 141). Código executável total no repositório: 16.093 linhas (src 6.562, tests 8.899, scripts 632).
+
+## SF-047 — Migration e regras de domínio da atribuição (2026-10-31)
+
+- **Duas migrations aditivas.** O PostgreSQL não aceita usar um valor novo de enum na mesma transação em que ele é criado, e o Prisma aplica cada migration numa transação. Por isso:
+  - `20261031120000_request_status_cancelled` só adiciona `CANCELLED`;
+  - `20261031120100_request_assignment` adiciona `Request.assigneeId` e `Request.cancelledAt`, `RequestStatusEvent.note`, a tabela `RequestAssignmentEvent`, o índice `(sectorId, assigneeId)`, FKs `RESTRICT` e três `CHECK`s: `cancelledAt` preenchido se e somente se `CANCELLED`; `note` com 1 a 1.000 caracteres quando presente; evento de atribuição sempre muda o responsável.
+- **SQL gerado** por `prisma migrate diff` a partir do banco de teste (não havia banco sombra), com os `CHECK`s escritos à mão.
+- **Domínio (`src/modules/requests/domain/lifecycle.ts`):**
+  - tabela de transições 5.6 e responsável efetivo (atendente ativo do setor atual);
+  - assumir, liberar, transferir (D1), status com responsável (D2), cancelar (D3) e reabrir em até 7 dias (D4);
+  - justificativas com no máximo 1.000 caracteres.
+  - Ator fora do escopo recebe `NotFoundError` (não revela a solicitação); ator no escopo com estado inválido recebe `ConflictError`.
+- **Tipos:** `RequestStatus` ganhou `CANCELLED`; `RequestRecord` ganhou `assigneeId` e `cancelledAt`; `RequestStatusEventRecord` ganhou `note`. As quatro telas que tinham cópias do mapa de rótulos passaram a usar `src/app/_components/request-status.ts`, com "Cancelada".
+- **Testes existentes alterados só na forma:**
+  - objetos de solicitação ganharam os campos novos (`tests/unit/authorization/index.test.ts` e o dublê `in-memory-requests.ts`);
+  - `demo-data.test.ts` ganhou anotação de tipo no mapa de passos esperados;
+  - limpeza de `fixtures.ts` e `prepare-e2e.ts` passou a apagar `RequestAssignmentEvent`.
+  - Nenhuma asserção mudou.
+- **Falha durante o trabalho:** o teste novo de schema criou um atendente sem setor e bateu no `CHECK` antigo `User_role_sectorId_check`. Erro do teste, corrigido.
+- **Resultados:** lint, typecheck e build OK; unitários 283/283 (45 arquivos); integração 125/125 + 1 pulado (26 arquivos); E2E 4/4. A integração aplicou as duas migrations no banco de teste.
+- **Pendente:** aplicar as migrations no banco de desenvolvimento local (`npx prisma migrate deploy` com o `.env.local`). O comando foi negado pela permissão automática desta sessão. Sem isso, `npm run dev` falha ao ler solicitações, porque o código espera as colunas novas.

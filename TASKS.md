@@ -497,7 +497,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-047 — Migration aditiva e regras de domínio da atribuição
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Migrations `20261031120000_request_status_cancelled` (só o novo valor do enum) e `20261031120100_request_assignment` (colunas, tabela, índices, FKs e três `CHECK`s); regras puras em `src/modules/requests/domain/lifecycle.ts`; rótulo "Cancelada" num mapa único de status nas telas. CA-ATR-13 verificado. As regras de domínio cobrem CA-ATR-02 a 09, que serão verificados com os casos de uso das próximas tarefas. A migration **não** foi aplicada no banco de desenvolvimento local (`serviceflow_dev`): o comando foi bloqueado pela permissão automática e fica para a responsável.
 - **Objetivo:** Migration somente aditiva (seção 6: `CANCELLED`, `assigneeId`, `cancelledAt`, `note`, `RequestAssignmentEvent`, `CHECK`s e índices) e regras puras de domínio: tabela de transições 5.6, responsável efetivo, permissões de assumir, liberar, transferir, cancelar e reabrir, prazo de 7 dias.
 - **Arquivos/módulos esperados:** `prisma/schema.prisma`, `prisma/migrations/`, `src/modules/requests/domain/`, `tests/unit/`, `tests/integration/`.
 - **Dependências:** SF-046.

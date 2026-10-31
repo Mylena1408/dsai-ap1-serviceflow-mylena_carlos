@@ -1,12 +1,9 @@
 import Link from "next/link";
 import { listRequesterRequests } from "@/modules/requests";
 import { requireRequesterPageAccess } from "../page-access";
+import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
-const statusLabels = {
-  OPEN: "Aberta",
-  IN_PROGRESS: "Em atendimento",
-  COMPLETED: "Concluída",
-} as const;
+const statusLabels = REQUEST_STATUS_LABELS;
 
 export default async function RequestListPage() {
   await requireRequesterPageAccess();

@@ -73,6 +73,8 @@ export function storedRequest(overrides: Partial<RequestRecord> = {}): RequestRe
     createdAt: fixedNow,
     updatedAt: fixedNow,
     completedAt: null,
+    assigneeId: null,
+    cancelledAt: null,
     ...overrides,
   };
 }
@@ -139,6 +141,8 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         createdAt: openedAt,
         updatedAt: openedAt,
         completedAt: null,
+        assigneeId: null,
+        cancelledAt: null,
       });
       return { id };
     },
@@ -170,6 +174,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         fromStatus: event.fromStatus,
         toStatus: event.toStatus,
         occurredAt: event.occurredAt,
+        note: event.note ?? null,
       });
     },
     async getWithHistory(requestId) {

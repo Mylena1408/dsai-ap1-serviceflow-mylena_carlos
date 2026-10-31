@@ -65,3 +65,7 @@ Resposta sem alteração de código: o SQLite não resolve na Vercel (disco temp
 > podemos prosseuir construindo outro ponto de função que não se envolva com a questão do banco de dados?
 
 Escolha da responsável: atribuição (passo 3 do plano). SPEC escrita como proposta e aprovada com D1 a D5 conforme propostos; tarefas SF-047 a SF-052 registradas.
+
+## Continuação — SF-047
+
+Após a aprovação da SPEC: migrations, domínio e testes da SF-047. O `prisma migrate deploy` no banco de desenvolvimento foi negado pela permissão automática e ficou pendente para a responsável.

@@ -44,6 +44,8 @@ function persistedRequest(requesterId: string, sectorId: string) {
     createdAt: timestamp,
     updatedAt: timestamp,
     completedAt: null,
+    assigneeId: null,
+    cancelledAt: null,
   };
 }
 

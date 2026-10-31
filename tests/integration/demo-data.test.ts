@@ -52,7 +52,7 @@ describe("demonstration data", () => {
     const requests = await prisma.request.findMany({
       include: { events: { orderBy: { occurredAt: "asc" } } },
     });
-    const expectedSteps = { OPEN: ["OPEN"], IN_PROGRESS: ["OPEN", "IN_PROGRESS"], COMPLETED: ["OPEN", "IN_PROGRESS", "COMPLETED"] };
+    const expectedSteps: Record<string, string[]> = { OPEN: ["OPEN"], IN_PROGRESS: ["OPEN", "IN_PROGRESS"], COMPLETED: ["OPEN", "IN_PROGRESS", "COMPLETED"] };
 
     for (const request of requests) {
       expect(request.events.map(({ toStatus }) => toStatus)).toEqual(expectedSteps[request.status]);

@@ -5,17 +5,14 @@ import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
 import { completeRequestAction, startRequestAction } from "../actions";
+import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 type QueueRequestPageProps = {
   params: Promise<{ requestId: string }>;
   searchParams: Promise<{ error?: string; notice?: string }>;
 };
 
-const statusLabels = {
-  OPEN: "Aberta",
-  IN_PROGRESS: "Em atendimento",
-  COMPLETED: "Concluída",
-} as const;
+const statusLabels = REQUEST_STATUS_LABELS;
 
 function feedback(error?: string, notice?: string): string | null {
   if (error === "missing") return "A solicitação não está disponível no seu setor.";

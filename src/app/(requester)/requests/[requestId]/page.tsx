@@ -4,17 +4,14 @@ import { getRequesterRequest, listRequestAttachments } from "@/modules/requests"
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
+import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 type RequestPageProps = {
   params: Promise<{ requestId: string }>;
   searchParams: Promise<{ notice?: string }>;
 };
 
-const statusLabels = {
-  OPEN: "Aberta",
-  IN_PROGRESS: "Em atendimento",
-  COMPLETED: "Concluída",
-} as const;
+const statusLabels = REQUEST_STATUS_LABELS;
 
 export default async function RequestPage({
   params,

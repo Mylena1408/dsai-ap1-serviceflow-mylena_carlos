@@ -1,4 +1,4 @@
-export type RequestStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
+export type RequestStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
 export interface RequestRecord {
   id: string;
@@ -15,6 +15,9 @@ export interface RequestRecord {
   createdAt: Date;
   updatedAt: Date;
   completedAt: Date | null;
+  /** Individual attendant in charge, when someone assumed the request (SPEC 2026-10-31). */
+  assigneeId: string | null;
+  cancelledAt: Date | null;
 }
 
 export interface RequestStatusEventRecord {
@@ -24,6 +27,8 @@ export interface RequestStatusEventRecord {
   fromStatus: RequestStatus | null;
   toStatus: RequestStatus;
   occurredAt: Date;
+  /** Cancellation or reopening reason. */
+  note: string | null;
   actor: {
     id: string;
     name: string;

@@ -145,7 +145,7 @@ Tudo no módulo `requests`, nas camadas existentes:
 - [ ] **CA-ATR-10** — Administrador, atendente de outro setor, outro solicitante, usuário inativo e não autenticado são negados em todas as novas operações, sem revelar a solicitação.
 - [ ] **CA-ATR-11** — Duas ações concorrentes sobre a mesma solicitação (por exemplo, dois atendentes assumindo) resultam em uma aceita e outra rejeitada, sem estado intermediário.
 - [ ] **CA-ATR-12** — O detalhe mostra o responsável e a linha do tempo com status, atribuições e justificativas em ordem cronológica, para solicitante e atendente.
-- [ ] **CA-ATR-13** — A migration é aditiva: dados existentes ficam inalterados e todas as suítes anteriores passam sem alteração de asserções.
+- [x] **CA-ATR-13** — A migration é aditiva: dados existentes ficam inalterados e todas as suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-047): duas migrations aditivas aplicadas sobre o banco de teste com dados existentes; `request-assignment-schema.test.ts`; todas as suítes anteriores passam sem alteração de asserções.*
 - [ ] **CA-ATR-14** — Identificadores de ator, solicitante e setor vêm da sessão e do banco; campos forjados no formulário (estado, horários, setor, ator) são rejeitados.
 
 ## 9. Estratégia de testes

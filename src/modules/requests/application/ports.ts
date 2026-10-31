@@ -35,6 +35,8 @@ export interface NewStatusEvent {
   fromStatus: RequestStatus | null;
   toStatus: RequestStatus;
   occurredAt: Date;
+  /** Cancellation or reopening reason (SPEC 2026-10-31, section 5.9). */
+  note?: string | null;
 }
 
 export interface StatusUpdate {

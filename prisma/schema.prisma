@@ -17,6 +17,7 @@ enum RequestStatus {
   OPEN
   IN_PROGRESS
   COMPLETED
+  CANCELLED
 }
 
 enum DocumentFormat {
@@ -58,64 +59,90 @@ model User {
   createdAt    DateTime @default(now()) @db.Timestamptz
   updatedAt    DateTime @updatedAt @db.Timestamptz
 
-  sector                      Sector?                 @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests                    Request[]              @relation("UserRequests")
-  requestStatusEvents         RequestStatusEvent[]   @relation("RequestStatusEventActor")
-  uploadedAttachments         RequestAttachment[]    @relation("RequestAttachmentUploader")
+  sector                Sector?                  @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requests              Request[]                @relation("UserRequests")
+  requestStatusEvents   RequestStatusEvent[]     @relation("RequestStatusEventActor")
+  uploadedAttachments   RequestAttachment[]      @relation("RequestAttachmentUploader")
+  assignedRequests      Request[]                @relation("RequestAssignee")
+  assignmentEventsActed RequestAssignmentEvent[] @relation("RequestAssignmentEventActor")
+  assignmentEventsFrom  RequestAssignmentEvent[] @relation("RequestAssignmentEventFrom")
+  assignmentEventsTo    RequestAssignmentEvent[] @relation("RequestAssignmentEventTo")
 }
 
 model Service {
-  id                   String   @id @default(uuid()) @db.Uuid
-  name                 String
-  description          String
-  categoryId           String   @db.Uuid
-  sectorId             String   @db.Uuid
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now()) @db.Timestamptz
-  updatedAt            DateTime @updatedAt @db.Timestamptz
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+  categoryId  String   @db.Uuid
+  sectorId    String   @db.Uuid
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
 
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  sector   Sector   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests Request[]
+  category             Category                     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  sector               Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requests             Request[]
   documentRequirements ServiceDocumentRequirement[]
 }
 
 model Request {
-  id                     String        @id @default(uuid()) @db.Uuid
-  requesterId            String        @db.Uuid
-  serviceId              String        @db.Uuid
-  sectorId               String        @db.Uuid
-  serviceNameSnapshot    String
+  id                         String        @id @default(uuid()) @db.Uuid
+  requesterId                String        @db.Uuid
+  serviceId                  String        @db.Uuid
+  sectorId                   String        @db.Uuid
+  serviceNameSnapshot        String
   serviceDescriptionSnapshot String
-  categoryIdSnapshot     String        @db.Uuid
-  categoryNameSnapshot   String
-  sectorNameSnapshot     String
-  description            String
-  status                 RequestStatus @default(OPEN)
-  createdAt              DateTime      @default(now()) @db.Timestamptz
-  updatedAt              DateTime      @updatedAt @db.Timestamptz
-  completedAt            DateTime?     @db.Timestamptz
+  categoryIdSnapshot         String        @db.Uuid
+  categoryNameSnapshot       String
+  sectorNameSnapshot         String
+  description                String
+  status                     RequestStatus @default(OPEN)
+  createdAt                  DateTime      @default(now()) @db.Timestamptz
+  updatedAt                  DateTime      @updatedAt @db.Timestamptz
+  completedAt                DateTime?     @db.Timestamptz
+  assigneeId                 String?       @db.Uuid
+  cancelledAt                DateTime?     @db.Timestamptz
 
-  requester  User                @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
-  service    Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  sector     Sector              @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  events     RequestStatusEvent[]
-  attachments RequestAttachment[]
+  requester        User                     @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
+  assignee         User?                    @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  service          Service                  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  sector           Sector                   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  events           RequestStatusEvent[]
+  attachments      RequestAttachment[]
+  assignmentEvents RequestAssignmentEvent[]
 
   @@index([requesterId])
   @@index([sectorId])
+  @@index([sectorId, assigneeId])
 }
 
 model RequestStatusEvent {
-  id          String        @id @default(uuid()) @db.Uuid
-  requestId   String        @db.Uuid
-  actorId     String        @db.Uuid
-  fromStatus  RequestStatus?
-  toStatus    RequestStatus
-  occurredAt  DateTime      @default(now()) @db.Timestamptz
+  id         String         @id @default(uuid()) @db.Uuid
+  requestId  String         @db.Uuid
+  actorId    String         @db.Uuid
+  fromStatus RequestStatus?
+  toStatus   RequestStatus
+  occurredAt DateTime       @default(now()) @db.Timestamptz
+  note       String?
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor   User    @relation("RequestStatusEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+}
+
+model RequestAssignmentEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  requestId      String   @db.Uuid
+  actorId        String   @db.Uuid
+  fromAssigneeId String?  @db.Uuid
+  toAssigneeId   String?  @db.Uuid
+  occurredAt     DateTime @default(now()) @db.Timestamptz
+
+  request      Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  actor        User    @relation("RequestAssignmentEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+  fromAssignee User?   @relation("RequestAssignmentEventFrom", fields: [fromAssigneeId], references: [id], onDelete: Restrict)
+  toAssignee   User?   @relation("RequestAssignmentEventTo", fields: [toAssigneeId], references: [id], onDelete: Restrict)
+
+  @@index([requestId])
 }
 
 // Name uniqueness among active requirements of a service and row-level CHECK
