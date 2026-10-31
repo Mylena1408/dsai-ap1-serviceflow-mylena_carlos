@@ -1,0 +1,150 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 31/10/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-10-30_mudancas.txt (commit 17650f0)
+Linha de base   : tag baseline-ap2 -> commit 410c07b
+Registro detalhado : NOTES.md (secoes SF-034, SF-035, SF-036 e SF-030 de
+                     2026-10-31), TASKS.md, diario/2026-10-31.md,
+                     prompts/sessoes/2026-10-31-sf034-abertura-com-documentos.md
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- DOCUMENTOS EXIGIDOS POR SERVICO CONCLUIDOS (SF-034, SF-035, SF-036):
+  o solicitante anexa os documentos ao abrir a solicitacao; solicitante e
+  atendente do setor veem e baixam os anexos; E2E cobre o percurso inteiro.
+  CA-DOC-01 a 22: 21 verificados, CA-DOC-21 parcial (depende da SF-030).
+- SF-030 (ARMAZENAMENTO REAL) CONTINUA PENDENTE: esta maquina nao tem
+  credenciais do Supabase nem CLI do Supabase/Vercel. Foi criado o comando
+  "npm run storage:provision" que configura e testa o bucket assim que as
+  chaves existirem. Os buckets reais NAO foram criados.
+- ATENCAO: sem o armazenamento configurado, servicos com documento
+  obrigatorio (incluindo os de RH do seed:demo) recusam novas solicitacoes
+  com a mensagem "Nao foi possivel guardar os documentos agora".
+- Pergunta respondida (sem codigo): SQLite nao resolve a publicacao na
+  Vercel (disco temporario) e exigiria reescrever recursos exclusivos do
+  PostgreSQL. Recomendado manter PostgreSQL (Supabase ou Neon).
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub   [LOCAL] so commitado
+
+ #  | Commit  | Status  | Mudanca
+----+---------+---------+------------------------------------------------------
+ 1  | 051621b | [OK]    | SF-034: abertura de solicitacao com documentos
+    |         |         | (validacao no servidor, gravacao antes da transacao,
+    |         |         | compensacao; bodySizeLimit 4,25 MiB).
+ 2  | d487b03 | [OK]    | Medicao de linhas apos a SF-034.
+ 3  | 84fae73 | [OK]    | SF-035: listagem e download autorizados de anexos
+    |         |         | (rota /api/requests/<id>/attachments/<id>).
+ 4  | 23e4c9b | [OK]    | Medicao de linhas apos a SF-035.
+ 5  | fe73fbd | [OK]    | SF-036: E2E de documentos, revisao CA-DOC, README;
+    |         |         | armazenamento em memoria so para o servidor de E2E.
+ 6  | bbe064f | [OK]    | Medicao de linhas apos a SF-036.
+ 7  | df68e1f | [LOCAL] | SF-030: npm run storage:provision e teste do bucket
+    |         |         | real (pulado sem credenciais). Provisionamento real
+    |         |         | NAO executado.
+ 8  | (este)  | [LOCAL] | Este resumo e a medicao do dia.
+
+-------------------------------------------------------------------------------
+ 3. ESTADO DOS TESTES (validacao final, commit df68e1f)
+-------------------------------------------------------------------------------
+
+ lint ............ OK
+ typecheck ....... OK
+ build ........... OK
+ unitarios ....... 268/268 (44 arquivos)    [inicio de 31/10: 226]
+ integracao ...... 120/120 (24 arquivos) + 1 PULADO
+                   (teste do bucket real: sem TEST_DOCUMENT_STORAGE_*)
+                   [inicio de 31/10: 106]
+ E2E ............. 4/4                       [inicio de 31/10: 3]
+
+ storage:provision (real) ... NAO EXECUTADO: sem credenciais. O comando
+                              termina com codigo 1 e a mensagem
+                              "Configure DOCUMENT_STORAGE_URL, ... antes de
+                              provisionar." (comportamento esperado).
+
+ Falhas encontradas e corrigidas durante o dia (todas registradas no NOTES):
+ - SF-034: um teste antigo de schema falhou com "attachments: []" por
+   padrao; corrigido no codigo (campo opcional), sem mudar o teste.
+ - SF-035: lint acusou o nome "useActor" num teste novo (regra de hooks do
+   React); renomeado.
+ - SF-036: dois erros no proprio teste E2E (seletor ambiguo e busca da chave
+   de armazenamento que pegava o link de download). Aplicativo correto.
+ - Aviso "The destination stream closed early" no servidor de E2E: ja
+   existia antes (confirmado com git stash); nao investigado.
+
+-------------------------------------------------------------------------------
+ 4. MEDICAO (cloc --diff via sh scripts/cloc-diff.sh, TypeScript/JavaScript)
+-------------------------------------------------------------------------------
+
+ HOJE (17650f0 -> df68e1f):
+   src ......... 689 added   (23 removed)
+   tests ....... 1.485 added
+   scripts ..... 141 added
+   total ....... 2.315 added (23 removed; saldo liquido 2.292)
+
+ META (baseline-ap2 -> df68e1f):
+   added ....... 7.897   (meta 100.000 -> 7,9%)
+   removed ..... 2.547
+   saldo ....... 5.350
+
+ CODIGO EXECUTAVEL TOTAL NO REPOSITORIO (cloc em df68e1f):
+   src 6.562 + tests 8.899 + scripts 632 = 16.093 linhas
+
+-------------------------------------------------------------------------------
+ 5. COMO USAR (novidades de 31/10)
+-------------------------------------------------------------------------------
+
+1) Documentos exigidos: em /admin > Servicos, cada servico tem o painel
+   "Documentos exigidos" (ate 5; PDF/DOCX/TXT; obrigatorio ou opcional).
+   O solicitante ve a lista no detalhe do servico e anexa um arquivo por
+   documento (ate 2 MiB cada, 4 MiB no total).
+
+2) Para ENVIAR documentos de verdade e preciso configurar o Supabase Storage:
+     .env.local       DOCUMENT_STORAGE_URL / _BUCKET / _SECRET_KEY
+     .env.test.local  TEST_DOCUMENT_STORAGE_URL / _BUCKET / _SECRET_KEY
+   (chave sb_secret_ exclusiva; bucket de teste terminando em -test;
+    NUNCA versionar esses arquivos)
+   Depois:
+     npm run storage:provision          (bucket de desenvolvimento)
+     npm run storage:provision -- test  (bucket de teste)
+     npm run test:integration           (passa a rodar o teste real)
+
+3) Testes E2E nao precisam de Supabase: o playwright.config.ts liga
+   TEST_DOCUMENT_STORAGE=memory, aceito so fora de producao e com banco
+   terminado em _test.
+
+-------------------------------------------------------------------------------
+ 6. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+[ ] SF-030 (responsavel pelas contas): criar/reativar o projeto Supabase,
+    gerar a chave sb_secret_, preencher os .env, rodar storage:provision,
+    cadastrar as variaveis na Vercel (chave como Secret).
+[ ] Aplicar no banco principal a migration de documentos (20261016120000)
+    com backup antes.
+[ ] Relatorio da fase 1 (refatoracao + documentos), exigido pelo plano.
+[ ] Plano de 100 mil linhas, passo 1 (eventos + outbox, jobs, adaptadores)
+    ou passo 3 (atribuicao, comentarios, SLA): SPEC antes do codigo.
+
+-------------------------------------------------------------------------------
+ 7. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- SEGURANCA: o modo demonstracao continua valendo na Vercel; quem tiver o
+  link entra como administrador. Somente dados ficticios la.
+- O PostgreSQL de teste (../pgtest) estava parado hoje e foi reiniciado com
+  "node start.mjs".
+- "volta run" mostra codigo de saida 126 quando o comando falha; o codigo
+  real do script e 1.
+- Defeito antigo em playwright.config.ts (grava "undefined" em DATABASE_URL
+  sem .env) continua sem correcao.
+
+===============================================================================

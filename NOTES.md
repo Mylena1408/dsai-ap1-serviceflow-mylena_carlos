@@ -590,3 +590,4 @@ Padrão a replicar nas SF-039 e SF-040:
   2. preencher `DOCUMENT_STORAGE_*` em `.env.local` e `TEST_DOCUMENT_STORAGE_*` em `.env.test.local` (fora do Git);
   3. rodar `npm run storage:provision` e `npm run storage:provision -- test`, e depois `npm run test:integration`, que deixa de pular o teste real;
   4. cadastrar as variáveis na Vercel (a chave como Secret) e rodar o provisionamento com as de produção.
+- **Medição (`sh scripts/cloc-diff.sh`, commit `df68e1f`):** 7.616 → 7.897 linhas `added` (+281), saldo líquido 5.350. No dia 31/10 (`17650f0` → `df68e1f`): 2.315 linhas `added` (src 689, tests 1.485, scripts 141). Código executável total no repositório: 16.093 linhas (src 6.562, tests 8.899, scripts 632).
