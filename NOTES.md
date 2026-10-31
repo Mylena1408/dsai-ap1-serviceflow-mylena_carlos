@@ -655,3 +655,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Tela:** no detalhe do atendente, quando outro colega é o responsável, os botões "Iniciar atendimento" e "Concluir solicitação" dão lugar a "Somente o responsável, <nome>, pode iniciar ou concluir esta solicitação". O servidor continua sendo quem decide.
 - **Testes:** 4 unitários e 3 de integração novos, em arquivos próprios. `requests-transitions.test.ts` e `transition-request-status.test.ts` não foram alterados e passam (CA-ATR-05). O dublê em memória passou a respeitar `expectedAssigneeId`.
 - **Resultados:** lint, typecheck e build OK; unitários 297/297 (48 arquivos); integração 134/134 + 1 pulado (28 arquivos); E2E 4/4.
+
+## SF-050 — Cancelamento (2026-10-31)
+
+- **Caso de uso único (`cancelRequest`)** para solicitante e atendente. A sessão é conferida por `requireCurrentActor`, e a transação relê o ator e o estado (com responsável). O domínio decide (`assertCanCancel`) e a gravação é condicionada a estado **e** responsável; `cancelledAt`, `updatedAt` e o evento usam o horário do banco. Quem está fora do escopo recebe "não encontrado".
+- **Estrutura compartilhada (`changeLifecycle`)** para cancelamento e, na SF-051, reabertura. `StatusUpdate` ganhou `cancelledAt`; `completedAt` passou a aceitar `null`, para a reabertura limpar o campo. O repositório só altera `completedAt` quando o valor é informado (antes, só quando era verdadeiro).
+- **Defeito encontrado pelos testes:** `ValidationError` remove dos erros públicos os caminhos fora de uma lista permitida, e `note` não estava nela. Com isso, a mensagem específica "informe a justificativa" nunca apareceria na tela. `note` foi acrescentado a `PUBLIC_VALIDATION_PATHS` (`src/server/errors`).
+- **Telas:**
+  - solicitante: "Cancelar solicitação" recolhível no detalhe, só quando `OPEN`, com motivo opcional e mensagens de retorno (cancelada, motivo longo, estado mudou);
+  - atendente: "Cancelar solicitação" recolhível com justificativa obrigatória, oculto quando outro colega é o responsável.
+- **Testes:** 6 unitários do caso de uso, 3 das ações (em arquivo novo) e 5 de integração.
+- **Resultados:** lint, typecheck e build OK; unitários 306/306 (50 arquivos); integração 139/139 + 1 pulado (29 arquivos); E2E 4/4.

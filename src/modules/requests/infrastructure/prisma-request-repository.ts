@@ -132,7 +132,8 @@ function createPrismaRequestTransaction(
         data: {
           status: update.toStatus,
           updatedAt: update.updatedAt,
-          ...(update.completedAt ? { completedAt: update.completedAt } : {}),
+          ...(update.completedAt !== undefined ? { completedAt: update.completedAt } : {}),
+          ...(update.cancelledAt ? { cancelledAt: update.cancelledAt } : {}),
         },
       });
       return result.count;

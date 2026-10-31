@@ -58,6 +58,7 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "attachments",
   "isRequired",
   "acceptedFormats",
+  "note",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

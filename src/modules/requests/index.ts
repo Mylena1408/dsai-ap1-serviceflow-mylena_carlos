@@ -4,6 +4,7 @@ import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/st
 import * as assignment from "./application/assignment";
 import * as attachmentQueries from "./application/attachment-queries";
 import * as createRequestUseCase from "./application/create-request";
+import * as lifecycleActions from "./application/lifecycle-actions";
 import * as queries from "./application/request-queries";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
@@ -128,4 +129,13 @@ export async function listTransferCandidates(
   database: PrismaClient = prisma,
 ): Promise<Array<{ id: string; name: string }>> {
   return queries.listTransferCandidates(requestId, createPrismaRequestQueryRepository(database));
+}
+
+const lifecycleErrors = {
+  translate: ["P2034"] as const,
+  fallbackMessage: "Request lifecycle change failed.",
+};
+
+export async function cancelRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return lifecycleActions.cancelRequest(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
 }

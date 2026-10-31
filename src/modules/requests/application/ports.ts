@@ -50,7 +50,10 @@ export interface StatusUpdate {
   expectedAssigneeId?: string | null;
   toStatus: RequestStatus;
   updatedAt: Date;
-  completedAt?: Date;
+  /** Set on completion; null clears it on reopening (section 5.5). Omitted keeps it. */
+  completedAt?: Date | null;
+  /** Set on cancellation (section 5.4). */
+  cancelledAt?: Date;
 }
 
 /** Changes the assignee only while status and assignee still equal the values read. */

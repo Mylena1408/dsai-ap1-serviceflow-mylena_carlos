@@ -178,7 +178,8 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       if (!request) return 0;
       request.status = update.toStatus;
       request.updatedAt = update.updatedAt;
-      if (update.completedAt) request.completedAt = update.completedAt;
+      if (update.completedAt !== undefined) request.completedAt = update.completedAt;
+      if (update.cancelledAt) request.cancelledAt = update.cancelledAt;
       return 1;
     },
     async insertAttachments(attachments) {

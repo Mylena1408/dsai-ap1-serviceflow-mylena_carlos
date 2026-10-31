@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createRequest } from "@/modules/requests";
+import { cancelRequest, createRequest } from "@/modules/requests";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
 
@@ -67,4 +67,41 @@ export async function createRequestAction(formData: FormData): Promise<never> {
   revalidatePath("/catalog");
   revalidatePath("/requests");
   redirect(`/requests/${requestId}?notice=created`);
+}
+
+// Lifecycle actions on the requester's own request (SPEC 2026-10-31, sections 5.4 and 5.5).
+function lifecycleErrorCode(error: ApplicationError): string {
+  if (error instanceof ValidationError) {
+    return error.issues.some(({ path }) => path.includes("note")) ? "note" : "validation";
+  }
+  if (error.code === "NOT_FOUND" || error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN") {
+    return "missing";
+  }
+  return error.code === "CONFLICT" ? "state" : "unexpected";
+}
+
+async function runOnOwnRequest(
+  formData: FormData,
+  operation: (requestId: string, note: string) => Promise<void>,
+  notice: string,
+): Promise<never> {
+  const requestId = field(formData, "requestId");
+
+  try {
+    await operation(requestId, field(formData, "note"));
+  } catch (error) {
+    if (error instanceof ApplicationError) {
+      redirect(`/requests/${encodeURIComponent(requestId)}?error=${lifecycleErrorCode(error)}`);
+    }
+
+    throw error;
+  }
+
+  revalidatePath("/requests");
+  revalidatePath(`/requests/${requestId}`);
+  redirect(`/requests/${requestId}?notice=${notice}`);
+}
+
+export async function cancelOwnRequestAction(formData: FormData): Promise<never> {
+  return runOnOwnRequest(formData, (requestId, note) => cancelRequest({ requestId, note }), "cancelled");
 }

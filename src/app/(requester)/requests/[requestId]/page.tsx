@@ -9,20 +9,31 @@ import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
+import { LifecyclePanel } from "./lifecycle-panel";
 
 type RequestPageProps = {
   params: Promise<{ requestId: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; error?: string }>;
 };
 
 const statusLabels = REQUEST_STATUS_LABELS;
+
+function feedback(notice?: string, error?: string): string | null {
+  if (notice === "created") return "Sua solicitação foi aberta.";
+  if (notice === "cancelled") return "Sua solicitação foi cancelada.";
+  if (error === "note") return "O motivo pode ter no máximo 1.000 caracteres.";
+  if (error === "state") return "A solicitação mudou de estado e não pode mais ser alterada assim. Atualize a página.";
+  if (error === "missing") return "Não foi possível alterar esta solicitação.";
+  if (error) return "Não foi possível concluir a operação.";
+  return null;
+}
 
 export default async function RequestPage({
   params,
   searchParams,
 }: RequestPageProps) {
   await requireRequesterPageAccess();
-  const [{ requestId }, { notice }] = await Promise.all([params, searchParams]);
+  const [{ requestId }, { notice, error }] = await Promise.all([params, searchParams]);
   let request;
   let attachments;
 
@@ -41,8 +52,10 @@ export default async function RequestPage({
         <Link href="/requests">Minhas solicitações</Link>
       </nav>
       </header>
-      {notice === "created" ? (
-        <p className="feedback" role="status">Sua solicitação foi aberta.</p>
+      {feedback(notice, error) ? (
+        <p className={`feedback${error ? " feedback-error" : ""}`} role={error ? "alert" : "status"}>
+          {feedback(notice, error)}
+        </p>
       ) : null}
       <article className="surface-card">
         <p className="eyebrow">Solicitação</p>
@@ -61,6 +74,7 @@ export default async function RequestPage({
         <p className="request-description">{request.description}</p>
       </article>
       <RequestAttachments requestId={request.id} attachments={attachments} />
+      <LifecyclePanel request={request} />
       <section className="surface-card content-section" aria-labelledby="history-heading">
         <p className="eyebrow">Rastreabilidade</p>
         <h2 id="history-heading">Histórico</h2>

@@ -11,6 +11,7 @@ import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
 import { completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
+import { CancelRequestForm } from "./cancel-request-form";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 type QueueRequestPageProps = {
@@ -31,6 +32,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "assumed") return "Você assumiu esta solicitação.";
   if (notice === "released") return "Você liberou esta solicitação.";
   if (notice === "transferred") return "Solicitação transferida.";
+  if (notice === "cancelled") return "Solicitação cancelada.";
+  if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
   return null;
 }
 
@@ -85,6 +88,9 @@ export default async function QueueRequestPage({
         <p className="request-description">{request.description}</p>
       </article>
       <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} />
+      {(request.status === "OPEN" || request.status === "IN_PROGRESS") && !heldByColleague ? (
+        <CancelRequestForm requestId={request.id} />
+      ) : null}
       {heldByColleague && (request.status === "OPEN" || request.status === "IN_PROGRESS") ? (
         <p className="content-section">
           Somente o responsável, {request.assignee?.name}, pode iniciar ou concluir esta solicitação.

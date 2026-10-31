@@ -34,6 +34,15 @@ export const requestTransferInputSchema = z
   .object({ requestId: entityIdSchema, assigneeId: entityIdSchema })
   .strict();
 
+// Reasons are trimmed and limited by the domain (normalizeNote), with fixed messages.
+export const requestCancellationInputSchema = z
+  .object({ requestId: entityIdSchema, note: z.string().optional() })
+  .strict();
+
+export const requestReopeningInputSchema = z
+  .object({ requestId: entityIdSchema, note: z.string() })
+  .strict();
+
 export type RequestCreationInput = z.output<typeof requestCreationInputSchema>;
 export type RequestStatusTransitionInput = z.output<
   typeof requestStatusTransitionInputSchema

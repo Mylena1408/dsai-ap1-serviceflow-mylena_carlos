@@ -527,7 +527,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-050 — Cancelamento
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Caso de uso `cancelRequest` (`application/lifecycle-actions.ts`), formulário de cancelamento no detalhe do solicitante (só `OPEN`, motivo opcional) e do atendente (`OPEN`/`IN_PROGRESS`, justificativa obrigatória), `cancelledAt` e evento com `note`. CA-ATR-06 a 08 verificados; CA-ATR-10 e 14 na parte de cancelamento.
 - **Objetivo:** Cancelamento pelo solicitante (só `OPEN`, justificativa opcional) e pelo atendente do setor (`OPEN`/`IN_PROGRESS`, justificativa obrigatória); `cancelledAt` e evento com `note`; rótulo "Cancelada" nas telas.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, telas do solicitante e do atendente, testes.
 - **Dependências:** SF-049.

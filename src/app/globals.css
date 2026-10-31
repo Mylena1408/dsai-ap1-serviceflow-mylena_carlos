@@ -890,6 +890,21 @@ p {
   gap: 4px;
 }
 
+.lifecycle-form summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.lifecycle-form form {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lifecycle-form button {
+  justify-self: start;
+}
+
 .assignment-actions {
   display: grid;
   gap: 12px;

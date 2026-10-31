@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   assumeRequest,
+  cancelRequest,
   releaseRequest,
   transferRequest,
   transitionRequestStatus,
 } from "@/modules/requests";
-import { ApplicationError } from "@/server/errors";
+import { ApplicationError, ValidationError } from "@/server/errors";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -16,6 +17,9 @@ function field(formData: FormData, name: string): string {
 }
 
 function errorCode(error: ApplicationError): string {
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("note"))) {
+    return "note";
+  }
   return error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN"
     ? "access"
     : error.code === "NOT_FOUND"
@@ -82,4 +86,10 @@ export async function transferRequestAction(formData: FormData): Promise<never> 
     (requestId) => transferRequest({ requestId, assigneeId }),
     "transferred",
   );
+}
+
+// Section 5.4: the attendant cancels with a mandatory reason.
+export async function cancelRequestAction(formData: FormData): Promise<never> {
+  const note = field(formData, "note");
+  return runOnRequest(formData, (requestId) => cancelRequest({ requestId, note }), "cancelled");
 }
