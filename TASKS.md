@@ -571,7 +571,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-054 — Escrever e ler comentários
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31, junto com a SF-055 (mesmos arquivos). Casos de uso `addComment`, `listComments` e `countComments`, repositório Prisma, módulo público `@/modules/comments` e seção "Conversa" nos dois detalhes. CA-COM-01 a 04 e 06 a 08 verificados.
 - **Objetivo:** Casos de uso, repositório Prisma, seção "Conversa" nos detalhes do solicitante e do atendente.
 - **Arquivos/módulos esperados:** `src/modules/comments/{application,infrastructure}`, `src/modules/comments/index.ts`, telas de detalhe, testes.
 - **Dependências:** SF-053.
@@ -581,7 +581,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-055 — Notas internas e contagem nas listas
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31, junto com a SF-054 (mesmos arquivos e commit). Notas internas criadas só por atendentes e filtradas para o solicitante na conversa e na contagem; quantidade de comentários na fila e em "Minhas solicitações". CA-COM-05 verificado.
 - **Objetivo:** Nota interna só para atendentes; filtro para o solicitante; quantidade de comentários na fila e na lista.
 - **Arquivos/módulos esperados:** Módulo `comments`, telas de lista e detalhe, testes.
 - **Dependências:** SF-054.

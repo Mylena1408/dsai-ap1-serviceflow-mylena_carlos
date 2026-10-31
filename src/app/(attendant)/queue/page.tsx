@@ -1,13 +1,19 @@
 import Link from "next/link";
+import { countComments } from "@/modules/comments";
 import { effectiveAssigneeId, listAttendantQueue } from "@/modules/requests";
 import { requireAttendantPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 const statusLabels = REQUEST_STATUS_LABELS;
 
+function commentLabel(count: number): string {
+  return count === 1 ? "1 comentário" : `${count} comentários`;
+}
+
 export default async function AttendantQueuePage() {
   const actor = await requireAttendantPageAccess();
   const requests = await listAttendantQueue();
+  const commentCounts = await countComments(requests.map(({ id }) => id));
 
   return (
     <main className="page-shell">
@@ -39,6 +45,7 @@ export default async function AttendantQueuePage() {
                     : request.assignee?.name}
               </p>
               <p>{request.description}</p>
+              <p className="metadata">{commentLabel(commentCounts.get(request.id) ?? 0)}</p>
               <p className="metadata">
                 Aberta em{" "}
                 <time dateTime={request.createdAt.toISOString()}>

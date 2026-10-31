@@ -67,18 +67,18 @@ O atendente comenta mesmo sem ser o responsável: a conversa é do setor.
 
 ## 7. Arquitetura
 
-Novo módulo `src/modules/comments` com `domain` (regras 5.1 a 5.4), `application` (escrever e listar), `infrastructure` (Prisma) e `index.ts`; telas nos detalhes existentes. O módulo usa a API pública de `requests` só para ler o escopo da solicitação.
+Novo módulo `src/modules/comments` com `domain` (regras 5.1 a 5.4), `application` (escrever e listar), `infrastructure` (Prisma) e `index.ts`; telas nos detalhes existentes. O repositório do módulo lê o escopo da solicitação (solicitante, setor e estado) direto do banco, como o módulo `requests` faz com os requisitos documentais. *Alterado em 2026-10-31 na implementação (SF-054): a versão aprovada dizia "usa a API pública de `requests`", o que exigiria criar nela uma leitura sem autenticação.*
 
 ## 8. Critérios de aceitação
 
-- [ ] **CA-COM-01** — O solicitante dono e um atendente ativo do setor escrevem comentários; cada comentário guarda autor, texto e horário do banco.
-- [ ] **CA-COM-02** — A conversa aparece em ordem cronológica nos dois detalhes.
-- [ ] **CA-COM-03** — Texto vazio, só com espaços ou acima de 5.000 caracteres é rejeitado no servidor sem gravar nada.
-- [ ] **CA-COM-04** — Em solicitação cancelada, comentar é rejeitado; a leitura continua.
-- [ ] **CA-COM-05** — Nota interna: só atendentes criam; o solicitante não a vê em nenhuma tela nem resposta; a contagem do solicitante não a inclui.
-- [ ] **CA-COM-06** — Administrador, outro solicitante, atendente de outro setor, inativo e não autenticado não leem nem escrevem, sem revelar a solicitação.
-- [ ] **CA-COM-07** — Campos forjados (autor, horário, `isInternal` vindo do solicitante, outro `requestId` no corpo) são rejeitados ou ignorados conforme a regra 5.3.
-- [ ] **CA-COM-08** — Texto com HTML ou script aparece como texto, sem ser interpretado.
+- [x] **CA-COM-01** — O solicitante dono e um atendente ativo do setor escrevem comentários; cada comentário guarda autor, texto e horário do banco. *Verificado em 2026-10-31 (SF-054): `comment-use-cases.test.ts` e `request-comments.test.ts`.*
+- [x] **CA-COM-02** — A conversa aparece em ordem cronológica nos dois detalhes. *Verificado em 2026-10-31 (SF-054): ordem cronológica na integração; seção "Conversa" nos dois detalhes.*
+- [x] **CA-COM-03** — Texto vazio, só com espaços ou acima de 5.000 caracteres é rejeitado no servidor sem gravar nada. *Verificado em 2026-10-31 (SF-054): rejeição antes da sessão e sem gravação (unitário e integração), mais o `CHECK` do banco (SF-053).*
+- [x] **CA-COM-04** — Em solicitação cancelada, comentar é rejeitado; a leitura continua. *Verificado em 2026-10-31 (SF-054): cancelada rejeita comentário e mantém a leitura; a tela troca o formulário por aviso.*
+- [x] **CA-COM-05** — Nota interna: só atendentes criam; o solicitante não a vê em nenhuma tela nem resposta; a contagem do solicitante não a inclui. *Verificado em 2026-10-31 (SF-055): unitário e integração (conversa, contagem e resposta serializada sem a nota).*
+- [x] **CA-COM-06** — Administrador, outro solicitante, atendente de outro setor, inativo e não autenticado não leem nem escrevem, sem revelar a solicitação. *Verificado em 2026-10-31 (SF-054): outro solicitante, outro setor, administrador, não autenticado e atendente que mudou de setor.*
+- [x] **CA-COM-07** — Campos forjados (autor, horário, `isInternal` vindo do solicitante, outro `requestId` no corpo) são rejeitados ou ignorados conforme a regra 5.3. *Verificado em 2026-10-31 (SF-054): schema estrito rejeita autor, horário e campos extras; a ação do solicitante nunca envia `isInternal`.*
+- [x] **CA-COM-08** — Texto com HTML ou script aparece como texto, sem ser interpretado. *Verificado em 2026-10-31 (SF-054): texto com marcação é guardado e devolvido como texto; a tela usa interpolação do React, sem `dangerouslySetInnerHTML`.*
 - [x] **CA-COM-09** — Migration aditiva; todas as suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-053): migration aditiva aplicada no banco de teste com dados existentes; `request-comment-schema.test.ts`; suítes anteriores sem alteração de asserções.*
 
 ## 9. Estratégia de testes

@@ -9,9 +9,11 @@ import {
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
-import { completeRequestAction, startRequestAction } from "../actions";
+import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
+import { listComments } from "@/modules/comments";
+import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
 
@@ -34,6 +36,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "released") return "Você liberou esta solicitação.";
   if (notice === "transferred") return "Solicitação transferida.";
   if (notice === "cancelled") return "Solicitação cancelada.";
+  if (notice === "commented") return "Comentário enviado.";
+  if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
   if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
   return null;
 }
@@ -49,11 +53,13 @@ export default async function QueueRequestPage({
   ]);
   let request;
   let attachments;
+  let comments;
   let candidates: Array<{ id: string; name: string }> = [];
 
   try {
     request = await getAttendantRequest(requestId);
     attachments = await listRequestAttachments(request.id);
+    comments = await listComments(request.id);
     if (effectiveAssigneeId(request) === actor.id) {
       candidates = await listTransferCandidates(request.id);
     }
@@ -110,6 +116,13 @@ export default async function QueueRequestPage({
         </form>
       ) : null}
       <RequestAttachments requestId={request.id} attachments={attachments} />
+      <RequestConversation
+        requestId={request.id}
+        comments={comments}
+        canWrite={request.status !== "CANCELLED"}
+        allowInternal
+        action={addCommentAction}
+      />
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
     </main>
   );

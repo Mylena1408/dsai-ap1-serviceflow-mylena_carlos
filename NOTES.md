@@ -710,3 +710,21 @@ Padrão a replicar nas SF-039 e SF-040:
 - `body` foi acrescentado a `PUBLIC_VALIDATION_PATHS`, para a tela mostrar a mensagem certa. É a mesma lição da SF-050.
 - **Testes:** 5 unitários e 2 de integração; limpeza de `fixtures.ts` e `prepare-e2e.ts` com a tabela nova.
 - **Resultados:** lint e typecheck OK; integração 144/144 + 1 pulado.
+
+## SF-054 e SF-055 — Escrever, ler, notas internas e contagem (2026-10-31)
+
+- **Feitas juntas:** as duas tarefas mexem nos mesmos arquivos (caso de uso, repositório e telas). São um commit só, com as duas registradas.
+- **Módulo `src/modules/comments`:** `domain` (SF-053), `application` (portas, schema estrito e casos de uso), `infrastructure` (Prisma) e `index.ts`.
+  - `addComment`: normaliza o texto, confere a sessão, relê leitor e solicitação na transação, aplica `assertCanComment` e grava com o horário do banco;
+  - `listComments`: devolve notas internas só para atendentes;
+  - `countComments`: conta por solicitação, e para o solicitante nunca inclui notas internas.
+- **Mudança em relação à SPEC (seção 7):** a SPEC dizia que o módulo leria o escopo da solicitação pela API pública de `requests`. Na implementação, o repositório de `comments` lê solicitante, setor e estado direto do banco, como o módulo `requests` já faz com os requisitos documentais. Assim não foi preciso criar em `requests` uma função sem autenticação. A seção 7 foi atualizada.
+- **Telas:**
+  - componente compartilhado `src/app/_components/request-conversation.tsx`, com a seção "Conversa" (autor, perfil, horário; nota interna destacada) e formulário de 1 a 5.000 caracteres;
+  - a caixa "Nota interna" aparece só para atendentes;
+  - em solicitação cancelada, o formulário vira um aviso;
+  - a fila e "Minhas solicitações" mostram a quantidade de comentários visíveis ao leitor;
+  - mensagens de retorno: comentário enviado, texto inválido (`body` nos caminhos públicos, SF-053), estado.
+- **Testes existentes:** `attendant-actions.test.ts` e `requester-actions.test.ts` (e dois arquivos meus de hoje) falharam **ao carregar**, sem asserção quebrada. As ações agora importam `@/modules/comments`, que puxa o `next-auth`, e esses testes só isolavam `@/modules/requests`. A correção foi acrescentar uma linha `vi.mock("@/modules/comments", …)` em cada um; nenhuma asserção mudou.
+- **Testes novos:** 6 unitários dos casos de uso, 3 das ações e 5 de integração (conversa, texto inválido, cancelada, notas internas em lista e contagem, matriz de autorização com mudança de setor, marcação como texto).
+- **Resultados:** lint, typecheck e build OK; unitários 329/329 (55 arquivos); integração 149/149 + 1 pulado (32 arquivos); E2E 5/5.

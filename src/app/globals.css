@@ -890,6 +890,54 @@ p {
   gap: 4px;
 }
 
+.comment-list {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.comment-list li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+}
+
+.comment-list li.is-internal {
+  border-style: dashed;
+  background: var(--brand-soft);
+}
+
+.comment-body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.comment-badge {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.comment-form {
+  display: grid;
+  gap: 8px;
+}
+
+.comment-form button {
+  justify-self: start;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .history-note {
   font-style: italic;
 }

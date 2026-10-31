@@ -15,6 +15,7 @@ const nextCache = vi.hoisted(() => ({
 }));
 
 vi.mock("@/modules/requests", () => requests);
+vi.mock("@/modules/comments", () => ({ addComment: vi.fn() }));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 

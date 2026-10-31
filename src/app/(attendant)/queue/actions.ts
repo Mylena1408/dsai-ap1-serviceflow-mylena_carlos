@@ -9,6 +9,7 @@ import {
   transferRequest,
   transitionRequestStatus,
 } from "@/modules/requests";
+import { addComment } from "@/modules/comments";
 import { ApplicationError, ValidationError } from "@/server/errors";
 
 function field(formData: FormData, name: string): string {
@@ -19,6 +20,9 @@ function field(formData: FormData, name: string): string {
 function errorCode(error: ApplicationError): string {
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("note"))) {
     return "note";
+  }
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("body"))) {
+    return "body";
   }
   return error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN"
     ? "access"
@@ -92,4 +96,11 @@ export async function transferRequestAction(formData: FormData): Promise<never> 
 export async function cancelRequestAction(formData: FormData): Promise<never> {
   const note = field(formData, "note");
   return runOnRequest(formData, (requestId) => cancelRequest({ requestId, note }), "cancelled");
+}
+
+// Comments and internal notes (SPEC 2026-10-31-comentarios, decision C3).
+export async function addCommentAction(formData: FormData): Promise<never> {
+  const body = field(formData, "body");
+  const isInternal = formData.get("isInternal") === "on";
+  return runOnRequest(formData, (requestId) => addComment({ requestId, body, isInternal }), "commented");
 }

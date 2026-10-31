@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { countComments } from "@/modules/comments";
 import { listRequesterRequests } from "@/modules/requests";
 import { requireRequesterPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -8,6 +9,7 @@ const statusLabels = REQUEST_STATUS_LABELS;
 export default async function RequestListPage() {
   await requireRequesterPageAccess();
   const requests = await listRequesterRequests();
+  const commentCounts = await countComments(requests.map(({ id }) => id));
 
   return (
     <main className="page-shell">
@@ -30,6 +32,11 @@ export default async function RequestListPage() {
                 </Link>
               </h2>
               <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+              <p className="metadata">
+                {(commentCounts.get(request.id) ?? 0) === 1
+                  ? "1 comentário"
+                  : `${commentCounts.get(request.id) ?? 0} comentários`}
+              </p>
               <p className="metadata">
                 Aberta em{" "}
                 <time dateTime={request.createdAt.toISOString()}>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { addComment } from "@/modules/comments";
 import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
@@ -72,6 +73,7 @@ export async function createRequestAction(formData: FormData): Promise<never> {
 // Lifecycle actions on the requester's own request (SPEC 2026-10-31, sections 5.4 and 5.5).
 function lifecycleErrorCode(error: ApplicationError): string {
   if (error instanceof ValidationError) {
+    if (error.issues.some(({ path }) => path.includes("body"))) return "body";
     return error.issues.some(({ path }) => path.includes("note")) ? "note" : "validation";
   }
   if (error.code === "NOT_FOUND" || error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN") {
@@ -108,4 +110,12 @@ export async function cancelOwnRequestAction(formData: FormData): Promise<never>
 
 export async function reopenOwnRequestAction(formData: FormData): Promise<never> {
   return runOnOwnRequest(formData, (requestId, note) => reopenRequest({ requestId, note }), "reopened");
+}
+
+// Comments (SPEC 2026-10-31-comentarios): the requester never marks internal notes.
+export async function addOwnCommentAction(formData: FormData): Promise<never> {
+  const body = field(formData, "body");
+  return runOnOwnRequest(formData, async (requestId) => {
+    await addComment({ requestId, body });
+  }, "commented");
 }

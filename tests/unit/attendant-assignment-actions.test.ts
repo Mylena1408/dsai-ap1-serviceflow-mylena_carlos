@@ -15,6 +15,7 @@ const nextNavigation = vi.hoisted(() => ({
 const nextCache = vi.hoisted(() => ({ revalidatePath: vi.fn() }));
 
 vi.mock("@/modules/requests", () => requests);
+vi.mock("@/modules/comments", () => ({ addComment: vi.fn() }));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 
