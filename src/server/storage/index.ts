@@ -115,6 +115,46 @@ export function createUnavailableDocumentStorage(): DocumentStorage {
   return { put: unavailable, get: unavailable, remove: unavailable };
 }
 
+const END_TO_END_STORE = Symbol.for("serviceflow.e2eDocumentStorage");
+
+/**
+ * Memory storage for the browser tests (SPEC 21.15.7: automated tests use the memory
+ * adapter). TEST_DOCUMENT_STORAGE=memory is accepted only outside production and with a
+ * DATABASE_URL whose database name ends in _test. The store lives on globalThis because
+ * Server Actions and route handlers may be loaded as separate bundles in one process.
+ */
+export function getEndToEndDocumentStorage(
+  env: Record<string, string | undefined> = process.env,
+): DocumentStorage | null {
+  if (env.TEST_DOCUMENT_STORAGE === undefined || env.TEST_DOCUMENT_STORAGE === "") {
+    return null;
+  }
+
+  if (env.TEST_DOCUMENT_STORAGE !== "memory") {
+    throw new Error("TEST_DOCUMENT_STORAGE only accepts the value memory.");
+  }
+
+  if (env.NODE_ENV === "production") {
+    throw new Error("TEST_DOCUMENT_STORAGE cannot be used in production.");
+  }
+
+  let databaseName = "";
+
+  try {
+    databaseName = decodeURIComponent(new URL(env.DATABASE_URL ?? "").pathname.replace(/^\/+/, ""));
+  } catch {
+    // Invalid or missing URL: rejected below.
+  }
+
+  if (!databaseName.toLowerCase().endsWith("_test")) {
+    throw new Error("TEST_DOCUMENT_STORAGE requires a DATABASE_URL whose database name ends in _test.");
+  }
+
+  const holder = globalThis as { [END_TO_END_STORE]?: DocumentStorage };
+  holder[END_TO_END_STORE] ??= createMemoryDocumentStorage();
+  return holder[END_TO_END_STORE];
+}
+
 /**
  * Storage of the running application, from DOCUMENT_STORAGE_* (SPEC 21.15.7). The
  * configuration is read on first use, so operations that store no files never depend on it.
@@ -126,18 +166,18 @@ export function getApplicationDocumentStorage(
   const storage = () => {
     if (!resolved) {
       const config = getDocumentStorageConfig("application", env);
-      resolved = config
-        ? createSupabaseDocumentStorage(config)
-        : createUnavailableDocumentStorage();
+      resolved =
+        getEndToEndDocumentStorage(env) ??
+        (config ? createSupabaseDocumentStorage(config) : createUnavailableDocumentStorage());
     }
 
     return resolved;
   };
 
   return {
-    put: (key, bytes, contentType) => storage().put(key, bytes, contentType),
-    get: (key) => storage().get(key),
-    remove: (key) => storage().remove(key),
+    put: async (key, bytes, contentType) => storage().put(key, bytes, contentType),
+    get: async (key) => storage().get(key),
+    remove: async (key) => storage().remove(key),
   };
 }
 

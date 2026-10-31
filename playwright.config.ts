@@ -28,6 +28,8 @@ export default defineConfig({
       NODE_ENV: "development",
       DATABASE_URL: testDatabaseUrl,
       AUTH_SECRET: randomBytes(32).toString("base64"),
+      // Documents go to an in-process memory store; no real bucket is used (SPEC 21.15.7).
+      TEST_DOCUMENT_STORAGE: "memory",
     },
     timeout: 120_000,
     reuseExistingServer: false,

@@ -10,6 +10,7 @@ Plataforma configurável para gerenciamento de solicitações de serviços inter
 - SF-028 foi revisada, mas permanece não concluída porque SF-026 continua incompleta e a política operacional de backup/recuperação ainda depende de definição e teste de restauração.
 - SF-029: implementação da alteração da própria senha; testes manuais concluídos com sucesso. A validação automatizada de integração permanece pendente devido à indisponibilidade do setup PostgreSQL/Prisma Client.
 - Os fluxos E2E completos da primeira entrega já foram implementados e executados com sucesso.
+- Documentos exigidos por serviço (SPEC principal, seção 21): configuração (SF-032), validação de arquivos (SF-033), abertura com documentos (SF-034), consulta e download autorizados (SF-035) e testes E2E (SF-036) concluídos em 2026-10-31. O armazenamento real no Supabase (SF-030) ainda não foi provisionado: sem ele, envios com arquivo são recusados.
 
 ## Requisitos e stack
 
@@ -58,6 +59,19 @@ DATABASE_URL=postgresql://serviceflow:change-me@localhost:5432/serviceflow_dev
 - O banco deve ser criado previamente em uma instância local do PostgreSQL e o nome do schema/database deve refletir o ambiente escolhido.
 - Gere `AUTH_SECRET` localmente com `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"` e mantenha o valor somente no arquivo de ambiente ignorado pelo Git. Use um valor independente e protegido para cada ambiente.
 - Nunca versione arquivos `.env`, `.env.local` ou `.env.test.local`, nem registre valores reais de conexão ou segredos.
+
+### Armazenamento de documentos
+
+Os arquivos anexados ficam num bucket **privado** do Supabase Storage, acessado só pelo servidor (SPEC principal, seção 21.15). Configure no arquivo local, sem prefixo `NEXT_PUBLIC_`:
+
+```env
+DOCUMENT_STORAGE_URL=https://<projeto>.supabase.co
+DOCUMENT_STORAGE_BUCKET=serviceflow-documents-dev
+DOCUMENT_STORAGE_SECRET_KEY=<chave sb_secret_ exclusiva do ServiceFlow>
+```
+
+- Sem essas variáveis, serviços sem documentos exigidos funcionam normalmente, mas envios com arquivo são recusados com a mensagem "Não foi possível guardar os documentos agora". Isso inclui os serviços de RH do `npm run seed:demo`, que têm documento obrigatório.
+- Na Vercel, cadastre `DOCUMENT_STORAGE_SECRET_KEY` como variável **Secret**, com valor próprio em Production. A chave de produção deve pertencer a um projeto Supabase exclusivo de produção (seção 21.15.7).
 
 ## Autenticação
 
@@ -108,6 +122,8 @@ A política operacional de backup e recuperação do PostgreSQL ainda precisa se
 - Atendentes autenticados consultam a fila do setor em `/queue` e iniciam/concluem solicitações permitidas. O setor da fila é o snapshot registrado na abertura; não há atribuição individual.
 - A rota inicial encaminha a sessão autenticada à interface do perfil obtido do servidor; o cliente não escolhe papel.
 - A abertura valida no servidor a disponibilidade atual do serviço, categoria e setor e grava snapshots e evento inicial junto da solicitação. Transições persistem status e evento de histórico atomicamente.
+- Administradores configuram, por serviço, até 5 documentos exigidos (PDF, DOCX ou TXT; obrigatórios ou opcionais). O solicitante anexa um arquivo por documento ao abrir a solicitação (até 2 MiB cada, 4 MiB no total); o servidor confere o conteúdo real de cada arquivo.
+- O solicitante e os atendentes do setor da solicitação veem os documentos enviados no detalhe e os baixam por `/api/requests/<solicitação>/attachments/<anexo>`, rota que autoriza cada download. Para qualquer outra pessoa, a rota responde como se o anexo não existisse.
 
 ## Testes
 
@@ -137,6 +153,8 @@ npm exec -- playwright install chromium
 
 Os testes E2E completos já cobrem bootstrap/login, configuração administrativa, catálogo, abertura e consulta das próprias solicitações, atendimento, conclusão e negações críticas para acesso a solicitação alheia ou de outro setor.
 
+O E2E de documentos (`tests/e2e/request-documents.spec.ts`) usa só arquivos sintéticos e guarda os anexos na memória do servidor de teste (`TEST_DOCUMENT_STORAGE=memory`, definido em `playwright.config.ts`). Essa opção só é aceita fora de produção e com um `DATABASE_URL` cujo banco termine em `_test`. Nenhum teste usa o bucket de produção.
+
 ## Verificações
 
 ```bash
@@ -148,6 +166,8 @@ npm run build
 Para servir a versão compilada, execute `npm run start` após o build.
 
 ## Métricas do projeto
+
+> Medição atual: a partir de 2026-10-29, a meta é medida em linhas `added` contra a tag `baseline-ap2` com `sh scripts/cloc-diff.sh` (`SPEC/2026-10-29-plano-escala-100k.md`). O valor de cada tarefa fica registrado em `NOTES.md`. A tabela abaixo é o registro histórico da medição anterior.
 
 Medição oficial executada em 2026-10-06 com `cloc`, usando `--vcs=git` e as exclusões documentadas:
 

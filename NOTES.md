@@ -546,3 +546,24 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes:** 12 unitários novos (casos de uso, cabeçalho e rota) e 6 de integração (`request-attachments-access.test.ts`). Nenhum teste existente alterado. Na primeira versão, o lint acusou o nome `useActor` no teste novo (a regra de hooks do React o tratou como hook); renomeado para `actAs`.
 - **Resultados:** lint, typecheck e build OK; unitários 259/259 (42 arquivos); integração 120/120 (24 arquivos); E2E 3/3 (rodado antes da correção de lint, que só mudou arquivos de teste).
 - **Medição (`sh scripts/cloc-diff.sh`, commit `84fae73`):** 6.717 → 7.410 linhas `added` (+693 nesta tarefa), saldo líquido 4.863. Meta: 7,4% de 100.000.
+
+## SF-036 — Testes E2E e revisão dos documentos (2026-10-31)
+
+- **E2E (`tests/e2e/request-documents.spec.ts`):** cobre o percurso da SPEC 21.13:
+  - o administrador cria um serviço de exemplo e configura um documento obrigatório (PDF) e um opcional (TXT) pela tela;
+  - o solicitante vê a lista; o navegador impede o envio sem o obrigatório e, sem essa verificação, o servidor também recusa (`error=attachments`);
+  - o solicitante envia com sucesso e baixa o arquivo com o mesmo SHA-256; os cabeçalhos da resposta são conferidos;
+  - o atendente do setor baixa o mesmo conteúdo;
+  - administrador e visitante sem login recebem a mesma resposta 404 na rota direta.
+- **Armazenamento no E2E:** o servidor do Playwright usa `TEST_DOCUMENT_STORAGE=memory`, um armazenamento em memória guardado em `globalThis`. Ele é compartilhado entre a Server Action e a rota de download, que o Next pode carregar em pacotes separados no mesmo processo. A SPEC 21.15.7 prevê adaptador em memória para testes automatizados. A opção é recusada em produção (`NODE_ENV=production`), com valor diferente de `memory` ou com `DATABASE_URL` cujo banco não termine em `_test`. Sem a variável, nada muda.
+- **Ajuste:** os métodos de `getApplicationDocumentStorage` passaram a ser `async`. Antes, uma configuração inválida lançava erro síncrono em vez de devolver uma promessa rejeitada; o efeito era o mesmo dentro de `createRequest`, mas o contrato da interface ficou correto.
+- **Revisão (CA-DOC-01 a 22):** todos registrados na SPEC com a evidência. CA-DOC-21 fica **parcial**: o bucket privado real e a negação de leitura anônima só podem ser verificados depois do provisionamento da SF-030.
+- **CA-DOC-04:** a única criação automática de cadastro em código de produção é o "Setor de demonstração" do modo demonstração, aprovado na seção 22 (que diz explicitamente que nenhum outro setor ou serviço é criado). Migrations não têm `INSERT`.
+- **Segredos:** a busca nos arquivos versionados só encontrou o valor fictício `sb_secret_synthetic-value-for-tests`. `.env.local` e `.env.test.local` não estão no Git.
+- **Logs:** em `src/`, o único `console.*` é o da falha de compensação (SF-034), já testado.
+- **Fixtures:** `tests/` só contém `.ts`; os documentos de teste são gerados em memória.
+- **README:** seção de armazenamento de documentos, fluxos de documentos, nota sobre o E2E em memória e aviso de que a tabela de métricas é histórica (a medição atual está no `NOTES.md`).
+- **Falhas durante o trabalho (do teste, não do aplicativo):**
+  - `getByRole("alert")` também pegou o anunciador de rotas do Next;
+  - a busca pela chave de armazenamento no HTML pegava o próprio link `/api/requests/<id>/...`. A verificação passou a procurar a chave completa `requests/<solicitação>/<anexo>`. A saída confirmou que só o link aparecia.
+- **Resultados:** lint, typecheck e build OK; unitários 263/263 (43 arquivos); integração 120/120 (24 arquivos); E2E 4/4. O aviso "The destination stream closed early" continua aparecendo no servidor de E2E, como antes da SF-034.

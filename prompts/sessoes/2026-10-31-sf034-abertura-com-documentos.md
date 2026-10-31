@@ -32,3 +32,13 @@ Ver `NOTES.md`, seção SF-034.
 3. Casos de uso de listagem e download, repositório Prisma, rota de download e componente de listagem.
 4. Testes unitários e de integração; todas as suítes; correção de lint num teste novo.
 5. Registro em SPEC, `TASKS.md`, `NOTES.md` e diário. Resultado: `NOTES.md`, seção SF-035.
+
+## Continuação — SF-036
+
+> faça o push da sf-035 e siga para a sf-036
+
+1. Push de `84fae73` e `23e4c9b`.
+2. Leitura dos E2E existentes, do editor de requisitos e dos dados de demonstração.
+3. Armazenamento em memória protegido para o servidor do E2E; E2E do percurso de documentos.
+4. Revisão dos critérios CA-DOC-01 a 22, de segredos, logs e fixtures; README.
+5. Todas as suítes; registro em SPEC, `TASKS.md`, `NOTES.md` e diário. Resultado: `NOTES.md`, seção SF-036.
