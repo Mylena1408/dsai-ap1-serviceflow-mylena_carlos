@@ -27,6 +27,8 @@ O total é um **mínimo**: em três dias só se sabe quando as sessões começar
 | 20/10 | — | 16:25 | sem medida | Só commit | Banco de teste local, integração de SF-031/SF-032 |
 | 27/10 | 12:35 | 14:01 | 1h26 | Medido | Contagem cloc, análise de arquitetura, SPEC de refatoração (2 sessões: 12:35–12:47 e 12:50–14:01) |
 | 29/10 | 15:15 | 17:32 | 2h17 | Medido | Triagem, testes, commits da documentação, linha de base e este registro |
+| 29/10 (noite) a 30/10 | 17:33 | 01:35 | até 8h02 | Estimado (commits) | Plano de escala, SF-037 a SF-046, modo de demonstração, banco fictício, relógio do banco |
+| 31/10 | antes de 16:00 | 19:19 | ≥ 3h19 | Parcial | SF-034 a SF-036 (documentos), SF-030 (provisionamento preparado), publicação na Vercel, SF-047 a SF-052 (atribuição), relatório da fase 1 |
 
 ## 3. Tempo por fase
 
@@ -56,3 +58,5 @@ O total é um **mínimo**: em três dias só se sabe quando as sessões começar
 ## 5. Como manter
 
 Ao fim de cada sessão, acrescentar uma linha na seção 2 com início, fim e trabalho realizado, e atualizar o resumo.
+
+**Nota (2026-10-31):** as duas últimas linhas da tabela foram estimadas pelos horários dos commits, sem descontar pausas, e não entram no "Total mínimo registrado" do resumo, que continua sendo 23h06 até 29/10 às 17:32. Somando o mínimo de 31/10 (3h19), o total mínimo passa a **26h25**, mais até 8h02 de 29 e 30/10.
