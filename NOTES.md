@@ -545,3 +545,4 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Sem migration e sem dependência nova.**
 - **Testes:** 12 unitários novos (casos de uso, cabeçalho e rota) e 6 de integração (`request-attachments-access.test.ts`). Nenhum teste existente alterado. Na primeira versão, o lint acusou o nome `useActor` no teste novo (a regra de hooks do React o tratou como hook); renomeado para `actAs`.
 - **Resultados:** lint, typecheck e build OK; unitários 259/259 (42 arquivos); integração 120/120 (24 arquivos); E2E 3/3 (rodado antes da correção de lint, que só mudou arquivos de teste).
+- **Medição (`sh scripts/cloc-diff.sh`, commit `84fae73`):** 6.717 → 7.410 linhas `added` (+693 nesta tarefa), saldo líquido 4.863. Meta: 7,4% de 100.000.
