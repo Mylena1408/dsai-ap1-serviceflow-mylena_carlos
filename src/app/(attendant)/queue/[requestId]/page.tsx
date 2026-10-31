@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAttendantRequest } from "@/modules/requests";
+import { getAttendantRequest, listRequestAttachments } from "@/modules/requests";
+import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
 import { completeRequestAction, startRequestAction } from "../actions";
@@ -37,9 +38,11 @@ export default async function QueueRequestPage({
     searchParams,
   ]);
   let request;
+  let attachments;
 
   try {
     request = await getAttendantRequest(requestId);
+    attachments = await listRequestAttachments(request.id);
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -79,6 +82,7 @@ export default async function QueueRequestPage({
           <button type="submit">Concluir solicitação</button>
         </form>
       ) : null}
+      <RequestAttachments requestId={request.id} attachments={attachments} />
       <section className="surface-card content-section" aria-labelledby="history-heading">
         <p className="eyebrow">Rastreabilidade</p>
         <h2 id="history-heading">Histórico</h2>

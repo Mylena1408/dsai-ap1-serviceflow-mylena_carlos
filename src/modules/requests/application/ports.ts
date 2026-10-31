@@ -1,4 +1,5 @@
 import type { DetectedDocumentFormat } from "@/modules/attachments";
+import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
@@ -66,6 +67,18 @@ export interface NewRequestAttachment {
 export interface AttachmentStorage {
   put(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
   remove(key: string): Promise<void>;
+}
+
+/** Reads the content of attachments that are referenced by a database row. */
+export interface AttachmentContentReader {
+  get(key: string): Promise<Uint8Array>;
+}
+
+export interface AttachmentQueryRepository {
+  findRequestScope(requestId: string): Promise<{ requesterId: string; sectorId: string } | null>;
+  listForRequest(requestId: string): Promise<RequestAttachmentSummary[]>;
+  /** Filters by both identifiers, so an attachment of another request is not found. */
+  findInRequest(requestId: string, attachmentId: string): Promise<StoredRequestAttachment | null>;
 }
 
 /** Operations available inside a request transaction. */

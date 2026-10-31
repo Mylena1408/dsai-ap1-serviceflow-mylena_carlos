@@ -531,3 +531,17 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** lint, typecheck e build OK; unitários 247/247 (39 arquivos); integração 114/114 (23 arquivos); E2E 3/3. O aviso "The destination stream closed early" do servidor no E2E já aparecia antes da mudança (confirmado com `git stash`; registrado desde 2026-10-05).
 - **Medição (`sh scripts/cloc-diff.sh`, commit `051621b`):** 6.717 linhas `added` (antes 5.600; +1.117), saldo líquido 4.168. Meta: 6,7% de 100.000.
 - **Pendências:** adaptador real do Supabase sem teste contra bucket (SF-030 não provisionada); E2E do percurso com documentos na SF-036; listagem e download na SF-035.
+
+## SF-035 — Consulta e download autorizados de anexos (2026-10-31)
+
+- **Autorização (SPEC 21.5):** `listRequestAttachments` e `getAttachmentDownload` (módulo `requests`) aplicam a cada chamada a mesma regra de leitura da solicitação (`assertRequestReadable`): o solicitante que abriu ou um atendente do setor atual da solicitação. Administrador é negado. A sessão é recarregada do banco a cada requisição, então mudança de setor e desativação valem na hora.
+- **Rota:** `GET /api/requests/[requestId]/attachments/[attachmentId]`. Recebe só identificadores, busca o anexo filtrando pelos dois e só então lê o objeto.
+- **Respostas da rota:** não autenticado, inativo, negado, identificador malformado e inexistente recebem **a mesma** resposta 404, com `Cache-Control: private, no-store`. Assim a rota não revela se o anexo existe. A seção 10 aceita "não encontrado" desde que seja consistente. Falha do armazenamento → 500 com a mensagem genérica, sem detalhes do provedor.
+- **Cabeçalhos do download:** `Content-Type` do formato detectado, `Content-Disposition: attachment` com nome ASCII de reserva e `filename*` em UTF-8 (RFC 6266), `X-Content-Type-Options: nosniff`, `Cache-Control: private, no-store` e `Content-Length`.
+- **Integridade:** além do tamanho (SPEC 21.15.6), o servidor confere o SHA-256 antes de entregar. Conteúdo diferente do registrado nunca é servido (erro fixo 500). Para arquivos de até 2 MiB o custo é desprezível.
+- **Listagem:** o repositório seleciona só os campos de exibição; a chave de armazenamento só é lida na busca do download e nunca chega ao cliente.
+- **Telas:** os detalhes do solicitante e do atendente mostram "Documentos enviados" (documento, obrigatório/opcional, nome do arquivo, formato, tamanho e link de download). Componente compartilhado em `src/app/_components/request-attachments.tsx`. A seção não aparece em solicitações sem anexos.
+- **Sem armazenamento configurado:** o download devolve o erro fixo 500. Hoje só pode haver anexo se o armazenamento estiver configurado, porque a SF-034 recusa envios sem ele.
+- **Sem migration e sem dependência nova.**
+- **Testes:** 12 unitários novos (casos de uso, cabeçalho e rota) e 6 de integração (`request-attachments-access.test.ts`). Nenhum teste existente alterado. Na primeira versão, o lint acusou o nome `useActor` no teste novo (a regra de hooks do React o tratou como hook); renomeado para `actAs`.
+- **Resultados:** lint, typecheck e build OK; unitários 259/259 (42 arquivos); integração 120/120 (24 arquivos); E2E 3/3 (rodado antes da correção de lint, que só mudou arquivos de teste).

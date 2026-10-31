@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRequesterRequest } from "@/modules/requests";
+import { getRequesterRequest, listRequestAttachments } from "@/modules/requests";
+import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 
@@ -22,9 +23,11 @@ export default async function RequestPage({
   await requireRequesterPageAccess();
   const [{ requestId }, { notice }] = await Promise.all([params, searchParams]);
   let request;
+  let attachments;
 
   try {
     request = await getRequesterRequest(requestId);
+    attachments = await listRequestAttachments(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
     throw error;
@@ -50,6 +53,7 @@ export default async function RequestPage({
         <h2>Sua descrição</h2>
         <p className="request-description">{request.description}</p>
       </article>
+      <RequestAttachments requestId={request.id} attachments={attachments} />
       <section className="surface-card content-section" aria-labelledby="history-heading">
         <p className="eyebrow">Rastreabilidade</p>
         <h2 id="history-heading">Histórico</h2>

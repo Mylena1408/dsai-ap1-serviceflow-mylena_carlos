@@ -1,15 +1,20 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/storage";
+import * as attachmentQueries from "./application/attachment-queries";
 import * as createRequestUseCase from "./application/create-request";
 import * as queries from "./application/request-queries";
 import * as transitionUseCase from "./application/transition-request-status";
+import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 import type { RequestWithHistory } from "./domain/request";
+import { createPrismaAttachmentQueryRepository } from "./infrastructure/prisma-attachment-repository";
 import {
   createPrismaRequestQueryRepository,
   createPrismaRequestTransactionRunner,
 } from "./infrastructure/prisma-request-repository";
 
+export { buildAttachmentContentDisposition } from "./domain/attachment";
+export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 export { buildRequestSnapshot } from "./domain/snapshot";
 export { assertRequestStatusTransition } from "./domain/status-transition";
 export type {
@@ -32,6 +37,30 @@ export async function createRequest(
       translate: ["P2003", "P2025"],
       fallbackMessage: "Request creation failed.",
     }),
+    storage,
+  );
+}
+
+export async function listRequestAttachments(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<RequestAttachmentSummary[]> {
+  return attachmentQueries.listRequestAttachments(
+    requestId,
+    createPrismaAttachmentQueryRepository(database),
+  );
+}
+
+export async function getAttachmentDownload(
+  requestId: unknown,
+  attachmentId: unknown,
+  database: PrismaClient = prisma,
+  storage: DocumentStorage = getApplicationDocumentStorage(),
+): Promise<AttachmentDownload> {
+  return attachmentQueries.getAttachmentDownload(
+    requestId,
+    attachmentId,
+    createPrismaAttachmentQueryRepository(database),
     storage,
   );
 }

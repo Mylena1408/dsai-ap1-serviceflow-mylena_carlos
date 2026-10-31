@@ -22,3 +22,13 @@
 ## Resultado
 
 Ver `NOTES.md`, seção SF-034.
+
+## Continuação — SF-035
+
+> faça um push e siga para a SF-035
+
+1. Push de `051621b` e `d487b03`.
+2. Leitura da política de autorização, das páginas de detalhe e do callback de sessão do Auth.js.
+3. Casos de uso de listagem e download, repositório Prisma, rota de download e componente de listagem.
+4. Testes unitários e de integração; todas as suítes; correção de lint num teste novo.
+5. Registro em SPEC, `TASKS.md`, `NOTES.md` e diário. Resultado: `NOTES.md`, seção SF-035.
