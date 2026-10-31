@@ -624,3 +624,25 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Credenciais:** a URL do banco com a senha foi colada no chat pela responsável, que decidiu tratá-la como não sensível, por ser um banco didático só com dados fictícios. Ela foi usada apenas nas linhas de comando das migrations e do seed, e não foi gravada em nenhum arquivo do projeto. **Recomendação:** trocar a senha do papel `neondb_owner` no Neon se o banco passar a ter qualquer dado real.
 - **Verificação do site publicado (só leitura):** `/` e `/catalog` redirecionam para `/login`; `/login` responde 200; o download anônimo de anexo responde 404. No navegador (Playwright), os três botões de demonstração entram em `/admin`, `/catalog` (catálogo visível) e `/queue` (12 solicitações). Nenhuma solicitação foi criada pelo teste.
 - **Limitações:** sem armazenamento de documentos (SF-030), os serviços de RH com documento obrigatório recusam novas solicitações. O modo demonstração permite que qualquer pessoa com o link entre como administrador.
+
+## SF-048 — Assumir, liberar e transferir (2026-10-31)
+
+- **Banco local:** antes de começar, as migrations da SF-047 foram aplicadas no `serviceflow_dev`. O Prisma CLI lê só o `.env`, então o comando rodou com as variáveis do `.env.local` carregadas no shell, sem exibi-las.
+- **Casos de uso (`application/assignment.ts`):**
+  - a sessão é conferida por `requireStatusChangeActor`: atendente do setor da solicitação, e qualquer outro recebe "não encontrado";
+  - a transação relê o ator e o estado da solicitação (com o responsável atual), aplica as regras do domínio, grava com `updateMany` condicionado a **estado e responsável** lidos e registra o `RequestAssignmentEvent` com o horário do banco;
+  - se a linha mudou entre a leitura e a escrita, o resultado é `ConflictError` e nada é gravado.
+- **Ao assumir de um responsável que saiu do setor**, o evento registra a origem (o antigo responsável), não nulo. Assim a troca fica rastreável.
+- **`updatedAt`** passa a ser o horário do último evento, de status ou de atribuição.
+- **Transferência:** o identificador do novo responsável vem do formulário, mas é recarregado do banco (`findUserForAssignment`) e validado pelo domínio. A lista de colegas (`listTransferCandidates`) só é consultada quando quem vê a página é o responsável efetivo.
+- **Telas:**
+  - painel "Responsável" no detalhe do atendente, com Assumir, Liberar e Transferir conforme as regras;
+  - a fila mostra "Responsável: ninguém / você / nome";
+  - o detalhe do solicitante mostra o atendente responsável (regra 5.1.4);
+  - `requireAttendantPageAccess` passou a devolver o ator, e quem já chamava ignora o retorno.
+- **Fora desta tarefa:** a regra 5.3 (com responsável, só ele inicia e conclui) é a SF-049. Até lá, os botões de status continuam valendo para qualquer atendente do setor.
+- **Testes:**
+  - 8 unitários dos casos de uso e 2 das ações (em arquivo novo; o teste existente das ações não mudou);
+  - 6 de integração, entre eles a concorrência real com duas transações, executada 4 vezes com o mesmo resultado;
+  - o dublê em memória ganhou os métodos novos.
+- **Resultados:** lint, typecheck e build OK; unitários 293/293 (47 arquivos); integração 131/131 + 1 pulado (27 arquivos); E2E 4/4.

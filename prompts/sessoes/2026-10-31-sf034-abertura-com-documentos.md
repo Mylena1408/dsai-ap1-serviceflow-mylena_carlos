@@ -69,3 +69,11 @@ Escolha da responsável: atribuição (passo 3 do plano). SPEC escrita como prop
 ## Continuação — SF-047
 
 Após a aprovação da SPEC: migrations, domínio e testes da SF-047. O `prisma migrate deploy` no banco de desenvolvimento foi negado pela permissão automática e ficou pendente para a responsável.
+
+## Continuação — publicação e SF-048
+
+> pode publicar
+
+> de push nos 3 commits, faça as migrations da sf-047, siga para a sf-048
+
+Publicação na Vercel (ver `NOTES.md`, "Publicação na Vercel com banco Neon"); push de `1dfff4e`, `f7a056f` e `ed44bfb`; migrations no banco local; implementação da SF-048 (ver `NOTES.md`, seção SF-048).

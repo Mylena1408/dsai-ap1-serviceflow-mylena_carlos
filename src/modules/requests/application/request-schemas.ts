@@ -26,6 +26,14 @@ export const requestStatusTransitionInputSchema = z
   })
   .strict();
 
+export const requestAssignmentInputSchema = z
+  .object({ requestId: entityIdSchema })
+  .strict();
+
+export const requestTransferInputSchema = z
+  .object({ requestId: entityIdSchema, assigneeId: entityIdSchema })
+  .strict();
+
 export type RequestCreationInput = z.output<typeof requestCreationInputSchema>;
 export type RequestStatusTransitionInput = z.output<
   typeof requestStatusTransitionInputSchema

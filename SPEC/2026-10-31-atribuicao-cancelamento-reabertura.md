@@ -133,20 +133,20 @@ Tudo no módulo `requests`, nas camadas existentes:
 
 ## 8. Critérios de aceitação
 
-- [ ] **CA-ATR-01** — Um atendente ativo do setor assume uma solicitação `OPEN` ou `IN_PROGRESS` sem responsável efetivo; o evento de atribuição registra ator, origem nula, destino e horário do banco.
-- [ ] **CA-ATR-02** — Assumir solicitação com responsável efetivo é rejeitado sem gravar nada; se o responsável foi desativado ou mudou de setor, outro atendente do setor consegue assumir.
-- [ ] **CA-ATR-03** — O responsável transfere para outro atendente ativo do mesmo setor; transferência para si, inativo, outro setor, outro perfil ou identificador inexistente é rejeitada no servidor.
-- [ ] **CA-ATR-04** — O responsável libera a solicitação; ela fica sem responsável e o evento registra destino nulo.
+- [x] **CA-ATR-01** — Um atendente ativo do setor assume uma solicitação `OPEN` ou `IN_PROGRESS` sem responsável efetivo; o evento de atribuição registra ator, origem nula, destino e horário do banco. *Verificado em 2026-10-31 (SF-048): testes unitários de `assignment.ts` e `tests/integration/request-assignment.test.ts`.*
+- [x] **CA-ATR-02** — Assumir solicitação com responsável efetivo é rejeitado sem gravar nada; se o responsável foi desativado ou mudou de setor, outro atendente do setor consegue assumir. *Verificado em 2026-10-31 (SF-048): conflito sem gravação; após o responsável mudar de setor, outro atendente assume (unitário e integração).*
+- [x] **CA-ATR-03** — O responsável transfere para outro atendente ativo do mesmo setor; transferência para si, inativo, outro setor, outro perfil ou identificador inexistente é rejeitada no servidor. *Verificado em 2026-10-31 (SF-048): transferência com evento; alvo validado no banco (si mesmo, inativo, outro setor, administrador, solicitante e inexistente rejeitados).*
+- [x] **CA-ATR-04** — O responsável libera a solicitação; ela fica sem responsável e o evento registra destino nulo. *Verificado em 2026-10-31 (SF-048): unitário e integração.*
 - [ ] **CA-ATR-05** — Sem responsável, qualquer atendente do setor inicia e conclui como antes (testes existentes de transição passam sem alteração de asserções); com responsável efetivo, só ele inicia e conclui.
 - [ ] **CA-ATR-06** — O solicitante cancela a própria solicitação `OPEN`; não consegue cancelar `IN_PROGRESS`, `COMPLETED`, `CANCELLED` nem solicitação alheia.
 - [ ] **CA-ATR-07** — O atendente do setor cancela `OPEN` ou `IN_PROGRESS` somente com justificativa de 1 a 1.000 caracteres; a justificativa fica no evento.
 - [ ] **CA-ATR-08** — `CANCELLED` é terminal: nenhuma transição, atribuição ou reabertura é aceita.
 - [ ] **CA-ATR-09** — O solicitante reabre a própria solicitação `COMPLETED` em até 7 dias com justificativa; ela volta a `OPEN`, `completedAt` fica nulo e o responsável é mantido. Após 7 dias, a reabertura é rejeitada.
-- [ ] **CA-ATR-10** — Administrador, atendente de outro setor, outro solicitante, usuário inativo e não autenticado são negados em todas as novas operações, sem revelar a solicitação.
-- [ ] **CA-ATR-11** — Duas ações concorrentes sobre a mesma solicitação (por exemplo, dois atendentes assumindo) resultam em uma aceita e outra rejeitada, sem estado intermediário.
+- [ ] **CA-ATR-10** — Administrador, atendente de outro setor, outro solicitante, usuário inativo e não autenticado são negados em todas as novas operações, sem revelar a solicitação. *Parte de atribuição verificada em 2026-10-31 (SF-048); cancelamento e reabertura nas SF-050 e SF-051.*
+- [x] **CA-ATR-11** — Duas ações concorrentes sobre a mesma solicitação (por exemplo, dois atendentes assumindo) resultam em uma aceita e outra rejeitada, sem estado intermediário. *Verificado em 2026-10-31 (SF-048): duas transações reais concorrentes no PostgreSQL de teste (4 execuções), uma aceita e outra `ConflictError`, com um único evento.*
 - [ ] **CA-ATR-12** — O detalhe mostra o responsável e a linha do tempo com status, atribuições e justificativas em ordem cronológica, para solicitante e atendente.
 - [x] **CA-ATR-13** — A migration é aditiva: dados existentes ficam inalterados e todas as suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-047): duas migrations aditivas aplicadas sobre o banco de teste com dados existentes; `request-assignment-schema.test.ts`; todas as suítes anteriores passam sem alteração de asserções.*
-- [ ] **CA-ATR-14** — Identificadores de ator, solicitante e setor vêm da sessão e do banco; campos forjados no formulário (estado, horários, setor, ator) são rejeitados.
+- [ ] **CA-ATR-14** — Identificadores de ator, solicitante e setor vêm da sessão e do banco; campos forjados no formulário (estado, horários, setor, ator) são rejeitados. *Parte de atribuição verificada em 2026-10-31 (SF-048): schemas estritos rejeitam ator, setor e responsável forjados; o novo responsável é validado no banco.*
 
 ## 9. Estratégia de testes
 

@@ -42,6 +42,14 @@ export interface RequestWithHistory extends RequestRecord {
     id: string;
     isActive: boolean;
   };
+  /** Stored assignee, effective or not (SPEC 2026-10-31, section 5.1). */
+  assignee: {
+    id: string;
+    name: string;
+    role: "ADMIN" | "REQUESTER" | "ATTENDANT";
+    isActive: boolean;
+    sectorId: string | null;
+  } | null;
 }
 
 export type RequestSummary = Pick<

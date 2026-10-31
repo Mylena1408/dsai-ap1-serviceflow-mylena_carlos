@@ -1,4 +1,5 @@
 import type {
+  NewAssignmentEvent,
   NewRequestAttachment,
   RequestQueryRepository,
   RequestTransaction,
@@ -26,6 +27,7 @@ export interface InMemoryRequestStore {
   events: StoredEvent[];
   requirements: StoredRequirement[];
   attachments: NewRequestAttachment[];
+  assignmentEvents: NewAssignmentEvent[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -41,6 +43,7 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     events: [],
     requirements: [],
     attachments: [],
+    assignmentEvents: [],
     ...seed,
   };
 }
@@ -79,6 +82,18 @@ export function storedRequest(overrides: Partial<RequestRecord> = {}): RequestRe
   };
 }
 
+function lifecycleUser(store: InMemoryRequestStore, userId: string | null) {
+  const user = store.actors.find(({ id }) => id === userId);
+  return user ? { id: user.id, role: user.role, isActive: user.isActive, sectorId: user.sectorId } : null;
+}
+
+function assigneeOf(store: InMemoryRequestStore, userId: string | null) {
+  const user = store.actors.find(({ id }) => id === userId);
+  return user
+    ? { id: user.id, name: user.name, role: user.role, isActive: user.isActive, sectorId: user.sectorId }
+    : null;
+}
+
 function withHistory(store: InMemoryRequestStore, request: RequestRecord): RequestWithHistory {
   const service = store.services.find(({ id }) => id === request.serviceId);
 
@@ -92,6 +107,7 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
         return { ...event, actor: { id: actor.id, name: actor.name, email: actor.email } };
       }),
     service: { id: request.serviceId, isActive: service?.isActive ?? false },
+    assignee: assigneeOf(store, request.assigneeId),
   };
 }
 
@@ -111,6 +127,11 @@ export function createInMemoryQueryRepository(store: InMemoryRequestStore): Requ
     },
     async findInSector(requestId, sectorId) {
       return find(({ id, sectorId: owner }) => id === requestId && owner === sectorId)[0] ?? null;
+    },
+    async listSectorAttendants(sectorId) {
+      return store.actors
+        .filter((actor) => actor.sectorId === sectorId && actor.role === "ATTENDANT" && actor.isActive)
+        .map(({ id, name }) => ({ id, name }));
     },
   };
 }
@@ -176,6 +197,36 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         occurredAt: event.occurredAt,
         note: event.note ?? null,
       });
+    },
+    async findLifecycleState(requestId) {
+      const request = store.requests.find(({ id }) => id === requestId);
+      return request
+        ? {
+            requesterId: request.requesterId,
+            sectorId: request.sectorId,
+            status: request.status,
+            completedAt: request.completedAt,
+            assignee: lifecycleUser(store, request.assigneeId),
+          }
+        : null;
+    },
+    async findUserForAssignment(userId) {
+      return lifecycleUser(store, userId);
+    },
+    async updateAssigneeIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, assigneeId }) =>
+          id === update.requestId &&
+          status === update.expectedStatus &&
+          assigneeId === update.expectedAssigneeId,
+      );
+      if (!request) return 0;
+      request.assigneeId = update.assigneeId;
+      request.updatedAt = update.updatedAt;
+      return 1;
+    },
+    async insertAssignmentEvent(event) {
+      store.assignmentEvents.push({ ...event });
     },
     async getWithHistory(requestId) {
       const request = store.requests.find(({ id }) => id === requestId);

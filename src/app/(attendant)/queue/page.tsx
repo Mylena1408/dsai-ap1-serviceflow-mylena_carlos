@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { listAttendantQueue } from "@/modules/requests";
+import { effectiveAssigneeId, listAttendantQueue } from "@/modules/requests";
 import { requireAttendantPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 const statusLabels = REQUEST_STATUS_LABELS;
 
 export default async function AttendantQueuePage() {
-  await requireAttendantPageAccess();
+  const actor = await requireAttendantPageAccess();
   const requests = await listAttendantQueue();
 
   return (
@@ -30,6 +30,14 @@ export default async function AttendantQueuePage() {
                 </Link>
               </h2>
               <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+              <p className="metadata">
+                Responsável:{" "}
+                {effectiveAssigneeId(request) === null
+                  ? "ninguém"
+                  : effectiveAssigneeId(request) === actor.id
+                    ? "você"
+                    : request.assignee?.name}
+              </p>
               <p>{request.description}</p>
               <p className="metadata">
                 Aberta em{" "}

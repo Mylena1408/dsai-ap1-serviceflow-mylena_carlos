@@ -59,3 +59,18 @@ export async function getAttendantRequest(
 
   return request;
 }
+
+/**
+ * Colleagues the effective assignee can transfer to (section 5.2): active attendants of the
+ * request's sector, except the actor. Same scope as reading the request in the queue.
+ */
+export async function listTransferCandidates(
+  requestId: unknown,
+  repository: RequestQueryRepository,
+): Promise<Array<{ id: string; name: string }>> {
+  const request = await getAttendantRequest(requestId, repository);
+  const actor = assertRole(await requireCurrentActor(), "ATTENDANT");
+  const attendants = await repository.listSectorAttendants(request.sectorId);
+
+  return attendants.filter(({ id }) => id !== actor.id);
+}

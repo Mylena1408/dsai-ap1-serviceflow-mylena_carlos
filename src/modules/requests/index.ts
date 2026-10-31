@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/storage";
+import * as assignment from "./application/assignment";
 import * as attachmentQueries from "./application/attachment-queries";
 import * as createRequestUseCase from "./application/create-request";
 import * as queries from "./application/request-queries";
@@ -15,6 +16,7 @@ import {
 
 export { buildAttachmentContentDisposition } from "./domain/attachment";
 export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
+export { effectiveAssigneeId } from "./domain/lifecycle";
 export { buildRequestSnapshot } from "./domain/snapshot";
 export { assertRequestStatusTransition } from "./domain/status-transition";
 export type {
@@ -102,4 +104,28 @@ export async function transitionRequestStatus(
       fallbackMessage: "Request transition failed.",
     }),
   );
+}
+
+const assignmentErrors = {
+  translate: ["P2003", "P2034"] as const,
+  fallbackMessage: "Request assignment failed.",
+};
+
+export async function assumeRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return assignment.assumeRequest(input, createPrismaRequestTransactionRunner(database, assignmentErrors));
+}
+
+export async function releaseRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return assignment.releaseRequest(input, createPrismaRequestTransactionRunner(database, assignmentErrors));
+}
+
+export async function transferRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return assignment.transferRequest(input, createPrismaRequestTransactionRunner(database, assignmentErrors));
+}
+
+export async function listTransferCandidates(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<Array<{ id: string; name: string }>> {
+  return queries.listTransferCandidates(requestId, createPrismaRequestQueryRepository(database));
 }

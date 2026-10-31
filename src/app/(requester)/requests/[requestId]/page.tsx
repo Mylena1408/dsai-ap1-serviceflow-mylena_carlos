@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRequesterRequest, listRequestAttachments } from "@/modules/requests";
+import {
+  effectiveAssigneeId,
+  getRequesterRequest,
+  listRequestAttachments,
+} from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
@@ -46,6 +50,12 @@ export default async function RequestPage({
         <p><span className="status-pill">{statusLabels[request.status]}</span></p>
         <p>Categoria: {request.categoryNameSnapshot}</p>
         <p>Setor responsável: {request.sectorNameSnapshot}</p>
+        <p>
+          Atendente responsável:{" "}
+          {effectiveAssigneeId(request) !== null && request.assignee
+            ? request.assignee.name
+            : "ainda não definido"}
+        </p>
         <p>{request.serviceDescriptionSnapshot}</p>
         <h2>Sua descrição</h2>
         <p className="request-description">{request.description}</p>

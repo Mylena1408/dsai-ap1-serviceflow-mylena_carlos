@@ -22,7 +22,12 @@ const requestWithHistory = {
   service: {
     select: { id: true, isActive: true },
   },
+  assignee: {
+    select: { id: true, name: true, role: true, isActive: true, sectorId: true },
+  },
 } satisfies Prisma.RequestInclude;
+
+const lifecycleUser = { id: true, role: true, isActive: true, sectorId: true } as const;
 
 // Compile-time check that the Prisma row matches the domain type exactly.
 type RequestWithHistoryRow = Prisma.RequestGetPayload<{
@@ -63,6 +68,13 @@ export function createPrismaRequestQueryRepository(
         include: requestWithHistory,
       });
       return row && toDomain(row);
+    },
+    listSectorAttendants(sectorId) {
+      return database.user.findMany({
+        where: { sectorId, role: "ATTENDANT", isActive: true },
+        select: { id: true, name: true },
+        orderBy: [{ name: "asc" }, { id: "asc" }],
+      });
     },
   };
 }
@@ -130,6 +142,35 @@ function createPrismaRequestTransaction(
     },
     async insertStatusEvent(event) {
       await transaction.requestStatusEvent.create({ data: event });
+    },
+    findLifecycleState(requestId) {
+      return transaction.request.findUnique({
+        where: { id: requestId },
+        select: {
+          requesterId: true,
+          sectorId: true,
+          status: true,
+          completedAt: true,
+          assignee: { select: lifecycleUser },
+        },
+      });
+    },
+    findUserForAssignment(userId) {
+      return transaction.user.findUnique({ where: { id: userId }, select: lifecycleUser });
+    },
+    async updateAssigneeIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: {
+          id: update.requestId,
+          status: update.expectedStatus,
+          assigneeId: update.expectedAssigneeId,
+        },
+        data: { assigneeId: update.assigneeId, updatedAt: update.updatedAt },
+      });
+      return result.count;
+    },
+    async insertAssignmentEvent(event) {
+      await transaction.requestAssignmentEvent.create({ data: event });
     },
     async getWithHistory(requestId) {
       return toDomain(

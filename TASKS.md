@@ -507,7 +507,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-048 — Assumir, liberar e transferir
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Casos de uso `assumeRequest`, `releaseRequest` e `transferRequest` (`application/assignment.ts`), repositório com atualização condicional por estado e responsável, evento de atribuição, lista de colegas para transferir, painel "Responsável" no detalhe do atendente, responsável na fila e no detalhe do solicitante. CA-ATR-01 a 04 e 11 verificados; CA-ATR-10 e 14 na parte de atribuição.
 - **Objetivo:** Casos de uso, repositório com atualização condicional (estado + responsável), eventos de atribuição e telas do atendente (fila com responsável; detalhe com Assumir, Liberar e Transferir).
 - **Arquivos/módulos esperados:** `src/modules/requests/{application,infrastructure}`, `src/app/(attendant)/queue/`, testes.
 - **Dependências:** SF-047.

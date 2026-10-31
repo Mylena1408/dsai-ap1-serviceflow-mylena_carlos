@@ -1,6 +1,7 @@
 import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
+import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
 
@@ -11,6 +12,8 @@ export interface RequestQueryRepository {
   findForRequester(requestId: string, requesterId: string): Promise<RequestWithHistory | null>;
   listBySector(sectorId: string): Promise<RequestWithHistory[]>;
   findInSector(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
+  /** Active attendants of a sector, by name, for the transfer form. */
+  listSectorAttendants(sectorId: string): Promise<Array<{ id: string; name: string }>>;
 }
 
 export interface TransactionActor {
@@ -46,6 +49,23 @@ export interface StatusUpdate {
   toStatus: RequestStatus;
   updatedAt: Date;
   completedAt?: Date;
+}
+
+/** Changes the assignee only while status and assignee still equal the values read. */
+export interface AssigneeUpdate {
+  requestId: string;
+  expectedStatus: RequestStatus;
+  expectedAssigneeId: string | null;
+  assigneeId: string | null;
+  updatedAt: Date;
+}
+
+export interface NewAssignmentEvent {
+  requestId: string;
+  actorId: string;
+  fromAssigneeId: string | null;
+  toAssigneeId: string | null;
+  occurredAt: Date;
 }
 
 /** Attachment row; every field is derived on the server (SPEC 21.4 item 8, 21.9). */
@@ -107,6 +127,12 @@ export interface RequestTransaction {
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;
   insertStatusEvent(event: NewStatusEvent): Promise<void>;
+  /** State needed by the lifecycle rules, with the current assignee as stored now. */
+  findLifecycleState(requestId: string): Promise<LifecycleRequest | null>;
+  findUserForAssignment(userId: string): Promise<LifecycleUser | null>;
+  /** Returns the number of rows changed (0 when status or assignee changed meanwhile). */
+  updateAssigneeIfCurrent(update: AssigneeUpdate): Promise<number>;
+  insertAssignmentEvent(event: NewAssignmentEvent): Promise<void>;
   getWithHistory(requestId: string): Promise<RequestWithHistory>;
 }
 

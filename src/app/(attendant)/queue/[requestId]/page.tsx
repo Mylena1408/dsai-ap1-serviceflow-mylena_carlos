@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAttendantRequest, listRequestAttachments } from "@/modules/requests";
+import {
+  effectiveAssigneeId,
+  getAttendantRequest,
+  listRequestAttachments,
+  listTransferCandidates,
+} from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
 import { completeRequestAction, startRequestAction } from "../actions";
+import { AssignmentPanel } from "./assignment-panel";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 type QueueRequestPageProps = {
@@ -22,6 +28,9 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "unexpected") return "Não foi possível concluir a operação.";
   if (notice === "started") return "Atendimento iniciado.";
   if (notice === "completed") return "Solicitação concluída.";
+  if (notice === "assumed") return "Você assumiu esta solicitação.";
+  if (notice === "released") return "Você liberou esta solicitação.";
+  if (notice === "transferred") return "Solicitação transferida.";
   return null;
 }
 
@@ -29,17 +38,21 @@ export default async function QueueRequestPage({
   params,
   searchParams,
 }: QueueRequestPageProps) {
-  await requireAttendantPageAccess();
+  const actor = await requireAttendantPageAccess();
   const [{ requestId }, { error, notice }] = await Promise.all([
     params,
     searchParams,
   ]);
   let request;
   let attachments;
+  let candidates: Array<{ id: string; name: string }> = [];
 
   try {
     request = await getAttendantRequest(requestId);
     attachments = await listRequestAttachments(request.id);
+    if (effectiveAssigneeId(request) === actor.id) {
+      candidates = await listTransferCandidates(request.id);
+    }
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -67,6 +80,7 @@ export default async function QueueRequestPage({
         <h2>Descrição da solicitação</h2>
         <p className="request-description">{request.description}</p>
       </article>
+      <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} />
       {request.status === "OPEN" ? (
         <form className="content-section" action={startRequestAction}>
           <input type="hidden" name="requestId" value={request.id} />

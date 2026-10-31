@@ -890,6 +890,18 @@ p {
   gap: 4px;
 }
 
+.assignment-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.transfer-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .attachment-list {
   display: grid;
   gap: 12px;
