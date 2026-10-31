@@ -554,3 +554,47 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ATR-12 e todos os CA-ATR-01 a 14 registrados.
 - **Testes relacionados:** E2E do percurso; todas as suítes, lint, typecheck e build.
 - **SPEC:** `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`.
+
+## Comentários e conversas — SPEC de 2026-10-31
+
+**Ordem:** SF-053 → SF-054 → SF-055 → SF-056.
+
+### SF-053 — Migration e domínio dos comentários
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration aditiva (`RequestComment` com `CHECK` do texto e índice) e regras puras: quem lê, quem escreve, estados aceitos (C1), nota interna (C3), normalização do texto.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/comments/domain/`, testes.
+- **Dependências:** SF-052.
+- **Critérios de conclusão:** CA-COM-09 e as regras de domínio de CA-COM-03 a 05.
+- **Testes relacionados:** Unitários das regras; integração da migration e do `CHECK`.
+- **SPEC:** `SPEC/2026-10-31-comentarios.md`.
+
+### SF-054 — Escrever e ler comentários
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso, repositório Prisma, seção "Conversa" nos detalhes do solicitante e do atendente.
+- **Arquivos/módulos esperados:** `src/modules/comments/{application,infrastructure}`, `src/modules/comments/index.ts`, telas de detalhe, testes.
+- **Dependências:** SF-053.
+- **Critérios de conclusão:** CA-COM-01 a 04, 06 a 08.
+- **Testes relacionados:** Unitários e integração com matriz de autorização.
+- **SPEC:** `SPEC/2026-10-31-comentarios.md`.
+
+### SF-055 — Notas internas e contagem nas listas
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Nota interna só para atendentes; filtro para o solicitante; quantidade de comentários na fila e na lista.
+- **Arquivos/módulos esperados:** Módulo `comments`, telas de lista e detalhe, testes.
+- **Dependências:** SF-054.
+- **Critérios de conclusão:** CA-COM-05.
+- **Testes relacionados:** Integração do filtro; contagem por perfil.
+- **SPEC:** `SPEC/2026-10-31-comentarios.md`.
+
+### SF-056 — E2E e revisão dos comentários
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 9 da SPEC; revisão de escopo, segurança e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-055.
+- **Critérios de conclusão:** Todos os CA-COM-01 a 09 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-10-31-comentarios.md`.
