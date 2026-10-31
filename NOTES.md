@@ -529,4 +529,5 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Sem migration e sem dependência nova.**
 - **Testes:** 21 unitários novos (associação no domínio, caso de uso com arquivos, Server Action e listagem para o solicitante) e 8 de integração (`requests-create-with-documents.test.ts`), incluindo falha da transação por gatilho no PostgreSQL. Testes existentes alterados só nos dublês (`in-memory-requests.ts` e o repositório falso de requisitos ganharam os métodos novos) e na expectativa da Server Action, que agora repassa `attachments: []`.
 - **Resultados:** lint, typecheck e build OK; unitários 247/247 (39 arquivos); integração 114/114 (23 arquivos); E2E 3/3. O aviso "The destination stream closed early" do servidor no E2E já aparecia antes da mudança (confirmado com `git stash`; registrado desde 2026-10-05).
+- **Medição (`sh scripts/cloc-diff.sh`, commit `051621b`):** 6.717 linhas `added` (antes 5.600; +1.117), saldo líquido 4.168. Meta: 6,7% de 100.000.
 - **Pendências:** adaptador real do Supabase sem teste contra bucket (SF-030 não provisionada); E2E do percurso com documentos na SF-036; listagem e download na SF-035.
