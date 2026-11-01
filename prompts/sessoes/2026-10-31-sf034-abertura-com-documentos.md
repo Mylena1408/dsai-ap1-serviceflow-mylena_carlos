@@ -373,3 +373,9 @@ Decisões K1 a K4 respondidas pela responsável no questionário: todas as propo
 > siga para a sf-087
 
 SF-087 concluída (ver `NOTES.md`, seção SF-087).
+
+## Continuação — SF-088
+
+> siga para a sf-088
+
+SF-088 concluída (ver `NOTES.md`, seção SF-088).

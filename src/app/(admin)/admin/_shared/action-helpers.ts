@@ -6,7 +6,7 @@ import { ApplicationError } from "@/server/errors";
 import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
-export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages";
+export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions";
 export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services";
 
 export function field(formData: FormData, name: string): string {

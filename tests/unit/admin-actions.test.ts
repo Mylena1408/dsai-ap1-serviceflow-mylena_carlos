@@ -58,6 +58,7 @@ vi.mock("@/modules/document-requirements", () => ({
 // tests/unit/service-field-actions.test.ts.
 vi.mock("@/modules/service-fields", () => ({}));
 vi.mock("@/modules/service-stages", () => ({}));
+vi.mock("@/modules/permissions", () => ({}));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 

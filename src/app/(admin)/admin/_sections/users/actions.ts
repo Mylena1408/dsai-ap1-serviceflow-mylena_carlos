@@ -5,6 +5,7 @@ import {
   setUserActive,
   updateUser,
 } from "@/modules/users";
+import { grantPermission, revokePermission } from "@/modules/permissions";
 import {
   activeState,
   createFailure,
@@ -65,4 +66,24 @@ export async function toggleUserAction(formData: FormData): Promise<never> {
     reportFailure("users", section, error);
   }
   return finish("users", "status", section);
+}
+
+// SPEC 2026-11-01-permissoes-configuraveis, 5.2: the administrator grants and revokes.
+async function changePermission(formData: FormData, grant: boolean): Promise<never> {
+  const section = selectedSection(formData);
+  const input = { userId: field(formData, "userId"), permission: field(formData, "permission") };
+  try {
+    await (grant ? grantPermission(input) : revokePermission(input));
+  } catch (error) {
+    reportFailure("permissions", section, error);
+  }
+  return finish("permissions", "updated", section);
+}
+
+export async function grantPermissionAction(formData: FormData): Promise<never> {
+  return changePermission(formData, true);
+}
+
+export async function revokePermissionAction(formData: FormData): Promise<never> {
+  return changePermission(formData, false);
 }

@@ -78,14 +78,14 @@ Cada concessão e revogação fica numa tabela `UserPermissionEvent` (usuário, 
 ## 7. Critérios de aceitação
 
 - [ ] **CA-PER-01** — Sem permissões concedidas, todas as regras atuais valem, e as suítes anteriores passam sem alteração de asserções.
-- [ ] **CA-PER-02** — Só o administrador concede e revoga; a concessão respeita os perfis da tabela 5.1 e só vale para usuários ativos; repetir não duplica.
-- [ ] **CA-PER-03** — Concessões e revogações ficam no histórico do usuário, com quem fez e quando.
-- [ ] **CA-PER-04** — A revogação vale na operação seguinte, sem novo login; mudança de setor ou de perfil é respeitada.
+- [x] **CA-PER-02** — Só o administrador concede e revoga; a concessão respeita os perfis da tabela 5.1 e só vale para usuários ativos; repetir não duplica. *Verificado em 2026-11-01 (SF-088): só o administrador vê, concede e revoga (atendente, gestor e solicitante recebem recusa); perfis fora da tabela 5.1, permissão desconhecida, usuário inexistente e usuário inativo são recusados sem gravar nada; conceder de novo não duplica nem gera histórico (unitário das ações e integração).*
+- [x] **CA-PER-03** — Concessões e revogações ficam no histórico do usuário, com quem fez e quando. *Verificado em 2026-11-01 (SF-088): cada concessão e revogação efetiva fica no histórico com a permissão, a ação, quem fez e quando, e aparece na tela do usuário (integração e navegador).*
+- [x] **CA-PER-04** — A revogação vale na operação seguinte, sem novo login; mudança de setor ou de perfil é respeitada. *Verificado em 2026-11-01 (SF-087 e SF-088): a permissão segue o setor atual da pessoa (muda junto com ele) e deixa de valer ao mudar para um perfil que não pode recebê-la, continuando registrada "sem efeito"; as regras releem o usuário a cada verificação (unitário e integração). O uso nas operações, sem novo login, é conferido nas SF-089 e SF-090.*
 - [ ] **CA-PER-05** — Com `SECTOR_SERVICES`, a pessoa cria e edita serviços do próprio setor e configura documentos, campos e etapas deles; serviços de outros setores e a troca de setor são recusados.
 - [ ] **CA-PER-06** — Com `SECTOR_REQUESTS_READ`, o gestor lista e abre todas as solicitações do setor só para leitura; sem a permissão, continua vendo só as que exigem aprovação.
 - [ ] **CA-PER-07** — Com `QUEUE_SUPERVISION`, o atendente libera e transfere solicitação do setor que está com colega; sem a permissão, continua recusado; iniciar, concluir e mover etapas seguem só do responsável.
 - [ ] **CA-PER-08** — As ações feitas por permissão aparecem no histórico normal da solicitação e geram os eventos e notificações já existentes.
-- [ ] **CA-PER-09** — Telas: a administração mostra e altera as permissões de cada usuário (com as sem efeito marcadas); as áreas mostram as páginas liberadas só para quem tem a permissão.
+- [ ] **CA-PER-09** — Telas: a administração mostra e altera as permissões de cada usuário (com as sem efeito marcadas); as áreas mostram as páginas liberadas só para quem tem a permissão. *Parcial em 2026-11-01 (SF-088): a administração mostra e altera as permissões de cada usuário, com as sem efeito marcadas (navegador). Faltam as páginas liberadas nas áreas de atendente e gestor (SF-089 e SF-090).*
 - [x] **CA-PER-10** — Migration aditiva; dados existentes não mudam. *Verificado em 2026-11-01 (SF-087): migration só aditiva aplicada sobre dados existentes; ninguém começa com permissões; uma concessão por usuário e permissão (`permission-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes

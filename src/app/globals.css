@@ -1400,3 +1400,10 @@ p {
 .filter-links [aria-current="page"] {
   font-weight: 700;
 }
+
+/* History of permission grants (SPEC 2026-11-01-permissoes-configuraveis, 5.4). */
+.permission-history {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+}

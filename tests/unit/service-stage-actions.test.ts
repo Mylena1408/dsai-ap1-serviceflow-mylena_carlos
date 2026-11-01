@@ -24,6 +24,7 @@ vi.mock("@/modules/document-requirements", () => ({}));
 vi.mock("@/modules/sectors", () => ({}));
 vi.mock("@/modules/categories", () => ({}));
 vi.mock("@/modules/users", () => ({}));
+vi.mock("@/modules/permissions", () => ({}));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 

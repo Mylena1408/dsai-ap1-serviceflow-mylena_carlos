@@ -14,6 +14,8 @@ export {
 } from "./_sections/categories/actions";
 export {
   createUserAction,
+  grantPermissionAction,
+  revokePermissionAction,
   toggleUserAction,
   updateUserAction,
 } from "./_sections/users/actions";

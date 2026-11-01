@@ -939,7 +939,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-088 — Concessão e revogação pelo administrador
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Casos de uso `grantPermission`, `revokePermission` e `listPermissionOverview` (só administrador), com histórico de cada mudança efetiva; bloco "Permissões adicionais" em cada usuário da administração, com as permissões que o perfil pode receber, a situação (não concedida, concedida, concedida sem efeito), os botões "Conceder"/"Revogar" e o histórico. CA-PER-02, 03 e 04 verificados; parte de administração do CA-PER-09 verificada.
 - **Objetivo:** Casos de uso de conceder e revogar (só administrador, perfis válidos, usuário ativo, sem duplicar), histórico e bloco de permissões na tela de usuários, com as sem efeito marcadas.
 - **Arquivos/módulos esperados:** `src/modules/permissions/`, área administrativa, testes.
 - **Dependências:** SF-087.

@@ -12,6 +12,7 @@ import { listUsers } from "@/modules/users";
 import { listDocumentRequirements } from "@/modules/document-requirements";
 import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
+import { listPermissionOverview } from "@/modules/permissions";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { OverviewSection } from "./_sections/overview-section";
 import { SectorsSection } from "./_sections/sectors/sectors-section";
@@ -45,6 +46,13 @@ function announcement(error?: string, notice?: string, entity?: string): string 
   // Reactivating a custom field fails on the limit or on a repeated label (SPEC 2026-11-01-campos-personalizados, 5.1).
   if (error === "dependency" && entity === "serviceFields") {
     return "Não foi possível concluir: o serviço já tem o limite de campos ativos ou outro campo ativo usa o mesmo rótulo.";
+  }
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.2: profile not eligible or inactive user.
+  if (error === "validation" && entity === "permissions") {
+    return "Este perfil não pode receber essa permissão.";
+  }
+  if (error === "dependency" && entity === "permissions") {
+    return "Usuários inativos não recebem permissões.";
   }
   // Reactivating a stage fails on the limit or on a repeated name (SPEC 2026-11-01-fluxos-configuraveis, 5.1).
   if (error === "dependency" && entity === "serviceStages") {
@@ -91,7 +99,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages] =
+  const [{ entity, error, notice, section }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -101,6 +109,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       listDocumentRequirements(),
       listServiceFields(),
       listServiceStages(),
+      listPermissionOverview(),
     ]);
   const message = announcement(error, notice, entity);
   const selectedSection = selectedAdminSection(section);
@@ -164,7 +173,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       ) : null}
 
       {selectedSection === "users" ? (
-        <UsersSection section={selectedSection} sectors={sectors} users={users} />
+        <UsersSection permissions={permissions} section={selectedSection} sectors={sectors} users={users} />
       ) : null}
 
       {selectedSection === "services" ? (

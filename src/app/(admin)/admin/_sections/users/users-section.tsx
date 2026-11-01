@@ -1,16 +1,25 @@
 import type { SectorRecord } from "@/modules/sectors";
 import type { ManagedUser } from "@/modules/users";
+import type { Permission, PermissionOverview } from "@/modules/permissions";
+import { UserPermissionsPanel } from "../../user-permissions-panel";
 import { AdminCreateForm } from "../../create-form";
 import { AdminRecordEditor } from "../../record-editor";
-import { createUserAction, toggleUserAction, updateUserAction } from "./actions";
+import {
+  createUserAction,
+  grantPermissionAction,
+  revokePermissionAction,
+  toggleUserAction,
+  updateUserAction,
+} from "./actions";
 
 type UsersSectionProps = {
   section: "users";
   users: ManagedUser[];
   sectors: SectorRecord[];
+  permissions: PermissionOverview;
 };
 
-export function UsersSection({ section, users, sectors }: UsersSectionProps) {
+export function UsersSection({ section, users, sectors, permissions }: UsersSectionProps) {
   return (
     <section className="admin-section" aria-labelledby="users-heading">
         <div className="section-heading">
@@ -54,7 +63,17 @@ export function UsersSection({ section, users, sectors }: UsersSectionProps) {
               section={section}
               toggleAction={toggleUserAction}
               updateAction={updateUserAction}
-            />
+            >
+              <UserPermissionsPanel
+                grantAction={grantPermissionAction}
+                granted={permissions.grants
+                  .filter((grant) => grant.userId === user.id)
+                  .map((grant): Permission => grant.permission)}
+                history={permissions.events.filter((event) => event.userId === user.id).slice(0, 10)}
+                revokeAction={revokePermissionAction}
+                user={user}
+              />
+            </AdminRecordEditor>
           ))}
         </ul>
         </section>
