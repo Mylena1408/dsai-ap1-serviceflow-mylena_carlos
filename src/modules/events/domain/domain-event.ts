@@ -45,6 +45,13 @@ export type DomainEvent =
       payload: { stageEventId: string; direction: "start" | "advance" | "return"; actorId: string };
     }
   | {
+      // Manager decision (SPEC 2026-11-01-aprovacoes, 5.6); the note stays in the record.
+      type: "request.approval_decided";
+      requestId: string;
+      occurredAt: Date;
+      payload: { decision: "APPROVED" | "REJECTED"; actorId: string };
+    }
+  | {
       // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
       // writes them, and the consumer reloads the request to find the recipients.
       type: "request.sla_warning" | "request.sla_breached";
@@ -64,6 +71,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.sla_warning",
   "request.sla_breached",
   "request.stage_changed",
+  "request.approval_decided",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -75,6 +83,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.sla_warning": [],
   "request.sla_breached": [],
   "request.stage_changed": ["stageEventId", "direction", "actorId"],
+  "request.approval_decided": ["decision", "actorId"],
 };
 
 /**

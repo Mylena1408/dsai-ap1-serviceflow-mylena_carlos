@@ -42,6 +42,9 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
+  approval: {
+    include: { decider: { select: { id: true, name: true } } },
+  },
   assignmentEvents: {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: {
@@ -299,6 +302,21 @@ function createPrismaRequestTransaction(
         },
       });
       return result.count;
+    },
+    async updateApprovalIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: { id: update.requestId, status: "OPEN", approvalState: "PENDING" },
+        data: {
+          approvalState: update.approvalState,
+          updatedAt: update.updatedAt,
+          ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
+          ...(update.status ? { status: update.status, cancelledAt: update.cancelledAt } : {}),
+        },
+      });
+      return result.count;
+    },
+    async insertApproval(approval) {
+      await transaction.requestApproval.create({ data: approval });
     },
     async listActiveStageNames(serviceId) {
       const stages = await transaction.serviceStage.findMany({

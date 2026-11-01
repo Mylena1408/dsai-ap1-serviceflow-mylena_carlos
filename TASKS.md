@@ -895,7 +895,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-084 — Decisão do gestor
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Caso de uso `decideApproval` (aprovar com observação opcional; rejeitar com observação obrigatória, cancelando a solicitação), atualização condicional à aprovação pendente, registro em `RequestApproval`, decisão na linha do tempo, eventos `request.approval_decided` (e `request.status_changed` na rejeição), vencimento do SLA a partir da aprovação e notificações (gestores ativos do setor na abertura; solicitante na decisão). CA-APR-05, 06, 07 e 08 verificados.
 - **Objetivo:** Casos de uso de aprovar e rejeitar (observação obrigatória na rejeição) com registro, linha do tempo, eventos, cancelamento na rejeição, vencimento a partir da aprovação e notificações (gestores na abertura, solicitante na decisão).
 - **Arquivos/módulos esperados:** Módulos de solicitações, eventos e notificações, testes.
 - **Dependências:** SF-083.

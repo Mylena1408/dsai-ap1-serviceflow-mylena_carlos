@@ -44,6 +44,15 @@ export const requestStageMoveInputSchema = z
   })
   .strict();
 
+// Manager decision (SPEC 2026-11-01-aprovacoes, 5.4); the note is checked by the domain.
+export const requestApprovalDecisionInputSchema = z
+  .object({
+    requestId: entityIdSchema,
+    decision: z.enum(["APPROVED", "REJECTED"]),
+    note: z.string().optional(),
+  })
+  .strict();
+
 export const requestAssignmentInputSchema = z
   .object({ requestId: entityIdSchema })
   .strict();

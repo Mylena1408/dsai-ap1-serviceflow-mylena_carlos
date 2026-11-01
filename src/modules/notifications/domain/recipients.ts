@@ -11,7 +11,10 @@ export type NotificationType =
   | "comment.internal"
   | "sla.warning"
   | "sla.breached"
-  | "stage.changed";
+  | "stage.changed"
+  | "approval.requested"
+  | "approval.approved"
+  | "approval.rejected";
 
 export interface NotificationContext {
   requesterId: string;
@@ -22,6 +25,10 @@ export interface NotificationContext {
    * progress, and the active attendants of its sector, used when nobody holds it.
    */
   slaRecipients?: { requestActive: boolean; sectorAttendantIds: readonly string[] };
+  /** Approval state of the request now (SPEC 2026-11-01-aprovacoes). */
+  approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
+  /** Active managers of the sector, loaded only for an opening that requires approval. */
+  approvalManagerIds?: readonly string[];
 }
 
 export type NotifiableEvent =
@@ -32,7 +39,8 @@ export type NotifiableEvent =
   | { type: "request.priority_changed" }
   | { type: "request.sla_warning" }
   | { type: "request.sla_breached" }
-  | { type: "request.stage_changed"; payload: { direction: string; actorId: string } };
+  | { type: "request.stage_changed"; payload: { direction: string; actorId: string } }
+  | { type: "request.approval_decided"; payload: { decision: string; actorId: string } };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -54,12 +62,17 @@ function plan(recipientId: string | null, type: NotificationType, actorId: strin
 export function plannedNotifications(event: NotifiableEvent, context: NotificationContext): PlannedNotification[] {
   switch (event.type) {
     case "request.opened":
+      // SPEC 2026-11-01-aprovacoes, 5.6.3: an opening that requires approval reaches the sector managers.
+      return (context.approvalManagerIds ?? []).map((recipientId) => ({ recipientId, type: "approval.requested" }));
+
     case "request.priority_changed":
       return [];
 
     case "request.status_changed": {
       const type = STATUS_TYPES[event.payload.toStatus];
       if (!type) return [];
+      // A rejection also cancels the request; the requester hears about it once, as a rejection.
+      if (event.payload.toStatus === "CANCELLED" && context.approvalState === "REJECTED") return [];
       // Requesters only cancel or reopen their own request: the assignee hears about it.
       // Any other status change comes from an attendant: the requester hears about it.
       const byRequester = event.payload.actorId === context.requesterId;
@@ -89,6 +102,13 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       const recipients = context.effectiveAssigneeId ? [context.effectiveAssigneeId] : sla.sectorAttendantIds;
       return recipients.map((recipientId) => ({ recipientId, type }));
     }
+
+    case "request.approval_decided":
+      return plan(
+        context.requesterId,
+        event.payload.decision === "APPROVED" ? "approval.approved" : "approval.rejected",
+        event.payload.actorId,
+      );
 
     case "request.stage_changed":
       // SPEC 2026-11-01-fluxos-configuraveis, 5.5.3 (decision W4): the requester hears about each

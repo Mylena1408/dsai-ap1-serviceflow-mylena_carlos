@@ -11,9 +11,18 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
           requesterId: true,
           sectorId: true,
           status: true,
+          approvalState: true,
           assignee: { select: { id: true, role: true, isActive: true, sectorId: true } },
         },
       });
+    },
+    async sectorManagerIds(sectorId) {
+      const rows = await database.user.findMany({
+        where: { sectorId, role: "MANAGER", isActive: true },
+        select: { id: true },
+        orderBy: { id: "asc" },
+      });
+      return rows.map(({ id }) => id);
     },
     async sectorAttendantIds(sectorId) {
       const rows = await database.user.findMany({

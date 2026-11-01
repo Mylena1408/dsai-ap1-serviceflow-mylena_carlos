@@ -15,11 +15,14 @@ export interface NotificationRequestState {
   requesterId: string;
   sectorId: string;
   status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  approvalState: "PENDING" | "APPROVED" | "REJECTED" | null;
   assignee: { id: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER"; isActive: boolean; sectorId: string | null } | null;
 }
 
 export interface NotificationStore {
   findRequestState(requestId: string): Promise<NotificationRequestState | null>;
+  /** Active managers of a sector (approval requests, SPEC de aprovações 5.6.3). */
+  sectorManagerIds(sectorId: string): Promise<string[]>;
   /** Active attendants of a sector (SLA alerts without an assignee). */
   sectorAttendantIds(sectorId: string): Promise<string[]>;
   /** The subset of `userIds` that are active. */

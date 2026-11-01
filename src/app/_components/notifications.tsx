@@ -18,6 +18,9 @@ const MESSAGES: Record<NotificationType, (service: string, stage?: string) => st
   "comment.internal": (service) => `Nova nota interna em ${service}`,
   "sla.warning": (service) => `Prazo próximo do vencimento: ${service}`,
   "sla.breached": (service) => `Prazo vencido: ${service}`,
+  "approval.requested": (service) => `Aprovação pendente: ${service}`,
+  "approval.approved": (service) => `Solicitação aprovada: ${service}`,
+  "approval.rejected": (service) => `Solicitação rejeitada: ${service}`,
   // The stage name is missing once the event is purged (after 30 days).
   "stage.changed": (service, stage) =>
     stage ? `Sua solicitação passou para a etapa ${stage}: ${service}` : `Sua solicitação mudou de etapa: ${service}`,

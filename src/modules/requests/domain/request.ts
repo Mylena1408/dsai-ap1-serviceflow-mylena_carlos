@@ -82,12 +82,25 @@ export interface RequestStageEventRecord {
   actor: { id: string; name: string };
 }
 
+/** Manager decision (SPEC 2026-11-01-aprovacoes, 5.6). */
+export interface RequestApprovalRecord {
+  id: string;
+  requestId: string;
+  deciderId: string;
+  decision: "APPROVED" | "REJECTED";
+  note: string | null;
+  decidedAt: Date;
+  decider: { id: string; name: string };
+}
+
 export interface RequestWithHistory extends RequestRecord {
   events: RequestStatusEventRecord[];
   /** Priority changes (SPEC 2026-11-01, section 6). */
   priorityEvents: RequestPriorityEventRecord[];
   /** Stage entries and moves (SPEC 2026-11-01-fluxos-configuraveis, 5.5). */
   stageEvents: RequestStageEventRecord[];
+  /** Approval decision, when one was made (SPEC 2026-11-01-aprovacoes, 5.6). */
+  approval: RequestApprovalRecord | null;
   /** Assume, release and transfer events (SPEC 2026-10-31, section 5.9). */
   assignmentEvents: RequestAssignmentEventRecord[];
   service: {

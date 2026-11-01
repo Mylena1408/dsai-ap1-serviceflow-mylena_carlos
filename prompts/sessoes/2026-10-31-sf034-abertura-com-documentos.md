@@ -337,3 +337,9 @@ A SF-081 já estava concluída; entendido como a SF-082. PostgreSQL de teste rel
 > tem minha aprovação a sf-083; aprovação do gestor no cadastro de serviço;demais necessidades tem minha permissão
 
 SF-083 concluída (ver `NOTES.md`, seção SF-083).
+
+## Continuação — SF-084
+
+> siga para a sf-084
+
+SF-084 concluída (ver `NOTES.md`, seção SF-084).

@@ -1,4 +1,5 @@
 import type {
+  NewApproval,
   NewAssignmentEvent,
   NewPriorityEvent,
   NewStageEvent,
@@ -41,6 +42,7 @@ export interface InMemoryRequestStore {
   fieldValues: NewRequestFieldValue[];
   stages: StoredStage[];
   stageEvents: Array<NewStageEvent & { id: string }>;
+  approvals: NewApproval[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -63,6 +65,7 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     fieldValues: [],
     stages: [],
     stageEvents: [],
+    approvals: [],
     ...seed,
   };
 }
@@ -145,6 +148,10 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
     priorityEvents: store.priorityEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event, index) => ({ ...event, id: `priority-${index + 1}`, actor: nameOf(store, event.actorId)! })),
+    approval: (() => {
+      const approval = store.approvals.find(({ requestId }) => requestId === request.id);
+      return approval ? { ...approval, id: `approval-${request.id}`, decider: nameOf(store, approval.deciderId)! } : null;
+    })(),
     stageEvents: store.stageEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event) => ({ ...event, actor: nameOf(store, event.actorId)! })),
@@ -260,6 +267,24 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       if (update.stageNamesSnapshot !== undefined) request.stageNamesSnapshot = update.stageNamesSnapshot;
       if (update.stageIndex !== undefined) request.stageIndex = update.stageIndex;
       return 1;
+    },
+    async updateApprovalIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, approvalState }) => id === update.requestId && status === "OPEN" && approvalState === "PENDING",
+      );
+      if (!request) return 0;
+      request.approvalState = update.approvalState;
+      request.updatedAt = update.updatedAt;
+      if (update.dueAt !== undefined) request.dueAt = update.dueAt;
+      if (update.status) {
+        request.status = update.status;
+        request.cancelledAt = update.cancelledAt ?? null;
+      }
+      return 1;
+    },
+    async insertApproval(approval) {
+      if (store.approvals.some(({ requestId }) => requestId === approval.requestId)) throw new Error("duplicate approval");
+      store.approvals.push(approval);
     },
     async listActiveStageNames(serviceId) {
       return store.stages

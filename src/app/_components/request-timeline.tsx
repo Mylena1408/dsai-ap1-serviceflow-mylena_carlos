@@ -61,8 +61,22 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     note: event.note,
   }));
 
-  // Stable sort: on equal times, status events come first, then assignments, priorities and stages.
-  return [...statusEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries].sort(
+  // SPEC 2026-11-01-aprovacoes, 5.6: the manager decision with its note.
+  const approvalEntries = request.approval
+    ? [
+        {
+          id: `approval-${request.approval.id}`,
+          occurredAt: request.approval.decidedAt,
+          title: `${request.approval.decision === "APPROVED" ? "Aprovada" : "Rejeitada"} por ${request.approval.decider.name}`,
+          actor: request.approval.decider.name,
+          note: request.approval.note,
+        },
+      ]
+    : [];
+
+  // Stable sort: on equal times, status events come first, then assignments, priorities, stages
+  // and the approval.
+  return [...statusEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

@@ -43,6 +43,11 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         requesterId: request.requesterId,
         effectiveAssigneeId: assigneeId,
         ...(SLA_EVENTS.has(event.type) ? { slaRecipients: await slaRecipients(store, request, assigneeId) } : {}),
+        approvalState: request.approvalState,
+        // SPEC 2026-11-01-aprovacoes, 5.6.3: managers are loaded only when the opening needs them.
+        ...(event.type === "request.opened" && request.approvalState === "PENDING"
+          ? { approvalManagerIds: await store.sectorManagerIds(request.sectorId) }
+          : {}),
       });
 
       if (planned.length === 0) {

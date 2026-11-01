@@ -1167,3 +1167,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes existentes alterados (só os objetos de teste):** os dublês de serviço em `service-use-cases.test.ts` e `catalog.test.ts` ganharam `requiresApproval: false`; o dublê em memória das solicitações ganhou o campo no serviço e `approvalState` na solicitação.
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit) marcou a opção no serviço, conferiu o aviso de setor sem gestor, abriu uma solicitação e confirmou que o atendente vê o aviso no lugar do botão de início. O primeiro seletor do teste falhou porque, em edição, o nome do serviço fica num campo e o filtro por texto deixa de achar o item; o teste foi ajustado.
 - **Resultados:** lint, typecheck e build OK; unitários 518/518 (88 arquivos); integração 241/241 + 1 pulado (53 arquivos); E2E 12/12.
+
+## SF-084 — Decisão do gestor (2026-11-01)
+
+- **Caso de uso `decideApproval`:** relê o ator e a solicitação na transação, confere a regra do domínio (gestor ativo do setor, aprovação pendente, solicitação aberta) e a observação; grava com `updateApprovalIfCurrent`, que só altera a linha se ela ainda estiver `OPEN` e `PENDING` (decisão simultânea vira conflito). Aprovar grava o vencimento a partir do horário da aprovação; rejeitar muda o status para cancelado no mesmo `UPDATE`, grava o evento de status com a observação como justificativa e o `request.status_changed`. Os dois casos gravam `RequestApproval` e `request.approval_decided` (`decision` e `actorId`, sem a observação).
+- **Histórico:** `RequestWithHistory` ganhou `approval` (com o nome de quem decidiu); a linha do tempo mostra "Aprovada por …" ou "Rejeitada por …" com a observação.
+- **Notificações:** tipos `approval.requested`, `approval.approved` e `approval.rejected`. Na abertura com aprovação pendente, o consumidor carrega os gestores ativos do setor (só nesse caso). Como a rejeição também grava o cancelamento, a regra de status ignora o cancelamento de uma solicitação rejeitada, para o solicitante receber uma única notificação ("Solicitação rejeitada").
+- **Prioridade com aprovação pendente:** a regra existente do SLA já mantém o vencimento nulo; conferido em teste.
+- **Asserção existente alterada (exigida pela SPEC):** a lista exata de tipos de evento recebeu `request.approval_decided`. O dublê em memória ganhou as decisões e os dois métodos novos.
+- **Erro meu no teste:** esperei "não encontrado" para um gestor inativo, mas a sessão de um usuário inativo já é recusada antes ("autenticação necessária"), comportamento existente e correto; a expectativa foi separada.
+- **O que fica para a SF-085:** as telas do gestor (lista, detalhe com os formulários de decisão e a página de notificações dele) e a situação da aprovação nas telas de solicitante e atendente.
+- **Resultados:** lint, typecheck e build OK; unitários 525/525 (89 arquivos); integração 248/248 + 1 pulado (54 arquivos); E2E 12/12.

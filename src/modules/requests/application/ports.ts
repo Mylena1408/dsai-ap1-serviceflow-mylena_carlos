@@ -91,6 +91,26 @@ export interface StatusUpdate {
   stageIndex?: number | null;
 }
 
+/** Decides the approval only while the request is still open and pending (SPEC de aprovações, 5.4). */
+export interface ApprovalUpdate {
+  requestId: string;
+  approvalState: "APPROVED" | "REJECTED";
+  updatedAt: Date;
+  /** Due date from the approval (5.5). */
+  dueAt?: Date | null;
+  /** The rejection cancels the request (5.3.4). */
+  status?: "CANCELLED";
+  cancelledAt?: Date;
+}
+
+export interface NewApproval {
+  requestId: string;
+  deciderId: string;
+  decision: "APPROVED" | "REJECTED";
+  note: string | null;
+  decidedAt: Date;
+}
+
 /** Moves the stage only while status, assignee and stage are still the ones read. */
 export interface StageUpdate {
   requestId: string;
@@ -204,6 +224,9 @@ export interface RequestTransaction {
   findServiceForRequest(serviceId: string): Promise<ServiceForRequest | null>;
   /** Active document requirements of the service, in display order. */
   listActiveRequirements(serviceId: string): Promise<ActiveDocumentRequirement[]>;
+  /** Returns the number of rows changed (0 when the approval was already decided). */
+  updateApprovalIfCurrent(update: ApprovalUpdate): Promise<number>;
+  insertApproval(approval: NewApproval): Promise<void>;
   /** Names of the active stages of the service, in flow order (SPEC de fluxos, 5.2). */
   listActiveStageNames(serviceId: string): Promise<string[]>;
   /** Returns the number of rows changed (0 when the request changed meanwhile). */
