@@ -103,8 +103,8 @@ Uma solicitação concluída que é reaberta volta para "Aberta" sem etapa. Quan
 ## 7. Critérios de aceitação
 
 - [ ] **CA-FLX-01** — Serviço sem etapas: iniciar, concluir, cancelar e reabrir funcionam como hoje, e todas as suítes anteriores passam sem alteração de asserções.
-- [ ] **CA-FLX-02** — O administrador cria, renomeia, reordena, desativa e reativa etapas; outros perfis são negados no servidor.
-- [ ] **CA-FLX-03** — A configuração recusa nome vazio, com mais de 60 caracteres ou repetido entre as ativas, e a 9ª etapa ativa (também na reativação).
+- [x] **CA-FLX-02** — O administrador cria, renomeia, reordena, desativa e reativa etapas; outros perfis são negados no servidor. *Verificado em 2026-11-01 (SF-077): o administrador cria, renomeia, reordena, desativa e reativa etapas (a reativada vai para o fim do fluxo); solicitante, atendente e anônimo são negados em todas as operações, sem gravar nada (unitário dos casos de uso e das ações; integração; editor conferido no navegador).*
+- [x] **CA-FLX-03** — A configuração recusa nome vazio, com mais de 60 caracteres ou repetido entre as ativas, e a 9ª etapa ativa (também na reativação). *Verificado em 2026-11-01 (SF-077): nome vazio, só com espaços ou com mais de 60 caracteres recusado; nome repetido entre as ativas, ignorando maiúsculas, recusado na criação, na renomeação e na reativação; 9ª etapa ativa recusada, também na reativação (unitário e integração).*
 - [ ] **CA-FLX-04** — Ao iniciar o atendimento, a solicitação guarda a cópia das etapas ativas e entra na primeira; mudar o fluxo depois não altera a cópia.
 - [ ] **CA-FLX-05** — Avançar vai para a próxima etapa; voltar vai para a anterior e exige justificativa; não há avanço depois da última nem retorno antes da primeira.
 - [ ] **CA-FLX-06** — Concluir antes da última etapa é recusado; na última, conclui normalmente (com o resultado do SLA, quando houver).

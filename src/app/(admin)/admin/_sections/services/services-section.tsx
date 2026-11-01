@@ -5,21 +5,28 @@ import {
 } from "@/modules/document-requirements";
 import type { SectorRecord } from "@/modules/sectors";
 import { MAX_ACTIVE_SERVICE_FIELDS, type ServiceFieldRecord } from "@/modules/service-fields";
+import { MAX_ACTIVE_SERVICE_STAGES, type ServiceStageRecord } from "@/modules/service-stages";
 import type { ServiceRecord } from "@/modules/services";
 import { AdminCreateForm } from "../../create-form";
 import { DocumentRequirementsEditor } from "../../document-requirements-editor";
 import { AdminRecordEditor } from "../../record-editor";
 import { ServiceFieldsEditor } from "../../service-fields-editor";
+import { ServiceStagesEditor } from "../../service-stages-editor";
 import { ServiceSlaFields } from "../../service-sla-fields";
 import {
   createDocumentRequirementAction,
   createServiceAction,
   createServiceFieldAction,
+  createServiceStageAction,
   deactivateDocumentRequirementAction,
   deactivateServiceFieldAction,
+  deactivateServiceStageAction,
   moveDocumentRequirementAction,
   moveServiceFieldAction,
+  moveServiceStageAction,
   reactivateServiceFieldAction,
+  reactivateServiceStageAction,
+  renameServiceStageAction,
   toggleServiceAction,
   updateDocumentRequirementAction,
   updateServiceAction,
@@ -33,6 +40,7 @@ type ServicesSectionProps = {
   sectors: SectorRecord[];
   documentRequirements: DocumentRequirementRecord[];
   serviceFields: ServiceFieldRecord[];
+  serviceStages: ServiceStageRecord[];
 };
 
 export function ServicesSection({
@@ -42,6 +50,7 @@ export function ServicesSection({
   sectors,
   documentRequirements,
   serviceFields,
+  serviceStages,
 }: ServicesSectionProps) {
   return (
     <section className="admin-section" aria-labelledby="services-heading">
@@ -134,6 +143,18 @@ export function ServicesSection({
                 reactivateAction={reactivateServiceFieldAction}
                 serviceId={service.id}
                 updateAction={updateServiceFieldAction}
+              />
+              <ServiceStagesEditor
+                createAction={createServiceStageAction}
+                deactivateAction={deactivateServiceStageAction}
+                maxActive={MAX_ACTIVE_SERVICE_STAGES}
+                moveAction={moveServiceStageAction}
+                reactivateAction={reactivateServiceStageAction}
+                renameAction={renameServiceStageAction}
+                serviceId={service.id}
+                stages={serviceStages
+                  .filter((stage) => stage.serviceId === service.id)
+                  .map((stage) => ({ id: stage.id, name: stage.name, isActive: stage.isActive }))}
               />
             </AdminRecordEditor>
           ))}

@@ -289,3 +289,9 @@ Decisões W1 a W4 respondidas pela responsável no questionário: todas as propo
 > siga para a sf-076
 
 SF-076 concluída (ver `NOTES.md`, seção SF-076).
+
+## Continuação — SF-077
+
+> siga para a sf-077
+
+SF-077 concluída (ver `NOTES.md`, seção SF-077).

@@ -57,6 +57,7 @@ vi.mock("@/modules/document-requirements", () => ({
 // The services actions also import the custom fields module (SF-072); its actions are tested in
 // tests/unit/service-field-actions.test.ts.
 vi.mock("@/modules/service-fields", () => ({}));
+vi.mock("@/modules/service-stages", () => ({}));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 

@@ -821,7 +821,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-077 — Configuração das etapas pelo administrador
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Casos de uso de criar, renomear, reordenar, desativar e reativar etapas (`service-stage-use-cases.ts`), repositório Prisma, cinco ações do servidor só para `ADMIN` e o editor "Etapas do atendimento" em cada serviço da área administrativa. CA-FLX-02 e 03 verificados.
 - **Objetivo:** Casos de uso de criar, renomear, reordenar, desativar e reativar; ações do servidor só para `ADMIN`; editor "Etapas do atendimento" em cada serviço.
 - **Arquivos/módulos esperados:** `src/modules/service-stages/`, `src/app/(admin)/admin/`, testes.
 - **Dependências:** SF-076.

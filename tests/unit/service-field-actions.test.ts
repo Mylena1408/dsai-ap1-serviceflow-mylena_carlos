@@ -18,6 +18,7 @@ const nextNavigation = vi.hoisted(() => ({
 const nextCache = vi.hoisted(() => ({ revalidatePath: vi.fn() }));
 
 vi.mock("@/modules/service-fields", () => fields);
+vi.mock("@/modules/service-stages", () => ({}));
 vi.mock("@/modules/services", () => ({}));
 vi.mock("@/modules/document-requirements", () => ({}));
 vi.mock("@/modules/sectors", () => ({}));

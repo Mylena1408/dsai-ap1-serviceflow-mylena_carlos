@@ -11,6 +11,7 @@ import { listServices } from "@/modules/services";
 import { listUsers } from "@/modules/users";
 import { listDocumentRequirements } from "@/modules/document-requirements";
 import { listServiceFields } from "@/modules/service-fields";
+import { listServiceStages } from "@/modules/service-stages";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { OverviewSection } from "./_sections/overview-section";
 import { SectorsSection } from "./_sections/sectors/sectors-section";
@@ -45,6 +46,10 @@ function announcement(error?: string, notice?: string, entity?: string): string 
   if (error === "dependency" && entity === "serviceFields") {
     return "Não foi possível concluir: o serviço já tem o limite de campos ativos ou outro campo ativo usa o mesmo rótulo.";
   }
+  // Reactivating a stage fails on the limit or on a repeated name (SPEC 2026-11-01-fluxos-configuraveis, 5.1).
+  if (error === "dependency" && entity === "serviceStages") {
+    return "Não foi possível concluir: o serviço já tem o limite de etapas ativas ou outra etapa ativa usa o mesmo nome.";
+  }
   if (error === "dependency") {
     return "A operação não pode ser concluída enquanto existirem dependências ativas ou solicitações pendentes.";
   }
@@ -75,7 +80,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section }, sectors, categories, users, services, documentRequirements, serviceFields] =
+  const [{ entity, error, notice, section }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -84,6 +89,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       listServices(),
       listDocumentRequirements(),
       listServiceFields(),
+      listServiceStages(),
     ]);
   const message = announcement(error, notice, entity);
   const selectedSection = selectedAdminSection(section);
@@ -155,6 +161,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           categories={categories}
           documentRequirements={documentRequirements}
           serviceFields={serviceFields}
+          serviceStages={serviceStages}
           section={selectedSection}
           sectors={sectors}
           services={services}

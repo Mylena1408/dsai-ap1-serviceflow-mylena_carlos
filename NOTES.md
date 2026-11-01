@@ -1092,3 +1092,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Teste existente alterado (só o dublê):** `tests/unit/authorization/index.test.ts` ganhou `stageNamesSnapshot: []` e `stageIndex: null` no objeto tipado como linha do Prisma, como na SF-068. Nenhuma asserção mudou.
 - **Erro meu, pego por um teste existente:** `tests/unit/prisma/migrations.test.ts` proíbe as palavras `INSERT INTO` e `COPY` nas migrations, e um comentário SQL meu dizia "copy". Troquei o comentário por "snapshot" (o teste não foi alterado). A migration ainda não tinha sido publicada; nos bancos locais, o `migrate deploy` seguiu sem pendências.
 - **Resultados:** lint, typecheck e build OK; unitários 469/469 (80 arquivos); integração 214/214 + 1 pulado (47 arquivos); E2E 10/10.
+
+## SF-077 — Configuração das etapas pelo administrador (2026-11-01)
+
+- **Casos de uso:** mesmo padrão dos campos personalizados (SF-072): `requireConfigurationAdministrator`, transação serializável, nome único entre as ativas conferido no caso de uso e garantido pelo índice do banco, ordenação "Subir/Descer" com `src/shared/ordering`. Etapa inativa não é renomeada nem movida; reativar põe no fim do fluxo, dentro do limite de 8 e sem repetir nome.
+- **Tela:** bloco "Etapas do atendimento" em cada serviço, depois de documentos e campos, com a posição de cada etapa, "Renomear", "Subir", "Descer", "Desativar" e a lista de inativas com "Reativar". O texto do bloco avisa que solicitações já em atendimento seguem as etapas do momento em que começaram (decisão W3). A recusa de reativação tem mensagem própria.
+- **Testes existentes alterados (só configuração, sem mudar asserções):** `admin-actions`, `admin-service-sla-actions` e `service-field-actions` importam as ações de serviços, que agora importam o módulo de etapas; cada um ganhou `vi.mock("@/modules/service-stages", () => ({}))`.
+- **Falha durante o trabalho:** o primeiro comando que gravava os arquivos do módulo usou heredocs no shell e quebrou por causa de um apóstrofo; nada foi gravado. Os arquivos foram escritos de novo com a ferramenta de edição.
+- **Verificação no navegador:** teste E2E temporário (removido antes do commit) criou três etapas, desceu, renomeou, desativou, criou outra com o mesmo nome em minúsculas e conferiu a recusa da reativação.
+- **Resultados:** lint, typecheck e build OK; unitários 482/482 (82 arquivos); integração 218/218 + 1 pulado (48 arquivos); E2E 10/10.

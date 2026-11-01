@@ -19,6 +19,13 @@ import {
   updateServiceField,
 } from "@/modules/service-fields";
 import {
+  createServiceStage,
+  deactivateServiceStage,
+  moveServiceStage,
+  reactivateServiceStage,
+  renameServiceStage,
+} from "@/modules/service-stages";
+import {
   activeState,
   createFailure,
   documentRequirementFields,
@@ -196,4 +203,58 @@ export async function reactivateServiceFieldAction(formData: FormData): Promise<
     reportFailure("serviceFields", section, error);
   }
   return finish("serviceFields", "status", section);
+}
+
+export async function createServiceStageAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await createServiceStage(field(formData, "serviceId"), { name: field(formData, "name") });
+  } catch (error) {
+    return createFailure(error);
+  }
+  return finishCreate();
+}
+
+export async function renameServiceStageAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await renameServiceStage(field(formData, "id"), { name: field(formData, "name") });
+  } catch (error) {
+    return updateFailure(error);
+  }
+  return finishUpdate();
+}
+
+export async function moveServiceStageAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await moveServiceStage(field(formData, "id"), field(formData, "direction"));
+  } catch (error) {
+    reportFailure("serviceStages", section, error);
+  }
+  return finish("serviceStages", "updated", section);
+}
+
+export async function deactivateServiceStageAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await deactivateServiceStage(field(formData, "id"));
+  } catch (error) {
+    reportFailure("serviceStages", section, error);
+  }
+  return finish("serviceStages", "status", section);
+}
+
+export async function reactivateServiceStageAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await reactivateServiceStage(field(formData, "id"));
+  } catch (error) {
+    reportFailure("serviceStages", section, error);
+  }
+  return finish("serviceStages", "status", section);
 }
