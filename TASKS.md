@@ -804,3 +804,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-FLD-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-01-campos-personalizados.md`.
+
+## Fluxos configuráveis por serviço — SPEC de 2026-11-01
+
+**Ordem:** SF-076 → SF-077 → SF-078 → SF-079 → SF-080.
+
+### SF-076 — Migration e domínio das etapas
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration aditiva da seção 6 (tabelas `ServiceStage` e `RequestStageEvent`, colunas `stageNamesSnapshot` e `stageIndex` em `Request`, `CHECK`s e tipo `request.stage_changed` na outbox) e regras puras: validação da configuração, cópia no início, avanço, retorno com justificativa e regra de conclusão na última etapa.
+- **Arquivos/módulos esperados:** `prisma/`, novo módulo `src/modules/service-stages/`, `src/modules/requests/domain/`, limpeza do banco de teste, testes.
+- **Dependências:** SF-075.
+- **Critérios de conclusão:** CA-FLX-11; regras de CA-FLX-03, 05 e 06 prontas para as próximas tarefas.
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-01-fluxos-configuraveis.md`.
+
+### SF-077 — Configuração das etapas pelo administrador
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso de criar, renomear, reordenar, desativar e reativar; ações do servidor só para `ADMIN`; editor "Etapas do atendimento" em cada serviço.
+- **Arquivos/módulos esperados:** `src/modules/service-stages/`, `src/app/(admin)/admin/`, testes.
+- **Dependências:** SF-076.
+- **Critérios de conclusão:** CA-FLX-02 e CA-FLX-03.
+- **Testes relacionados:** Unitários dos casos de uso e das ações; integração no banco.
+- **SPEC:** `SPEC/2026-11-01-fluxos-configuraveis.md`.
+
+### SF-078 — Início com cópia, avanço, retorno e conclusão
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Cópia do fluxo ao iniciar o atendimento; casos de uso de avançar e voltar com histórico, evento e controle de concorrência; recusa da conclusão antes da última etapa; reabertura limpando a cópia.
+- **Arquivos/módulos esperados:** `src/modules/requests/application/`, repositório de solicitações, testes.
+- **Dependências:** SF-077.
+- **Critérios de conclusão:** CA-FLX-01, 04, 05, 06, 07 e 09; parte de histórico e evento do CA-FLX-08.
+- **Testes relacionados:** Unitários; integração; suítes anteriores sem alteração de asserções.
+- **SPEC:** `SPEC/2026-11-01-fluxos-configuraveis.md`.
+
+### SF-079 — Telas das etapas e notificação ao solicitante
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Etapa atual e posição nos detalhes, na fila e em "Minhas solicitações"; botões de avançar e voltar para o atendente; etapas percorridas para o solicitante; etapas na linha do tempo; notificação `stage.changed` ao solicitante.
+- **Arquivos/módulos esperados:** Telas de detalhes e listas, `src/app/_components/`, módulo de notificações, testes.
+- **Dependências:** SF-078.
+- **Critérios de conclusão:** CA-FLX-08 e CA-FLX-10.
+- **Testes relacionados:** Unitários das telas e das notificações; integração.
+- **SPEC:** `SPEC/2026-11-01-fluxos-configuraveis.md`.
+
+### SF-080 — E2E e revisão dos fluxos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-079.
+- **Critérios de conclusão:** Todos os CA-FLX-01 a 11 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-01-fluxos-configuraveis.md`.

@@ -277,3 +277,9 @@ SF-074 concluída (ver `NOTES.md`, seção SF-074).
 > siga para a sf-075
 
 SF-075 concluída; SPEC de campos personalizados encerrada (ver `NOTES.md`, seção SF-075).
+
+## Continuação — SPEC de fluxos configuráveis
+
+> siga com a SPEC de fluxos configuráveis
+
+Decisões W1 a W4 respondidas pela responsável no questionário: todas as propostas aceitas (etapas dentro de "Em atendimento"; avançar e voltar uma por vez, concluir na última; cópia no início; notificação ao solicitante). SPEC `SPEC/2026-11-01-fluxos-configuraveis.md` aprovada e tarefas SF-076 a SF-080 registradas.

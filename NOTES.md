@@ -1075,3 +1075,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão:** nenhuma dependência nova; nenhum segredo nos arquivos; a migration da SPEC só acrescenta (enum, duas tabelas, índices, função e `CHECK`s); nenhum log novo com dados digitados. Testes existentes alterados só na configuração (`vi.mock` do módulo novo em cinco arquivos e o dublê em memória), sem mudar asserções. README com a seção de campos personalizados.
 - **Pendência para publicar:** aplicar no Neon, antes do próximo deploy, as migrations `20261101100000_sla_and_priorities`, `20261101200000_sla_due_soon_at` e `20261101300000_service_fields`.
 - **Resultados:** lint, typecheck e build OK; unitários 453/453 (78 arquivos); integração 210/210 + 1 pulado (46 arquivos); E2E 10/10.
+
+## SPEC de fluxos configuráveis (2026-11-01)
+
+- **SPEC `2026-11-01-fluxos-configuraveis.md`** (item 7 do plano) aprovada com as decisões W1 a W4 conforme propostas: etapas dentro de "Em atendimento", sem mudar o status; avançar e voltar uma etapa por vez (voltar com justificativa) e concluir só na última; cópia do fluxo no início do atendimento; notificação ao solicitante a cada mudança de etapa. Tarefas SF-076 a SF-080 registradas em `TASKS.md`.
+- **Fronteiras com outros itens:** a atribuição continua independente das etapas; a aprovação (item 8) terá SPEC própria e decidirá se vira um tipo de etapa.
