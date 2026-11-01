@@ -5,11 +5,14 @@ import { redirect } from "next/navigation";
 import { addComment } from "@/modules/comments";
 import { scheduleEventProcessing } from "@/server/jobs/schedule";
 import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
+import { FieldAnswersError } from "@/modules/service-fields";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
 
 // File inputs are named "attachment:<requirementId>" (SPEC 21.4 item 2).
 const ATTACHMENT_FIELD_PREFIX = "attachment:";
+// Custom field inputs are named "field.<fieldId>" (SPEC 2026-11-01-campos-personalizados, 9).
+const CUSTOM_FIELD_PREFIX = "field.";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -35,6 +38,26 @@ async function attachments(formData: FormData) {
   return uploads;
 }
 
+// Only sent when the form has custom fields, so services without them open as before.
+function customFieldValues(formData: FormData): { fieldValues?: Record<string, string> } {
+  const values: Record<string, string> = {};
+
+  for (const [name, value] of formData.entries()) {
+    if (name.startsWith(CUSTOM_FIELD_PREFIX) && typeof value === "string") {
+      values[name.slice(CUSTOM_FIELD_PREFIX.length)] = value;
+    }
+  }
+
+  return Object.keys(values).length > 0 ? { fieldValues: values } : {};
+}
+
+// Refused answers go back as field ids and fixed codes, never as typed values (5.3.4).
+function fieldErrorQuery(error: FieldAnswersError): string {
+  if (error.reason === "stale_form") return "error=fields-changed";
+  const list = error.fieldErrors.map(({ fieldId, code }) => `${fieldId}.${code}`).join(",");
+  return `error=fields&fields=${encodeURIComponent(list)}`;
+}
+
 function errorCode(error: ApplicationError): string {
   if (error instanceof DocumentStorageError) return "documents-unavailable";
   if (error instanceof ValidationError) {
@@ -56,11 +79,13 @@ export async function createRequestAction(formData: FormData): Promise<never> {
       serviceId,
       description: field(formData, "description"),
       attachments: await attachments(formData),
+      ...customFieldValues(formData),
     });
     requestId = request.id;
   } catch (error) {
     if (error instanceof ApplicationError) {
-      redirect(`/catalog/${encodeURIComponent(serviceId)}?error=${errorCode(error)}`);
+      const query = error instanceof FieldAnswersError ? fieldErrorQuery(error) : `error=${errorCode(error)}`;
+      redirect(`/catalog/${encodeURIComponent(serviceId)}?${query}`);
     }
 
     throw error;

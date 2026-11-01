@@ -14,6 +14,13 @@ export function createPrismaServiceFieldRepository(database: PrismaClient): Serv
       });
       return rows.map(toDomain);
     },
+    async listActiveForService(serviceId) {
+      const rows = await database.serviceField.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+      });
+      return rows.map(toDomain);
+    },
   };
 }
 

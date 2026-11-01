@@ -16,6 +16,12 @@ export const requestCreationInputSchema = z
     serviceId: entityIdSchema,
     description: nonEmptyTextSchema.max(10_000),
     attachments: z.array(attachmentUploadSchema).optional(),
+    // Answers to the service's custom fields, by field id (SPEC 2026-11-01-campos-personalizados,
+    // 5.3). Ids are checked against the active fields on the server; the bounds only stop abuse.
+    fieldValues: z
+      .record(z.string().max(64), z.string().max(20_000))
+      .refine((values) => Object.keys(values).length <= 50, { message: "Too many field values." })
+      .optional(),
   })
   .strict();
 

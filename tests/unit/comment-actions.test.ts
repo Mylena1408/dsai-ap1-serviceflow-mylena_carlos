@@ -11,6 +11,7 @@ const nextCache = vi.hoisted(() => ({ revalidatePath: vi.fn() }));
 
 vi.mock("@/modules/comments", () => comments);
 vi.mock("@/modules/requests", () => ({}));
+vi.mock("@/modules/service-fields", () => ({ FieldAnswersError: class {} }));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 

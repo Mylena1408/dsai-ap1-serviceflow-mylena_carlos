@@ -4,6 +4,8 @@ import type { ServiceFieldDefinition, ServiceFieldRecord } from "../domain/servi
 export interface ServiceFieldRepository {
   /** All fields grouped by service, active first, in display order. */
   listAll(): Promise<ServiceFieldRecord[]>;
+  /** Active fields of one service, in display order. */
+  listActiveForService(serviceId: string): Promise<ServiceFieldRecord[]>;
 }
 
 /** Operations available inside a custom field transaction. */

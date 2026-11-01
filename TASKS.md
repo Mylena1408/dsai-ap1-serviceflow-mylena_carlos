@@ -777,7 +777,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-073 — Abertura com campos
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Abertura recebe `fieldValues`, confere as respostas com os campos ativos carregados na transação (antes de guardar qualquer arquivo) e grava `RequestFieldValue` com snapshot junto da solicitação. Formulário de abertura virou o componente cliente `request-form.tsx`, com os campos de cada tipo, erro junto do campo e valores mantidos depois de uma recusa. CA-FLD-01, 04, 05, 06 e 08 verificados; CA-FLD-07 verificado no servidor e no navegador com teste temporário, com o E2E definitivo na SF-075.
 - **Objetivo:** Campos no formulário de abertura, validação no servidor com a configuração recarregada e gravação das respostas com snapshot na mesma transação da abertura.
 - **Arquivos/módulos esperados:** `src/modules/requests/application/create-request.ts`, repositório de solicitações, `src/app/(requester)/catalog/[serviceId]/`, testes.
 - **Dependências:** SF-072.

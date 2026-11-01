@@ -16,6 +16,9 @@ const nextCache = vi.hoisted(() => ({
 
 vi.mock("@/modules/requests", () => requests);
 vi.mock("@/modules/comments", () => ({ addComment: vi.fn() }));
+// The opening action also imports the custom fields module (SF-073); its behavior is tested in
+// tests/unit/request-field-actions.test.ts.
+vi.mock("@/modules/service-fields", () => ({ FieldAnswersError: class {} }));
 vi.mock("next/navigation", () => nextNavigation);
 vi.mock("next/cache", () => nextCache);
 

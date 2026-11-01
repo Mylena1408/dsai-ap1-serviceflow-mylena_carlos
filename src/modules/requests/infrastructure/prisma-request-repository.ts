@@ -243,6 +243,22 @@ function createPrismaRequestTransaction(
         select: { id: true, name: true, isRequired: true, acceptedFormats: true },
       });
     },
+    listActiveFields(serviceId) {
+      return transaction.serviceField.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          label: true,
+          type: true,
+          isRequired: true,
+          options: true,
+          minValue: true,
+          maxValue: true,
+          position: true,
+        },
+      });
+    },
     insertRequest({ openedAt, ...data }) {
       return transaction.request.create({
         data: { ...data, createdAt: openedAt, updatedAt: openedAt },
@@ -251,6 +267,9 @@ function createPrismaRequestTransaction(
     },
     async insertAttachments(attachments) {
       await transaction.requestAttachment.createMany({ data: attachments });
+    },
+    async insertFieldValues(values) {
+      await transaction.requestFieldValue.createMany({ data: values });
     },
     async updateStatusIfCurrent(update) {
       const result = await transaction.request.updateMany({

@@ -2,6 +2,7 @@ import type {
   NewAssignmentEvent,
   NewPriorityEvent,
   NewRequestAttachment,
+  NewRequestFieldValue,
   RequestQueryRepository,
   RequestTransaction,
   RequestTransactionRunner,
@@ -15,9 +16,11 @@ import type {
 } from "@/modules/requests/domain/request";
 import type { ActiveDocumentRequirement } from "@/modules/requests/domain/attachment-requirements";
 import type { DomainEvent } from "@/modules/events";
+import type { AnswerableField } from "@/modules/service-fields";
 
 export type StoredActor = TransactionActor & { name: string; email: string };
 export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
+export type StoredField = AnswerableField & { serviceId: string; isActive: boolean };
 type StoredEvent = Omit<RequestStatusEventRecord, "actor">;
 
 export interface InMemoryRequestStore {
@@ -32,6 +35,8 @@ export interface InMemoryRequestStore {
   assignmentEvents: NewAssignmentEvent[];
   outbox: DomainEvent[];
   priorityEvents: NewPriorityEvent[];
+  fields: StoredField[];
+  fieldValues: NewRequestFieldValue[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -50,6 +55,8 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     assignmentEvents: [],
     outbox: [],
     priorityEvents: [],
+    fields: [],
+    fieldValues: [],
     ...seed,
   };
 }
@@ -191,6 +198,21 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         .filter((requirement) => requirement.serviceId === serviceId && requirement.isActive)
         .map(({ id, name, isRequired, acceptedFormats }) => ({ id, name, isRequired, acceptedFormats }));
     },
+    async listActiveFields(serviceId) {
+      return store.fields
+        .filter((field) => field.serviceId === serviceId && field.isActive)
+        .sort((left, right) => left.position - right.position)
+        .map(({ id, label, type, isRequired, options, minValue, maxValue, position }) => ({
+          id,
+          label,
+          type,
+          isRequired,
+          options,
+          minValue,
+          maxValue,
+          position,
+        }));
+    },
     async insertRequest({ openedAt, id, ...data }) {
       store.requests.push({
         completedLate: null,
@@ -223,6 +245,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     },
     async insertAttachments(attachments) {
       store.attachments.push(...attachments);
+    },
+    async insertFieldValues(values) {
+      store.fieldValues.push(...values);
     },
     async insertStatusEvent(event) {
       store.events.push({

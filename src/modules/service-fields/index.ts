@@ -17,7 +17,7 @@ export {
   assertFieldTypeUnchanged,
 } from "./domain/service-field";
 export type { ServiceFieldDefinition, ServiceFieldRecord, ServiceFieldType } from "./domain/service-field";
-export { collectFieldAnswers, normalizeFieldValue } from "./domain/field-value";
+export { FieldAnswersError, assertFieldAnswers, collectFieldAnswers, normalizeFieldValue } from "./domain/field-value";
 export type {
   AnswerableField,
   FieldAnswer,
@@ -31,6 +31,13 @@ export type { ServiceFieldInput } from "./application/service-field-schemas";
 
 export async function listServiceFields(database: PrismaClient = prisma): Promise<ServiceFieldRecord[]> {
   return useCases.listServiceFields(createPrismaServiceFieldRepository(database));
+}
+
+export async function listPublishedServiceFields(
+  serviceId: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceFieldRecord[]> {
+  return useCases.listPublishedServiceFields(serviceId, createPrismaServiceFieldRepository(database));
 }
 
 export async function createServiceField(

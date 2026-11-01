@@ -64,6 +64,9 @@ function repository(store: Store): ServiceFieldRepository {
     async listAll() {
       return [...store.fields].sort((a, b) => Number(b.isActive) - Number(a.isActive) || a.position - b.position);
     },
+    async listActiveForService(id) {
+      return store.fields.filter((item) => item.serviceId === id && item.isActive).sort((a, b) => a.position - b.position);
+    },
   };
 }
 

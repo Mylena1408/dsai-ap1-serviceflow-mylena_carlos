@@ -2,18 +2,51 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MAX_ATTACHMENT_BYTES, MAX_ATTACHMENTS_TOTAL_BYTES } from "@/modules/attachments";
 import { listPublishedServiceRequirements } from "@/modules/document-requirements";
+import { listPublishedServiceFields } from "@/modules/service-fields";
 import { getPublishedService } from "@/modules/services";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { createRequestAction } from "../../requests/actions";
-import { DocumentFields } from "./document-fields";
+import { RequestForm, type FieldErrorCode } from "./request-form";
 
 type ServicePageProps = {
   params: Promise<{ serviceId: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; fields?: string }>;
 };
 
-function errorMessage(error?: string): string | null {
+const FIELD_ERROR_CODES = new Set<FieldErrorCode>([
+  "required",
+  "too_long",
+  "line_break",
+  "not_integer",
+  "out_of_range",
+  "invalid_date",
+  "invalid_option",
+  "invalid_choice",
+]);
+
+// "fields" lists "<fieldId>.<code>" pairs sent back by the opening action; anything that does not
+// name an active field with a known code is ignored.
+function parseFieldErrors(list: string | undefined, fieldIds: ReadonlySet<string>): Record<string, FieldErrorCode> {
+  const errors: Record<string, FieldErrorCode> = {};
+
+  for (const item of (list ?? "").split(",")) {
+    const separator = item.lastIndexOf(".");
+    const fieldId = item.slice(0, separator);
+    const code = item.slice(separator + 1) as FieldErrorCode;
+    if (separator > 0 && fieldIds.has(fieldId) && FIELD_ERROR_CODES.has(code)) errors[fieldId] = code;
+  }
+
+  return errors;
+}
+
+function errorMessage(error: string | undefined, hasDocuments: boolean): string | null {
+  if (error === "fields") {
+    return `Confira os campos indicados abaixo.${hasDocuments ? " Os arquivos precisam ser anexados novamente." : ""}`;
+  }
+  if (error === "fields-changed") {
+    return "Os campos deste serviço mudaram enquanto você preenchia. Confira o formulário abaixo e envie novamente.";
+  }
   if (error === "validation") return "Informe uma descrição válida, com até 10.000 caracteres.";
   if (error === "unavailable") return "Este serviço não está mais disponível para novas solicitações.";
   if (error === "access") return "Sua sessão não permite abrir esta solicitação.";
@@ -31,19 +64,22 @@ export default async function ServicePage({
   searchParams,
 }: ServicePageProps) {
   await requireRequesterPageAccess();
-  const [{ serviceId }, { error }] = await Promise.all([params, searchParams]);
+  const [{ serviceId }, { error, fields: fieldErrorList }] = await Promise.all([params, searchParams]);
   let service;
   let requirements;
+  let fields;
 
   try {
     service = await getPublishedService(serviceId);
     requirements = await listPublishedServiceRequirements(service.id);
+    fields = await listPublishedServiceFields(service.id);
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
   }
 
-  const message = errorMessage(error);
+  const message = errorMessage(error, requirements.length > 0);
+  const fieldErrors = error === "fields" ? parseFieldErrors(fieldErrorList, new Set(fields.map(({ id }) => id))) : {};
 
   return (
     <main className="page-shell">
@@ -63,31 +99,29 @@ export default async function ServicePage({
       <section className="surface-card content-section" aria-labelledby="request-heading">
         <p className="eyebrow">Próximo passo</p>
         <h2 id="request-heading">Abrir solicitação</h2>
-        <form action={createRequestAction} className="request-form">
-          <input type="hidden" name="serviceId" value={service.id} />
-          <label htmlFor="request-description">Descreva o que você precisa</label>
-          <textarea
-            id="request-description"
-            name="description"
-            required
-            maxLength={10_000}
-            rows={6}
-          />
-          <p>Máximo de 10.000 caracteres.</p>
-          {requirements.length > 0 ? (
-            <DocumentFields
-              requirements={requirements.map(({ id, name, isRequired, acceptedFormats }) => ({
-                id,
-                name,
-                isRequired,
-                acceptedFormats,
-              }))}
-              maxFileBytes={MAX_ATTACHMENT_BYTES}
-              maxTotalBytes={MAX_ATTACHMENTS_TOTAL_BYTES}
-            />
-          ) : null}
-          <button type="submit">Enviar solicitação</button>
-        </form>
+        <RequestForm
+          action={createRequestAction}
+          fieldErrors={fieldErrors}
+          fields={fields.map(({ id, label, helpText, type, isRequired, options, minValue, maxValue }) => ({
+            id,
+            label,
+            helpText,
+            type,
+            isRequired,
+            options,
+            minValue,
+            maxValue,
+          }))}
+          maxFileBytes={MAX_ATTACHMENT_BYTES}
+          maxTotalBytes={MAX_ATTACHMENTS_TOTAL_BYTES}
+          requirements={requirements.map(({ id, name, isRequired, acceptedFormats }) => ({
+            id,
+            name,
+            isRequired,
+            acceptedFormats,
+          }))}
+          serviceId={service.id}
+        />
       </section>
     </main>
   );

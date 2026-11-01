@@ -1,3 +1,4 @@
+import { ValidationError } from "@/server/errors";
 import { SERVICE_FIELD_LIMITS, type ServiceFieldRecord } from "./service-field";
 
 // SPEC 2026-11-01-campos-personalizados, sections 5.2 to 5.4: validation and normalization
@@ -163,4 +164,25 @@ export function collectFieldAnswers(
   });
 
   return errors.length > 0 ? { ok: false, reason: "invalid", errors } : { ok: true, answers };
+}
+
+// Refused answers of an opening. Field ids and fixed codes are safe to show: they let the form
+// point at each field without echoing what was typed (section 5.3.4).
+export class FieldAnswersError extends ValidationError {
+  constructor(
+    readonly reason: "stale_form" | "invalid",
+    readonly fieldErrors: readonly FieldAnswerError[] = [],
+  ) {
+    super([{ path: ["fields"], code: "custom" }]);
+  }
+}
+
+export function assertFieldAnswers(result: FieldAnswersResult): FieldAnswer[] {
+  if (result.ok) {
+    return result.answers;
+  }
+
+  throw result.reason === "stale_form"
+    ? new FieldAnswersError("stale_form")
+    : new FieldAnswersError("invalid", result.errors);
 }

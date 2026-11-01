@@ -1,4 +1,4 @@
-import { requireConfigurationAdministrator } from "@/server/authorization";
+import { requireConfigurationAdministrator, requirePublishedCatalogReader } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { nextPosition, planPositionMove } from "@/shared/ordering";
@@ -19,6 +19,18 @@ export async function listServiceFields(repository: ServiceFieldRepository): Pro
   await requireConfigurationAdministrator();
 
   return repository.listAll();
+}
+
+// What the requester sees before opening a request (section 5.3.1). Callers load the published
+// service first; the opening itself reloads the fields on the server.
+export async function listPublishedServiceFields(
+  serviceId: unknown,
+  repository: ServiceFieldRepository,
+): Promise<ServiceFieldRecord[]> {
+  await requirePublishedCatalogReader();
+  const id = validateInput(entityIdSchema, serviceId);
+
+  return repository.listActiveForService(id);
 }
 
 export async function createServiceField(

@@ -10,6 +10,7 @@ import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { requestCreationInputSchema, type RequestCreationInput } from "./request-schemas";
 import { assertServiceCanReceiveRequests } from "@/modules/services";
+import { assertFieldAnswers, collectFieldAnswers, type FieldAnswer } from "@/modules/service-fields";
 import {
   assertFormatStillAccepted,
   matchAttachmentsToRequirements,
@@ -65,8 +66,10 @@ export async function createRequest(
 
   assertAttachmentBatchLimits(uploads.map(({ bytes }) => ({ size: bytes.length })));
 
+  // Field answers are checked before any file is stored, so a refused form writes nothing.
   const requirements = await transactions.run(async (transaction) => {
     const { service } = await loadOpeningContext(transaction, actor.id, parsed.serviceId);
+    await fieldAnswers(transaction, service.id, parsed);
     return transaction.listActiveRequirements(service.id);
   });
   const prepared = matchAttachmentsToRequirements(requirements, uploads).map(
@@ -130,6 +133,18 @@ async function loadOpeningContext(
   return { actorId: currentActor.id, service };
 }
 
+// SPEC 2026-11-01-campos-personalizados, 5.3.2: answers are checked against the active fields
+// loaded in this transaction; a form built with another configuration is refused.
+async function fieldAnswers(
+  transaction: RequestTransaction,
+  serviceId: string,
+  parsed: RequestCreationInput,
+): Promise<FieldAnswer[]> {
+  const fields = await transaction.listActiveFields(serviceId);
+
+  return assertFieldAnswers(collectFieldAnswers(fields, new Map(Object.entries(parsed.fieldValues ?? {}))));
+}
+
 async function openRequest(
   transaction: RequestTransaction,
   actorId: string,
@@ -138,6 +153,7 @@ async function openRequest(
   prepared: readonly PreparedAttachment[],
 ): Promise<RequestWithHistory> {
   const context = await loadOpeningContext(transaction, actorId, parsed.serviceId);
+  const answers = await fieldAnswers(transaction, context.service.id, parsed);
 
   // The configuration in force when the transaction runs prevails (SPEC 21.4 item 5).
   const requirements: ActiveDocumentRequirement[] = await transaction.listActiveRequirements(
@@ -193,6 +209,12 @@ async function openRequest(
         uploadedById: context.actorId,
         createdAt: openedAt,
       })),
+    );
+  }
+
+  if (answers.length > 0) {
+    await transaction.insertFieldValues(
+      answers.map((answer) => ({ ...answer, requestId: created.id, createdAt: openedAt })),
     );
   }
 

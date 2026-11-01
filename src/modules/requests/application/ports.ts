@@ -1,5 +1,6 @@
 import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { DomainEvent } from "@/modules/events";
+import type { AnswerableField, FieldAnswer } from "@/modules/service-fields";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
@@ -136,6 +137,12 @@ export interface NewRequestAttachment {
 }
 
 /** Private object storage for attachment content (SPEC 21.8). */
+/** Answer to a custom field, with the snapshot of its definition (SPEC de campos, 5.4). */
+export interface NewRequestFieldValue extends FieldAnswer {
+  requestId: string;
+  createdAt: Date;
+}
+
 export interface AttachmentStorage {
   put(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
   remove(key: string): Promise<void>;
@@ -164,6 +171,8 @@ export interface RequestTransaction {
   findServiceForRequest(serviceId: string): Promise<ServiceForRequest | null>;
   /** Active document requirements of the service, in display order. */
   listActiveRequirements(serviceId: string): Promise<ActiveDocumentRequirement[]>;
+  /** Active custom fields of the service, in display order. */
+  listActiveFields(serviceId: string): Promise<AnswerableField[]>;
   insertRequest(
     data: RequestSnapshot & {
       id: string;
@@ -176,6 +185,7 @@ export interface RequestTransaction {
     },
   ): Promise<{ id: string }>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;
+  insertFieldValues(values: NewRequestFieldValue[]): Promise<void>;
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;
   insertStatusEvent(event: NewStatusEvent): Promise<void>;
