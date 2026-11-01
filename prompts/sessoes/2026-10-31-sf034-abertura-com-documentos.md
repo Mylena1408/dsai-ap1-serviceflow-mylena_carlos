@@ -229,3 +229,13 @@ SF-069 concluída (ver `NOTES.md`, seção SF-069).
 > siga para a sf-070
 
 SF-070 concluída; SPEC de SLA e prioridades encerrada (ver `NOTES.md`, seção SF-070).
+
+## Continuação — push, medição e relatório da fase 2
+
+> faça o push e a medição
+
+> qual o próximo passo do plano de escala?
+
+> siga com o relatório da fase 2
+
+Push da SF-070 feito; relatório `SPEC/2026-11-01-relatorio-fase-2.md` escrito (ver `NOTES.md`, seção "Relatório da fase 2").

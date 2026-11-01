@@ -1007,3 +1007,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Observação no log do servidor do E2E:** aparecem mensagens "Error: The destination stream closed early" do Next.js. Não quebram nenhum teste. A causa provável é o navegador do Playwright interromper uma resposta em streaming ao trocar de página, mas não investiguei nem verifiquei se elas já apareciam antes desta SPEC (as execuções anteriores só filtravam o resultado final).
 - **Pendência para publicar:** aplicar no Neon as migrations `20261101100000_sla_and_priorities` e `20261101200000_sla_due_soon_at` antes do próximo deploy.
 - **Resultados:** lint, typecheck e build OK; unitários 398/398 (71 arquivos); integração 186/186 + 1 pulado (42 arquivos); E2E 9/9.
+
+## Relatório da fase 2 (2026-11-01)
+
+- **Documento:** `SPEC/2026-11-01-relatorio-fase-2.md` (exigido pela seção 6 de `SPEC/2026-10-30-camadas-para-100k.md`).
+- **Medição:** 15.259 linhas `added` acumuladas (`0038b7e`), contra a previsão de 26.000 a 39.000 para o fim da fase 2. Só a fase 2 somou 7.687 (`bbe064f` → `0038b7e`).
+- **Recalibração:** as estimativas do plano estão de 3,3 a 4,7 vezes acima do real. Se a proporção se mantiver, o roadmap inteiro deve terminar entre ~29.000 e ~45.000 linhas, menos da metade da meta. A decisão sobre como tratar isso fica com a responsável (seção 8 do relatório).
+- **Correção:** o relatório da fase 1 estimou a atribuição em "cerca de 1.800 linhas"; a medição a partir de `568d752` dá 2.212.
+- **Exceção às migrations aditivas registrada no relatório:** a SF-065 apagou e recriou, mais ampla, a restrição `OutboxEvent_type_check`.
+- **Tempo:** 9h20 na fase 2, medidas pela transcrição do Claude Code; `diario/tempo-do-projeto.md` atualizado (total mínimo 33h29).
+- **Suítes não executadas de novo** para o relatório (só documentação); o PostgreSQL de teste está parado desde que o sistema o encerrou por falta de memória.
