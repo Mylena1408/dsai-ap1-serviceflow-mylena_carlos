@@ -149,3 +149,9 @@ SF-060 concluída (ver `NOTES.md`, seção SF-060).
 > pode publicar
 
 Deploy de produção e verificação só com leitura (ver `NOTES.md`).
+
+## Continuação — SPEC do passo 1
+
+> escreva a SPEC do passo 1
+
+SPEC de eventos, outbox e jobs escrita como proposta e aprovada (E1 a E4); tarefas SF-061 a SF-064. Nenhum código.

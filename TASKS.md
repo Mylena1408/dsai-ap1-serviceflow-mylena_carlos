@@ -642,3 +642,47 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-BUS-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-10-31-busca-filtros-paginacao.md`.
+
+## Eventos, outbox e jobs (passo 1) — SPEC de 2026-10-31
+
+**Ordem:** SF-061 → SF-062 → SF-063 → SF-064.
+
+### SF-061 — Outbox e gravação de eventos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration (`OutboxEvent` e `Notification`), módulo `events` e gravação dos eventos da seção 6.1 dentro das transações existentes de `requests` e `comments`.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/events/`, transações de `requests` e `comments`, testes.
+- **Dependências:** SF-060.
+- **Critérios de conclusão:** CA-EVT-01, 02 e 09.
+- **Testes relacionados:** Unitários do payload; integração com evento na mesma transação e falha forçada.
+- **SPEC:** `SPEC/2026-10-31-eventos-outbox-jobs.md`.
+
+### SF-062 — Processador, `after()` e cron diário
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Processador em lote com `FOR UPDATE SKIP LOCKED`, tentativas com espera crescente, disparo por `after()` nas Server Actions e rota `/api/cron/daily` protegida por `CRON_SECRET` com as limpezas da seção 7.
+- **Arquivos/módulos esperados:** `src/modules/events/`, `src/app/api/cron/daily/route.ts`, `vercel.json`, actions, testes.
+- **Dependências:** SF-061.
+- **Critérios de conclusão:** CA-EVT-03, 04 e 05.
+- **Testes relacionados:** Integração com processadores concorrentes, idempotência, tentativas, limpezas; unitário do segredo.
+- **SPEC:** `SPEC/2026-10-31-eventos-outbox-jobs.md`.
+
+### SF-063 — Notificações na aplicação
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Módulo `notifications`: regra de destinatários (8.1), consumidor idempotente, contador no topo, página `/notifications` e leitura.
+- **Arquivos/módulos esperados:** `src/modules/notifications/`, layout e páginas, testes.
+- **Dependências:** SF-062.
+- **Critérios de conclusão:** CA-EVT-06, 07 e 08.
+- **Testes relacionados:** Unitários da regra; integração da autorização e da leitura.
+- **SPEC:** `SPEC/2026-10-31-eventos-outbox-jobs.md`.
+
+### SF-064 — E2E e revisão dos eventos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 12; revisão de escopo, segurança e documentação; orientação para cadastrar `CRON_SECRET`.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-063.
+- **Critérios de conclusão:** Todos os CA-EVT-01 a 09 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-10-31-eventos-outbox-jobs.md`.
