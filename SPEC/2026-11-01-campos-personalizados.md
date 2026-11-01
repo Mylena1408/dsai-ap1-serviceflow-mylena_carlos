@@ -114,7 +114,7 @@ A SPEC principal deixou os "campos personalizados" fora da primeira entrega (se�
 - [ ] **CA-FLD-07** — Em qualquer recusa, nada é gravado (solicitação, evento, anexos ou respostas), e o formulário mantém os valores digitados.
 - [ ] **CA-FLD-08** — As respostas são gravadas com o snapshot na mesma transação da abertura; mudar o rótulo, as opções ou desativar o campo depois não altera a solicitação já aberta.
 - [ ] **CA-FLD-09** — O solicitante e os atendentes do setor veem as respostas nos detalhes, formatadas pelo tipo; atendente de outro setor e administrador não acessam.
-- [ ] **CA-FLD-10** — Migration aditiva; os dados existentes não mudam.
+- [x] **CA-FLD-10** — Migration aditiva; os dados existentes não mudam. *Verificado em 2026-11-01 (SF-071): migration aplicada sobre dados existentes; serviços e solicitações existentes ficam sem campos e sem respostas (`service-field-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes
 

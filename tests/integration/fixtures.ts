@@ -7,6 +7,7 @@ export const prisma = new PrismaClient({
 
 export async function resetTestFixtures(): Promise<void> {
   await prisma.$transaction([
+    prisma.requestFieldValue.deleteMany(),
     prisma.requestAttachment.deleteMany(),
     prisma.requestNotification.deleteMany(),
     prisma.outboxEvent.deleteMany(),
@@ -16,6 +17,7 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.requestStatusEvent.deleteMany(),
     prisma.request.deleteMany(),
     prisma.serviceDocumentRequirement.deleteMany(),
+    prisma.serviceField.deleteMany(),
     prisma.service.deleteMany(),
     prisma.user.deleteMany(),
     prisma.category.deleteMany(),

@@ -1023,3 +1023,17 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Meta de 100.000 linhas:** a responsável escolheu a opção 2 do relatório da fase 2: acrescentar funcionalidades reais, cada uma com SPEC própria aprovada. Registrado na seção 8 do relatório. Continuam proibidos duplicação, geração em massa e funcionalidade fictícia (SF-026).
 - **SPEC `2026-11-01-campos-personalizados.md`** (item 6 do plano, início da fase 3) aprovada com as decisões F1 a F4 conforme propostas: seis tipos de campo; respostas em tabela própria com snapshot; respostas imutáveis; até 10 campos ativos por serviço. Tarefas SF-071 a SF-075 registradas em `TASKS.md`.
 - **Modelo seguido:** os requisitos documentais da seção 21 da SPEC principal (configuração por serviço, desativação lógica, configuração recarregada no envio, snapshot na abertura, gravação na mesma transação).
+
+## SF-071 — Migration e domínio dos campos personalizados (2026-11-01)
+
+- **Migration `20261101300000_service_fields`, só aditiva:** gerada com `prisma migrate diff` a partir do schema anterior, mais as restrições escritas à mão:
+  - índice único parcial `(serviceId, label)` entre os campos ativos (rótulo `citext`, sem distinguir maiúsculas);
+  - `CHECK`s de rótulo (1 a 80, sem espaços nas pontas), texto de ajuda (1 a 200 ou nulo), posição, limites (só em `INTEGER`, dentro de ±1.000.000.000, mínimo ≤ máximo), valor da resposta (1 a 2.000) e snapshot;
+  - as opções são validadas por uma função `IMMUTABLE` (`service_field_options_valid`), porque um `CHECK` não percorre listas: cada opção sem espaços nas pontas, 1 a 80 caracteres, sem repetição ignorando maiúsculas; 2 a 20 opções só em `SELECT`, lista vazia nos outros tipos.
+- **`options` sem valor padrão:** o Prisma cria listas como colunas que aceitam nulo, e o `CHECK` exige a lista. O repositório da SF-072 sempre grava a lista (vazia fora de `SELECT`), como já acontece com os formatos dos documentos.
+- **Tipo imutável:** a regra fica na aplicação (`assertFieldTypeUnchanged`), usada pela edição na SF-072; não há trigger no banco.
+- **Módulo novo `service-fields`:** o lint passou a aplicar a ele as fronteiras de camadas automaticamente (a lista de módulos vem do diretório).
+- **Regras das respostas (`field-value.ts`):** os tamanhos contam caracteres (code points), como o `char_length` do PostgreSQL, e não unidades UTF-16 do JavaScript; quebras de linha `CRLF` do navegador contam como uma; inteiros só em base 10, sem sinal `+`, normalizados sem zeros à esquerda; datas conferidas no calendário (`2026-02-30` recusada); a lista aceita a opção exatamente como escrita. Uma resposta para campo que não é ativo do serviço devolve `stale_form`, para a abertura pedir recarga (5.3.3).
+- **Posição no snapshot:** a resposta guarda a posição do campo entre os ativos no momento da abertura (0, 1, 2…), e não a posição bruta, que pode ter lacunas.
+- **Limpeza do banco de teste:** `tests/integration/fixtures.ts` e `scripts/prepare-e2e.ts` apagam `RequestFieldValue` e `ServiceField` na ordem das chaves estrangeiras.
+- **Resultados:** lint, typecheck e build OK; unitários 421/421 (73 arquivos); integração 192/192 + 1 pulado (43 arquivos); E2E 9/9.

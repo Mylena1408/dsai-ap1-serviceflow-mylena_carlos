@@ -33,6 +33,15 @@ enum DocumentFormat {
   TXT
 }
 
+enum ServiceFieldType {
+  SHORT_TEXT
+  LONG_TEXT
+  INTEGER
+  DATE
+  SELECT
+  YES_NO
+}
+
 model Sector {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.Citext
@@ -95,6 +104,7 @@ model Service {
   sector               Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
   requests             Request[]
   documentRequirements ServiceDocumentRequirement[]
+  fields               ServiceField[]
 }
 
 model Request {
@@ -131,6 +141,7 @@ model Request {
   attachments      RequestAttachment[]
   assignmentEvents RequestAssignmentEvent[]
   priorityEvents   RequestPriorityEvent[]
+  fieldValues      RequestFieldValue[]
   comments         RequestComment[]
   outboxEvents     OutboxEvent[]
   notifications    RequestNotification[]
@@ -278,4 +289,44 @@ model RequestPriorityEvent {
   actor   User    @relation("RequestPriorityEventActor", fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId])
+}
+
+/// Custom field of a service (SPEC 2026-11-01-campos-personalizados, section 6).
+model ServiceField {
+  id         String           @id @default(uuid()) @db.Uuid
+  serviceId  String           @db.Uuid
+  label      String           @db.Citext
+  helpText   String?
+  type       ServiceFieldType
+  isRequired Boolean
+  options    String[]
+  minValue   Int?
+  maxValue   Int?
+  position   Int
+  isActive   Boolean          @default(true)
+  createdAt  DateTime         @default(now()) @db.Timestamptz
+  updatedAt  DateTime         @updatedAt @db.Timestamptz
+
+  service Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  values  RequestFieldValue[]
+
+  @@index([serviceId])
+}
+
+/// Answer given on opening, with a snapshot of the field definition; immutable.
+model RequestFieldValue {
+  id               String           @id @default(uuid()) @db.Uuid
+  requestId        String           @db.Uuid
+  fieldId          String           @db.Uuid
+  labelSnapshot    String
+  typeSnapshot     ServiceFieldType
+  positionSnapshot Int
+  value            String
+  createdAt        DateTime         @default(now()) @db.Timestamptz
+
+  request Request      @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  field   ServiceField @relation(fields: [fieldId], references: [id], onDelete: Restrict)
+
+  @@unique([requestId, fieldId])
+  @@index([fieldId])
 }

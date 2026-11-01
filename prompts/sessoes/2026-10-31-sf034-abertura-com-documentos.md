@@ -247,3 +247,9 @@ Push da SF-070 feito; relatório `SPEC/2026-11-01-relatorio-fase-2.md` escrito (
 > acrescentar funcionalidades reais,cada uma com SPEC aprovada
 
 Decisões F1 a F4 respondidas pela responsável no questionário: todas as propostas aceitas (seis tipos; tabela própria; respostas imutáveis; 10 campos ativos). SPEC `SPEC/2026-11-01-campos-personalizados.md` aprovada e tarefas SF-071 a SF-075 registradas.
+
+## Continuação — SF-071
+
+> siga para a sf-071
+
+SF-071 concluída (ver `NOTES.md`, seção SF-071).
