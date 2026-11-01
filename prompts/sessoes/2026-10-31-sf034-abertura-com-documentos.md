@@ -355,3 +355,9 @@ SF-085 concluída (ver `NOTES.md`, seção SF-085).
 > siga para a sf-086
 
 SF-086 concluída; SPEC de aprovações encerrada (ver `NOTES.md`, seção SF-086).
+
+## Continuação — relatório da fase 3
+
+> siga com o relatório da fase 3
+
+Relatório `SPEC/2026-11-01-relatorio-fase-3.md` escrito (ver `NOTES.md`, seção "Relatório da fase 3").

@@ -1196,3 +1196,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão da SPEC inteira (SF-081 a SF-086):** nenhuma dependência nova; nenhum segredo nos arquivos; migrations aditivas, com as três restrições recriadas mais amplas registradas na SPEC (setor do usuário, vencimento do SLA e tipos de evento); o evento da decisão leva só o código e o autor. Asserções existentes alteradas, todas exigidas pela SPEC: a lista exata de tipos de evento e a contagem de e-mails de demonstração (3 → 4). Mudanças só de configuração em testes existentes: colunas novas em objetos de teste e no dublê em memória. README com a seção de aprovações.
 - **Pendência para publicar:** aplicar no Neon, antes do próximo deploy, as migrations `20261101100000_sla_and_priorities`, `20261101200000_sla_due_soon_at`, `20261101300000_service_fields`, `20261101400000_service_stages`, `20261101500000_manager_role` e `20261101500100_approvals`.
 - **Resultados:** lint, typecheck e build OK; unitários 534/534 (91 arquivos); integração 251/251 + 1 pulado (55 arquivos); E2E 13/13.
+
+## Relatório da fase 3 (2026-11-01)
+
+- **Documento:** `SPEC/2026-11-01-relatorio-fase-3.md`.
+- **Medição:** 22.343 linhas `added` acumuladas (`334a890`); a fase 3 somou 7.129 (campos 3.096, fluxos 2.336, aprovações 1.652), contra 25.000 a 36.000 estimadas: razão de 3,5 a 5,1, confirmando a fase 2.
+- **Correção:** depois da SF-075 informei 2.275 linhas para a SPEC de campos; o correto é 3.096.
+- **Projeção:** o roadmap inteiro deve terminar entre ~30.000 e ~39.000 linhas; pela opção 2, as funcionalidades adicionais precisariam somar de 61.000 a 70.000. Candidatas listadas na seção 8 do relatório.
+- **Tempo:** 7h34 na fase 3 (cerca de 940 linhas por hora); `diario/tempo-do-projeto.md` atualizado (total mínimo 41h03).
+- **Suítes não executadas de novo para o relatório** (só documentação); a última execução completa foi a da SF-086, com tudo verde.
