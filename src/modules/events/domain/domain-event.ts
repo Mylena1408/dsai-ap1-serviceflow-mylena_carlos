@@ -35,6 +35,14 @@ export type DomainEvent =
       requestId: string;
       occurredAt: Date;
       payload: { fromPriority: EventRequestPriority; toPriority: EventRequestPriority; actorId: string };
+    }
+  | {
+      // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
+      // writes them, and the consumer reloads the request to find the recipients.
+      type: "request.sla_warning" | "request.sla_breached";
+      requestId: string;
+      occurredAt: Date;
+      payload: Record<string, never>;
     };
 
 export type DomainEventType = DomainEvent["type"];
@@ -45,6 +53,8 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.assignment_changed",
   "request.comment_added",
   "request.priority_changed",
+  "request.sla_warning",
+  "request.sla_breached",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -53,6 +63,8 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.assignment_changed": ["fromAssigneeId", "toAssigneeId", "actorId"],
   "request.comment_added": ["commentId", "authorId", "isInternal"],
   "request.priority_changed": ["fromPriority", "toPriority", "actorId"],
+  "request.sla_warning": [],
+  "request.sla_breached": [],
 };
 
 /**

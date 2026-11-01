@@ -8,12 +8,19 @@ export type NotificationType =
   | "status.OPEN"
   | "assignment.received"
   | "comment.public"
-  | "comment.internal";
+  | "comment.internal"
+  | "sla.warning"
+  | "sla.breached";
 
 export interface NotificationContext {
   requesterId: string;
   /** Effective assignee now (decision E4: without one, nobody on the team is notified). */
   effectiveAssigneeId: string | null;
+  /**
+   * SLA alerts only (SPEC 2026-11-01, section 5.5): whether the request is still open or in
+   * progress, and the active attendants of its sector, used when nobody holds it.
+   */
+  slaRecipients?: { requestActive: boolean; sectorAttendantIds: readonly string[] };
 }
 
 export type NotifiableEvent =
@@ -21,7 +28,9 @@ export type NotifiableEvent =
   | { type: "request.status_changed"; payload: { toStatus: string; actorId: string } }
   | { type: "request.assignment_changed"; payload: { toAssigneeId: string | null; actorId: string } }
   | { type: "request.comment_added"; payload: { authorId: string; isInternal: boolean } }
-  | { type: "request.priority_changed" };
+  | { type: "request.priority_changed" }
+  | { type: "request.sla_warning" }
+  | { type: "request.sla_breached" };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -67,6 +76,16 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       }
       const recipient = authorId === context.requesterId ? context.effectiveAssigneeId : context.requesterId;
       return plan(recipient, "comment.public", authorId);
+    }
+
+    case "request.sla_warning":
+    case "request.sla_breached": {
+      // Exception to E4: a deadline without an owner goes to the whole sector team.
+      const sla = context.slaRecipients;
+      if (!sla?.requestActive) return [];
+      const type: NotificationType = event.type === "request.sla_warning" ? "sla.warning" : "sla.breached";
+      const recipients = context.effectiveAssigneeId ? [context.effectiveAssigneeId] : sla.sectorAttendantIds;
+      return recipients.map((recipientId) => ({ recipientId, type }));
     }
 
     default:

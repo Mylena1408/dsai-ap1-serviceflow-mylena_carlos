@@ -16,6 +16,8 @@ const MESSAGES: Record<NotificationType, (service: string) => string> = {
   "assignment.received": (service) => `Uma solicitação foi transferida para você: ${service}`,
   "comment.public": (service) => `Novo comentário em ${service}`,
   "comment.internal": (service) => `Nova nota interna em ${service}`,
+  "sla.warning": (service) => `Prazo próximo do vencimento: ${service}`,
+  "sla.breached": (service) => `Prazo vencido: ${service}`,
 };
 
 export function notificationMessage(notification: NotificationRecord): string {

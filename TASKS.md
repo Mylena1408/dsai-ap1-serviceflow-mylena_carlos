@@ -733,7 +733,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-069 — Alertas de prazo
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Regra `pendingSlaAlert` no domínio; caso de uso `recordSlaAlerts` com marca e evento na mesma transação (update condicionado); eventos `request.sla_warning` e `request.sla_breached`; notificações `sla.warning` e `sla.breached` para o responsável efetivo ou, sem ele, para os atendentes ativos do setor; passo `slaAlerts` no início do job diário. CA-SLA-07 verificado.
 - **Objetivo:** Job diário grava `request.sla_warning` e `request.sla_breached` uma vez por solicitação; notificações para o responsável ou, sem ele, para o setor.
 - **Arquivos/módulos esperados:** `src/server/jobs`, `src/modules/requests`, `src/modules/notifications`, testes.
 - **Dependências:** SF-068.

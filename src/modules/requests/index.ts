@@ -7,6 +7,7 @@ import * as createRequestUseCase from "./application/create-request";
 import * as lifecycleActions from "./application/lifecycle-actions";
 import * as priorityUseCase from "./application/priority";
 import * as queries from "./application/request-queries";
+import * as slaAlerts from "./application/sla-alerts";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 import type { RequestWithHistory } from "./domain/request";
@@ -15,6 +16,7 @@ import {
   createPrismaRequestExistenceReader,
 } from "./infrastructure/prisma-attachment-repository";
 import * as orphanCleanup from "./application/orphan-cleanup";
+import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import {
   createPrismaRequestQueryRepository,
   createPrismaRequestTransactionRunner,
@@ -182,6 +184,13 @@ export async function cleanOrphanAttachmentObjects(
   database: PrismaClient = prisma,
 ): Promise<orphanCleanup.OrphanCleanupSummary> {
   return orphanCleanup.cleanOrphanAttachmentObjects(storage, createPrismaRequestExistenceReader(database), now);
+}
+
+export type { SlaAlertSummary } from "./application/sla-alerts";
+
+/** Daily job step: records the SLA alerts owed at `now` (SPEC 2026-11-01, section 5.5). */
+export async function recordSlaAlerts(now: Date, database: PrismaClient = prisma): Promise<slaAlerts.SlaAlertSummary> {
+  return slaAlerts.recordSlaAlerts(now, createPrismaSlaAlertStore(database));
 }
 
 export async function changeRequestPriority(input: unknown, database: PrismaClient = prisma): Promise<void> {

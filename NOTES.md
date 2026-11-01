@@ -988,3 +988,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ajuste em teste existente:** o dublê de `tests/unit/authorization/index.test.ts` monta a linha completa do Prisma e ganhou `dueSoonAt: null`; nenhuma asserção mudou.
 - **Migration aplicada** no banco de dev; ainda falta aplicar `20261101100000` e `20261101200000` no Neon antes de publicar.
 - **Resultados:** lint, typecheck e build OK; unitários 394/394 (70 arquivos); integração 182/182 + 1 pulado (41 arquivos); E2E 8/8.
+
+## SF-069 — Alertas de prazo (2026-11-01)
+
+- **Regra no domínio:** `pendingSlaAlert` (em `sla.ts`) usa `slaSituation`, a mesma regra da tela: "próximo" sem marca de aviso gera `warning`; "vencido" sem marca de vencido gera `breach`.
+- **Uma única vez:** `recordSlaAlerts` busca candidatas (abertas ou em atendimento, `dueSoonAt` já alcançado e alguma marca pendente, até 500 por execução) e, para cada uma, faz numa transação um `updateMany` condicionado ao status, ao vencimento e às marcas lidas; só grava o evento se a linha mudou. Duas execuções simultâneas não duplicam o alerta.
+- **Interpretações (registradas na SPEC, seção 5.5):** já vencida recebe só o alerta de vencido (o aviso é dado como encerrado); concluída ou cancelada antes do processamento não notifica ninguém; o solicitante não recebe alertas de prazo.
+- **Notificações:** `plannedNotifications` ganhou os dois tipos. O contexto tem um campo opcional `slaRecipients`, que o consumidor só monta para esses eventos (os atendentes do setor só são lidos quando não há responsável). A loja de notificações ganhou `sectorAttendantIds` e passou a ler o status da solicitação. Mensagens: "Prazo próximo do vencimento" e "Prazo vencido".
+- **Job diário:** o passo `slaAlerts` roda antes do processamento dos eventos, para que as notificações saiam na mesma execução. O resumo do job ganhou a chave `slaAlerts`.
+- **Teste existente alterado:** a lista exata de tipos de evento da SF-061 recebeu os dois tipos novos, criados pela SPEC. Nenhuma outra asserção mudou.
+- **Erro meu:** o dublê do teste unitário declarava um único parâmetro e o typecheck acusou; corrigido com o tipo da porta.
+- **Resultados:** lint, typecheck e build OK; unitários 398/398 (71 arquivos); integração 186/186 + 1 pulado (42 arquivos); E2E 8/8.

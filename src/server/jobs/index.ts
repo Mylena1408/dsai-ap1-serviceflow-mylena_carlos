@@ -1,6 +1,11 @@
 import { purgeProcessedEvents, runOutbox, type EventConsumer, type OutboxRunSummary } from "@/modules/events";
 import { notificationConsumer, purgeReadNotifications } from "@/modules/notifications";
-import { cleanOrphanAttachmentObjects, type OrphanCleanupSummary } from "@/modules/requests";
+import {
+  cleanOrphanAttachmentObjects,
+  recordSlaAlerts,
+  type OrphanCleanupSummary,
+  type SlaAlertSummary,
+} from "@/modules/requests";
 import { isDocumentStorageConfigured } from "@/server/storage";
 
 // Composition of the event consumers and the daily job (SPEC 2026-10-31-eventos-outbox-
@@ -24,6 +29,7 @@ export async function processEventsNow(): Promise<OutboxRunSummary> {
 export type DailyStep<T> = { status: "ok"; result: T } | { status: "skipped" } | { status: "error"; code: string };
 
 export interface DailyJobSummary {
+  slaAlerts: DailyStep<SlaAlertSummary>;
   events: DailyStep<OutboxRunSummary>;
   purgedEvents: DailyStep<number>;
   purgedNotifications: DailyStep<number>;
@@ -59,6 +65,8 @@ async function orphanStep(now: Date): Promise<DailyStep<OrphanCleanupSummary>> {
 
 /** Section 7: each task runs even if a previous one failed. */
 export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSummary> {
+  // SLA alerts first, so their notifications go out in the same run (SPEC 2026-11-01, 5.5).
+  const slaAlerts = await step(() => recordSlaAlerts(now));
   const events = await step(() => runOutbox(consumers, { maxBatches: 20 }));
   const purgedEvents = await step(() => purgeProcessedEvents(new Date(now.getTime() - PROCESSED_EVENT_RETENTION_MS)));
   const purgedNotifications = await step(() =>
@@ -66,5 +74,5 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   );
   const orphanObjects = await orphanStep(now);
 
-  return { events, purgedEvents, purgedNotifications, orphanObjects };
+  return { slaAlerts, events, purgedEvents, purgedNotifications, orphanObjects };
 }

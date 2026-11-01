@@ -12,11 +12,14 @@ export interface NotificationRecord {
 export interface NotificationRequestState {
   requesterId: string;
   sectorId: string;
+  status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   assignee: { id: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT"; isActive: boolean; sectorId: string | null } | null;
 }
 
 export interface NotificationStore {
   findRequestState(requestId: string): Promise<NotificationRequestState | null>;
+  /** Active attendants of a sector (SLA alerts without an assignee). */
+  sectorAttendantIds(sectorId: string): Promise<string[]>;
   /** The subset of `userIds` that are active. */
   activeUserIds(userIds: string[]): Promise<Set<string>>;
   /** Idempotent: an existing (eventId, recipientId) pair is kept as is. */

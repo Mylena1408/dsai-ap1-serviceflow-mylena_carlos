@@ -4,9 +4,19 @@ import { requireCurrentActor } from "@/server/authorization";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
 import { plannedNotifications, type NotifiableEvent } from "../domain/recipients";
-import type { NotificationRecord, NotificationStore } from "./ports";
+import type { NotificationRecord, NotificationRequestState, NotificationStore } from "./ports";
 
 export const RECENT_NOTIFICATIONS = 50;
+
+const SLA_EVENTS = new Set(["request.sla_warning", "request.sla_breached"]);
+
+/** SPEC 2026-11-01, section 5.5: the sector team is loaded only when nobody holds the request. */
+async function slaRecipients(store: NotificationStore, request: NotificationRequestState, assigneeId: string | null) {
+  return {
+    requestActive: request.status === "OPEN" || request.status === "IN_PROGRESS",
+    sectorAttendantIds: assigneeId ? [] : await store.sectorAttendantIds(request.sectorId),
+  };
+}
 
 /**
  * First consumer of the outbox (decision E1). Recipients are computed from the current
@@ -22,15 +32,17 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         return;
       }
 
+      const assigneeId = effectiveAssigneeId({
+        requesterId: request.requesterId,
+        sectorId: request.sectorId,
+        status: "OPEN",
+        completedAt: null,
+        assignee: request.assignee,
+      });
       const planned = plannedNotifications(event as unknown as NotifiableEvent, {
         requesterId: request.requesterId,
-        effectiveAssigneeId: effectiveAssigneeId({
-          requesterId: request.requesterId,
-          sectorId: request.sectorId,
-          status: "OPEN",
-          completedAt: null,
-          assignee: request.assignee,
-        }),
+        effectiveAssigneeId: assigneeId,
+        ...(SLA_EVENTS.has(event.type) ? { slaRecipients: await slaRecipients(store, request, assigneeId) } : {}),
       });
 
       if (planned.length === 0) {

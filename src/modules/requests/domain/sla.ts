@@ -70,6 +70,31 @@ export function slaSituation(request: SlaState, now: Date): SlaSituation {
   return remaining <= warningWindow ? "due_soon" : "on_time";
 }
 
+export type SlaAlertKind = "warning" | "breach";
+
+export interface SlaAlertState extends SlaState {
+  slaWarningNotifiedAt: Date | null;
+  slaBreachNotifiedAt: Date | null;
+}
+
+/**
+ * Alert the daily job still owes this request (section 5.5): once per situation. A request
+ * found already overdue gets only the breach alert; a late "due soon" would be noise.
+ */
+export function pendingSlaAlert(request: SlaAlertState, now: Date): SlaAlertKind | null {
+  const situation = slaSituation(request, now);
+
+  if (situation === "overdue") {
+    return request.slaBreachNotifiedAt === null ? "breach" : null;
+  }
+
+  if (situation === "due_soon") {
+    return request.slaWarningNotifiedAt === null ? "warning" : null;
+  }
+
+  return null;
+}
+
 export function isRequestPriority(value: unknown): value is RequestPriority {
   return typeof value === "string" && (REQUEST_PRIORITIES as readonly string[]).includes(value);
 }

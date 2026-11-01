@@ -25,6 +25,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.comment_added",
       // Added by SPEC 2026-11-01 (SLA e prioridades).
       "request.priority_changed",
+      "request.sla_warning",
+      "request.sla_breached",
     ]);
     expect(
       outboxPayload({
