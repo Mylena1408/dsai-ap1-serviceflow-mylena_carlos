@@ -1,0 +1,56 @@
+// Domain events written to the outbox (SPEC 2026-10-31-eventos-outbox-jobs, section 6).
+// Payloads carry identifiers and codes only: never comment text, reasons, file names or
+// personal data. Consumers reload whatever else they need from the database.
+
+export type EventRequestStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+
+export type DomainEvent =
+  | {
+      type: "request.opened";
+      requestId: string;
+      occurredAt: Date;
+      payload: { requesterId: string; sectorId: string };
+    }
+  | {
+      type: "request.status_changed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { fromStatus: EventRequestStatus; toStatus: EventRequestStatus; actorId: string };
+    }
+  | {
+      type: "request.assignment_changed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { fromAssigneeId: string | null; toAssigneeId: string | null; actorId: string };
+    }
+  | {
+      type: "request.comment_added";
+      requestId: string;
+      occurredAt: Date;
+      payload: { commentId: string; authorId: string; isInternal: boolean };
+    };
+
+export type DomainEventType = DomainEvent["type"];
+
+export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
+  "request.opened",
+  "request.status_changed",
+  "request.assignment_changed",
+  "request.comment_added",
+];
+
+const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
+  "request.opened": ["requesterId", "sectorId"],
+  "request.status_changed": ["fromStatus", "toStatus", "actorId"],
+  "request.assignment_changed": ["fromAssigneeId", "toAssigneeId", "actorId"],
+  "request.comment_added": ["commentId", "authorId", "isInternal"],
+};
+
+/**
+ * Copies only the declared payload keys, so a caller that passes a richer object (for
+ * example a whole comment) cannot leak text into the outbox (section 6.1, CA-EVT-02).
+ */
+export function outboxPayload(event: DomainEvent): Record<string, string | boolean | null> {
+  const source = event.payload as Record<string, string | boolean | null>;
+  return Object.fromEntries(PAYLOAD_KEYS[event.type].map((key) => [key, source[key] ?? null]));
+}

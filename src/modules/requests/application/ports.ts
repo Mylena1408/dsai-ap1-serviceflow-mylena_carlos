@@ -1,4 +1,5 @@
 import type { DetectedDocumentFormat } from "@/modules/attachments";
+import type { DomainEvent } from "@/modules/events";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
@@ -152,6 +153,8 @@ export interface RequestTransaction {
   /** Returns the number of rows changed (0 when status or assignee changed meanwhile). */
   updateAssigneeIfCurrent(update: AssigneeUpdate): Promise<number>;
   insertAssignmentEvent(event: NewAssignmentEvent): Promise<void>;
+  /** Writes a domain event to the outbox in this same transaction (SPEC de eventos, 6.2). */
+  recordEvent(event: DomainEvent): Promise<void>;
   getWithHistory(requestId: string): Promise<RequestWithHistory>;
 }
 

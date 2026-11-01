@@ -60,6 +60,12 @@ export async function transitionRequestStatus(
       toStatus: parsed.toStatus,
       occurredAt,
     });
+    await transaction.recordEvent({
+      type: "request.status_changed",
+      requestId: parsed.requestId,
+      occurredAt,
+      payload: { fromStatus: currentRequest.status, toStatus: parsed.toStatus, actorId: currentActor.id },
+    });
 
     return transaction.getWithHistory(parsed.requestId);
   });

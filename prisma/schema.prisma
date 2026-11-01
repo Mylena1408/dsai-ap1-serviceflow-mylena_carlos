@@ -68,6 +68,7 @@ model User {
   assignmentEventsFrom  RequestAssignmentEvent[] @relation("RequestAssignmentEventFrom")
   assignmentEventsTo    RequestAssignmentEvent[] @relation("RequestAssignmentEventTo")
   comments              RequestComment[]         @relation("RequestCommentAuthor")
+  notifications         RequestNotification[]    @relation("NotificationRecipient")
 }
 
 model Service {
@@ -112,6 +113,8 @@ model Request {
   attachments      RequestAttachment[]
   assignmentEvents RequestAssignmentEvent[]
   comments         RequestComment[]
+  outboxEvents     OutboxEvent[]
+  notifications    RequestNotification[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -205,4 +208,39 @@ model RequestComment {
   author  User    @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
 
   @@index([requestId, createdAt])
+}
+
+model OutboxEvent {
+  id            String    @id @default(uuid()) @db.Uuid
+  type          String
+  requestId     String    @db.Uuid
+  payload       Json
+  occurredAt    DateTime  @db.Timestamptz
+  availableAt   DateTime  @db.Timestamptz
+  attempts      Int       @default(0)
+  processedAt   DateTime? @db.Timestamptz
+  failedAt      DateTime? @db.Timestamptz
+  lastErrorCode String?
+
+  request       Request               @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  notifications RequestNotification[]
+
+  @@index([processedAt, failedAt, availableAt])
+}
+
+model RequestNotification {
+  id          String    @id @default(uuid()) @db.Uuid
+  recipientId String    @db.Uuid
+  requestId   String    @db.Uuid
+  eventId     String?   @db.Uuid
+  type        String
+  createdAt   DateTime  @db.Timestamptz
+  readAt      DateTime? @db.Timestamptz
+
+  recipient User         @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+  request   Request      @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  event     OutboxEvent? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, recipientId])
+  @@index([recipientId, readAt, createdAt])
 }

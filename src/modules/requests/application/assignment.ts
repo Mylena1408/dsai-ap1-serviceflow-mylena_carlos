@@ -59,6 +59,12 @@ async function changeAssignee(
       toAssigneeId,
       occurredAt,
     });
+    await transaction.recordEvent({
+      type: "request.assignment_changed",
+      requestId,
+      occurredAt,
+      payload: { fromAssigneeId, toAssigneeId, actorId: actor.id },
+    });
   });
 }
 

@@ -822,3 +822,19 @@ Padrão a replicar nas SF-039 e SF-040:
   - o detalhe tem as seções "Conversa" e "Histórico";
   - a lista do solicitante mostra busca e "Página 1 de 1 — 3 solicitações", sem o filtro de responsável.
   - Nenhum formulário que grava foi enviado.
+
+## SF-061 — Outbox e gravação de eventos (2026-11-01)
+
+- **Migration `20261101000000_outbox_and_notifications`:**
+  - `OutboxEvent`, com `CHECK` dos 4 tipos, `payload` sempre objeto e `lastErrorCode` de até 64 caracteres;
+  - `RequestNotification`, com chave única `(eventId, recipientId)` para a idempotência.
+  - **Mudanças em relação à SPEC (seção 9):** a tabela se chama `RequestNotification`, e não `Notification`, porque é sempre ligada a uma solicitação. E `eventId` aceita nulo com `ON DELETE SET NULL`: o job diário apaga eventos processados há mais de 30 dias, enquanto notificações não lidas continuam guardadas, e uma FK `RESTRICT` impediria essa limpeza. A seção 9 da SPEC foi atualizada.
+- **Módulo `src/modules/events`:**
+  - `DomainEvent`, com os 4 tipos da seção 6.1;
+  - `outboxPayload`, que copia só as chaves declaradas de cada tipo. Assim, mesmo um chamador que passe um objeto maior não vaza texto;
+  - `recordOutboxEvent(transaction, event)`, que grava com o cliente da transação de quem chama.
+- **Gravação:** `RequestTransaction` e `CommentTransaction` ganharam `recordEvent`. Abertura, transição, atribuição, cancelamento, reabertura e comentário gravam o evento logo depois do registro de histórico, com o mesmo horário do banco. Justificativas ficam só no histórico; o evento leva códigos.
+- **Falha durante o trabalho:** o primeiro script de ligação falhou no shell (aspas simples em heredoc) e não executou nada; foi refeito como arquivo Python.
+- **Testes:** 2 unitários e 3 de integração. Um deles cobre o percurso completo (7 eventos na ordem certa e sem texto). Outro força a falha da gravação do evento com um gatilho e confirma que nenhuma solicitação, comentário ou atribuição fica gravado pela metade. O terceiro confere o `CHECK` de tipo. Os dublês ganharam `recordEvent`, e a limpeza de `fixtures.ts` e `prepare-e2e.ts` passou a incluir as tabelas novas.
+- **Resultados:** lint, typecheck e build OK; unitários 348/348 (59 arquivos); integração 158/158 + 1 pulado (35 arquivos); E2E 7/7.
+- **Banco Neon:** precisa desta migration antes da próxima publicação.

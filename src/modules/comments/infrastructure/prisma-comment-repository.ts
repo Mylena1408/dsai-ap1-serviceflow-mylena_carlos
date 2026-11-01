@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { recordOutboxEvent } from "@/modules/events";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import type {
   CommentRecord,
@@ -75,6 +76,9 @@ export function createPrismaCommentTransactionRunner(database: PrismaClient): Co
             async currentTime() {
               const [row] = await transaction.$queryRaw<Array<{ now: Date }>>`SELECT now() AS "now"`;
               return row.now;
+            },
+            recordEvent(event) {
+              return recordOutboxEvent(transaction, event);
             },
             async insertComment(comment) {
               return toDomain(

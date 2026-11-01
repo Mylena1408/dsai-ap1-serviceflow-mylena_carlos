@@ -28,13 +28,22 @@ export async function addComment(
 
     assertCanComment(reader, request, parsed.isInternal);
 
-    return transaction.insertComment({
+    const comment = await transaction.insertComment({
       requestId: parsed.requestId,
       authorId: reader.id,
       body,
       isInternal: parsed.isInternal,
       createdAt: await transaction.currentTime(),
     });
+    // Identifiers only: the text never goes to the outbox (SPEC de eventos, 6.1).
+    await transaction.recordEvent({
+      type: "request.comment_added",
+      requestId: comment.requestId,
+      occurredAt: comment.createdAt,
+      payload: { commentId: comment.id, authorId: comment.author.id, isInternal: comment.isInternal },
+    });
+
+    return comment;
   });
 }
 

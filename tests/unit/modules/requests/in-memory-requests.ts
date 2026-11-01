@@ -13,6 +13,7 @@ import type {
   RequestWithHistory,
 } from "@/modules/requests/domain/request";
 import type { ActiveDocumentRequirement } from "@/modules/requests/domain/attachment-requirements";
+import type { DomainEvent } from "@/modules/events";
 
 export type StoredActor = TransactionActor & { name: string; email: string };
 export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
@@ -28,6 +29,7 @@ export interface InMemoryRequestStore {
   requirements: StoredRequirement[];
   attachments: NewRequestAttachment[];
   assignmentEvents: NewAssignmentEvent[];
+  outbox: DomainEvent[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -44,6 +46,7 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     requirements: [],
     attachments: [],
     assignmentEvents: [],
+    outbox: [],
     ...seed,
   };
 }
@@ -246,6 +249,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     },
     async insertAssignmentEvent(event) {
       store.assignmentEvents.push({ ...event });
+    },
+    async recordEvent(event) {
+      store.outbox.push(event);
     },
     async getWithHistory(requestId) {
       const request = store.requests.find(({ id }) => id === requestId);

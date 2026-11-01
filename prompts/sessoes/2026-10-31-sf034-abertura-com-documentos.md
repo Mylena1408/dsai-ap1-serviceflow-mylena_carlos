@@ -155,3 +155,11 @@ Deploy de produção e verificação só com leitura (ver `NOTES.md`).
 > escreva a SPEC do passo 1
 
 SPEC de eventos, outbox e jobs escrita como proposta e aprovada (E1 a E4); tarefas SF-061 a SF-064. Nenhum código.
+
+## Continuação — SF-061 e relatório
+
+> pode começar pela SF-061
+
+> apos a integração faça um relatorio atualizando a quantidade de linhas de codigo produzidos hoje, quantos temos ao total (retirados os iniciais deste sistema) e o que foi implementado, também indique os proximos passos,faça isso em uma tabela
+
+SF-061 concluída (ver `NOTES.md`); relatório em tabela no resumo do dia.

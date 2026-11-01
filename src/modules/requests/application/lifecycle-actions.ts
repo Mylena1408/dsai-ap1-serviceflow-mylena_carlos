@@ -64,6 +64,13 @@ async function changeLifecycle(
       occurredAt,
       note: change.note,
     });
+    // The reason stays in the history only; the event carries codes (SPEC de eventos, 6.1).
+    await transaction.recordEvent({
+      type: "request.status_changed",
+      requestId,
+      occurredAt,
+      payload: { fromStatus: request.status, toStatus: change.toStatus, actorId: actor.id },
+    });
   });
 }
 

@@ -1,3 +1,4 @@
+import type { DomainEvent } from "@/modules/events";
 import type { CommentReader, CommentRequestScope } from "../domain/comment-policy";
 
 export interface CommentRecord {
@@ -34,6 +35,8 @@ export interface CommentTransaction extends CommentScopeReader {
   /** Database time of the transaction (same clock as the request history). */
   currentTime(): Promise<Date>;
   insertComment(comment: NewComment): Promise<CommentRecord>;
+  /** Writes a domain event to the outbox in this same transaction. */
+  recordEvent(event: DomainEvent): Promise<void>;
 }
 
 export interface CommentTransactionRunner {

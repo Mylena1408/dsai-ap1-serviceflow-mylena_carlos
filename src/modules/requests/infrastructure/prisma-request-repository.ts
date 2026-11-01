@@ -3,6 +3,7 @@ import {
   runSerializableTransaction,
   type PersistenceErrorPolicy,
 } from "@/server/db/serializable-transaction";
+import { recordOutboxEvent } from "@/modules/events";
 import type { RequestWithHistory } from "../domain/request";
 import { escapeLikePattern, pageWindow, type SearchCriteria } from "../domain/search-criteria";
 import type {
@@ -257,6 +258,9 @@ function createPrismaRequestTransaction(
     },
     async insertAssignmentEvent(event) {
       await transaction.requestAssignmentEvent.create({ data: event });
+    },
+    recordEvent(event) {
+      return recordOutboxEvent(transaction, event);
     },
     async getWithHistory(requestId) {
       return toDomain(

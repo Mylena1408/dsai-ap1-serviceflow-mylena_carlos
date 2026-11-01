@@ -62,6 +62,7 @@ function runner(store: Store): CommentTransactionRunner {
         async currentTime() {
           return databaseTime;
         },
+        async recordEvent() {},
         async insertComment(comment: NewComment) {
           const author = readers[comment.authorId];
           const record = {

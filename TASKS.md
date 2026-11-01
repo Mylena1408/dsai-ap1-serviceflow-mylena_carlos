@@ -649,7 +649,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-061 — Outbox e gravação de eventos
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Migration `20261101000000_outbox_and_notifications` (`OutboxEvent` e `RequestNotification`, com `CHECK`s), módulo `src/modules/events` (`DomainEvent`, `outboxPayload`, `recordOutboxEvent`) e gravação dos eventos nas transações de abertura, transição, atribuição, cancelamento, reabertura e comentário. CA-EVT-01, 02 e 09 verificados.
 - **Objetivo:** Migration (`OutboxEvent` e `Notification`), módulo `events` e gravação dos eventos da seção 6.1 dentro das transações existentes de `requests` e `comments`.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/events/`, transações de `requests` e `comments`, testes.
 - **Dependências:** SF-060.

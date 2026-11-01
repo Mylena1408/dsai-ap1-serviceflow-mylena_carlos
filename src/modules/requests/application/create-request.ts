@@ -164,6 +164,12 @@ async function openRequest(
     toStatus: "OPEN",
     occurredAt: openedAt,
   });
+  await transaction.recordEvent({
+    type: "request.opened",
+    requestId: created.id,
+    occurredAt: openedAt,
+    payload: { requesterId: context.actorId, sectorId: context.service.sector.id },
+  });
 
   if (matches.length > 0) {
     await transaction.insertAttachments(
