@@ -1131,3 +1131,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ambiente:** o PostgreSQL de teste tinha sido encerrado de novo por falta de memória; foi religado a pedido da responsável para esta tarefa.
 - **Pendência para publicar:** aplicar no Neon, antes do próximo deploy, as migrations `20261101100000_sla_and_priorities`, `20261101200000_sla_due_soon_at`, `20261101300000_service_fields` e `20261101400000_service_stages`.
 - **Resultados:** lint, typecheck e build OK; unitários 503/503 (85 arquivos); integração 227/227 + 1 pulado (50 arquivos); E2E 11/11.
+
+## SPEC de aprovações (2026-11-01)
+
+- **SPEC `2026-11-01-aprovacoes.md`** (item 8 do plano, último da fase 3) aprovada com as decisões A1 a A4 conforme propostas: aprovação antes do início do atendimento, com o status "Aberta" e a aprovação pendente, e rejeição cancelando a solicitação; um nível (qualquer gestor ativo do setor); prazo do SLA a partir da aprovação; gestor vê só as solicitações do setor que exigem aprovação, só para leitura. Tarefas SF-081 a SF-086 registradas em `TASKS.md`.
+- **Mudanças previstas no banco além de acréscimos:** a restrição do setor do usuário (passa a exigir setor também para o gestor) e a dos tipos de evento da outbox serão apagadas e recriadas mais amplas, sem perda de dados.

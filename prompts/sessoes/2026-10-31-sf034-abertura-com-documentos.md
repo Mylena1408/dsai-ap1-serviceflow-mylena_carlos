@@ -313,3 +313,9 @@ SF-079 concluída (ver `NOTES.md`, seção SF-079).
 > pode prosseguir
 
 PostgreSQL de teste religado. SF-080 concluída; SPEC de fluxos configuráveis encerrada (ver `NOTES.md`, seção SF-080).
+
+## Continuação — SPEC de aprovações
+
+> siga com a SPEC de aprovações
+
+Decisões A1 a A4 respondidas pela responsável no questionário: todas as propostas aceitas (antes do início, com rejeição cancelando; um nível; SLA a partir da aprovação; gestor vê só as solicitações com aprovação). SPEC `SPEC/2026-11-01-aprovacoes.md` aprovada e tarefas SF-081 a SF-086 registradas.

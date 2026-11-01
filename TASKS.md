@@ -858,3 +858,67 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-FLX-01 a 11 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-01-fluxos-configuraveis.md`.
+
+## Aprovações com o perfil Gestor — SPEC de 2026-11-01
+
+**Ordem:** SF-081 → SF-082 → SF-083 → SF-084 → SF-085 → SF-086.
+
+### SF-081 — Migration e domínio das aprovações
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration da seção 6 (perfil `MANAGER`, restrição de setor recriada, enums de aprovação, `Service.requiresApproval`, `Request.approvalState`, tabela `RequestApproval`, `CHECK`s e tipo `request.approval_decided` na outbox) e regras puras: quem decide, observação, transições da aprovação, bloqueio do início e vencimento a partir da aprovação.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, limpeza do banco de teste, testes.
+- **Dependências:** SF-080.
+- **Critérios de conclusão:** CA-APR-10; regras de CA-APR-05, 06 e 07 prontas para as próximas tarefas.
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
+
+### SF-082 — Perfil Gestor no sistema
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Perfil "Gestor" no cadastro de usuários (com setor obrigatório), login com senha e conta de demonstração, área própria e navegação; bloqueio das outras áreas.
+- **Arquivos/módulos esperados:** Módulos de usuários e autenticação, `src/server/authorization`, telas de login e navegação, testes.
+- **Dependências:** SF-081.
+- **Critérios de conclusão:** CA-APR-02 (parte de usuários) e CA-APR-03.
+- **Testes relacionados:** Unitários e integração de usuários, autenticação e acesso; suítes anteriores.
+- **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
+
+### SF-083 — Aprovação na abertura e no início
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Opção "Exige aprovação do gestor" no serviço; snapshot na abertura com aprovação pendente; recusa do início enquanto pendente; solicitação pendente sem prazo de SLA.
+- **Arquivos/módulos esperados:** Módulos de serviços e solicitações, área administrativa, testes.
+- **Dependências:** SF-082.
+- **Critérios de conclusão:** CA-APR-01, CA-APR-02 (parte do serviço), CA-APR-04 e CA-APR-05 (parte do bloqueio).
+- **Testes relacionados:** Unitários; integração; suítes anteriores sem alteração de asserções.
+- **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
+
+### SF-084 — Decisão do gestor
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso de aprovar e rejeitar (observação obrigatória na rejeição) com registro, linha do tempo, eventos, cancelamento na rejeição, vencimento a partir da aprovação e notificações (gestores na abertura, solicitante na decisão).
+- **Arquivos/módulos esperados:** Módulos de solicitações, eventos e notificações, testes.
+- **Dependências:** SF-083.
+- **Critérios de conclusão:** CA-APR-05, 06, 07 e 08.
+- **Testes relacionados:** Unitários; integração com decisões concorrentes.
+- **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
+
+### SF-085 — Telas das aprovações
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Área "Aprovações" do gestor (lista com filtro e detalhe só de leitura com os formulários de decisão) e situação da aprovação nas listas e nos detalhes de solicitante e atendente.
+- **Arquivos/módulos esperados:** Telas do gestor, componentes compartilhados, testes.
+- **Dependências:** SF-084.
+- **Critérios de conclusão:** CA-APR-09.
+- **Testes relacionados:** Unitários das telas; integração do acesso.
+- **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
+
+### SF-086 — E2E e revisão das aprovações
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-085.
+- **Critérios de conclusão:** Todos os CA-APR-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
