@@ -598,3 +598,47 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-COM-01 a 09 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-10-31-comentarios.md`.
+
+## Busca, filtros e paginação — SPEC de 2026-10-31
+
+**Ordem:** SF-057 → SF-058 → SF-059 → SF-060.
+
+### SF-057 — Critérios de busca e índices
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Domínio dos critérios (termo, status, responsável, período, ordem, página): validação, normalização, escape de `%` e `_`, limites de data em America/Sao_Paulo e cálculo de página; migration aditiva com os índices da seção 6.
+- **Arquivos/módulos esperados:** `src/modules/requests/domain/`, `prisma/migrations/`, testes.
+- **Dependências:** SF-056.
+- **Critérios de conclusão:** CA-BUS-03, 04, 06 (regras), 10.
+- **Testes relacionados:** Unitários das regras e das bordas de data; integração da migration.
+- **SPEC:** `SPEC/2026-10-31-busca-filtros-paginacao.md`.
+
+### SF-058 — Consultas paginadas e casos de uso
+
+- **Estado:** Não iniciada.
+- **Objetivo:** `searchRequesterRequests` e `searchAttendantQueue`; consulta Prisma com filtro, ordem estável, `skip`/`take` e `count`.
+- **Arquivos/módulos esperados:** `src/modules/requests/{application,infrastructure}`, `index.ts`, testes.
+- **Dependências:** SF-057.
+- **Critérios de conclusão:** CA-BUS-01, 02, 05, 07, 08.
+- **Testes relacionados:** Integração com mais de 20 solicitações, escopo por leitor, responsável efetivo e bordas de data.
+- **SPEC:** `SPEC/2026-10-31-busca-filtros-paginacao.md`.
+
+### SF-059 — Telas de busca, filtros e páginas
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Formulário GET compartilhado nas listas do solicitante e do atendente, navegação de páginas, mensagens de critério inválido.
+- **Arquivos/módulos esperados:** `src/app/(requester)/requests/page.tsx`, `src/app/(attendant)/queue/page.tsx`, componente compartilhado, testes.
+- **Dependências:** SF-058.
+- **Critérios de conclusão:** CA-BUS-09.
+- **Testes relacionados:** Unitários da leitura dos parâmetros; E2E na SF-060.
+- **SPEC:** `SPEC/2026-10-31-busca-filtros-paginacao.md`.
+
+### SF-060 — E2E e revisão da busca
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 9 da SPEC; revisão de escopo, desempenho e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-059.
+- **Critérios de conclusão:** Todos os CA-BUS-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-10-31-busca-filtros-paginacao.md`.
