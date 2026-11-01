@@ -86,7 +86,7 @@ Cada concessão e revogação fica numa tabela `UserPermissionEvent` (usuário, 
 - [ ] **CA-PER-07** — Com `QUEUE_SUPERVISION`, o atendente libera e transfere solicitação do setor que está com colega; sem a permissão, continua recusado; iniciar, concluir e mover etapas seguem só do responsável.
 - [ ] **CA-PER-08** — As ações feitas por permissão aparecem no histórico normal da solicitação e geram os eventos e notificações já existentes.
 - [ ] **CA-PER-09** — Telas: a administração mostra e altera as permissões de cada usuário (com as sem efeito marcadas); as áreas mostram as páginas liberadas só para quem tem a permissão.
-- [ ] **CA-PER-10** — Migration aditiva; dados existentes não mudam.
+- [x] **CA-PER-10** — Migration aditiva; dados existentes não mudam. *Verificado em 2026-11-01 (SF-087): migration só aditiva aplicada sobre dados existentes; ninguém começa com permissões; uma concessão por usuário e permissão (`permission-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes
 

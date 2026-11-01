@@ -929,7 +929,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-087 — Migration e domínio das permissões
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Migration `20261101600000_user_permissions` (enums `Permission` e `PermissionAction`, tabelas `UserPermission` e `UserPermissionEvent`) e novo módulo `src/modules/permissions/` com o catálogo, quem pode receber cada permissão e a verificação com o perfil, o estado e o setor atuais. CA-PER-10 verificado; regras de CA-PER-02 e 04 prontas para as próximas tarefas.
 - **Objetivo:** Migration da seção 6 (enum `Permission`, tabelas `UserPermission` e `UserPermissionEvent`) e regras puras: quem pode receber cada permissão e verificação com o perfil, o estado e o setor atuais do usuário.
 - **Arquivos/módulos esperados:** `prisma/`, novo módulo `src/modules/permissions/`, `src/server/authorization`, limpeza do banco de teste, testes.
 - **Dependências:** SF-086.

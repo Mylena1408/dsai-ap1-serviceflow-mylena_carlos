@@ -367,3 +367,9 @@ Relatório `SPEC/2026-11-01-relatorio-fase-3.md` escrito (ver `NOTES.md`, seçã
 > siga com a SPEC de permissões configuráveis
 
 Decisões K1 a K4 respondidas pela responsável no questionário: todas as propostas aceitas (por usuário; três permissões; setor do usuário; com histórico). SPEC `SPEC/2026-11-01-permissoes-configuraveis.md` aprovada e tarefas SF-087 a SF-091 registradas.
+
+## Continuação — SF-087
+
+> siga para a sf-087
+
+SF-087 concluída (ver `NOTES.md`, seção SF-087).

@@ -1210,3 +1210,10 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - **SPEC `2026-11-01-permissoes-configuraveis.md`** (item 9 do plano, início da fase 4) aprovada com as decisões K1 a K4 conforme propostas: permissões concedidas por usuário; três permissões (gerir serviços do setor, ver todas as solicitações do setor, supervisionar a fila); sempre no setor atual do usuário; histórico de concessões e revogações. Tarefas SF-087 a SF-091 registradas em `TASKS.md`.
 - **Princípio:** permissões só acrescentam ações dentro do setor; sem nenhuma concedida, o sistema fica como está (garantia 7.4).
+
+## SF-087 — Migration e domínio das permissões (2026-11-01)
+
+- **Migration `20261101600000_user_permissions`:** só acrescenta (dois enums, duas tabelas, índice único em `userId` + `permission`, índice do histórico por usuário e data). Nenhuma restrição existente foi recriada.
+- **Regras (`src/modules/permissions/domain/permission.ts`):** catálogo fixo `SECTOR_SERVICES`, `SECTOR_REQUESTS_READ` e `QUEUE_SUPERVISION` com os perfis que podem receber cada um (tabela 5.1); `assertCanGrantPermission` recusa perfil não elegível (validação) e usuário inativo (conflito); `isPermissionEffective` e `hasPermissionInSector` só contam a permissão com usuário ativo, perfil elegível e setor, e só no setor atual da pessoa (5.2.3). As consultas ao banco e o uso nas regras de autorização vêm nas SF-088 a SF-090.
+- **Limpeza do banco de teste:** as duas tabelas novas entram antes de `User` em `tests/integration/fixtures.ts` e `scripts/prepare-e2e.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 538/538 (92 arquivos); integração 253/253 + 1 pulado (56 arquivos); E2E 13/13.

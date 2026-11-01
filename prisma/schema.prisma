@@ -25,6 +25,17 @@ enum ApprovalDecision {
   REJECTED
 }
 
+enum Permission {
+  SECTOR_SERVICES
+  SECTOR_REQUESTS_READ
+  QUEUE_SUPERVISION
+}
+
+enum PermissionAction {
+  GRANTED
+  REVOKED
+}
+
 enum RequestStatus {
   OPEN
   IN_PROGRESS
@@ -100,6 +111,10 @@ model User {
   priorityEvents        RequestPriorityEvent[]   @relation("RequestPriorityEventActor")
   stageEvents           RequestStageEvent[]      @relation("RequestStageEventActor")
   approvalsDecided      RequestApproval[]        @relation("RequestApprovalDecider")
+  permissions           UserPermission[]         @relation("UserPermissionHolder")
+  permissionsGranted    UserPermission[]         @relation("UserPermissionGrantor")
+  permissionEvents      UserPermissionEvent[]    @relation("UserPermissionEventUser")
+  permissionEventsActed UserPermissionEvent[]    @relation("UserPermissionEventActor")
 }
 
 model Service {
@@ -400,4 +415,33 @@ model RequestApproval {
   decider User    @relation("RequestApprovalDecider", fields: [deciderId], references: [id], onDelete: Restrict)
 
   @@index([deciderId])
+}
+
+/// Additional permission granted to a user (SPEC 2026-11-01-permissoes-configuraveis, section 6).
+model UserPermission {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  permission  Permission
+  grantedById String     @db.Uuid
+  grantedAt   DateTime   @db.Timestamptz
+
+  user      User @relation("UserPermissionHolder", fields: [userId], references: [id], onDelete: Restrict)
+  grantedBy User @relation("UserPermissionGrantor", fields: [grantedById], references: [id], onDelete: Restrict)
+
+  @@unique([userId, permission])
+}
+
+/// Grant or revocation of a permission (SPEC 2026-11-01-permissoes-configuraveis, 5.4).
+model UserPermissionEvent {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @db.Uuid
+  permission Permission
+  action     PermissionAction
+  actorId    String           @db.Uuid
+  occurredAt DateTime         @db.Timestamptz
+
+  user  User @relation("UserPermissionEventUser", fields: [userId], references: [id], onDelete: Restrict)
+  actor User @relation("UserPermissionEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([userId, occurredAt])
 }
