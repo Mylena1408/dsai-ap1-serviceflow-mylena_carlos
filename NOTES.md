@@ -773,3 +773,9 @@ Padrão a replicar nas SF-039 e SF-040:
   - Depois das correções, o arquivo passou 3 vezes seguidas.
 - **Testes:** 3 unitários (escopo da sessão, perfis, critérios inválidos antes da consulta) e 5 de integração. O dublê em memória ganhou um `search` simples, só com escopo e página; os filtros são verificados no PostgreSQL.
 - **Resultados:** lint, typecheck e build OK; unitários 342/342 (57 arquivos); integração 155/155 + 1 pulado (34 arquivos); E2E 6/6.
+
+## Banco Neon: migrations de comentários e índices (2026-10-31)
+
+- A pedido da responsável, aplicadas no banco de produção (Neon) as migrations `20261031200000_request_comments` e `20261031220000_request_list_indexes`, pela conexão direta. `prisma migrate status`: 9 migrations, banco em dia.
+- Ambas só acrescentam (uma tabela e dois índices); a versão publicada do site, anterior aos comentários, continua funcionando sobre o banco atualizado.
+- Uma tentativa anterior de aplicar a migration de comentários tinha sido bloqueada pela permissão automática; esta foi feita depois do pedido explícito.
