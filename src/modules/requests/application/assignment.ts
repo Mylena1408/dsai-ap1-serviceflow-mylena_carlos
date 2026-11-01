@@ -5,6 +5,8 @@ import {
   assertCanAssume,
   assertCanRelease,
   assertCanTransfer,
+  effectiveAssigneeId,
+  isQueueSupervisor,
   type LifecycleRequest,
   type LifecycleUser,
 } from "../domain/lifecycle";
@@ -68,6 +70,18 @@ async function changeAssignee(
   });
 }
 
+// SPEC 2026-11-01-permissoes-configuraveis, 5.3.3: the permission is read only when the actor is
+// not the holder, in the same transaction, so a revocation counts at once.
+async function supervises(actor: LifecycleUser, request: LifecycleRequest, transaction: RequestTransaction) {
+  const holderId = effectiveAssigneeId(request);
+
+  if (holderId === null || holderId === actor.id) {
+    return false;
+  }
+
+  return isQueueSupervisor(actor, request, await transaction.findPermissions(actor.id));
+}
+
 /** Section 5.2: the actor becomes the assignee. */
 export async function assumeRequest(
   input: unknown,
@@ -88,8 +102,8 @@ export async function releaseRequest(
 ): Promise<void> {
   const { requestId } = validateInput(requestAssignmentInputSchema, input);
 
-  await changeAssignee(requestId, transactions, async (actor, request) => {
-    assertCanRelease(actor, request);
+  await changeAssignee(requestId, transactions, async (actor, request, transaction) => {
+    assertCanRelease(actor, request, await supervises(actor, request, transaction));
     return null;
   });
 }
@@ -106,7 +120,7 @@ export async function transferRequest(
 
   await changeAssignee(requestId, transactions, async (actor, request, transaction) => {
     const target = await transaction.findUserForAssignment(assigneeId);
-    assertCanTransfer(actor, request, target);
+    assertCanTransfer(actor, request, target, await supervises(actor, request, transaction));
     return assigneeId;
   });
 }

@@ -959,7 +959,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-090 — Leitura ampliada e supervisão da fila
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Gestor com `SECTOR_REQUESTS_READ`: aba "Todas do setor" e detalhe só de leitura de qualquer solicitação do setor (inclusive respostas e documentos). Atendente com `QUEUE_SUPERVISION`: libera e transfere solicitação de colega, com a permissão lida na própria transação, histórico e notificações existentes. CA-PER-06, 07, 08 e 09 verificados.
 - **Objetivo:** Aba "Todas do setor" para o gestor com `SECTOR_REQUESTS_READ`; liberar e transferir solicitação de colega para o atendente com `QUEUE_SUPERVISION`, com histórico, eventos e notificações existentes.
 - **Arquivos/módulos esperados:** Módulo de solicitações, telas do gestor e do atendente, testes.
 - **Dependências:** SF-089.

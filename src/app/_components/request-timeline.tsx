@@ -20,7 +20,12 @@ type RequestTimelineProps = {
 
 function assignmentTitle(event: RequestWithHistory["assignmentEvents"][number]): string {
   if (!event.fromAssignee && event.toAssignee) return `Assumida por ${event.toAssignee.name}`;
-  if (event.fromAssignee && !event.toAssignee) return `Liberada por ${event.fromAssignee.name}`;
+  if (event.fromAssignee && !event.toAssignee) {
+    // A supervisor of the queue may release a colleague's request (SPEC de permissões, 5.3.3).
+    return event.actor.id === event.fromAssignee.id
+      ? `Liberada por ${event.fromAssignee.name}`
+      : `Liberada por ${event.actor.name} (estava com ${event.fromAssignee.name})`;
+  }
   return `Transferida de ${event.fromAssignee?.name} para ${event.toAssignee?.name}`;
 }
 

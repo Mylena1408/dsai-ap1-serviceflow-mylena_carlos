@@ -50,6 +50,8 @@ export function assertRole(
 export function assertRequestReadable(
   actor: AuthorizationActor | null,
   request: RequestAuthorizationScope,
+  /** A manager with "Ver todas as solicitações do setor" (SPEC de permissões, 5.3.2). */
+  options: { sectorReader?: boolean } = {},
 ): AuthorizationActor {
   const activeActor = assertActiveActor(actor);
   const canRead =
@@ -61,7 +63,7 @@ export function assertRequestReadable(
     (activeActor.role === "MANAGER" &&
       activeActor.sectorId !== null &&
       request.sectorId === activeActor.sectorId &&
-      request.requiresApproval === true);
+      (request.requiresApproval === true || options.sectorReader === true));
 
   if (!canRead) {
     throw new NotFoundError();

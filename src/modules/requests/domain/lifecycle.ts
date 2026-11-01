@@ -1,5 +1,6 @@
 import { ConflictError, NotFoundError, ValidationError } from "@/server/errors";
 import type { RequestPriority, RequestStatus } from "./request";
+import { hasPermissionInSector, type Permission } from "@/shared/permissions";
 
 // Assignment, cancellation and reopening rules (SPEC 2026-10-31, sections 5.1 to 5.6).
 // Callers load every state from the database; these functions only decide.
@@ -107,13 +108,21 @@ export function assertCanAssume(actor: LifecycleUser, request: LifecycleRequest)
 }
 
 /** Section 5.2: only the effective assignee releases. */
-export function assertCanRelease(actor: LifecycleUser, request: LifecycleRequest): void {
+export function assertCanRelease(actor: LifecycleUser, request: LifecycleRequest, supervisor = false): void {
   requireSectorAttendant(actor, request);
   requireAssignable(request);
+  const holderId = effectiveAssigneeId(request);
 
-  if (effectiveAssigneeId(request) !== actor.id) {
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.3: a supervisor of the queue also releases a
+  // request held by a colleague.
+  if (holderId !== actor.id && !(supervisor && holderId !== null)) {
     throw new ConflictError();
   }
+}
+
+/** Whether the attendant supervises the queue of the request's sector (permissions, 5.3.3). */
+export function isQueueSupervisor(actor: LifecycleUser, request: LifecycleRequest, granted: readonly Permission[]): boolean {
+  return hasPermissionInSector(actor, granted, "QUEUE_SUPERVISION", request.sectorId);
 }
 
 /** Section 5.2 (decision D1): only the effective assignee transfers, within the sector. */
@@ -121,10 +130,11 @@ export function assertCanTransfer(
   actor: LifecycleUser,
   request: LifecycleRequest,
   target: LifecycleUser | null,
+  supervisor = false,
 ): void {
-  assertCanRelease(actor, request);
+  assertCanRelease(actor, request, supervisor);
 
-  if (!isSectorAttendant(target, request.sectorId) || target.id === actor.id) {
+  if (!isSectorAttendant(target, request.sectorId) || target.id === actor.id || target.id === effectiveAssigneeId(request)) {
     throw new ValidationError([{ path: ["assigneeId"], code: "invalid_value" }]);
   }
 }

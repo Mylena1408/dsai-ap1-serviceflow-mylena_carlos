@@ -1,5 +1,5 @@
-import { assertRole, requireCurrentActor } from "@/server/authorization";
-import { NotFoundError } from "@/server/errors";
+import { actorHasPermission, assertRole, requireCurrentActor } from "@/server/authorization";
+import { AuthorizationError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
 import type { RequestWithHistory } from "../domain/request";
@@ -75,6 +75,14 @@ export async function listManagerApprovals(
     throw new NotFoundError();
   }
 
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.2: "sector" lists every request of the sector.
+  if (filter === "sector") {
+    if (!(await actorHasPermission(actor, "SECTOR_REQUESTS_READ"))) {
+      throw new AuthorizationError();
+    }
+    return repository.listBySector(actor.sectorId);
+  }
+
   return repository.listForApproval(actor.sectorId, filter !== "all");
 }
 
@@ -89,7 +97,9 @@ export async function getManagerRequest(
     throw new NotFoundError();
   }
 
-  const request = await repository.findForApproval(id, actor.sectorId);
+  const request =
+    (await repository.findForApproval(id, actor.sectorId)) ??
+    ((await actorHasPermission(actor, "SECTOR_REQUESTS_READ")) ? await repository.findInSector(id, actor.sectorId) : null);
 
   if (!request) {
     throw new NotFoundError();

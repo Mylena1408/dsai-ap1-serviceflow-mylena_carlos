@@ -13,6 +13,7 @@ import { RequestStageLabel } from "@/app/_components/request-stage";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { StagePanel } from "./stage-panel";
 import { NotFoundError } from "@/server/errors";
+import { actorHasPermission } from "@/server/authorization";
 import { requireAttendantPageAccess } from "../../page-access";
 import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
@@ -67,13 +68,16 @@ export default async function QueueRequestPage({
   let answers;
   let comments;
   let candidates: Array<{ id: string; name: string }> = [];
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.3.
+  const supervisor = await actorHasPermission(actor, "QUEUE_SUPERVISION");
 
   try {
     request = await getAttendantRequest(requestId);
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
-    if (effectiveAssigneeId(request) === actor.id) {
+    const holderId = effectiveAssigneeId(request);
+    if (holderId === actor.id || (supervisor && holderId !== null)) {
       candidates = await listTransferCandidates(request.id);
     }
   } catch (caught) {
@@ -115,7 +119,7 @@ export default async function QueueRequestPage({
         <h2>Descrição da solicitação</h2>
         <p className="request-description">{request.description}</p>
       </article>
-      <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} />
+      <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} supervisor={supervisor} />
       <StagePanel request={request} canAct={!heldByColleague} />
       {(request.status === "OPEN" || request.status === "IN_PROGRESS") && !heldByColleague ? (
         <>

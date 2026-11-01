@@ -385,3 +385,9 @@ SF-088 concluída (ver `NOTES.md`, seção SF-088).
 > siga para a sf-089
 
 SF-089 concluída (ver `NOTES.md`, seção SF-089).
+
+## Continuação — SF-090
+
+> siga para a sf-090
+
+SF-090 concluída (ver `NOTES.md`, seção SF-090).

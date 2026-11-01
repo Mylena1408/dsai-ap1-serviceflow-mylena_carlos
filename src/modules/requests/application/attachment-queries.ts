@@ -1,5 +1,5 @@
 import { sha256Hex } from "@/modules/attachments";
-import { assertRequestReadable, requireCurrentActor } from "@/server/authorization";
+import { actorHasPermission, assertRequestReadable, requireCurrentActor } from "@/server/authorization";
 import { InternalServerError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
@@ -22,7 +22,10 @@ export async function authorizeRequestRead(
     throw new NotFoundError();
   }
 
-  assertRequestReadable(actor, scope);
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.2: a manager may read every request of the sector.
+  const sectorReader =
+    actor.role === "MANAGER" && !scope.requiresApproval && (await actorHasPermission(actor, "SECTOR_REQUESTS_READ"));
+  assertRequestReadable(actor, scope, { sectorReader });
   return id;
 }
 

@@ -382,6 +382,10 @@ function createPrismaRequestTransaction(
         },
       });
     },
+    async findPermissions(userId) {
+      const grants = await transaction.userPermission.findMany({ where: { userId }, select: { permission: true } });
+      return grants.map(({ permission }) => permission);
+    },
     findUserForAssignment(userId) {
       return transaction.user.findUnique({ where: { id: userId }, select: lifecycleUser });
     },

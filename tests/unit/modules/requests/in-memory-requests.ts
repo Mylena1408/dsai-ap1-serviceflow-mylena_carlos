@@ -19,6 +19,7 @@ import type {
 import type { ActiveDocumentRequirement } from "@/modules/requests/domain/attachment-requirements";
 import type { DomainEvent } from "@/modules/events";
 import type { AnswerableField } from "@/modules/service-fields";
+import type { Permission } from "@/shared/permissions";
 
 export type StoredActor = TransactionActor & { name: string; email: string };
 export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
@@ -43,6 +44,8 @@ export interface InMemoryRequestStore {
   stages: StoredStage[];
   stageEvents: Array<NewStageEvent & { id: string }>;
   approvals: NewApproval[];
+  /** Granted permissions by user id (SPEC de permissões). */
+  permissions: Record<string, Permission[]>;
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -66,6 +69,7 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     stages: [],
     stageEvents: [],
     approvals: [],
+    permissions: {},
     ...seed,
   };
 }
@@ -353,6 +357,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
             assignee: lifecycleUser(store, request.assigneeId),
           }
         : null;
+    },
+    async findPermissions(userId) {
+      return store.permissions[userId] ?? [];
     },
     async findUserForAssignment(userId) {
       return lifecycleUser(store, userId);

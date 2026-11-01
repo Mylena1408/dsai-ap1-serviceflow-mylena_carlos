@@ -1,5 +1,6 @@
 import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { DomainEvent } from "@/modules/events";
+import type { Permission } from "@/shared/permissions";
 import type { AnswerableField, FieldAnswer } from "@/modules/service-fields";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
@@ -263,6 +264,8 @@ export interface RequestTransaction {
   /** State needed by the lifecycle rules, with the current assignee as stored now. */
   findLifecycleState(requestId: string): Promise<LifecycleRequest | null>;
   findUserForAssignment(userId: string): Promise<LifecycleUser | null>;
+  /** Permissions granted to a user, read in this transaction (SPEC de permissões, 5.2.4). */
+  findPermissions(userId: string): Promise<Permission[]>;
   /** Returns the number of rows changed (0 when status or assignee changed meanwhile). */
   updateAssigneeIfCurrent(update: AssigneeUpdate): Promise<number>;
   insertAssignmentEvent(event: NewAssignmentEvent): Promise<void>;
