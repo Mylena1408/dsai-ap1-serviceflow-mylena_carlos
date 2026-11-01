@@ -1,4 +1,4 @@
-export type UserRole = "ADMIN" | "REQUESTER" | "ATTENDANT";
+export type UserRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
 
 /** User data exposed to administration; never includes the password hash. */
 export interface ManagedUser {

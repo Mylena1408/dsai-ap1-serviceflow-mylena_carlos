@@ -23,7 +23,7 @@ export function assertAdministratorCanRetire({
 export interface AttendantSectorChange {
   isActiveAttendant: boolean;
   currentSectorId: string | null;
-  nextRole: "ADMIN" | "REQUESTER" | "ATTENDANT";
+  nextRole: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
   nextSectorId: string | null;
   nextIsActive: boolean;
   hasPendingRequests: boolean;

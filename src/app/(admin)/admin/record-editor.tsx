@@ -32,7 +32,7 @@ type EditableRecord =
       id: string;
       name: string;
       email: string;
-      role: "ADMIN" | "REQUESTER" | "ATTENDANT";
+      role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
       sectorId: string | null;
       isActive: boolean;
     }
@@ -68,6 +68,7 @@ const roleLabels = {
   ADMIN: "Administrador",
   REQUESTER: "Solicitante",
   ATTENDANT: "Atendente",
+  MANAGER: "Gestor",
 } as const;
 
 function EditorForm({

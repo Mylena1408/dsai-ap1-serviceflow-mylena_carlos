@@ -14,6 +14,7 @@ const roleLabels = {
   REQUESTER: "solicitante",
   ATTENDANT: "atendente",
   ADMIN: "administrador",
+  MANAGER: "gestor",
 } as const;
 
 // Conversation of a request (SPEC 2026-10-31-comentarios, section 5.5). Text is rendered by

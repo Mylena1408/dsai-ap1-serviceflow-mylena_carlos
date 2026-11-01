@@ -9,7 +9,7 @@ import type { SearchCriteria } from "../domain/search-criteria";
 import type { RequestPriority, RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
 
-export type ActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT";
+export type ActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
 
 export interface RequestQueryRepository {
   listByRequester(requesterId: string): Promise<RequestWithHistory[]>;

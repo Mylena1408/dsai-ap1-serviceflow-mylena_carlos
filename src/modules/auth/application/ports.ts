@@ -1,4 +1,4 @@
-export type AuthRole = "ADMIN" | "REQUESTER" | "ATTENDANT";
+export type AuthRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
 
 export interface PasswordHasher {
   hash(password: string): Promise<string>;

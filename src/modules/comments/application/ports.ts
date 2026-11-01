@@ -7,7 +7,7 @@ export interface CommentRecord {
   body: string;
   isInternal: boolean;
   createdAt: Date;
-  author: { id: string; name: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT" };
+  author: { id: string; name: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER" };
 }
 
 export interface NewComment {

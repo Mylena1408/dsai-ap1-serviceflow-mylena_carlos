@@ -52,6 +52,7 @@ function persistedRequest(requesterId: string, sectorId: string) {
     dueSoonAt: null,
     stageNamesSnapshot: [],
     stageIndex: null,
+    approvalState: null,
     slaWarningNotifiedAt: null,
     slaBreachNotifiedAt: null,
     completedLate: null,

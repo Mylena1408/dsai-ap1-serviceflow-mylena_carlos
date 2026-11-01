@@ -1136,3 +1136,17 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - **SPEC `2026-11-01-aprovacoes.md`** (item 8 do plano, último da fase 3) aprovada com as decisões A1 a A4 conforme propostas: aprovação antes do início do atendimento, com o status "Aberta" e a aprovação pendente, e rejeição cancelando a solicitação; um nível (qualquer gestor ativo do setor); prazo do SLA a partir da aprovação; gestor vê só as solicitações do setor que exigem aprovação, só para leitura. Tarefas SF-081 a SF-086 registradas em `TASKS.md`.
 - **Mudanças previstas no banco além de acréscimos:** a restrição do setor do usuário (passa a exigir setor também para o gestor) e a dos tipos de evento da outbox serão apagadas e recriadas mais amplas, sem perda de dados.
+
+## SF-081 — Migration e domínio das aprovações (2026-11-01)
+
+- **Duas migrations:** `20261101500000_manager_role` só acrescenta o valor `MANAGER` ao enum de perfis, porque o PostgreSQL não deixa usar um valor novo de enum na mesma transação que o cria; `20261101500100_approvals` faz o resto. Registrado na SPEC (seção 6).
+- **Restrições recriadas mais amplas, sem mudar dados:**
+  - `User_role_sectorId_check`: setor obrigatório para atendente **e** gestor;
+  - `Request_dueAt_check` (da SPEC de SLA): continua exigindo vencimento quando há horas de SLA, exceto com aprovação pendente ou rejeitada (o prazo começa na aprovação). Mudança não prevista no texto original da SPEC; registrada na seção 6;
+  - `OutboxEvent_type_check`: aceita `request.approval_decided`.
+- **Novas restrições:** `Request_approval_check` (pendente só com a solicitação aberta ou cancelada e sem vencimento; rejeitada só cancelada) e `RequestApproval_note_check` (observação obrigatória na rejeição, até 1.000 caracteres); uma decisão por solicitação (único em `requestId`).
+- **Defeito meu, encontrado pelo teste de schema e corrigido antes do commit:** a primeira versão de `Request_dueAt_check` usava `"approvalState" IN (...)` sem tratar o nulo. Em SQL, `NULL IN (...)` é `NULL`, e um `CHECK` com resultado `NULL` passa: a regra do SLA ficava frouxa para **todas** as solicitações sem aprovação. Corrigido com `COALESCE(..., false)`. A versão errada já tinha sido aplicada nos bancos locais (desenvolvimento e teste); a restrição foi substituída neles com `prisma db execute`. Nada disso foi publicado.
+- **Regras (`approval.ts`):** estado inicial pela configuração do serviço; início recusado com aprovação pendente; só um gestor ativo do setor decide, uma vez, com a solicitação aberta (quem está fora recebe "não encontrado"); observação opcional ao aprovar e obrigatória ao rejeitar (mesmo `normalizeNote` do cancelamento); vencimento sem prazo enquanto pendente e a partir da aprovação depois.
+- **Perfil novo nos tipos:** as uniões de perfil do código ganharam `MANAGER`; rótulo "Gestor" na administração e na conversa; a página inicial e "Alterar senha" mandam o gestor para `/approvals`, área que nasce na SF-082 (até lá não há como criar gestores pela interface). A conta de demonstração continua com três perfis até a SF-082.
+- **Teste existente alterado (só o objeto de teste):** `tests/unit/authorization/index.test.ts` ganhou `approvalState: null` no objeto tipado como linha do Prisma.
+- **Resultados:** lint, typecheck e build OK; unitários 513/513 (86 arquivos); integração 233/233 + 1 pulado (51 arquivos); E2E 11/11.

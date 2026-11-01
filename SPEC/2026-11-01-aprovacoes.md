@@ -102,6 +102,7 @@ Para solicitações que exigem aprovação, o vencimento do SLA é calculado **a
 - Nova tabela `RequestApproval` com único em `requestId`, `CHECK` da observação (obrigatória na rejeição, até 1.000 caracteres).
 - `OutboxEvent`: o `CHECK` de tipos passa a aceitar `request.approval_decided` (recriado mais amplo, como nas SPECs de SLA e de fluxos).
 - Dados existentes: serviços sem aprovação, solicitações com `approvalState` nulo.
+- *Atualização registrada em 2026-11-01 (SF-081):* a restrição `Request_dueAt_check` da SPEC de SLA exige vencimento exatamente quando há snapshot do prazo. Com a aprovação pendente (5.5), o snapshot é guardado na abertura e o vencimento só nasce na aprovação; uma solicitação rejeitada nunca recebe vencimento. A restrição é recriada mais ampla: continua igual para quem não exige aprovação e aceita snapshot sem vencimento só com a aprovação pendente ou rejeitada. Também é preciso separar a migration em duas, porque o PostgreSQL não deixa usar um valor novo de enum (`MANAGER`) na mesma transação que o cria.
 
 ## 7. Critérios de aceitação
 
@@ -114,7 +115,7 @@ Para solicitações que exigem aprovação, o vencimento do SLA é calculado **a
 - [ ] **CA-APR-07** — Com aprovação, o vencimento do SLA conta a partir da aprovação; pendente, a solicitação fica sem prazo.
 - [ ] **CA-APR-08** — A decisão aparece na linha do tempo com a observação, grava o evento e notifica o solicitante; a abertura notifica os gestores ativos do setor.
 - [ ] **CA-APR-09** — O gestor vê só as solicitações do seu setor que exigem aprovação, só para leitura; solicitante e atendente veem a situação da aprovação.
-- [ ] **CA-APR-10** — Migration aditiva (com as restrições recriadas mais amplas); dados existentes não mudam.
+- [x] **CA-APR-10** — Migration aditiva (com as restrições recriadas mais amplas); dados existentes não mudam. *Verificado em 2026-11-01 (SF-081): migrations aplicadas sobre dados existentes; serviços ficam sem aprovação e solicitações com `approvalState` nulo; as três restrições recriadas mantêm as regras anteriores para quem não usa aprovação (inclusive a do SLA, conferida pelo teste de schema do SLA) (`approval-schema.test.ts`, `sla-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes
 

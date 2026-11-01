@@ -11,6 +11,18 @@ enum Role {
   ADMIN
   REQUESTER
   ATTENDANT
+  MANAGER
+}
+
+enum ApprovalState {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
 }
 
 enum RequestStatus {
@@ -87,19 +99,22 @@ model User {
   notifications         RequestNotification[]    @relation("NotificationRecipient")
   priorityEvents        RequestPriorityEvent[]   @relation("RequestPriorityEventActor")
   stageEvents           RequestStageEvent[]      @relation("RequestStageEventActor")
+  approvalsDecided      RequestApproval[]        @relation("RequestApprovalDecider")
 }
 
 model Service {
-  id              String          @id @default(uuid()) @db.Uuid
-  name            String
-  description     String
-  categoryId      String          @db.Uuid
-  sectorId        String          @db.Uuid
-  isActive        Boolean         @default(true)
-  defaultPriority RequestPriority @default(NORMAL)
-  slaHours        Int?
-  createdAt       DateTime        @default(now()) @db.Timestamptz
-  updatedAt       DateTime        @updatedAt @db.Timestamptz
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String
+  description      String
+  categoryId       String          @db.Uuid
+  sectorId         String          @db.Uuid
+  isActive         Boolean         @default(true)
+  defaultPriority  RequestPriority @default(NORMAL)
+  slaHours         Int?
+  /// SPEC 2026-11-01-aprovacoes, 5.2: a manager of the sector approves before the attendance.
+  requiresApproval Boolean         @default(false)
+  createdAt        DateTime        @default(now()) @db.Timestamptz
+  updatedAt        DateTime        @updatedAt @db.Timestamptz
 
   category             Category                     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   sector               Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
@@ -138,6 +153,8 @@ model Request {
   stageNamesSnapshot         String[]        @default([])
   /// Current position in stageNamesSnapshot; null exactly when the copy is empty.
   stageIndex                 Int?
+  /// Approval situation (SPEC 2026-11-01-aprovacoes, 5.3); null when the service did not require it.
+  approvalState              ApprovalState?
 
   requester        User                     @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
   assignee         User?                    @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
@@ -149,6 +166,7 @@ model Request {
   priorityEvents   RequestPriorityEvent[]
   fieldValues      RequestFieldValue[]
   stageEvents      RequestStageEvent[]
+  approval         RequestApproval?
   comments         RequestComment[]
   outboxEvents     OutboxEvent[]
   notifications    RequestNotification[]
@@ -367,4 +385,19 @@ model RequestStageEvent {
   actor   User    @relation("RequestStageEventActor", fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId])
+}
+
+/// Decision of a manager on a request that required approval (SPEC 2026-11-01-aprovacoes, 5.6).
+model RequestApproval {
+  id        String           @id @default(uuid()) @db.Uuid
+  requestId String           @unique @db.Uuid
+  deciderId String           @db.Uuid
+  decision  ApprovalDecision
+  note      String?
+  decidedAt DateTime         @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  decider User    @relation("RequestApprovalDecider", fields: [deciderId], references: [id], onDelete: Restrict)
+
+  @@index([deciderId])
 }

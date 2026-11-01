@@ -15,7 +15,7 @@ export interface NotificationRequestState {
   requesterId: string;
   sectorId: string;
   status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
-  assignee: { id: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT"; isActive: boolean; sectorId: string | null } | null;
+  assignee: { id: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER"; isActive: boolean; sectorId: string | null } | null;
 }
 
 export interface NotificationStore {

@@ -96,7 +96,7 @@ export interface RequestWithHistory extends RequestRecord {
   assignee: {
     id: string;
     name: string;
-    role: "ADMIN" | "REQUESTER" | "ATTENDANT";
+    role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
     isActive: boolean;
     sectorId: string | null;
   } | null;

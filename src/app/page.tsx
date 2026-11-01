@@ -15,5 +15,8 @@ export default async function HomePage(): Promise<never> {
       redirect("/catalog");
     case "ATTENDANT":
       redirect("/queue");
+    case "MANAGER":
+      // SPEC 2026-11-01-aprovacoes, 5.1: the manager area (SF-082).
+      redirect("/approvals");
   }
 }

@@ -865,7 +865,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-081 — Migration e domínio das aprovações
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Migrations `20261101500000_manager_role` (perfil `MANAGER`) e `20261101500100_approvals` (enums de aprovação, `Service.requiresApproval`, `Request.approvalState`, tabela `RequestApproval`, `CHECK`s e três restrições recriadas mais amplas); regras puras em `src/modules/requests/domain/approval.ts`. Tipos de perfil ampliados com `MANAGER` (o comportamento do gestor vem na SF-082). CA-APR-10 verificado; regras de CA-APR-05, 06 e 07 prontas para as próximas tarefas.
 - **Objetivo:** Migration da seção 6 (perfil `MANAGER`, restrição de setor recriada, enums de aprovação, `Service.requiresApproval`, `Request.approvalState`, tabela `RequestApproval`, `CHECK`s e tipo `request.approval_decided` na outbox) e regras puras: quem decide, observação, transições da aprovação, bloqueio do início e vencimento a partir da aprovação.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, limpeza do banco de teste, testes.
 - **Dependências:** SF-080.

@@ -10,6 +10,8 @@ const homeByRole = {
   ADMIN: "/admin",
   REQUESTER: "/catalog",
   ATTENDANT: "/queue",
+  // SPEC 2026-11-01-aprovacoes, 5.1: the manager area (SF-082).
+  MANAGER: "/approvals",
 } as const;
 
 export default async function ChangePasswordPage() {

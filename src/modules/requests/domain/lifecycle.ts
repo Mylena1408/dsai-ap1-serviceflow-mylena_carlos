@@ -7,7 +7,7 @@ import type { RequestPriority, RequestStatus } from "./request";
 export const REOPEN_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 export const MAX_NOTE_LENGTH = 1_000;
 
-export type LifecycleRole = "ADMIN" | "REQUESTER" | "ATTENDANT";
+export type LifecycleRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
 
 export interface LifecycleUser {
   id: string;

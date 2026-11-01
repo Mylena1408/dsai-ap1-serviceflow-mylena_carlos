@@ -8,7 +8,7 @@ export const MAX_COMMENT_LENGTH = 5_000;
 
 export interface CommentReader {
   id: string;
-  role: "ADMIN" | "REQUESTER" | "ATTENDANT";
+  role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
   isActive: boolean;
   sectorId: string | null;
 }
