@@ -143,6 +143,8 @@ Os itens da fase 3 (campos personalizados, fluxos e aprovações) podem render m
 2. ampliar o escopo com funcionalidades reais, cada uma com SPEC própria aprovada (por exemplo, as partes que as SPECs deixaram fora de escopo, como anexos em comentários, transferência entre setores, calendário de feriados e e-mail);
 3. revisar a meta junto a quem a definiu.
 
+**Decisão tomada em 2026-11-01:** a responsável escolheu a **opção 2**: acrescentar funcionalidades reais, cada uma com SPEC própria aprovada antes do código. Continuam valendo a SF-026 e a seção 5 do plano (nada de duplicação, geração em massa ou funcionalidade fictícia). O roadmap dos 16 itens segue na ordem do plano, e as funcionalidades novas entram como SPECs adicionais.
+
 O relatório da fase 3 deve medir de novo a razão e atualizar a projeção.
 
 ## 9. Pendências que passam para a fase 3
@@ -150,5 +152,5 @@ O relatório da fase 3 deve medir de novo a razão e atualizar a projeção.
 1. SF-030: provisionar o armazenamento real (depende de credenciais do Supabase) e fechar o CA-DOC-21.
 2. Aplicar no Neon as migrations do SLA antes da próxima publicação.
 3. Banco Neon: trocar a senha se o banco receber dados reais.
-4. Decisão sobre a meta (seção 8).
+4. Propor, ao longo das próximas fases, as funcionalidades adicionais da opção 2 (seção 8), cada uma com SPEC própria.
 5. Próxima SPEC: campos personalizados por serviço (item 6), primeiro passo da fase 3.

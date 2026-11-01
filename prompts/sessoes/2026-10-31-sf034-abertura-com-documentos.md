@@ -239,3 +239,11 @@ SF-070 concluída; SPEC de SLA e prioridades encerrada (ver `NOTES.md`, seção 
 > siga com o relatório da fase 2
 
 Push da SF-070 feito; relatório `SPEC/2026-11-01-relatorio-fase-2.md` escrito (ver `NOTES.md`, seção "Relatório da fase 2").
+
+## Continuação — decisão sobre a meta e SPEC de campos personalizados
+
+> siga com a SPEC de campos personalizados
+
+> acrescentar funcionalidades reais,cada uma com SPEC aprovada
+
+Decisões F1 a F4 respondidas pela responsável no questionário: todas as propostas aceitas (seis tipos; tabela própria; respostas imutáveis; 10 campos ativos). SPEC `SPEC/2026-11-01-campos-personalizados.md` aprovada e tarefas SF-071 a SF-075 registradas.

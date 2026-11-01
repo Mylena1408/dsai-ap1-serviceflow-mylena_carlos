@@ -750,3 +750,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-SLA-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.
+
+## Campos personalizados por serviço — SPEC de 2026-11-01
+
+**Ordem:** SF-071 → SF-072 → SF-073 → SF-074 → SF-075.
+
+### SF-071 — Migration e domínio dos campos personalizados
+
+- **Estado:** Pendente.
+- **Objetivo:** Migration aditiva da seção 6 (enum `ServiceFieldType`, tabelas `ServiceField` e `RequestFieldValue`, `CHECK`s e índice único parcial) e regras puras: validação da definição do campo (5.1 e 5.2) e validação e normalização de cada tipo de valor.
+- **Arquivos/módulos esperados:** `prisma/`, novo módulo `src/modules/service-fields/`, limpeza em `tests/integration/fixtures.ts` e `scripts/prepare-e2e.ts`, testes.
+- **Dependências:** SF-070.
+- **Critérios de conclusão:** CA-FLD-10; regras de CA-FLD-03 e CA-FLD-05 prontas para as próximas tarefas.
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-01-campos-personalizados.md`.
+
+### SF-072 — Configuração dos campos pelo administrador
+
+- **Estado:** Pendente.
+- **Objetivo:** Casos de uso de criar, editar, reordenar, desativar e reativar; ações do servidor só para `ADMIN`; editor na seção de serviços da área administrativa.
+- **Arquivos/módulos esperados:** `src/modules/service-fields/`, `src/app/(admin)/admin/`, testes.
+- **Dependências:** SF-071.
+- **Critérios de conclusão:** CA-FLD-02 e CA-FLD-03.
+- **Testes relacionados:** Unitários dos casos de uso e das ações; integração no banco.
+- **SPEC:** `SPEC/2026-11-01-campos-personalizados.md`.
+
+### SF-073 — Abertura com campos
+
+- **Estado:** Pendente.
+- **Objetivo:** Campos no formulário de abertura, validação no servidor com a configuração recarregada e gravação das respostas com snapshot na mesma transação da abertura.
+- **Arquivos/módulos esperados:** `src/modules/requests/application/create-request.ts`, repositório de solicitações, `src/app/(requester)/catalog/[serviceId]/`, testes.
+- **Dependências:** SF-072.
+- **Critérios de conclusão:** CA-FLD-01, 04, 05, 06, 07 e 08.
+- **Testes relacionados:** Unitários; integração da abertura; suítes anteriores sem alteração de asserções.
+- **SPEC:** `SPEC/2026-11-01-campos-personalizados.md`.
+
+### SF-074 — Respostas nos detalhes e serviço de exemplo
+
+- **Estado:** Pendente.
+- **Objetivo:** Bloco "Informações do serviço" nos detalhes do solicitante e do atendente, com formatação por tipo; serviço de exemplo com campos no banco fictício.
+- **Arquivos/módulos esperados:** consultas de detalhes em `src/modules/requests/`, telas de detalhes, `scripts/demo-data.ts`, testes.
+- **Dependências:** SF-073.
+- **Critérios de conclusão:** CA-FLD-09.
+- **Testes relacionados:** Unitários da formatação; integração do acesso.
+- **SPEC:** `SPEC/2026-11-01-campos-personalizados.md`.
+
+### SF-075 — E2E e revisão dos campos personalizados
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-074.
+- **Critérios de conclusão:** Todos os CA-FLD-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-01-campos-personalizados.md`.

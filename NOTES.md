@@ -1017,3 +1017,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Exceção às migrations aditivas registrada no relatório:** a SF-065 apagou e recriou, mais ampla, a restrição `OutboxEvent_type_check`.
 - **Tempo:** 9h20 na fase 2, medidas pela transcrição do Claude Code; `diario/tempo-do-projeto.md` atualizado (total mínimo 33h29).
 - **Suítes não executadas de novo** para o relatório (só documentação); o PostgreSQL de teste está parado desde que o sistema o encerrou por falta de memória.
+
+## Decisão sobre a meta e SPEC de campos personalizados (2026-11-01)
+
+- **Meta de 100.000 linhas:** a responsável escolheu a opção 2 do relatório da fase 2: acrescentar funcionalidades reais, cada uma com SPEC própria aprovada. Registrado na seção 8 do relatório. Continuam proibidos duplicação, geração em massa e funcionalidade fictícia (SF-026).
+- **SPEC `2026-11-01-campos-personalizados.md`** (item 6 do plano, início da fase 3) aprovada com as decisões F1 a F4 conforme propostas: seis tipos de campo; respostas em tabela própria com snapshot; respostas imutáveis; até 10 campos ativos por serviço. Tarefas SF-071 a SF-075 registradas em `TASKS.md`.
+- **Modelo seguido:** os requisitos documentais da seção 21 da SPEC principal (configuração por serviço, desativação lógica, configuração recarregada no envio, snapshot na abertura, gravação na mesma transação).
