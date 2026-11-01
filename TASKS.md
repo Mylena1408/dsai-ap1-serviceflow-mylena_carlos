@@ -686,3 +686,67 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-EVT-01 a 09 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-10-31-eventos-outbox-jobs.md`.
+
+## SLA e prioridades — SPEC de 2026-11-01
+
+**Ordem:** SF-065 → SF-066 → SF-067 → SF-068 → SF-069 → SF-070.
+
+### SF-065 — Migration e domínio do SLA
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration aditiva da seção 6 e regras puras: prazo efetivo por prioridade, vencimento, situação nas bordas, resultado da conclusão.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, testes.
+- **Dependências:** SF-064.
+- **Critérios de conclusão:** CA-SLA-05 e 10; regras de CA-SLA-04 e 08.
+- **Testes relacionados:** Unitários nas bordas; integração da migration.
+- **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.
+
+### SF-066 — Configuração no serviço e snapshot
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Prioridade padrão e prazo-base no cadastro de serviço (administração); snapshot e vencimento na abertura; resultado na conclusão; recálculo na reabertura.
+- **Arquivos/módulos esperados:** `src/modules/services/`, `src/modules/requests/`, área administrativa, testes.
+- **Dependências:** SF-065.
+- **Critérios de conclusão:** CA-SLA-01, 02, 03, 08; parte de reabertura de CA-SLA-04.
+- **Testes relacionados:** Integração com snapshot, conclusão e reabertura.
+- **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.
+
+### SF-067 — Mudança de prioridade
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Caso de uso do atendente, `RequestPriorityEvent` no histórico único, evento `request.priority_changed` e recálculo do vencimento.
+- **Arquivos/módulos esperados:** `src/modules/requests/`, detalhe do atendente, testes.
+- **Dependências:** SF-066.
+- **Critérios de conclusão:** CA-SLA-06; parte de prioridade de CA-SLA-04.
+- **Testes relacionados:** Unitários e integração com autorização e concorrência.
+- **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.
+
+### SF-068 — Telas do SLA
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Prioridade e situação na fila, nos detalhes e na lista do solicitante; filtro por situação e ordem por vencimento na fila.
+- **Arquivos/módulos esperados:** Telas de lista e detalhe, critérios de busca, testes.
+- **Dependências:** SF-067.
+- **Critérios de conclusão:** CA-SLA-09.
+- **Testes relacionados:** Integração do filtro e da ordem; unitários dos critérios.
+- **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.
+
+### SF-069 — Alertas de prazo
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Job diário grava `request.sla_warning` e `request.sla_breached` uma vez por solicitação; notificações para o responsável ou, sem ele, para o setor.
+- **Arquivos/módulos esperados:** `src/server/jobs`, `src/modules/requests`, `src/modules/notifications`, testes.
+- **Dependências:** SF-068.
+- **Critérios de conclusão:** CA-SLA-07.
+- **Testes relacionados:** Integração com alertas únicos e destinatários.
+- **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.
+
+### SF-070 — E2E e revisão do SLA
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-069.
+- **Critérios de conclusão:** Todos os CA-SLA-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-01-sla-prioridades.md`.

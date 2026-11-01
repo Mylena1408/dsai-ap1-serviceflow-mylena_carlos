@@ -187,3 +187,9 @@ SF-064 concluída (ver `NOTES.md`, seção SF-064).
 > sim,pode prosseguir
 
 Migration no Neon, deploy e verificação só com leitura (ver `NOTES.md`).
+
+## Continuação — SPEC de SLA (01/11)
+
+> escreva a SPEC de SLA e prioridades
+
+SPEC escrita como proposta e aprovada (P1, S1, S2, S3); tarefas SF-065 a SF-070 registradas. Nenhum código.
