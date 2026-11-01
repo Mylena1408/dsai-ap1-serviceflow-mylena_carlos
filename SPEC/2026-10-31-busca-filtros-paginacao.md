@@ -91,14 +91,14 @@ Valores fora da lista, datas inválidas ou data inicial maior que a final são r
 
 - [ ] **CA-BUS-01** — O solicitante só encontra as próprias solicitações e o atendente só as do seu setor atual, com qualquer combinação de busca e filtros; administrador continua negado.
 - [ ] **CA-BUS-02** — A busca encontra o termo na descrição e no nome do serviço sem distinção de maiúsculas; `%` e `_` são tratados como texto.
-- [ ] **CA-BUS-03** — Termo com 1 caractere ou acima de 100 é rejeitado com mensagem fixa.
-- [ ] **CA-BUS-04** — O filtro de status aceita um ou mais valores; nenhum marcado mostra todos; valor desconhecido é rejeitado.
+- [x] **CA-BUS-03** — Termo com 1 caractere ou acima de 100 é rejeitado com mensagem fixa. *Verificado em 2026-10-31 (SF-057): `search-criteria.test.ts`.*
+- [x] **CA-BUS-04** — O filtro de status aceita um ou mais valores; nenhum marcado mostra todos; valor desconhecido é rejeitado. *Verificado em 2026-10-31 (SF-057) nas regras: um ou mais status, repetidos e vazios descartados, desconhecido rejeitado. A aplicação na consulta é verificada na SF-058.*
 - [ ] **CA-BUS-05** — O atendente filtra por "Atribuídas a mim" e "Sem responsável", este considerando o responsável efetivo.
-- [ ] **CA-BUS-06** — O período de abertura é inclusivo nas duas datas, no fuso America/Sao_Paulo; data inválida ou início depois do fim é rejeitado.
+- [x] **CA-BUS-06** — O período de abertura é inclusivo nas duas datas, no fuso America/Sao_Paulo; data inválida ou início depois do fim é rejeitado. *Verificado em 2026-10-31 (SF-057) nas regras: dias de São Paulo convertidos para instantes (01/10 00:00 = 03:00 UTC), período inclusivo, datas inválidas e período invertido rejeitados. A aplicação na consulta é verificada na SF-058.*
 - [ ] **CA-BUS-07** — A ordenação "mais recentes" e "mais antigas" é estável; o padrão de cada lista é o atual.
 - [ ] **CA-BUS-08** — A paginação mostra 20 itens por página, total e número de páginas corretos; página fora do intervalo vai para a última; mudar critérios volta à página 1.
 - [ ] **CA-BUS-09** — O estado da busca fica na URL e é restaurado ao recarregar a página.
-- [ ] **CA-BUS-10** — Migration aditiva; suítes anteriores passam sem alteração de asserções.
+- [x] **CA-BUS-10** — Migration aditiva; suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-057): migration só com dois índices, aplicada no banco de teste; `request-list-indexes.test.ts`; suítes anteriores sem alteração.*
 
 ## 9. Estratégia de testes
 

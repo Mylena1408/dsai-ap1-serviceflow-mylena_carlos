@@ -60,6 +60,7 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "acceptedFormats",
   "note",
   "body",
+  "search",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

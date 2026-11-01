@@ -113,3 +113,9 @@ SF-056 concluída (ver `NOTES.md`, seção SF-056).
 > escreva a SPEC de busca, filtros e paginação
 
 SPEC escrita como proposta e aprovada (B1 a B4); tarefas SF-057 a SF-060 registradas. Nenhum código.
+
+## Continuação — SF-057
+
+> pode começar pela SF-057
+
+SF-057 concluída (ver `NOTES.md`, seção SF-057).

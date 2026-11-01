@@ -740,3 +740,20 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão:** sem segredos nos arquivos versionados; nenhum `console.*` nem `dangerouslySetInnerHTML` no módulo ou no componente; nenhuma dependência nova; migration só aditiva. README com o fluxo de conversa.
 - **SPEC `2026-10-31-comentarios.md` concluída:** CA-COM-01 a 09 verificados.
 - **Resultados:** lint, typecheck e build OK; unitários 329/329 (55 arquivos); integração 149/149 + 1 pulado (32 arquivos); E2E 6/6.
+
+## SF-057 — Critérios de busca e índices (2026-10-31)
+
+- **`parseSearchCriteria(raw, audience)`** transforma os parâmetros da URL (`q`, `status`, `assignee`, `from`, `to`, `order`, `page`) em critérios validados:
+  - o termo é aparado e precisa ter de 2 a 100 caracteres; vazio significa sem busca;
+  - os status são deduplicados e o vazio é descartado;
+  - o filtro de responsável só vale para o atendente; para o solicitante é ignorado;
+  - a ordem padrão é a atual de cada lista;
+  - página inválida vira 1;
+  - parâmetros desconhecidos são ignorados.
+  - Erros usam o caminho `search` (acrescentado aos caminhos públicos) com mensagem fixa.
+- **Datas:** `startOfDayInTimeZone` calcula a meia-noite do dia em America/Sao_Paulo com `Intl`, em duas passadas para absorver horário de verão. Não depende do fuso do servidor nem supõe −03:00 fixo; o teste confere também Nova York no verão e no inverno. O período vira `[início do primeiro dia, início do dia seguinte ao último)`.
+- **Defeito encontrado pelo teste:** com `to` fora do formato (`31/10/2026`), o cálculo do dia seguinte rodava antes da validação e lançava `RangeError` em vez da mensagem fixa. A data passou a ser validada antes.
+- **`pageWindow`:** 20 por página; página além da última vai para a última; lista vazia tem 1 página.
+- **`escapeLikePattern`:** escapa `\`, `%` e `_`. A SF-058 vai confirmar no PostgreSQL se o filtro `contains` do Prisma já escapa esses caracteres antes de decidir onde usar a função, para não escapar duas vezes.
+- **Migration `20261031220000_request_list_indexes`:** `Request(requesterId, createdAt, id)` e `Request(sectorId, createdAt, id)`. Os índices antigos permanecem.
+- **Resultados:** lint, typecheck e build OK; unitários 339/339 (56 arquivos); integração 150/150 + 1 pulado (33 arquivos); E2E 6/6.

@@ -605,7 +605,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-057 — Critérios de busca e índices
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Regras em `src/modules/requests/domain/search-criteria.ts` (`parseSearchCriteria`, `startOfDayInTimeZone`, `pageWindow`, `escapeLikePattern`) e migration `20261031220000_request_list_indexes`. CA-BUS-03, 04 e 06 verificados nas regras; CA-BUS-10 verificado. Uso nas consultas fica para a SF-058.
 - **Objetivo:** Domínio dos critérios (termo, status, responsável, período, ordem, página): validação, normalização, escape de `%` e `_`, limites de data em America/Sao_Paulo e cálculo de página; migration aditiva com os índices da seção 6.
 - **Arquivos/módulos esperados:** `src/modules/requests/domain/`, `prisma/migrations/`, testes.
 - **Dependências:** SF-056.

@@ -116,6 +116,8 @@ model Request {
   @@index([requesterId])
   @@index([sectorId])
   @@index([sectorId, assigneeId])
+  @@index([requesterId, createdAt, id])
+  @@index([sectorId, createdAt, id])
 }
 
 model RequestStatusEvent {
