@@ -1112,3 +1112,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Evento:** payload `{ stageEventId, direction, actorId }` — só identificadores e códigos (SPEC de eventos, 6.1); a justificativa fica só no histórico. O consumidor de notificações ainda ignora esse tipo (SF-079).
 - **Testes existentes alterados:** a lista exata de tipos de evento da SF-061 (`domain-event.test.ts`) recebeu `request.stage_changed`, exigido pela SPEC — única asserção alterada. O dublê em memória das solicitações ganhou etapas, histórico e as colunas novas, e `RequestRecord` ganhou `stageNamesSnapshot` e `stageIndex`.
 - **Resultados:** lint, typecheck e build OK; unitários 493/493 (83 arquivos); integração 224/224 + 1 pulado (49 arquivos); E2E 10/10.
+
+## SF-079 — Telas das etapas e notificação (2026-11-01)
+
+- **Histórico:** `RequestWithHistory` ganhou `stageEvents` (com o nome de quem moveu), lido junto com os outros eventos. A linha do tempo mostra "Etapa: X" na entrada e "Etapa: X → Y" nas mudanças, com a justificativa do retorno.
+- **Atendente:** componente `stage-panel.tsx` com "Avançar para …" e "Voltar para …" (justificativa obrigatória num bloco recolhível, como o cancelamento). Os dois formulários enviam a etapa mostrada (`fromStageIndex`). Na última etapa aparece o aviso de que já é possível concluir; antes dela o botão de concluir não aparece (o servidor recusa de qualquer forma). Com responsável, só ele vê os botões. Mensagens novas: "Etapa alterada." e a de justificativa do retorno (`stage-note`).
+- **Solicitante e listas:** `request-stage.tsx` com o rótulo "Etapa N de M: nome" ao lado do status (detalhes, fila e "Minhas solicitações") e a lista de etapas com "(concluída)" e "(atual)" para o solicitante.
+- **Notificação (`stage.changed`):** regra em `plannedNotifications` (solicitante, exceto `direction: start`). O nome da etapa vem do registro do histórico apontado pelo evento (`stageEventId`), lido pela loja de notificações na listagem; quando o evento já foi apagado (30 dias), a mensagem fica genérica: "Sua solicitação mudou de etapa". Nenhum texto foi copiado para o evento ou para a notificação.
+- **Testes existentes alterados (só os objetos de teste, sem mudar asserções):** `tests/unit/request-timeline.test.ts` monta objetos parciais de histórico e ganhou `stageEvents: []` nos dois objetos, como aconteceu com `priorityEvents` no SLA.
+- **Erro meu nos testes:** no teste de integração usei `queue.requests` em vez de `queue.items`; corrigido.
+- **Verificação no navegador:** teste E2E temporário (removido antes do commit) percorreu início, avanço, retorno com justificativa, avanço até a última etapa, rótulo na fila, conclusão, etapas para o solicitante e a notificação com o nome da etapa.
+- **Resultados:** lint, typecheck e build OK; unitários 503/503 (85 arquivos); integração 227/227 + 1 pulado (50 arquivos); E2E 10/10.

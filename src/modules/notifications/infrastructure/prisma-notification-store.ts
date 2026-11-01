@@ -49,13 +49,34 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
           createdAt: true,
           readAt: true,
           request: { select: { serviceNameSnapshot: true } },
+          event: { select: { payload: true } },
         },
       });
-      return rows.map(({ request, type, ...row }) => ({
-        ...row,
-        type: type as NotificationType,
-        serviceName: request.serviceNameSnapshot,
-      }));
+      // Stage names come from the history row named by the event (identifiers only in the outbox).
+      const stageEventIds = rows.flatMap(({ type, event }) => {
+        const id = type === "stage.changed" ? (event?.payload as { stageEventId?: unknown } | null)?.stageEventId : null;
+        return typeof id === "string" ? [id] : [];
+      });
+      const stageNames = new Map(
+        stageEventIds.length === 0
+          ? []
+          : (
+              await database.requestStageEvent.findMany({
+                where: { id: { in: stageEventIds } },
+                select: { id: true, toStage: true },
+              })
+            ).map(({ id, toStage }) => [id, toStage]),
+      );
+      return rows.map(({ request, type, event, ...row }) => {
+        const stageEventId = (event?.payload as { stageEventId?: unknown } | null)?.stageEventId;
+        const stageName = type === "stage.changed" && typeof stageEventId === "string" ? stageNames.get(stageEventId) : undefined;
+        return {
+          ...row,
+          type: type as NotificationType,
+          serviceName: request.serviceNameSnapshot,
+          ...(stageName ? { stageName } : {}),
+        };
+      });
     },
     async markAllRead(recipientId) {
       await database.requestNotification.updateMany({

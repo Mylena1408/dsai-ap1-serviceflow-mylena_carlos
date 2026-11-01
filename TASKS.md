@@ -841,7 +841,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-079 — Telas das etapas e notificação ao solicitante
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Painel "Fluxo de atendimento" para o atendente (avançar, voltar com justificativa, aviso da última etapa e botão de concluir só nela); etapa atual e posição nos detalhes, na fila e em "Minhas solicitações"; etapas percorridas para o solicitante; entradas e mudanças de etapa na linha do tempo; notificação `stage.changed` ao solicitante com o nome da etapa. CA-FLX-08 e 10 verificados.
 - **Objetivo:** Etapa atual e posição nos detalhes, na fila e em "Minhas solicitações"; botões de avançar e voltar para o atendente; etapas percorridas para o solicitante; etapas na linha do tempo; notificação `stage.changed` ao solicitante.
 - **Arquivos/módulos esperados:** Telas de detalhes e listas, `src/app/_components/`, módulo de notificações, testes.
 - **Dependências:** SF-078.

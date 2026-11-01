@@ -6,6 +6,7 @@ import {
   assumeRequest,
   cancelRequest,
   changeRequestPriority,
+  moveRequestStage,
   releaseRequest,
   transferRequest,
   transitionRequestStatus,
@@ -19,9 +20,9 @@ function field(formData: FormData, name: string): string {
   return typeof value === "string" ? value : "";
 }
 
-function errorCode(error: ApplicationError): string {
+function errorCode(error: ApplicationError, noteCode: string): string {
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("note"))) {
-    return "note";
+    return noteCode;
   }
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("body"))) {
     return "body";
@@ -44,6 +45,8 @@ async function runOnRequest(
   formData: FormData,
   operation: (requestId: string) => Promise<unknown>,
   notice: string,
+  /** Error code of a refused reason; each form with a reason has its own message. */
+  noteCode = "note",
 ): Promise<never> {
   const requestId = field(formData, "requestId");
 
@@ -51,7 +54,7 @@ async function runOnRequest(
     await operation(requestId);
   } catch (error) {
     if (error instanceof ApplicationError) {
-      redirect(`/queue/${encodeURIComponent(requestId)}?error=${errorCode(error)}`);
+      redirect(`/queue/${encodeURIComponent(requestId)}?error=${errorCode(error, noteCode)}`);
     }
 
     throw error;
@@ -115,4 +118,31 @@ export async function addCommentAction(formData: FormData): Promise<never> {
 export async function changePriorityAction(formData: FormData): Promise<never> {
   const priority = field(formData, "priority");
   return runOnRequest(formData, (requestId) => changeRequestPriority({ requestId, priority }), "priority");
+}
+
+// SPEC 2026-11-01-fluxos-configuraveis, section 5.3. The form sends the stage it shows; a move
+// from another stage is refused as a conflict, so a double click never skips a stage.
+function shownStageIndex(formData: FormData): number | string {
+  const value = field(formData, "fromStageIndex");
+  return /^\d+$/.test(value) ? Number(value) : value;
+}
+
+export async function advanceStageAction(formData: FormData): Promise<never> {
+  const fromStageIndex = shownStageIndex(formData);
+  return runOnRequest(
+    formData,
+    (requestId) => moveRequestStage({ requestId, direction: "advance", fromStageIndex }),
+    "stage",
+  );
+}
+
+export async function returnStageAction(formData: FormData): Promise<never> {
+  const fromStageIndex = shownStageIndex(formData);
+  const note = field(formData, "note");
+  return runOnRequest(
+    formData,
+    (requestId) => moveRequestStage({ requestId, direction: "return", fromStageIndex, note }),
+    "stage",
+    "stage-note",
+  );
 }

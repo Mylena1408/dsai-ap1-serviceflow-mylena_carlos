@@ -8,7 +8,7 @@ import {
 // In-app notifications (SPEC 2026-10-31-eventos-outbox-jobs, section 8.2). Messages are built
 // from the type and the service name; no comment, note or reason text is ever copied.
 
-const MESSAGES: Record<NotificationType, (service: string) => string> = {
+const MESSAGES: Record<NotificationType, (service: string, stage?: string) => string> = {
   "status.IN_PROGRESS": (service) => `Atendimento iniciado: ${service}`,
   "status.COMPLETED": (service) => `Solicitação concluída: ${service}`,
   "status.CANCELLED": (service) => `Solicitação cancelada: ${service}`,
@@ -18,10 +18,16 @@ const MESSAGES: Record<NotificationType, (service: string) => string> = {
   "comment.internal": (service) => `Nova nota interna em ${service}`,
   "sla.warning": (service) => `Prazo próximo do vencimento: ${service}`,
   "sla.breached": (service) => `Prazo vencido: ${service}`,
+  // The stage name is missing once the event is purged (after 30 days).
+  "stage.changed": (service, stage) =>
+    stage ? `Sua solicitação passou para a etapa ${stage}: ${service}` : `Sua solicitação mudou de etapa: ${service}`,
 };
 
 export function notificationMessage(notification: NotificationRecord): string {
-  return (MESSAGES[notification.type] ?? ((service: string) => `Novidade em ${service}`))(notification.serviceName);
+  return (MESSAGES[notification.type] ?? ((service: string) => `Novidade em ${service}`))(
+    notification.serviceName,
+    notification.stageName,
+  );
 }
 
 /** Top bar link with the unread count; never breaks the page if counting fails. */

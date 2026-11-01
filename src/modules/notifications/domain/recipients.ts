@@ -10,7 +10,8 @@ export type NotificationType =
   | "comment.public"
   | "comment.internal"
   | "sla.warning"
-  | "sla.breached";
+  | "sla.breached"
+  | "stage.changed";
 
 export interface NotificationContext {
   requesterId: string;
@@ -30,7 +31,8 @@ export type NotifiableEvent =
   | { type: "request.comment_added"; payload: { authorId: string; isInternal: boolean } }
   | { type: "request.priority_changed" }
   | { type: "request.sla_warning" }
-  | { type: "request.sla_breached" };
+  | { type: "request.sla_breached" }
+  | { type: "request.stage_changed"; payload: { direction: string; actorId: string } };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -87,6 +89,12 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       const recipients = context.effectiveAssigneeId ? [context.effectiveAssigneeId] : sla.sectorAttendantIds;
       return recipients.map((recipientId) => ({ recipientId, type }));
     }
+
+    case "request.stage_changed":
+      // SPEC 2026-11-01-fluxos-configuraveis, 5.5.3 (decision W4): the requester hears about each
+      // move; entering the first stage comes with the start, which already notifies.
+      if (event.payload.direction === "start") return [];
+      return plan(context.requesterId, "stage.changed", event.payload.actorId);
 
     default:
       // Event types this consumer does not know about notify nobody.

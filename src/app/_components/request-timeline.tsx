@@ -52,8 +52,17 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     note: null,
   }));
 
-  // Stable sort: on equal times, status events come first, then assignments and priorities.
-  return [...statusEntries, ...assignmentEntries, ...priorityEntries].sort(
+  // SPEC 2026-11-01-fluxos-configuraveis, 5.5: entering the first stage and every move.
+  const stageEntries = request.stageEvents.map((event) => ({
+    id: `stage-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: event.fromStage ? `Etapa: ${event.fromStage} → ${event.toStage}` : `Etapa: ${event.toStage}`,
+    actor: event.actor.name,
+    note: event.note,
+  }));
+
+  // Stable sort: on equal times, status events come first, then assignments, priorities and stages.
+  return [...statusEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

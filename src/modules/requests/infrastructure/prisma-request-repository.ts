@@ -38,6 +38,10 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
+  stageEvents: {
+    orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+    include: { actor: { select: { id: true, name: true } } },
+  },
   assignmentEvents: {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: {

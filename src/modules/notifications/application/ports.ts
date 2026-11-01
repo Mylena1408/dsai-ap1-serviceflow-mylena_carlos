@@ -7,6 +7,8 @@ export interface NotificationRecord {
   createdAt: Date;
   readAt: Date | null;
   serviceName: string;
+  /** Stage entered, for "stage.changed" while its event is still kept (SPEC de fluxos, 5.5). */
+  stageName?: string;
 }
 
 export interface NotificationRequestState {

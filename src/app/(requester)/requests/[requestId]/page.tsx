@@ -8,6 +8,7 @@ import {
 } from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
+import { RequestStageLabel, RequestStageSteps } from "@/app/_components/request-stage";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -76,7 +77,10 @@ export default async function RequestPage({
       <article className="surface-card">
         <p className="eyebrow">Solicitação</p>
         <h1>{request.serviceNameSnapshot}</h1>
-        <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+        <p>
+          <span className="status-pill">{statusLabels[request.status]}</span>{" "}
+          <RequestStageLabel request={request} />
+        </p>
         <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>
         <p>Setor responsável: {request.sectorNameSnapshot}</p>
@@ -87,6 +91,7 @@ export default async function RequestPage({
             : "ainda não definido"}
         </p>
         <p>{request.serviceDescriptionSnapshot}</p>
+        <RequestStageSteps request={request} />
         <h2>Sua descrição</h2>
         <p className="request-description">{request.description}</p>
       </article>

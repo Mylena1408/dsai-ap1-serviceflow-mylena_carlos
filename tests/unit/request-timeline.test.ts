@@ -28,6 +28,8 @@ function assignmentEvent(id: string, minute: number, from: typeof ana | null, to
 }
 
 const request = {
+  // Stage moves (SPEC 2026-11-01-fluxos-configuraveis) are covered in request-stage-timeline.test.ts.
+  stageEvents: [],
   priorityEvents: [
     { id: "p1", requestId: "r", actorId: "bia", fromPriority: "NORMAL", toPriority: "URGENT", occurredAt: at(3), actor: bia },
   ],
@@ -60,6 +62,7 @@ describe("request timeline", () => {
 
   it("keeps status events first when times are equal", () => {
     const tied = {
+      stageEvents: [],
       priorityEvents: [],
       events: [statusEvent("s1", 0, null, "OPEN")],
       assignmentEvents: [assignmentEvent("a1", 0, null, ana)],

@@ -1325,3 +1325,38 @@ p {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Stages of the attendance flow (SPEC 2026-11-01-fluxos-configuraveis, 5.6). */
+.stage-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stage-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage-step {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  font-size: 13px;
+}
+
+.stage-step-done {
+  opacity: 0.75;
+}
+
+.stage-step-current {
+  border-color: var(--brand);
+  font-weight: 700;
+}

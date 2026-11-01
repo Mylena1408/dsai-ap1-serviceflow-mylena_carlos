@@ -143,6 +143,9 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
     priorityEvents: store.priorityEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event, index) => ({ ...event, id: `priority-${index + 1}`, actor: nameOf(store, event.actorId)! })),
+    stageEvents: store.stageEvents
+      .filter(({ requestId }) => requestId === request.id)
+      .map((event) => ({ ...event, actor: nameOf(store, event.actorId)! })),
     assignmentEvents: store.assignmentEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event, index) => ({

@@ -9,6 +9,8 @@ import {
 } from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
+import { RequestStageLabel } from "@/app/_components/request-stage";
+import { StagePanel } from "./stage-panel";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
 import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
@@ -42,6 +44,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "cancelled") return "Solicitação cancelada.";
   if (notice === "commented") return "Comentário enviado.";
   if (notice === "priority") return "Prioridade alterada.";
+  if (notice === "stage") return "Etapa alterada.";
+  if (error === "stage-note") return "Informe a justificativa do retorno, com até 1.000 caracteres.";
   if (error === "priority") return "Escolha uma prioridade diferente da atual.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
   if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
@@ -79,6 +83,9 @@ export default async function QueueRequestPage({
   // Section 5.3: with an effective assignee only that attendant starts or completes.
   const assigneeId = effectiveAssigneeId(request);
   const heldByColleague = assigneeId !== null && assigneeId !== actor.id;
+  // SPEC 2026-11-01-fluxos-configuraveis, 5.3.3: with a flow, completion only at the last stage.
+  const atLastStage =
+    request.stageIndex === null || request.stageIndex === request.stageNamesSnapshot.length - 1;
 
   return (
     <main className="page-shell">
@@ -95,7 +102,10 @@ export default async function QueueRequestPage({
       <article className="surface-card">
         <p className="eyebrow">Atendimento da solicitação</p>
         <h1>{request.serviceNameSnapshot}</h1>
-        <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+        <p>
+          <span className="status-pill">{statusLabels[request.status]}</span>{" "}
+          <RequestStageLabel request={request} />
+        </p>
         <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>
         <p>Setor de origem: {request.sectorNameSnapshot}</p>
@@ -104,6 +114,7 @@ export default async function QueueRequestPage({
         <p className="request-description">{request.description}</p>
       </article>
       <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} />
+      <StagePanel request={request} canAct={!heldByColleague} />
       {(request.status === "OPEN" || request.status === "IN_PROGRESS") && !heldByColleague ? (
         <>
           <PriorityForm requestId={request.id} priority={request.priority} />
@@ -121,7 +132,7 @@ export default async function QueueRequestPage({
           <button type="submit">Iniciar atendimento</button>
         </form>
       ) : null}
-      {request.status === "IN_PROGRESS" && !heldByColleague ? (
+      {request.status === "IN_PROGRESS" && !heldByColleague && atLastStage ? (
         <form className="content-section" action={completeRequestAction}>
           <input type="hidden" name="requestId" value={request.id} />
           <button type="submit">Concluir solicitação</button>

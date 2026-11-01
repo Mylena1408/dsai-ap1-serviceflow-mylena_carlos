@@ -67,10 +67,25 @@ export interface RequestPriorityEventRecord {
   actor: { id: string; name: string };
 }
 
+/** Entry into a stage of the flow copy (SPEC 2026-11-01-fluxos-configuraveis, 5.5). */
+export interface RequestStageEventRecord {
+  id: string;
+  requestId: string;
+  actorId: string;
+  fromStage: string | null;
+  toStage: string;
+  /** Reason, only when going back. */
+  note: string | null;
+  occurredAt: Date;
+  actor: { id: string; name: string };
+}
+
 export interface RequestWithHistory extends RequestRecord {
   events: RequestStatusEventRecord[];
   /** Priority changes (SPEC 2026-11-01, section 6). */
   priorityEvents: RequestPriorityEventRecord[];
+  /** Stage entries and moves (SPEC 2026-11-01-fluxos-configuraveis, 5.5). */
+  stageEvents: RequestStageEventRecord[];
   /** Assume, release and transfer events (SPEC 2026-10-31, section 5.9). */
   assignmentEvents: RequestAssignmentEventRecord[];
   service: {

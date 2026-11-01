@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RequestStageLabel } from "@/app/_components/request-stage";
 import { countComments } from "@/modules/comments";
 import { effectiveAssigneeId, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
 import { ValidationError } from "@/server/errors";
@@ -64,7 +65,10 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
                   {request.serviceNameSnapshot}
                 </Link>
               </h2>
-              <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+              <p>
+                <span className="status-pill">{statusLabels[request.status]}</span>{" "}
+                <RequestStageLabel request={request} />
+              </p>
               <RequestSla request={request} now={now} />
               <p className="metadata">
                 Responsável:{" "}
