@@ -5,6 +5,7 @@ import * as assignment from "./application/assignment";
 import * as attachmentQueries from "./application/attachment-queries";
 import * as createRequestUseCase from "./application/create-request";
 import * as lifecycleActions from "./application/lifecycle-actions";
+import * as priorityUseCase from "./application/priority";
 import * as queries from "./application/request-queries";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
@@ -32,6 +33,7 @@ export type { RequestSearchResult } from "./application/request-queries";
 export { buildRequestSnapshot } from "./domain/snapshot";
 export { assertRequestStatusTransition } from "./domain/status-transition";
 export type {
+  RequestPriority,
   RequestStatus,
   RequestSummary,
   RequestWithHistory,
@@ -178,4 +180,11 @@ export async function cleanOrphanAttachmentObjects(
   database: PrismaClient = prisma,
 ): Promise<orphanCleanup.OrphanCleanupSummary> {
   return orphanCleanup.cleanOrphanAttachmentObjects(storage, createPrismaRequestExistenceReader(database), now);
+}
+
+export async function changeRequestPriority(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return priorityUseCase.changeRequestPriority(
+    input,
+    createPrismaRequestTransactionRunner(database, lifecycleErrors),
+  );
 }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   assumeRequest,
   cancelRequest,
+  changeRequestPriority,
   releaseRequest,
   transferRequest,
   transitionRequestStatus,
@@ -24,6 +25,9 @@ function errorCode(error: ApplicationError): string {
   }
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("body"))) {
     return "body";
+  }
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("priority"))) {
+    return "priority";
   }
   return error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN"
     ? "access"
@@ -105,4 +109,10 @@ export async function addCommentAction(formData: FormData): Promise<never> {
   const body = field(formData, "body");
   const isInternal = formData.get("isInternal") === "on";
   return runOnRequest(formData, (requestId) => addComment({ requestId, body, isInternal }), "commented");
+}
+
+// SPEC 2026-11-01-sla-prioridades, section 5.1 (decision P1).
+export async function changePriorityAction(formData: FormData): Promise<never> {
+  const priority = field(formData, "priority");
+  return runOnRequest(formData, (requestId) => changeRequestPriority({ requestId, priority }), "priority");
 }

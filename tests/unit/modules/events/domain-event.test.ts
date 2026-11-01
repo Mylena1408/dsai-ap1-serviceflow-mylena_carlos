@@ -23,6 +23,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.status_changed",
       "request.assignment_changed",
       "request.comment_added",
+      // Added by SPEC 2026-11-01 (SLA e prioridades).
+      "request.priority_changed",
     ]);
     expect(
       outboxPayload({

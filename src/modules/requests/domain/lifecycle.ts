@@ -186,3 +186,22 @@ export function assertCanReopen(
 
   requireNote(note);
 }
+
+/**
+ * SPEC 2026-11-01-sla-prioridades, section 5.1 (decision P1): an attendant of the sector
+ * changes the priority of an open or in-progress request; with an effective assignee, only
+ * that attendant. The new priority must differ from the current one.
+ */
+export function assertCanChangePriority(
+  actor: LifecycleUser,
+  request: LifecycleRequest,
+  toPriority: RequestPriority,
+): void {
+  requireSectorAttendant(actor, request);
+  requireAssignable(request);
+  assertCanChangeStatusWithAssignee(actor.id, request);
+
+  if (request.priority === toPriority) {
+    throw new ValidationError([{ path: ["priority"], code: "invalid_value" }]);
+  }
+}

@@ -12,6 +12,7 @@ import { requireAttendantPageAccess } from "../../page-access";
 import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
+import { PriorityForm } from "./priority-form";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -37,6 +38,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "transferred") return "Solicitação transferida.";
   if (notice === "cancelled") return "Solicitação cancelada.";
   if (notice === "commented") return "Comentário enviado.";
+  if (notice === "priority") return "Prioridade alterada.";
+  if (error === "priority") return "Escolha uma prioridade diferente da atual.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
   if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
   return null;
@@ -96,7 +99,10 @@ export default async function QueueRequestPage({
       </article>
       <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} />
       {(request.status === "OPEN" || request.status === "IN_PROGRESS") && !heldByColleague ? (
-        <CancelRequestForm requestId={request.id} />
+        <>
+          <PriorityForm requestId={request.id} priority={request.priority} />
+          <CancelRequestForm requestId={request.id} />
+        </>
       ) : null}
       {heldByColleague && (request.status === "OPEN" || request.status === "IN_PROGRESS") ? (
         <p className="content-section">

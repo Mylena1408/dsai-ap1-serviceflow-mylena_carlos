@@ -61,6 +61,7 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "note",
   "body",
   "search",
+  "priority",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

@@ -20,7 +20,8 @@ export type NotifiableEvent =
   | { type: "request.opened" }
   | { type: "request.status_changed"; payload: { toStatus: string; actorId: string } }
   | { type: "request.assignment_changed"; payload: { toAssigneeId: string | null; actorId: string } }
-  | { type: "request.comment_added"; payload: { authorId: string; isInternal: boolean } };
+  | { type: "request.comment_added"; payload: { authorId: string; isInternal: boolean } }
+  | { type: "request.priority_changed" };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -42,6 +43,7 @@ function plan(recipientId: string | null, type: NotificationType, actorId: strin
 export function plannedNotifications(event: NotifiableEvent, context: NotificationContext): PlannedNotification[] {
   switch (event.type) {
     case "request.opened":
+    case "request.priority_changed":
       return [];
 
     case "request.status_changed": {
@@ -66,5 +68,9 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       const recipient = authorId === context.requesterId ? context.effectiveAssigneeId : context.requesterId;
       return plan(recipient, "comment.public", authorId);
     }
+
+    default:
+      // Event types this consumer does not know about notify nobody.
+      return [];
   }
 }

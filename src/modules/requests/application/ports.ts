@@ -98,6 +98,26 @@ export interface NewAssignmentEvent {
   occurredAt: Date;
 }
 
+/** Changes the priority only while status, assignee and priority are still the ones read. */
+export interface PriorityUpdate {
+  requestId: string;
+  expectedStatus: RequestStatus;
+  expectedAssigneeId: string | null;
+  expectedPriority: RequestPriority;
+  priority: RequestPriority;
+  dueAt: Date | null;
+  resetSlaAlerts: boolean;
+  updatedAt: Date;
+}
+
+export interface NewPriorityEvent {
+  requestId: string;
+  actorId: string;
+  fromPriority: RequestPriority;
+  toPriority: RequestPriority;
+  occurredAt: Date;
+}
+
 /** Attachment row; every field is derived on the server (SPEC 21.4 item 8, 21.9). */
 export interface NewRequestAttachment {
   id: string;
@@ -165,6 +185,9 @@ export interface RequestTransaction {
   /** Returns the number of rows changed (0 when status or assignee changed meanwhile). */
   updateAssigneeIfCurrent(update: AssigneeUpdate): Promise<number>;
   insertAssignmentEvent(event: NewAssignmentEvent): Promise<void>;
+  /** Returns the number of rows changed (0 when the request changed meanwhile). */
+  updatePriorityIfCurrent(update: PriorityUpdate): Promise<number>;
+  insertPriorityEvent(event: NewPriorityEvent): Promise<void>;
   /** Writes a domain event to the outbox in this same transaction (SPEC de eventos, 6.2). */
   recordEvent(event: DomainEvent): Promise<void>;
   getWithHistory(requestId: string): Promise<RequestWithHistory>;

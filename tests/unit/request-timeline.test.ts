@@ -28,6 +28,9 @@ function assignmentEvent(id: string, minute: number, from: typeof ana | null, to
 }
 
 const request = {
+  priorityEvents: [
+    { id: "p1", requestId: "r", actorId: "bia", fromPriority: "NORMAL", toPriority: "URGENT", occurredAt: at(3), actor: bia },
+  ],
   events: [
     statusEvent("s1", 0, null, "OPEN"),
     statusEvent("s2", 3, "OPEN", "IN_PROGRESS", bia),
@@ -48,6 +51,7 @@ describe("request timeline", () => {
       ["Assumida por Ana", "Ana", null],
       ["Transferida de Ana para Bia", "Ana", null],
       ["Aberta → Em atendimento", "Bia", null],
+      ["Prioridade: Normal → Urgente", "Bia", null],
       ["Em atendimento → Concluída", "Bia", null],
       ["Concluída → Aberta", "Rita", "A impressora parou de novo"],
       ["Liberada por Bia", "Bia", null],
@@ -56,6 +60,7 @@ describe("request timeline", () => {
 
   it("keeps status events first when times are equal", () => {
     const tied = {
+      priorityEvents: [],
       events: [statusEvent("s1", 0, null, "OPEN")],
       assignmentEvents: [assignmentEvent("a1", 0, null, ana)],
     } as unknown as RequestWithHistory;

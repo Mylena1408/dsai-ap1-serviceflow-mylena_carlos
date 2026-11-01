@@ -964,3 +964,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes existentes:** os dublês do módulo `services` (`service-use-cases.test.ts`, `catalog.test.ts`) ganharam os campos novos; nenhuma asserção mudou.
 - **Testes novos:** 4 unitários de ciclo de vida, 2 das ações da administração e 4 de integração.
 - **Resultados:** lint, typecheck e build OK; unitários 383/383 (67 arquivos); integração 175/175 + 1 pulado (39 arquivos); E2E 8/8.
+
+## SF-067 — Mudança de prioridade (2026-11-01)
+
+- **Interpretação (registrada na SPEC, seção 5.3):** a SPEC diz que mudar a prioridade recalcula o vencimento "a partir da abertura" e que a reabertura reinicia a contagem. Para uma solicitação reaberta, o novo vencimento é calculado a partir do **início do período atual**, obtido como `dueAt − prazo efetivo da prioridade antiga` (`dueAtAfterPriorityChange`). Não foi preciso coluna nova.
+- **Domínio:** `assertCanChangePriority` em `lifecycle.ts` (atendente do setor, status `OPEN`/`IN_PROGRESS`, responsável efetivo; prioridade igual gera `ValidationError` no campo `priority`, que entrou em `PUBLIC_VALIDATION_PATHS`).
+- **Caso de uso:** `application/priority.ts`. A atualização é condicionada a status, responsável e prioridade lidos (conflito se algo mudou). Se o vencimento foi adiado, as marcas de alerta voltam a nulo para que os alertas da SF-069 possam ser gerados de novo; se foi antecipado, ficam como estão.
+- **Eventos:** `request.priority_changed` entrou na união de eventos e no `DOMAIN_EVENT_TYPES`; não gera notificação (a SPEC não pede). O teste da SF-061 que confere a lista exata de tipos foi atualizado com esse tipo — é a única asserção existente alterada, e a mudança vem da SPEC.
+- **Telas:** histórico mostra "Prioridade: X → Y"; o detalhe do atendente tem o formulário (só com status aberta ou em atendimento e sem colega responsável).
+- **Erro meu nos testes:** no teste da ação, criei `ValidationError` com `path` em texto; o construtor espera lista. Corrigido.
+- **Resultados:** lint, typecheck e build OK; unitários 391/391 (69 arquivos); integração 178/178 + 1 pulado (40 arquivos); E2E 8/8.

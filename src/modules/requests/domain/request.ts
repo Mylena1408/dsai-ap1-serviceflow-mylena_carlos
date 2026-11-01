@@ -54,8 +54,20 @@ export interface RequestAssignmentEventRecord {
   toAssignee: { id: string; name: string } | null;
 }
 
+export interface RequestPriorityEventRecord {
+  id: string;
+  requestId: string;
+  actorId: string;
+  fromPriority: RequestPriority;
+  toPriority: RequestPriority;
+  occurredAt: Date;
+  actor: { id: string; name: string };
+}
+
 export interface RequestWithHistory extends RequestRecord {
   events: RequestStatusEventRecord[];
+  /** Priority changes (SPEC 2026-11-01, section 6). */
+  priorityEvents: RequestPriorityEventRecord[];
   /** Assume, release and transfer events (SPEC 2026-10-31, section 5.9). */
   assignmentEvents: RequestAssignmentEventRecord[];
   service: {

@@ -1,4 +1,5 @@
 import type { RequestWithHistory } from "@/modules/requests";
+import { PRIORITY_LABELS } from "./request-priority";
 import { REQUEST_STATUS_LABELS } from "./request-status";
 
 type TimelineEntry = {
@@ -43,8 +44,16 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     note: null,
   }));
 
-  // Stable sort: on equal times, status events stay before assignment events.
-  return [...statusEntries, ...assignmentEntries].sort(
+  const priorityEntries = request.priorityEvents.map((event) => ({
+    id: `priority-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: `Prioridade: ${PRIORITY_LABELS[event.fromPriority]} → ${PRIORITY_LABELS[event.toPriority]}`,
+    actor: event.actor.name,
+    note: null,
+  }));
+
+  // Stable sort: on equal times, status events come first, then assignments and priorities.
+  return [...statusEntries, ...assignmentEntries, ...priorityEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

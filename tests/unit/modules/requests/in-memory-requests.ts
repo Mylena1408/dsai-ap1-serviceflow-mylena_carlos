@@ -1,5 +1,6 @@
 import type {
   NewAssignmentEvent,
+  NewPriorityEvent,
   NewRequestAttachment,
   RequestQueryRepository,
   RequestTransaction,
@@ -30,6 +31,7 @@ export interface InMemoryRequestStore {
   attachments: NewRequestAttachment[];
   assignmentEvents: NewAssignmentEvent[];
   outbox: DomainEvent[];
+  priorityEvents: NewPriorityEvent[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -47,6 +49,7 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     attachments: [],
     assignmentEvents: [],
     outbox: [],
+    priorityEvents: [],
     ...seed,
   };
 }
@@ -122,6 +125,9 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
       }),
     service: { id: request.serviceId, isActive: service?.isActive ?? false },
     assignee: assigneeOf(store, request.assigneeId),
+    priorityEvents: store.priorityEvents
+      .filter(({ requestId }) => requestId === request.id)
+      .map((event, index) => ({ ...event, id: `priority-${index + 1}`, actor: nameOf(store, event.actorId)! })),
     assignmentEvents: store.assignmentEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event, index) => ({
@@ -264,6 +270,23 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     },
     async recordEvent(event) {
       store.outbox.push(event);
+    },
+    async updatePriorityIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, assigneeId, priority }) =>
+          id === update.requestId &&
+          status === update.expectedStatus &&
+          assigneeId === update.expectedAssigneeId &&
+          priority === update.expectedPriority,
+      );
+      if (!request) return 0;
+      request.priority = update.priority;
+      request.dueAt = update.dueAt;
+      request.updatedAt = update.updatedAt;
+      return 1;
+    },
+    async insertPriorityEvent(event) {
+      store.priorityEvents.push({ ...event });
     },
     async getWithHistory(requestId) {
       const request = store.requests.find(({ id }) => id === requestId);

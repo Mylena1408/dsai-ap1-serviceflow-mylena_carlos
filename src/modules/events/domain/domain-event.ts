@@ -3,6 +3,7 @@
 // personal data. Consumers reload whatever else they need from the database.
 
 export type EventRequestStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+export type EventRequestPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 
 export type DomainEvent =
   | {
@@ -28,6 +29,12 @@ export type DomainEvent =
       requestId: string;
       occurredAt: Date;
       payload: { commentId: string; authorId: string; isInternal: boolean };
+    }
+  | {
+      type: "request.priority_changed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { fromPriority: EventRequestPriority; toPriority: EventRequestPriority; actorId: string };
     };
 
 export type DomainEventType = DomainEvent["type"];
@@ -37,6 +44,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.status_changed",
   "request.assignment_changed",
   "request.comment_added",
+  "request.priority_changed",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -44,6 +52,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.status_changed": ["fromStatus", "toStatus", "actorId"],
   "request.assignment_changed": ["fromAssigneeId", "toAssigneeId", "actorId"],
   "request.comment_added": ["commentId", "authorId", "isInternal"],
+  "request.priority_changed": ["fromPriority", "toPriority", "actorId"],
 };
 
 /**

@@ -73,3 +73,22 @@ export function slaSituation(request: SlaState, now: Date): SlaSituation {
 export function isRequestPriority(value: unknown): value is RequestPriority {
   return typeof value === "string" && (REQUEST_PRIORITIES as readonly string[]).includes(value);
 }
+
+/**
+ * New due date after a priority change (section 5.3). The counting period starts at the
+ * opening, or at the reopening; it is recovered from the current due date and the old
+ * priority, so both cases use the start of the current period.
+ */
+export function dueAtAfterPriorityChange(
+  dueAt: Date | null,
+  slaHours: number | null,
+  fromPriority: RequestPriority,
+  toPriority: RequestPriority,
+): Date | null {
+  if (dueAt === null || slaHours === null) {
+    return null;
+  }
+
+  const periodStart = new Date(dueAt.getTime() - effectiveSlaMinutes(slaHours, fromPriority) * MINUTE_MS);
+  return dueAtFrom(periodStart, slaHours, toPriority);
+}

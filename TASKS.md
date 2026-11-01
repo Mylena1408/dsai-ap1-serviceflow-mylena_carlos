@@ -713,7 +713,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-067 — Mudança de prioridade
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Caso de uso `changeRequestPriority` (atendente do setor, responsável efetivo, status aberta ou em atendimento), vencimento recalculado a partir do início do período atual, histórico em `RequestPriorityEvent`, evento `request.priority_changed` na outbox, formulário no detalhe da fila. CA-SLA-06 verificado; CA-SLA-04 completo.
 - **Objetivo:** Caso de uso do atendente, `RequestPriorityEvent` no histórico único, evento `request.priority_changed` e recálculo do vencimento.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, detalhe do atendente, testes.
 - **Dependências:** SF-066.

@@ -207,3 +207,7 @@ Medição informada (13.479 linhas `added`); SF-065 concluída (ver `NOTES.md`).
 > siga para a sf-066
 
 SF-066 concluída (ver `NOTES.md`, seção SF-066).
+
+## Continuação — SF-067
+
+SF-067 concluída (ver `NOTES.md`, seção SF-067).

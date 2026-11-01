@@ -1010,6 +1010,13 @@ p {
   font-style: italic;
 }
 
+.priority-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
 .lifecycle-form summary {
   cursor: pointer;
   font-weight: 600;

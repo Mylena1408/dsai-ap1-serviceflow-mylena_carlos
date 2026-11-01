@@ -28,6 +28,10 @@ const requestWithHistory = {
   assignee: {
     select: { id: true, name: true, role: true, isActive: true, sectorId: true },
   },
+  priorityEvents: {
+    orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+    include: { actor: { select: { id: true, name: true } } },
+  },
   assignmentEvents: {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: {
@@ -264,6 +268,26 @@ function createPrismaRequestTransaction(
     },
     async insertAssignmentEvent(event) {
       await transaction.requestAssignmentEvent.create({ data: event });
+    },
+    async updatePriorityIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: {
+          id: update.requestId,
+          status: update.expectedStatus,
+          assigneeId: update.expectedAssigneeId,
+          priority: update.expectedPriority,
+        },
+        data: {
+          priority: update.priority,
+          dueAt: update.dueAt,
+          updatedAt: update.updatedAt,
+          ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
+        },
+      });
+      return result.count;
+    },
+    async insertPriorityEvent(event) {
+      await transaction.requestPriorityEvent.create({ data: event });
     },
     recordEvent(event) {
       return recordOutboxEvent(transaction, event);
