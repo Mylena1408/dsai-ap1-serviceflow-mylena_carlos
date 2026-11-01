@@ -137,3 +137,9 @@ Aplicadas com `prisma migrate deploy`; status em dia.
 > pode seguir para a SF-059
 
 SF-059 concluída (ver `NOTES.md`, seção SF-059).
+
+## Continuação — SF-060
+
+> prossiga
+
+SF-060 concluída (ver `NOTES.md`, seção SF-060).

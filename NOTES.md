@@ -798,3 +798,17 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ponto de atenção:** `demo-data.spec.ts` (antigo) espera ver na primeira página do solicitante as 3 solicitações fictícias dele. Hoje o solicitante de demonstração tem 8 no E2E; se outros testes passarem de 20 novas, esse teste também precisará buscar.
 - **Testes:** 4 unitários do montador de links.
 - **Resultados:** lint, typecheck e build OK; unitários 346/346 (58 arquivos); integração 155/155 + 1 pulado; E2E 6/6.
+
+## SF-060 — E2E e revisão da busca (2026-10-31)
+
+- **E2E (`request-search.spec.ts`):** grava 22 solicitações sintéticas direto no banco do E2E, para haver mais de uma página: 2 em atendimento e 1 atribuída ao atendente de demonstração. Depois, no navegador:
+  - o atendente busca o termo em maiúsculas e vê "Página 1 de 2 — 22 solicitações" com 20 itens; vai para a próxima página, recarrega e o formulário e a lista continuam iguais;
+  - "Atribuídas a mim" volta para a página 1 e mostra só a atribuída, com "Responsável: você";
+  - "Mais recentes primeiro" inverte a ordem;
+  - uma busca com 1 caractere mostra a mensagem fixa, sem lista;
+  - o solicitante filtra "Em atendimento" (2 resultados, sem o filtro de responsável); um período sem resultados mostra "Nenhuma solicitação encontrada"; "Limpar" volta a `/requests`.
+  - Passou rodando sozinho e com a suíte inteira. O comentário do teste foi corrigido: as contas de demonstração são criadas por `seedDemoData`, e não por testes anteriores.
+- **Revisão:** sem segredos versionados; nenhum `console.*`, `dangerouslySetInnerHTML` ou SQL montado à mão nos arquivos novos; os filtros chegam ao banco só pelo Prisma; nenhuma dependência nova; migration só aditiva (SF-057). README com o novo fluxo.
+- **SPEC `2026-10-31-busca-filtros-paginacao.md` concluída:** CA-BUS-01 a 10 verificados.
+- **Resultados:** lint, typecheck e build OK; unitários 346/346 (58 arquivos); integração 155/155 + 1 pulado (34 arquivos); E2E 7/7.
+- **Publicação:** o banco Neon já tem as migrations; o site ainda está na versão anterior aos comentários e à busca.

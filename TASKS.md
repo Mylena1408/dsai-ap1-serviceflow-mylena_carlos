@@ -635,7 +635,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-060 — E2E e revisão da busca
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. E2E `tests/e2e/request-search.spec.ts` (seção 9 da SPEC), README e revisão. CA-BUS-01 a 10 verificados: SPEC concluída.
 - **Objetivo:** E2E da seção 9 da SPEC; revisão de escopo, desempenho e documentação.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-059.
