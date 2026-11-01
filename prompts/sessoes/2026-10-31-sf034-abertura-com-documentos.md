@@ -331,3 +331,9 @@ SF-081 concluída (ver `NOTES.md`, seção SF-081).
 > siga o teste novamente e logo depois continue para a sf-081
 
 A SF-081 já estava concluída; entendido como a SF-082. PostgreSQL de teste religado, unitários e integração confirmados (513 e 233 + 1 pulado) e SF-082 concluída (ver `NOTES.md`, seção SF-082).
+
+## Continuação — SF-083
+
+> tem minha aprovação a sf-083; aprovação do gestor no cadastro de serviço;demais necessidades tem minha permissão
+
+SF-083 concluída (ver `NOTES.md`, seção SF-083).

@@ -126,7 +126,10 @@ export default async function QueueRequestPage({
           Somente o responsável, {request.assignee?.name}, pode iniciar ou concluir esta solicitação.
         </p>
       ) : null}
-      {request.status === "OPEN" && !heldByColleague ? (
+      {request.approvalState === "PENDING" && request.status === "OPEN" ? (
+        <p className="content-section">O atendimento só pode começar depois da aprovação do gestor do setor.</p>
+      ) : null}
+      {request.status === "OPEN" && !heldByColleague && request.approvalState !== "PENDING" ? (
         <form className="content-section" action={startRequestAction}>
           <input type="hidden" name="requestId" value={request.id} />
           <button type="submit">Iniciar atendimento</button>

@@ -46,6 +46,7 @@ type EditableRecord =
       isActive: boolean;
       defaultPriority: PriorityValue;
       slaHours: number | null;
+      requiresApproval: boolean;
     };
 
 type RecordEditorProps = {
@@ -164,7 +165,11 @@ function EditorForm({
                 ))}
               </select>
             </label>
-            <ServiceSlaFields defaultPriority={record.defaultPriority} slaHours={record.slaHours} />
+            <ServiceSlaFields
+              defaultPriority={record.defaultPriority}
+              requiresApproval={record.requiresApproval}
+              slaHours={record.slaHours}
+            />
           </>
         ) : null}
       </div>
@@ -230,6 +235,7 @@ export function AdminRecordEditor({
           <span>Setor: {sectors.find((sector) => sector.id === record.sectorId)?.name}</span>
           <span>Prioridade padrão: {PRIORITY_LABELS[record.defaultPriority]}</span>
           <span>{record.slaHours === null ? "Sem prazo" : `Prazo-base: ${record.slaHours} h`}</span>
+          <span>{record.requiresApproval ? "Exige aprovação do gestor" : "Sem aprovação"}</span>
         </>
       );
     }

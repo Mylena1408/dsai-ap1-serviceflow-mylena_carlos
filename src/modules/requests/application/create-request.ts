@@ -17,7 +17,7 @@ import {
   type ActiveDocumentRequirement,
 } from "../domain/attachment-requirements";
 import type { RequestWithHistory } from "../domain/request";
-import { dueAtFrom } from "../domain/sla";
+import { approvalStateOnOpening, dueAtOnOpening } from "../domain/approval";
 import { buildRequestSnapshot } from "../domain/snapshot";
 import type {
   AttachmentStorage,
@@ -166,6 +166,7 @@ async function openRequest(
   }
 
   const openedAt = await transaction.currentTime();
+  const approvalState = approvalStateOnOpening(context.service.requiresApproval);
   const created = await transaction.insertRequest({
     ...buildRequestSnapshot(context.actorId, context.service),
     id: requestId,
@@ -175,7 +176,9 @@ async function openRequest(
     // SPEC 2026-11-01, sections 5.1 to 5.3: default priority and SLA snapshot of the service.
     priority: context.service.defaultPriority,
     slaHoursSnapshot: context.service.slaHours,
-    dueAt: dueAtFrom(openedAt, context.service.slaHours, context.service.defaultPriority),
+    // SPEC 2026-11-01-aprovacoes, 5.2 and 5.5: with approval, pending and without a due date.
+    approvalState,
+    dueAt: dueAtOnOpening(openedAt, context.service.slaHours, context.service.defaultPriority, approvalState),
   });
 
   await transaction.insertStatusEvent({

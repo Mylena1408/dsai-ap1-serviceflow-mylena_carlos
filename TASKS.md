@@ -885,7 +885,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-083 — Aprovação na abertura e no início
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Opção "Exige aprovação do gestor" no cadastro do serviço (com aviso quando o setor não tem gestor ativo); abertura com aprovação pendente, horas de SLA guardadas e sem vencimento; início do atendimento recusado no servidor enquanto pendente, com o botão substituído por um aviso para o atendente. CA-APR-01, 02 e 04 verificados; parte de bloqueio do CA-APR-05 e parte "sem prazo" do CA-APR-07 verificadas.
 - **Objetivo:** Opção "Exige aprovação do gestor" no serviço; snapshot na abertura com aprovação pendente; recusa do início enquanto pendente; solicitação pendente sem prazo de SLA.
 - **Arquivos/módulos esperados:** Módulos de serviços e solicitações, área administrativa, testes.
 - **Dependências:** SF-082.

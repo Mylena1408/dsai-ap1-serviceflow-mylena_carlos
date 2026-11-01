@@ -5,9 +5,11 @@ import { PRIORITY_LABELS, PRIORITY_VALUES, type PriorityValue } from "@/app/_com
 export function ServiceSlaFields({
   defaultPriority,
   slaHours,
+  requiresApproval,
 }: {
   defaultPriority: PriorityValue;
   slaHours: number | null;
+  requiresApproval: boolean;
 }) {
   return (
     <>
@@ -33,6 +35,12 @@ export function ServiceSlaFields({
           step={1}
           type="number"
         />
+      </label>
+      {/* SPEC 2026-11-01-aprovacoes, 5.2: the marker tells the server the form has the checkbox. */}
+      <input name="requiresApprovalField" type="hidden" value="1" />
+      <label className="checkbox-field">
+        <input defaultChecked={requiresApproval} name="requiresApproval" type="checkbox" />
+        Exige aprovação do gestor
       </label>
     </>
   );

@@ -46,6 +46,8 @@ function slaFields(formData: FormData) {
   return {
     ...(formData.has("defaultPriority") ? { defaultPriority: field(formData, "defaultPriority") } : {}),
     ...(formData.has("slaHours") ? { slaHours: field(formData, "slaHours") } : {}),
+    // A checkbox is absent when unchecked; the marker says the form has it (SPEC de aprovações, 5.2).
+    ...(formData.has("requiresApprovalField") ? { requiresApproval: formData.get("requiresApproval") === "on" } : {}),
   };
 }
 

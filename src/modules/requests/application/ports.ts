@@ -4,6 +4,7 @@ import type { AnswerableField, FieldAnswer } from "@/modules/service-fields";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { RequestFieldAnswer } from "../domain/field-answer";
+import type { ApprovalState } from "../domain/approval";
 import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
 import type { SearchCriteria } from "../domain/search-criteria";
 import type { RequestPriority, RequestStatus, RequestWithHistory } from "../domain/request";
@@ -49,6 +50,8 @@ export interface ServiceForRequest {
   /** SPEC 2026-11-01 (SLA): applied to the request on opening. */
   defaultPriority: RequestPriority;
   slaHours: number | null;
+  /** SPEC 2026-11-01 (aprovações): copied to the request on opening. */
+  requiresApproval: boolean;
   category: { id: string; name: string; isActive: boolean };
   sector: { id: string; name: string; isActive: boolean };
 }
@@ -218,6 +221,7 @@ export interface RequestTransaction {
       priority: RequestPriority;
       slaHoursSnapshot: number | null;
       dueAt: Date | null;
+      approvalState: ApprovalState | null;
     },
   ): Promise<{ id: string }>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;

@@ -10,6 +10,8 @@ export const serviceInputSchema = z
     // Optional so forms and callers without these fields keep the current values.
     defaultPriority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
     slaHours: z.union([z.string(), z.number(), z.null()]).optional(),
+    // SPEC 2026-11-01-aprovacoes, 5.2; optional for the same reason.
+    requiresApproval: z.boolean().optional(),
   })
   .strict();
 

@@ -75,6 +75,7 @@ export function activeService(overrides: Partial<ServiceForRequest> = {}): Servi
     isActive: true,
     defaultPriority: "NORMAL",
     slaHours: null,
+    requiresApproval: false,
     category: { id: "category-1", name: "Category", isActive: true },
     sector: { id: "sector-1", name: "Sector", isActive: true },
     ...overrides,
@@ -105,6 +106,7 @@ export function storedRequest(overrides: Partial<RequestRecord> = {}): RequestRe
     completedLate: null,
     stageNamesSnapshot: [],
     stageIndex: null,
+    approvalState: null,
     ...overrides,
   };
 }
@@ -314,6 +316,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
             serviceId: request.serviceId,
             stageNamesSnapshot: request.stageNamesSnapshot,
             stageIndex: request.stageIndex,
+            approvalState: request.approvalState,
             assignee: lifecycleUser(store, request.assigneeId),
           }
         : null;

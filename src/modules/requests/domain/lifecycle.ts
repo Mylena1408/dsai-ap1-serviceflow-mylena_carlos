@@ -31,6 +31,8 @@ export interface LifecycleRequest {
   serviceId?: string;
   stageNamesSnapshot?: string[];
   stageIndex?: number | null;
+  /** Approval situation (SPEC 2026-11-01-aprovacoes); optional like the SLA state. */
+  approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
 }
 
 // Section 5.6. Start and completion keep their own rule in status-transition.ts.

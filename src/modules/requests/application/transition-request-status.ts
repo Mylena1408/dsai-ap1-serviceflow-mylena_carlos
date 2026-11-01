@@ -6,6 +6,7 @@ import type { RequestWithHistory } from "../domain/request";
 import { assertCanChangeStatusWithAssignee } from "../domain/lifecycle";
 import { completedLateAt } from "../domain/sla";
 import { assertCanCompleteAtStage, stageCopyOnStart } from "../domain/stages";
+import { assertCanStartWithApproval } from "../domain/approval";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
 
@@ -49,6 +50,10 @@ export async function transitionRequestStatus(
     // stage (5.3.3); starting copies the active stages and enters the first one (5.2.2).
     if (parsed.toStatus === "COMPLETED") {
       assertCanCompleteAtStage(stageState);
+    }
+    // SPEC 2026-11-01-aprovacoes, 5.3.2: nobody starts while the approval is pending.
+    if (parsed.toStatus === "IN_PROGRESS") {
+      assertCanStartWithApproval(currentRequest.approvalState ?? null);
     }
     const stageCopy =
       parsed.toStatus === "IN_PROGRESS" && currentRequest.serviceId

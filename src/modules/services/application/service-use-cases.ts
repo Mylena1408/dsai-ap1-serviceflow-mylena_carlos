@@ -9,11 +9,12 @@ import { parseSlaHours } from "../domain/sla-config";
 import type { ServiceRepository, ServiceTransactionRunner } from "./ports";
 
 function serviceData(parsed: ServiceInput): ServiceData {
-  const { defaultPriority, slaHours, ...base } = parsed;
+  const { defaultPriority, slaHours, requiresApproval, ...base } = parsed;
   return {
     ...base,
     ...(defaultPriority !== undefined ? { defaultPriority } : {}),
     ...(slaHours !== undefined ? { slaHours: parseSlaHours(slaHours) } : {}),
+    ...(requiresApproval !== undefined ? { requiresApproval } : {}),
   };
 }
 

@@ -71,6 +71,17 @@ function announcement(error?: string, notice?: string, entity?: string): string 
   return null;
 }
 
+// SPEC 2026-11-01-aprovacoes, 9: how many active managers each sector has.
+function activeManagersBySector(users: Array<{ role: string; isActive: boolean; sectorId: string | null }>) {
+  const counts = new Map<string, number>();
+  for (const user of users) {
+    if (user.role === "MANAGER" && user.isActive && user.sectorId) {
+      counts.set(user.sectorId, (counts.get(user.sectorId) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   try {
     await requireConfigurationAdministrator();
@@ -162,6 +173,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           documentRequirements={documentRequirements}
           serviceFields={serviceFields}
           serviceStages={serviceStages}
+          activeManagersBySector={activeManagersBySector(users)}
           section={selectedSection}
           sectors={sectors}
           services={services}

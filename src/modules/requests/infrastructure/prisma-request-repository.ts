@@ -341,6 +341,7 @@ function createPrismaRequestTransaction(
           serviceId: true,
           stageNamesSnapshot: true,
           stageIndex: true,
+          approvalState: true,
           assignee: { select: lifecycleUser },
         },
       });

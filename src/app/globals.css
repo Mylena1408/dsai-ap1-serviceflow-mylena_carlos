@@ -1360,3 +1360,14 @@ p {
   border-color: var(--brand);
   font-weight: 700;
 }
+
+/* Checkbox next to its text in administrative forms (SPEC 2026-11-01-aprovacoes, 5.2). */
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-field input {
+  width: auto;
+}

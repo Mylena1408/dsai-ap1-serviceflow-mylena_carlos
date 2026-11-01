@@ -41,6 +41,8 @@ type ServicesSectionProps = {
   documentRequirements: DocumentRequirementRecord[];
   serviceFields: ServiceFieldRecord[];
   serviceStages: ServiceStageRecord[];
+  /** Active managers per sector id, to warn about services nobody can approve (SPEC de aprovações, 9). */
+  activeManagersBySector: ReadonlyMap<string, number>;
 };
 
 export function ServicesSection({
@@ -51,6 +53,7 @@ export function ServicesSection({
   documentRequirements,
   serviceFields,
   serviceStages,
+  activeManagersBySector,
 }: ServicesSectionProps) {
   return (
     <section className="admin-section" aria-labelledby="services-heading">
@@ -82,7 +85,7 @@ export function ServicesSection({
               ))}
             </select>
           </label>
-          <ServiceSlaFields defaultPriority="NORMAL" slaHours={null} />
+          <ServiceSlaFields defaultPriority="NORMAL" requiresApproval={false} slaHours={null} />
         </AdminCreateForm>
         <ul className="entity-list">
           {services.map((service) => (
@@ -98,6 +101,7 @@ export function ServicesSection({
                 isActive: service.isActive,
                 defaultPriority: service.defaultPriority,
                 slaHours: service.slaHours,
+                requiresApproval: service.requiresApproval,
               }}
               categories={categories}
               sectors={sectors}
@@ -105,6 +109,13 @@ export function ServicesSection({
               toggleAction={toggleServiceAction}
               updateAction={updateServiceAction}
             >
+              {service.requiresApproval ? (
+                <p className={(activeManagersBySector.get(service.sectorId) ?? 0) === 0 ? "feedback feedback-error" : "section-description"}>
+                  {(activeManagersBySector.get(service.sectorId) ?? 0) === 0
+                    ? "Nenhum gestor ativo no setor deste serviço: as solicitações ficarão aguardando aprovação."
+                    : `Gestores ativos no setor: ${activeManagersBySector.get(service.sectorId)}.`}
+                </p>
+              ) : null}
               <DocumentRequirementsEditor
                 createAction={createDocumentRequirementAction}
                 deactivateAction={deactivateDocumentRequirementAction}

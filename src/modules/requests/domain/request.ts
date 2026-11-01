@@ -27,6 +27,8 @@ export interface RequestRecord {
   /** SPEC 2026-11-01-fluxos-configuraveis: flow copy taken at the start and current stage. */
   stageNamesSnapshot: string[];
   stageIndex: number | null;
+  /** SPEC 2026-11-01-aprovacoes: null when the service did not require approval. */
+  approvalState: "PENDING" | "APPROVED" | "REJECTED" | null;
 }
 
 export interface RequestStatusEventRecord {
