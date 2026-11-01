@@ -4,7 +4,9 @@ import {
   type PersistenceErrorPolicy,
 } from "@/server/db/serializable-transaction";
 import type { RequestWithHistory } from "../domain/request";
+import { escapeLikePattern, pageWindow, type SearchCriteria } from "../domain/search-criteria";
 import type {
+  RequestSearchScope,
   RequestQueryRepository,
   RequestTransaction,
   RequestTransactionRunner,
@@ -43,6 +45,69 @@ type RequestWithHistoryRow = Prisma.RequestGetPayload<{
 }>;
 const toDomain = (row: RequestWithHistoryRow): RequestWithHistory => row;
 
+/**
+ * Prisma filter for one reader's list (SPEC 2026-10-31-busca-filtros-paginacao, section 5).
+ * The scope always comes from the session.
+ */
+function searchWhere(
+  scope: RequestSearchScope,
+  criteria: SearchCriteria,
+  viewerId: string,
+): Prisma.RequestWhereInput {
+  const and: Prisma.RequestWhereInput[] = [scope];
+
+  if (criteria.statuses.length > 0) {
+    and.push({ status: { in: criteria.statuses } });
+  }
+
+  if (criteria.openedFrom || criteria.openedBefore) {
+    and.push({
+      createdAt: {
+        ...(criteria.openedFrom ? { gte: criteria.openedFrom } : {}),
+        ...(criteria.openedBefore ? { lt: criteria.openedBefore } : {}),
+      },
+    });
+  }
+
+  if (criteria.term) {
+    // Prisma passes `contains` to ILIKE without escaping % and _ (checked in
+    // request-search.test.ts), so the term is escaped here.
+    const pattern = escapeLikePattern(criteria.term);
+    and.push({
+      OR: [
+        { description: { contains: pattern, mode: "insensitive" } },
+        { serviceNameSnapshot: { contains: pattern, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if ("sectorId" in scope && criteria.assignee === "mine") {
+    // The viewer is an active attendant of this sector, so holding it is effective.
+    and.push({ assigneeId: viewerId });
+  }
+
+  if ("sectorId" in scope && criteria.assignee === "unassigned") {
+    // Effective assignee only (SPEC de atribuição, 5.1): a holder who left counts as none.
+    and.push({
+      OR: [
+        { assigneeId: null },
+        {
+          assignee: {
+            OR: [
+              { isActive: false },
+              { role: { not: "ATTENDANT" } },
+              { sectorId: null },
+              { sectorId: { not: scope.sectorId } },
+            ],
+          },
+        },
+      ],
+    });
+  }
+
+  return { AND: and };
+}
+
 export function createPrismaRequestQueryRepository(
   database: PrismaClient,
 ): RequestQueryRepository {
@@ -76,6 +141,21 @@ export function createPrismaRequestQueryRepository(
         include: requestWithHistory,
       });
       return row && toDomain(row);
+    },
+    async search(scope, criteria, viewerId) {
+      const where = searchWhere(scope, criteria, viewerId);
+      const total = await database.request.count({ where });
+      const window = pageWindow(total, criteria.page);
+      const direction = criteria.order === "newest" ? "desc" : "asc";
+      const rows = await database.request.findMany({
+        where,
+        include: requestWithHistory,
+        orderBy: [{ createdAt: direction }, { id: direction }],
+        skip: window.skip,
+        take: window.take,
+      });
+
+      return { items: rows.map(toDomain), total, page: window.page, pageCount: window.pageCount };
     },
     listSectorAttendants(sectorId) {
       return database.user.findMany({

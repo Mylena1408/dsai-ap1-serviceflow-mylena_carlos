@@ -3,7 +3,8 @@ import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
 import type { RequestWithHistory } from "../domain/request";
-import type { RequestQueryRepository } from "./ports";
+import { parseSearchCriteria, type RawSearchParams, type SearchCriteria } from "../domain/search-criteria";
+import type { RequestQueryRepository, RequestSearchPage } from "./ports";
 
 export async function listRequesterRequests(
   repository: RequestQueryRepository,
@@ -73,4 +74,41 @@ export async function listTransferCandidates(
   const attendants = await repository.listSectorAttendants(request.sectorId);
 
   return attendants.filter(({ id }) => id !== actor.id);
+}
+
+export interface RequestSearchResult extends RequestSearchPage {
+  criteria: SearchCriteria;
+}
+
+function asRawParams(raw: unknown): RawSearchParams {
+  return raw !== null && typeof raw === "object" ? (raw as RawSearchParams) : {};
+}
+
+/** "Minhas solicitações" with search, filters and pages; only the requester's own requests. */
+export async function searchRequesterRequests(
+  rawParams: unknown,
+  repository: RequestQueryRepository,
+): Promise<RequestSearchResult> {
+  const actor = assertRole(await requireCurrentActor(), "REQUESTER");
+  const criteria = parseSearchCriteria(asRawParams(rawParams), "requester");
+  const page = await repository.search({ requesterId: actor.id }, criteria, actor.id);
+
+  return { ...page, criteria };
+}
+
+/** "Fila do meu setor" with search, filters and pages; only the attendant's current sector. */
+export async function searchAttendantQueue(
+  rawParams: unknown,
+  repository: RequestQueryRepository,
+): Promise<RequestSearchResult> {
+  const actor = assertRole(await requireCurrentActor(), "ATTENDANT");
+
+  if (!actor.sectorId) {
+    throw new NotFoundError();
+  }
+
+  const criteria = parseSearchCriteria(asRawParams(rawParams), "attendant");
+  const page = await repository.search({ sectorId: actor.sectorId }, criteria, actor.id);
+
+  return { ...page, criteria };
 }

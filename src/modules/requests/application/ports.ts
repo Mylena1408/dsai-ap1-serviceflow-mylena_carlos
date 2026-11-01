@@ -2,6 +2,7 @@ import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
+import type { SearchCriteria } from "../domain/search-criteria";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
 
@@ -14,6 +15,20 @@ export interface RequestQueryRepository {
   findInSector(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
   /** Active attendants of a sector, by name, for the transfer form. */
   listSectorAttendants(sectorId: string): Promise<Array<{ id: string; name: string }>>;
+  /**
+   * One page of the reader's list (SPEC 2026-10-31-busca-filtros-paginacao). `scope` is
+   * built from the session; `viewerId` resolves the "mine" assignee filter.
+   */
+  search(scope: RequestSearchScope, criteria: SearchCriteria, viewerId: string): Promise<RequestSearchPage>;
+}
+
+export type RequestSearchScope = { requesterId: string } | { sectorId: string };
+
+export interface RequestSearchPage {
+  items: RequestWithHistory[];
+  total: number;
+  page: number;
+  pageCount: number;
 }
 
 export interface TransactionActor {

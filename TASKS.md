@@ -615,7 +615,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-058 — Consultas paginadas e casos de uso
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Casos de uso `searchRequesterRequests` e `searchAttendantQueue` (`request-queries.ts`) e consulta Prisma paginada (`search` no repositório), exportados em `@/modules/requests`. CA-BUS-01, 02, 05, 07 e 08 verificados; CA-BUS-04 e 06 confirmados na consulta. As telas ainda usam as listas antigas (SF-059).
 - **Objetivo:** `searchRequesterRequests` e `searchAttendantQueue`; consulta Prisma com filtro, ordem estável, `skip`/`take` e `count`.
 - **Arquivos/módulos esperados:** `src/modules/requests/{application,infrastructure}`, `index.ts`, testes.
 - **Dependências:** SF-057.

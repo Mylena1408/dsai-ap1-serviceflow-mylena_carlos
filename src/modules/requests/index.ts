@@ -18,6 +18,13 @@ import {
 export { buildAttachmentContentDisposition } from "./domain/attachment";
 export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 export { effectiveAssigneeId, REOPEN_WINDOW_MS } from "./domain/lifecycle";
+export {
+  MAX_SEARCH_TERM,
+  MIN_SEARCH_TERM,
+  SEARCH_PAGE_SIZE,
+} from "./domain/search-criteria";
+export type { AssigneeFilter, SearchCriteria, SearchOrder } from "./domain/search-criteria";
+export type { RequestSearchResult } from "./application/request-queries";
 export { buildRequestSnapshot } from "./domain/snapshot";
 export { assertRequestStatusTransition } from "./domain/status-transition";
 export type {
@@ -142,4 +149,18 @@ export async function cancelRequest(input: unknown, database: PrismaClient = pri
 
 export async function reopenRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return lifecycleActions.reopenRequest(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
+export async function searchRequesterRequests(
+  rawParams: unknown,
+  database: PrismaClient = prisma,
+): Promise<queries.RequestSearchResult> {
+  return queries.searchRequesterRequests(rawParams, createPrismaRequestQueryRepository(database));
+}
+
+export async function searchAttendantQueue(
+  rawParams: unknown,
+  database: PrismaClient = prisma,
+): Promise<queries.RequestSearchResult> {
+  return queries.searchAttendantQueue(rawParams, createPrismaRequestQueryRepository(database));
 }

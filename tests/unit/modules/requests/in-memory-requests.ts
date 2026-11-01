@@ -142,6 +142,13 @@ export function createInMemoryQueryRepository(store: InMemoryRequestStore): Requ
     async findInSector(requestId, sectorId) {
       return find(({ id, sectorId: owner }) => id === requestId && owner === sectorId)[0] ?? null;
     },
+    async search(scope, criteria) {
+      // Scope and paging only; filters are covered by the PostgreSQL integration tests.
+      const all = find((request) =>
+        "requesterId" in scope ? request.requesterId === scope.requesterId : request.sectorId === scope.sectorId,
+      );
+      return { items: all.slice(0, 20), total: all.length, page: criteria.page, pageCount: 1 };
+    },
     async listSectorAttendants(sectorId) {
       return store.actors
         .filter((actor) => actor.sectorId === sectorId && actor.role === "ATTENDANT" && actor.isActive)

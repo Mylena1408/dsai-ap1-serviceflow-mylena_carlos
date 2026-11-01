@@ -757,3 +757,19 @@ Padrão a replicar nas SF-039 e SF-040:
 - **`escapeLikePattern`:** escapa `\`, `%` e `_`. A SF-058 vai confirmar no PostgreSQL se o filtro `contains` do Prisma já escapa esses caracteres antes de decidir onde usar a função, para não escapar duas vezes.
 - **Migration `20261031220000_request_list_indexes`:** `Request(requesterId, createdAt, id)` e `Request(sectorId, createdAt, id)`. Os índices antigos permanecem.
 - **Resultados:** lint, typecheck e build OK; unitários 339/339 (56 arquivos); integração 150/150 + 1 pulado (33 arquivos); E2E 6/6.
+
+## SF-058 — Consultas paginadas (2026-10-31)
+
+- **Casos de uso:** `searchRequesterRequests(raw)` e `searchAttendantQueue(raw)`. Conferem o perfil na sessão, interpretam os parâmetros (`parseSearchCriteria`) e chamam `repository.search(scope, criteria, viewerId)`. O escopo (`requesterId` ou `sectorId`) vem **só** da sessão; parâmetros forjados na URL são ignorados. Atendente sem setor recebe "não encontrado". O resultado traz `items`, `total`, `page`, `pageCount` e os `criteria` aplicados.
+- **Consulta (`searchWhere`):**
+  - filtro por escopo, status, período `[início, fim)` e termo (descrição ou nome do serviço, `mode: insensitive`);
+  - "Atribuídas a mim" usa `assigneeId = leitor`: o leitor é atendente ativo do setor, então o vínculo é efetivo;
+  - "Sem responsável" usa `assigneeId` nulo **ou** responsável inativo, de outro perfil, sem setor ou de outro setor.
+  - `count` com o mesmo filtro, depois `pageWindow` e `findMany` com `skip` e `take`, ordenado por `createdAt` e `id` na mesma direção.
+- **Achado sobre o Prisma:** o `contains` do Prisma passa o valor ao `ILIKE` **sem** escapar `%` e `_`. O teste mostrou que "0% pronto" encontrava "Código 1000 pronto". O termo passou a ser escapado com `escapeLikePattern` (SF-057), e o teste agora confirma que só o texto literal é encontrado.
+- **Erros meus nos testes, corrigidos:**
+  - duas verificações dependiam da ordem entre solicitações com o mesmo horário, que é decidida pelo identificador aleatório. Uma delas falhava de forma intermitente;
+  - o ajudante do teste criava solicitação cancelada sem `cancelledAt`, e o `CHECK` da SF-047 recusou. Status e data passaram a ser gravados juntos.
+  - Depois das correções, o arquivo passou 3 vezes seguidas.
+- **Testes:** 3 unitários (escopo da sessão, perfis, critérios inválidos antes da consulta) e 5 de integração. O dublê em memória ganhou um `search` simples, só com escopo e página; os filtros são verificados no PostgreSQL.
+- **Resultados:** lint, typecheck e build OK; unitários 342/342 (57 arquivos); integração 155/155 + 1 pulado (34 arquivos); E2E 6/6.

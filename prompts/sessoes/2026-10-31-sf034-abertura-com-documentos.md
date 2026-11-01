@@ -119,3 +119,9 @@ SPEC escrita como proposta e aprovada (B1 a B4); tarefas SF-057 a SF-060 registr
 > pode começar pela SF-057
 
 SF-057 concluída (ver `NOTES.md`, seção SF-057).
+
+## Continuação — SF-058
+
+> pode seguir para a SF-058
+
+SF-058 concluída (ver `NOTES.md`, seção SF-058).
