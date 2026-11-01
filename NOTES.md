@@ -823,7 +823,7 @@ Padrão a replicar nas SF-039 e SF-040:
   - a lista do solicitante mostra busca e "Página 1 de 1 — 3 solicitações", sem o filtro de responsável.
   - Nenhum formulário que grava foi enviado.
 
-## SF-061 — Outbox e gravação de eventos (2026-11-01)
+## SF-061 — Outbox e gravação de eventos (2026-10-31)
 
 - **Migration `20261101000000_outbox_and_notifications`:**
   - `OutboxEvent`, com `CHECK` dos 4 tipos, `payload` sempre objeto e `lastErrorCode` de até 64 caracteres;
@@ -838,3 +838,4 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes:** 2 unitários e 3 de integração. Um deles cobre o percurso completo (7 eventos na ordem certa e sem texto). Outro força a falha da gravação do evento com um gatilho e confirma que nenhuma solicitação, comentário ou atribuição fica gravado pela metade. O terceiro confere o `CHECK` de tipo. Os dublês ganharam `recordEvent`, e a limpeza de `fixtures.ts` e `prepare-e2e.ts` passou a incluir as tabelas novas.
 - **Resultados:** lint, typecheck e build OK; unitários 348/348 (59 arquivos); integração 158/158 + 1 pulado (35 arquivos); E2E 7/7.
 - **Banco Neon:** precisa desta migration antes da próxima publicação.
+- **Correção de data:** a SF-061 foi concluída em 31/10 às 22:54 (horário dos commits). A migration recebeu o prefixo `20261101000000` por engano; o nome foi mantido porque ela já está aplicada nos bancos de teste e de desenvolvimento, e o prefixo só ordena as migrations.

@@ -98,7 +98,7 @@ O `payload` guarda **só identificadores e códigos**: nunca texto de comentári
 ## 9. Dados (migration somente aditiva)
 
 - `OutboxEvent`: `id`, `type`, `requestId`, `payload` (JSON), `occurredAt`, `availableAt`, `attempts`, `processedAt`, `failedAt`, `lastErrorCode`. Índice em `(processedAt, failedAt, availableAt)`.
-- `RequestNotification`: `id`, `recipientId`, `requestId`, `eventId` (opcional, `ON DELETE SET NULL`), `type`, `createdAt`, `readAt`. Única em `(eventId, recipientId)`; índice em `(recipientId, readAt, createdAt)`. *Alterado em 2026-11-01 na implementação (SF-061): o nome era `Notification`; e `eventId` passou a aceitar nulo para que a limpeza de eventos processados (seção 7) não seja bloqueada por notificações não lidas.*
+- `RequestNotification`: `id`, `recipientId`, `requestId`, `eventId` (opcional, `ON DELETE SET NULL`), `type`, `createdAt`, `readAt`. Única em `(eventId, recipientId)`; índice em `(recipientId, readAt, createdAt)`. *Alterado em 2026-10-31 na implementação (SF-061): o nome era `Notification`; e `eventId` passou a aceitar nulo para que a limpeza de eventos processados (seção 7) não seja bloqueada por notificações não lidas.*
 - Nenhuma tabela existente é alterada.
 
 ## 10. Arquitetura
@@ -110,15 +110,15 @@ O `payload` guarda **só identificadores e códigos**: nunca texto de comentári
 
 ## 11. Critérios de aceitação
 
-- [x] **CA-EVT-01** — Cada ação da seção 6.1 grava exatamente um evento na mesma transação; se a transação falha, nenhum evento fica gravado. *Verificado em 2026-11-01 (SF-061): `outbox-events.test.ts` (um evento por ação; com a gravação do evento falhando por gatilho, a ação inteira é desfeita).*
-- [x] **CA-EVT-02** — O `payload` não contém texto de comentário, justificativa, nome de arquivo nem dado pessoal. *Verificado em 2026-11-01 (SF-061): `outboxPayload` copia só as chaves declaradas (unitário) e o conteúdo gravado não contém texto de comentário, justificativa nem descrição (integração).*
+- [x] **CA-EVT-01** — Cada ação da seção 6.1 grava exatamente um evento na mesma transação; se a transação falha, nenhum evento fica gravado. *Verificado em 2026-10-31 (SF-061): `outbox-events.test.ts` (um evento por ação; com a gravação do evento falhando por gatilho, a ação inteira é desfeita).*
+- [x] **CA-EVT-02** — O `payload` não contém texto de comentário, justificativa, nome de arquivo nem dado pessoal. *Verificado em 2026-10-31 (SF-061): `outboxPayload` copia só as chaves declaradas (unitário) e o conteúdo gravado não contém texto de comentário, justificativa nem descrição (integração).*
 - [ ] **CA-EVT-03** — Dois processadores simultâneos não processam o mesmo evento; um evento reprocessado não gera notificação duplicada.
 - [ ] **CA-EVT-04** — Falha de consumidor agenda nova tentativa com espera crescente e registra só o código; após 10 tentativas o evento é marcado como falho.
 - [ ] **CA-EVT-05** — A rota de cron recusa requisição sem o segredo correto (401) e, com ele, processa pendentes e faz as limpezas da seção 7.
 - [ ] **CA-EVT-06** — Os destinatários seguem a tabela 8.1; o autor não é notificado; usuário inativo não recebe; o solicitante nunca recebe notificação de nota interna.
 - [ ] **CA-EVT-07** — O contador e a página mostram só as notificações do próprio usuário; "marcar todas como lidas" e abrir pelo link marcam como lidas.
 - [ ] **CA-EVT-08** — Logo após uma ação (sem esperar o cron), o destinatário vê a notificação.
-- [x] **CA-EVT-09** — Migration aditiva; suítes anteriores passam sem alteração de asserções. *Verificado em 2026-11-01 (SF-061): migration aditiva aplicada no banco de teste; suítes anteriores sem alteração de asserções.*
+- [x] **CA-EVT-09** — Migration aditiva; suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-061): migration aditiva aplicada no banco de teste; suítes anteriores sem alteração de asserções.*
 
 ## 12. Estratégia de testes
 

@@ -264,3 +264,93 @@ Legenda: [OK] commitado e enviado ao GitHub   [LOCAL] so commitado
   (passo 3); eventos/outbox e jobs (passo 1) - cada um com SPEC antes.
 
 ===============================================================================
+
+===============================================================================
+ RELATORIO DO DIA 31/10/2026 (ate o commit 5d14afa, 22:54)
+===============================================================================
+
+-------------------------------------------------------------------------------
+ R1. LINHAS DE CODIGO (cloc --diff via sh scripts/cloc-diff.sh; TS/JS em
+     src, tests e scripts)
+-------------------------------------------------------------------------------
+
+ Medida                                   | src   | tests  | scripts | TOTAL
+ -----------------------------------------+-------+--------+---------+--------
+ Adicionadas HOJE (17650f0 -> 5d14afa)    | 2.340 | 4.072  |   145   |  6.557
+   removidas hoje                         |    63 |     4  |     0   |     67
+   saldo liquido hoje                     |       |        |         |  6.490
+ Adicionadas desde a linha de base        | 5.925 | 5.697  |   489   | 12.111
+ (sem as linhas iniciais do sistema;      |       |        |         |
+  tag baseline-ap2 -> 5d14afa)            |       |        |         |
+   removidas desde a linha de base        | 2.554 |     9  |     0   |  2.563
+   saldo liquido desde a linha de base    |       |        |         |  9.548
+ Codigo executavel total no repositorio   | 8.173 | 11.482 |   636   | 20.291
+ (inclui as linhas iniciais)              |       |        |         |
+
+ Meta: 100.000 linhas adicionadas -> 12.111 = 12,1% (faltam 87.889).
+ Linhas iniciais do sistema na linha de base: 10.852 (SPEC/2026-10-29-
+ plano-escala-100k.md, secao 2); elas NAO contam para a meta.
+
+-------------------------------------------------------------------------------
+ R2. O QUE FOI IMPLEMENTADO HOJE (32 commits, todos enviados ao GitHub)
+-------------------------------------------------------------------------------
+
+ Funcionalidade / entrega              | Tarefas          | Criterios          | Situacao
+ --------------------------------------+------------------+--------------------+--------------
+ Documentos exigidos por servico       | SF-034 a SF-036  | CA-DOC 21 de 22    | Concluida (*)
+ Preparacao do armazenamento (Supabase)| SF-030           | -                  | Pendente (**)
+ Publicacao na Vercel + banco Neon     | -                | -                  | No ar
+ Atribuicao, cancelamento, reabertura  | SF-047 a SF-052  | CA-ATR 14 de 14    | Concluida
+ Relatorio da fase 1                   | -                | -                  | Concluido
+ Comentarios e notas internas          | SF-053 a SF-056  | CA-COM 9 de 9      | Concluida
+ Busca, filtros e paginacao            | SF-057 a SF-060  | CA-BUS 10 de 10    | Concluida
+ Eventos/outbox/jobs (passo 1)         | SF-061 de 4      | CA-EVT 3 de 9      | Em andamento
+
+ (*)  CA-DOC-21 parcial: bucket real depende da SF-030.
+ (**) Comando npm run storage:provision pronto; faltam credenciais do
+      Supabase (conta da responsavel).
+
+ SPECs escritas e aprovadas hoje: atribuicao (D1-D5), comentarios (C1-C3),
+ busca (B1-B4), eventos/outbox/jobs (E1-E4).
+
+-------------------------------------------------------------------------------
+ R3. TESTES (validacao final, commit 5d14afa)
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia | Agora
+ ---------------+---------------+------------------------------------------
+ Unitarios      |      226      | 348/348
+ Integracao     |      106      | 158/158 + 1 pulado (bucket real)
+ E2E            |        3      | 7/7
+ Lint/typecheck/build | OK      | OK
+
+-------------------------------------------------------------------------------
+ R4. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+ #  | Passo                                            | Quem        | Depende de
+ ---+--------------------------------------------------+-------------+-------------
+ 1  | SF-062: processador de eventos, after() e cron   | Agente      | SF-061 (ok)
+    | diario com limpezas                              |             |
+ 2  | SF-063: notificacoes na aplicacao                | Agente      | SF-062
+ 3  | SF-064: E2E e revisao dos eventos                | Agente      | SF-063
+ 4  | Cadastrar CRON_SECRET na Vercel (Secret)         | Responsavel | SF-062
+ 5  | Aplicar a migration 20261101000000 no Neon e     | Responsavel | SF-064
+    | publicar a versao com notificacoes               | / Agente    |
+ 6  | SPEC de SLA e prioridades (usa os eventos/jobs)  | Agente +    | SF-064
+    |                                                  | aprovacao   |
+ 7  | SF-030: chave sb_secret_ e storage:provision     | Responsavel | conta Supabase
+ 8  | Restante do plano: campos personalizados ->      | Agente +    | SPEC de cada
+    | fluxos -> aprovacoes -> permissoes -> auditoria  | aprovacao   | item
+    | -> relatorios -> API -> MCP -> multi-organizacao |             |
+
+ Avisos:
+ - Site publicado (https://serviceflow-sand.vercel.app) esta na versao de
+   comentarios e busca; o Neon ainda NAO tem a migration dos eventos
+   (20261101000000). Aplicar antes de publicar a SF-061 em diante.
+ - O prefixo 20261101000000 da migration foi um engano de data (o trabalho
+   e de 31/10); mantido porque ja esta aplicada nos bancos locais.
+ - demo-data.spec.ts espera as solicitacoes ficticias na 1a pagina do
+   solicitante; revisar se outros E2E criarem mais de 20 para ele.
+
+===============================================================================
