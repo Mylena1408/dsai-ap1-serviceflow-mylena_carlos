@@ -271,3 +271,9 @@ SF-073 concluída (ver `NOTES.md`, seção SF-073).
 > siga para a sf-074
 
 SF-074 concluída (ver `NOTES.md`, seção SF-074).
+
+## Continuação — SF-075
+
+> siga para a sf-075
+
+SF-075 concluída; SPEC de campos personalizados encerrada (ver `NOTES.md`, seção SF-075).

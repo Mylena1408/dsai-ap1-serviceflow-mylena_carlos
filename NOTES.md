@@ -1068,3 +1068,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Banco fictício:** `DEMO_SERVICE_FIELDS` configura cinco campos (um de cada tipo, menos texto longo) em "Manutenção de ar-condicionado", escolhido porque nenhum E2E abre esse serviço. Como os documentos de exemplo, só cria quando o serviço ainda não tem campos. O resumo devolvido por `seedDemoData` não ganhou chave nova, porque o teste existente o compara com `toEqual` exato; a contagem é conferida no teste novo.
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit) abriu o serviço de exemplo preenchendo os campos e conferiu o bloco nos detalhes do solicitante e do atendente.
 - **Resultados:** lint, typecheck e build OK; unitários 453/453 (78 arquivos); integração 210/210 + 1 pulado (46 arquivos); E2E 9/9.
+
+## SF-075 — E2E e revisão dos campos personalizados (2026-11-01)
+
+- **E2E (`request-custom-fields.spec.ts`):** o administrador cria um serviço e um campo de cada tipo pelo editor; o solicitante vê os campos na ordem, envia sem o obrigatório e com quantidade fora do limite (com a validação do navegador desligada, para o servidor responder), recebe os dois erros junto dos campos com tudo o que digitou mantido, corrige e abre; os detalhes do solicitante mostram as seis respostas formatadas e o atendente do setor vê as mesmas respostas.
+- **Revisão:** nenhuma dependência nova; nenhum segredo nos arquivos; a migration da SPEC só acrescenta (enum, duas tabelas, índices, função e `CHECK`s); nenhum log novo com dados digitados. Testes existentes alterados só na configuração (`vi.mock` do módulo novo em cinco arquivos e o dublê em memória), sem mudar asserções. README com a seção de campos personalizados.
+- **Pendência para publicar:** aplicar no Neon, antes do próximo deploy, as migrations `20261101100000_sla_and_priorities`, `20261101200000_sla_due_soon_at` e `20261101300000_service_fields`.
+- **Resultados:** lint, typecheck e build OK; unitários 453/453 (78 arquivos); integração 210/210 + 1 pulado (46 arquivos); E2E 10/10.
