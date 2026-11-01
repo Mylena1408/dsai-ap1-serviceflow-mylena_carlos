@@ -9,6 +9,7 @@ import { RequestAttachments } from "@/app/_components/request-attachments";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
+import { RequestSla } from "@/app/_components/request-sla";
 import { RequestTimeline } from "@/app/_components/request-timeline";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { listComments } from "@/modules/comments";
@@ -72,6 +73,7 @@ export default async function RequestPage({
         <p className="eyebrow">Solicitação</p>
         <h1>{request.serviceNameSnapshot}</h1>
         <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+        <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>
         <p>Setor responsável: {request.sectorNameSnapshot}</p>
         <p>

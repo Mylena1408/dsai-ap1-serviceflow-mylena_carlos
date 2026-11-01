@@ -723,7 +723,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-068 — Telas do SLA
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Prioridade, situação e vencimento na fila, nos detalhes do atendente e do solicitante e na lista do solicitante (`request-sla.tsx`); filtro "Situação do prazo" e ordem "Vencimento mais próximo" na fila; coluna `dueSoonAt` mantida por trigger (migration `20261101200000_sla_due_soon_at`). CA-SLA-09 verificado.
 - **Objetivo:** Prioridade e situação na fila, nos detalhes e na lista do solicitante; filtro por situação e ordem por vencimento na fila.
 - **Arquivos/módulos esperados:** Telas de lista e detalhe, critérios de busca, testes.
 - **Dependências:** SF-067.

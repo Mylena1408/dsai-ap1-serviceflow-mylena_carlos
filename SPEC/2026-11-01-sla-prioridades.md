@@ -97,6 +97,8 @@ A situação é **calculada na hora de exibir**, sempre exata. Ela não depende 
 - `RequestStatusEvent` não muda. A mudança de prioridade fica numa nova tabela `RequestPriorityEvent` (`requestId`, `actorId`, `fromPriority`, `toPriority`, `occurredAt`) e aparece no histórico único.
 - `OutboxEvent`: o `CHECK` de tipos passa a aceitar `request.priority_changed`, `request.sla_warning` e `request.sla_breached`.
 - Solicitações existentes ficam com prioridade `NORMAL` e sem prazo.
+- *Atualização registrada em 2026-11-01 (SF-068), também aditiva:* `Request.dueSoonAt` (opcional) guarda o instante em que a solicitação entra em "próximo do vencimento" (vencimento − 20% do prazo efetivo). O filtro da fila precisa dessa conta por linha, que o Prisma não expressa em filtros. Um trigger do banco preenche o campo em toda gravação de vencimento, prioridade ou prazo; a aplicação nunca o escreve. Índice em `(sectorId, dueSoonAt)`.
+- *Regras do filtro (SF-068), iguais às da tela (5.4):* "dentro", "próximo" e "vencido" valem só para solicitações abertas ou em atendimento; "sem prazo" inclui as sem SLA e as canceladas; concluídas com SLA aparecem só sem filtro de situação, com o resultado "no prazo" ou "com atraso". A ordem "vencimento mais próximo" põe as sem prazo no fim, das mais antigas para as mais novas.
 
 ## 7. Critérios de aceitação
 
@@ -108,7 +110,7 @@ A situação é **calculada na hora de exibir**, sempre exata. Ela não depende 
 - [x] **CA-SLA-06** — Só o atendente do setor (o responsável efetivo, se houver) muda a prioridade; a mudança aparece no histórico e gera evento. *Verificado em 2026-11-01 (SF-067): atendente do setor muda a prioridade; colega com responsável definido recebe conflito; outro setor e solicitante não encontram a solicitação; concluída e cancelada recusadas; prioridade igual rejeitada; histórico e evento na outbox (unitário e integração).*
 - [ ] **CA-SLA-07** — O job diário gera no máximo um alerta de cada tipo por solicitação; o responsável recebe e, sem responsável, os atendentes ativos do setor.
 - [x] **CA-SLA-08** — A conclusão registra "no prazo" ou "com atraso"; cancelada não tem resultado. *Verificado em 2026-11-01 (SF-066): "no prazo" exatamente no vencimento, "com atraso" 1 ms depois, sem resultado sem SLA (unitário); conclusão atrasada no banco (integração).*
-- [ ] **CA-SLA-09** — A fila filtra por situação do prazo e ordena por vencimento mais próximo, sem quebrar a busca e a paginação existentes.
+- [x] **CA-SLA-09** — A fila filtra por situação do prazo e ordena por vencimento mais próximo, sem quebrar a busca e a paginação existentes. *Verificado em 2026-11-01 (SF-068): filtro por situação com as mesmas regras da tela, ordem por vencimento com as sem prazo no fim, combinação com busca, status e páginas, parâmetros ignorados ou recusados na lista do solicitante (integração e unitário); suítes de busca anteriores sem alteração de asserções.*
 - [x] **CA-SLA-10** — Migration aditiva; solicitações existentes ficam `NORMAL` e sem prazo. *Verificado em 2026-11-01 (SF-065): migration aplicada sobre dados existentes; serviços e solicitações ficam `NORMAL` e sem prazo (`sla-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes

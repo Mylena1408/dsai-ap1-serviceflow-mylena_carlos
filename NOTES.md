@@ -974,3 +974,17 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Telas:** histórico mostra "Prioridade: X → Y"; o detalhe do atendente tem o formulário (só com status aberta ou em atendimento e sem colega responsável).
 - **Erro meu nos testes:** no teste da ação, criei `ValidationError` com `path` em texto; o construtor espera lista. Corrigido.
 - **Resultados:** lint, typecheck e build OK; unitários 391/391 (69 arquivos); integração 178/178 + 1 pulado (40 arquivos); E2E 8/8.
+
+## SF-068 — Telas do SLA (2026-11-01)
+
+- **Mudança de dados registrada na SPEC (seção 6):** o filtro "próximo do vencimento" depende de `vencimento − 20% do prazo efetivo`, uma conta por linha que o Prisma não expressa em `where`. Alternativas consideradas:
+  - consulta SQL crua para a busca inteira: reescreveria a busca da SF-058;
+  - campo gravado pela aplicação: três caminhos de escrita (abertura, reabertura, prioridade) teriam de lembrar dele;
+  - coluna gerada do PostgreSQL: recusada, porque `timestamptz − interval` não é imutável.
+  - **Escolha:** coluna `dueSoonAt` preenchida por **trigger** (`request_due_soon_at`) em toda gravação de `dueAt`, `priority`, `slaHoursSnapshot` ou da própria coluna. A aplicação nunca a escreve, e as portas e testes existentes não mudaram. Os fatores (3, 6, 12, 24 minutos por hora de prazo) repetem a regra do domínio; o teste de integração compara o trigger com `slaSituation` nas quatro prioridades, na borda exata.
+- **Critérios de busca:** `sla` (`on_time`, `due_soon`, `overdue`, `none`) e a ordem `due` existem só na fila. Na lista do solicitante, `sla` é ignorado (como `assignee`) e `order=due` é recusado. A chave `sla` só aparece nos critérios quando escolhida, para não mudar o formato verificado pelos testes da SF-057.
+- **Hora de referência do filtro:** o repositório usa o relógio da aplicação no momento da consulta, o mesmo usado na tela para calcular a situação.
+- **Telas:** componente `request-sla.tsx` (prioridade, situação em texto e vencimento enquanto o prazo corre), na fila, na lista do solicitante e nos dois detalhes. A cor só reforça o texto.
+- **Ajuste em teste existente:** o dublê de `tests/unit/authorization/index.test.ts` monta a linha completa do Prisma e ganhou `dueSoonAt: null`; nenhuma asserção mudou.
+- **Migration aplicada** no banco de dev; ainda falta aplicar `20261101100000` e `20261101200000` no Neon antes de publicar.
+- **Resultados:** lint, typecheck e build OK; unitários 394/394 (70 arquivos); integração 182/182 + 1 pulado (41 arquivos); E2E 8/8.

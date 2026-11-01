@@ -4,8 +4,14 @@ import {
   type PersistenceErrorPolicy,
 } from "@/server/db/serializable-transaction";
 import { recordOutboxEvent } from "@/modules/events";
-import type { RequestWithHistory } from "../domain/request";
-import { escapeLikePattern, pageWindow, type SearchCriteria } from "../domain/search-criteria";
+import type { RequestStatus, RequestWithHistory } from "../domain/request";
+import {
+  escapeLikePattern,
+  pageWindow,
+  type SearchCriteria,
+  type SearchOrder,
+  type SlaFilter,
+} from "../domain/search-criteria";
 import type {
   RequestSearchScope,
   RequestQueryRepository,
@@ -54,10 +60,41 @@ const toDomain = (row: RequestWithHistoryRow): RequestWithHistory => row;
  * Prisma filter for one reader's list (SPEC 2026-10-31-busca-filtros-paginacao, section 5).
  * The scope always comes from the session.
  */
+const ACTIVE_STATUSES: RequestStatus[] = ["OPEN", "IN_PROGRESS"];
+
+/**
+ * Filter by SLA situation, the same rules as `slaSituation` (SPEC 2026-11-01, section 5.4):
+ * only open or in-progress requests have a running situation; at the due date itself the
+ * request is still "due soon". `dueSoonAt` is kept by a database trigger.
+ */
+function slaWhere(filter: SlaFilter, now: Date): Prisma.RequestWhereInput {
+  switch (filter) {
+    case "on_time":
+      return { status: { in: ACTIVE_STATUSES }, dueSoonAt: { gt: now } };
+    case "due_soon":
+      return { status: { in: ACTIVE_STATUSES }, dueSoonAt: { lte: now }, dueAt: { gte: now } };
+    case "overdue":
+      return { status: { in: ACTIVE_STATUSES }, dueAt: { lt: now } };
+    case "none":
+      return { OR: [{ dueAt: null }, { status: "CANCELLED" }] };
+  }
+}
+
+function searchOrder(order: SearchOrder): Prisma.RequestOrderByWithRelationInput[] {
+  if (order === "due") {
+    // Nearest due date first; requests without SLA at the end, oldest first.
+    return [{ dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }, { id: "asc" }];
+  }
+
+  const direction = order === "newest" ? "desc" : "asc";
+  return [{ createdAt: direction }, { id: direction }];
+}
+
 function searchWhere(
   scope: RequestSearchScope,
   criteria: SearchCriteria,
   viewerId: string,
+  now: Date,
 ): Prisma.RequestWhereInput {
   const and: Prisma.RequestWhereInput[] = [scope];
 
@@ -110,6 +147,10 @@ function searchWhere(
     });
   }
 
+  if ("sectorId" in scope && criteria.sla) {
+    and.push(slaWhere(criteria.sla, now));
+  }
+
   return { AND: and };
 }
 
@@ -148,14 +189,13 @@ export function createPrismaRequestQueryRepository(
       return row && toDomain(row);
     },
     async search(scope, criteria, viewerId) {
-      const where = searchWhere(scope, criteria, viewerId);
+      const where = searchWhere(scope, criteria, viewerId, new Date());
       const total = await database.request.count({ where });
       const window = pageWindow(total, criteria.page);
-      const direction = criteria.order === "newest" ? "desc" : "asc";
       const rows = await database.request.findMany({
         where,
         include: requestWithHistory,
-        orderBy: [{ createdAt: direction }, { id: direction }],
+        orderBy: searchOrder(criteria.order),
         skip: window.skip,
         take: window.take,
       });

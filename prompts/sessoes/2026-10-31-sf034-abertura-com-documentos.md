@@ -211,3 +211,9 @@ SF-066 concluída (ver `NOTES.md`, seção SF-066).
 ## Continuação — SF-067
 
 SF-067 concluída (ver `NOTES.md`, seção SF-067).
+
+## Continuação — SF-068
+
+> siga para a sf-068
+
+SF-068 concluída (ver `NOTES.md`, seção SF-068).

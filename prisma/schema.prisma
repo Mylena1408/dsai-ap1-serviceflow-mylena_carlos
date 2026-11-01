@@ -117,6 +117,8 @@ model Request {
   priority                   RequestPriority @default(NORMAL)
   slaHoursSnapshot           Int?
   dueAt                      DateTime?       @db.Timestamptz
+  /// Start of "próximo do vencimento"; filled by a database trigger, never written by the app.
+  dueSoonAt                  DateTime?       @db.Timestamptz
   slaWarningNotifiedAt       DateTime?       @db.Timestamptz
   slaBreachNotifiedAt        DateTime?       @db.Timestamptz
   completedLate              Boolean?
@@ -139,6 +141,7 @@ model Request {
   @@index([requesterId, createdAt, id])
   @@index([sectorId, createdAt, id])
   @@index([sectorId, dueAt])
+  @@index([sectorId, dueSoonAt])
 }
 
 model RequestStatusEvent {

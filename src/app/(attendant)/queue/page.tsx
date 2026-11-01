@@ -5,6 +5,7 @@ import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
 import { hasSearchCriteria, type SearchParams } from "@/app/_components/request-search-url";
+import { RequestSla } from "@/app/_components/request-sla";
 import { requireAttendantPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
@@ -32,6 +33,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
 
   const requests = result?.items ?? [];
   const commentCounts = await countComments(requests.map(({ id }) => id));
+  const now = new Date();
 
   return (
     <main className="page-shell">
@@ -42,7 +44,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
           <p>Solicitações encaminhadas à equipe que você atende.</p>
         </div>
       </header>
-      <RequestSearchForm basePath="/queue" params={params} showAssignee defaultOrder="oldest" />
+      <RequestSearchForm basePath="/queue" params={params} showAssignee showSla defaultOrder="oldest" />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
           Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.
@@ -63,6 +65,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
                 </Link>
               </h2>
               <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+              <RequestSla request={request} now={now} />
               <p className="metadata">
                 Responsável:{" "}
                 {effectiveAssigneeId(request) === null

@@ -1010,6 +1010,48 @@ p {
   font-style: italic;
 }
 
+/* SLA: priority, situation and due date (SPEC 2026-11-01, section 5.6). The situation
+   is always written as text; the color only reinforces it. */
+.sla-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.priority-pill,
+.sla-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.sla-on-time,
+.sla-completed-on-time {
+  border-color: #bfdccb;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.sla-due-soon {
+  border-color: #ecd29a;
+  background: #fff7e6;
+  color: #7a5200;
+}
+
+.sla-overdue,
+.sla-completed-late {
+  border-color: #efc4c1;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .priority-form {
   display: flex;
   flex-wrap: wrap;

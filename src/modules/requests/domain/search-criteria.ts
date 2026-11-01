@@ -11,11 +11,19 @@ export const SEARCH_TIME_ZONE = "America/Sao_Paulo";
 
 const STATUSES: readonly RequestStatus[] = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
 const ASSIGNEE_FILTERS = ["all", "mine", "unassigned"] as const;
-const ORDERS = ["newest", "oldest"] as const;
+const ORDERS = ["newest", "oldest", "due"] as const;
+/** Orders of each list; "due" (nearest due date first) exists only in the queue (SPEC 2026-11-01, 5.6). */
+const AUDIENCE_ORDERS: Record<SearchAudience, readonly SearchOrder[]> = {
+  requester: ["newest", "oldest"],
+  attendant: ORDERS,
+};
+const SLA_FILTERS = ["on_time", "due_soon", "overdue", "none"] as const;
 
 export type SearchAudience = "requester" | "attendant";
 export type AssigneeFilter = (typeof ASSIGNEE_FILTERS)[number];
 export type SearchOrder = (typeof ORDERS)[number];
+/** Situations of the queue filter (SPEC 2026-11-01-sla-prioridades, sections 5.4 and 5.6). */
+export type SlaFilter = (typeof SLA_FILTERS)[number];
 
 export interface SearchCriteria {
   term: string | null;
@@ -29,6 +37,8 @@ export interface SearchCriteria {
   openedBefore: Date | null;
   order: SearchOrder;
   page: number;
+  /** Queue only, and present only when chosen (SPEC 2026-11-01, section 5.6). */
+  sla?: SlaFilter;
 }
 
 /** Query parameters as Next.js delivers them: absent, one value or repeated. */
@@ -122,7 +132,13 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
   }
 
   const orderRaw = single(raw.order) || (audience === "requester" ? "newest" : "oldest");
-  if (!ORDERS.includes(orderRaw as SearchOrder)) {
+  if (!AUDIENCE_ORDERS[audience].includes(orderRaw as SearchOrder)) {
+    invalid("invalid_value");
+  }
+
+  // The requester list has no SLA filter (section 5.6), so the parameter is ignored there.
+  const slaRaw = audience === "attendant" ? single(raw.sla) || null : null;
+  if (slaRaw !== null && !SLA_FILTERS.includes(slaRaw as SlaFilter)) {
     invalid("invalid_value");
   }
 
@@ -145,6 +161,7 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
     openedBefore,
     order: orderRaw as SearchOrder,
     page: parsePage(single(raw.page)),
+    ...(slaRaw !== null ? { sla: slaRaw as SlaFilter } : {}),
   };
 }
 

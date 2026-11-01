@@ -49,6 +49,7 @@ function persistedRequest(requesterId: string, sectorId: string) {
     priority: "NORMAL" as const,
     slaHoursSnapshot: null,
     dueAt: null,
+    dueSoonAt: null,
     slaWarningNotifiedAt: null,
     slaBreachNotifiedAt: null,
     completedLate: null,

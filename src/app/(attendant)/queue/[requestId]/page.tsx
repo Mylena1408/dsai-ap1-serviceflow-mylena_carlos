@@ -12,6 +12,7 @@ import { requireAttendantPageAccess } from "../../page-access";
 import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
+import { RequestSla } from "@/app/_components/request-sla";
 import { PriorityForm } from "./priority-form";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
@@ -91,6 +92,7 @@ export default async function QueueRequestPage({
         <p className="eyebrow">Atendimento da solicitação</p>
         <h1>{request.serviceNameSnapshot}</h1>
         <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+        <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>
         <p>Setor de origem: {request.sectorNameSnapshot}</p>
         <p>{request.serviceDescriptionSnapshot}</p>

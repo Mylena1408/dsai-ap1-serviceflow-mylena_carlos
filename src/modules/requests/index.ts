@@ -28,7 +28,9 @@ export {
   MIN_SEARCH_TERM,
   SEARCH_PAGE_SIZE,
 } from "./domain/search-criteria";
-export type { AssigneeFilter, SearchCriteria, SearchOrder } from "./domain/search-criteria";
+export type { AssigneeFilter, SearchCriteria, SearchOrder, SlaFilter } from "./domain/search-criteria";
+export { slaSituation } from "./domain/sla";
+export type { SlaSituation } from "./domain/sla";
 export type { RequestSearchResult } from "./application/request-queries";
 export { buildRequestSnapshot } from "./domain/snapshot";
 export { assertRequestStatusTransition } from "./domain/status-transition";

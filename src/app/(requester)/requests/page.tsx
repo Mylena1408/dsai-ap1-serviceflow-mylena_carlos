@@ -5,6 +5,7 @@ import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
 import { hasSearchCriteria, type SearchParams } from "@/app/_components/request-search-url";
+import { RequestSla } from "@/app/_components/request-sla";
 import { requireRequesterPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
@@ -28,6 +29,7 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
 
   const requests = result?.items ?? [];
   const commentCounts = await countComments(requests.map(({ id }) => id));
+  const now = new Date();
 
   return (
     <main className="page-shell">
@@ -59,6 +61,7 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
                 </Link>
               </h2>
               <p><span className="status-pill">{statusLabels[request.status]}</span></p>
+              <RequestSla request={request} now={now} />
               <p className="metadata">
                 {(commentCounts.get(request.id) ?? 0) === 1
                   ? "1 comentário"

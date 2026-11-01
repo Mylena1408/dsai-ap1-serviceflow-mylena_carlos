@@ -8,6 +8,8 @@ type RequestSearchFormProps = {
   params: SearchParams;
   /** The assignee filter exists only in the attendant queue (section 5.3). */
   showAssignee: boolean;
+  /** The SLA filter and the "due" order exist only in the queue (SPEC 2026-11-01, 5.6). */
+  showSla?: boolean;
   defaultOrder: "newest" | "oldest";
 };
 
@@ -23,7 +25,7 @@ function first(value: string | string[] | undefined): string {
 
 // GET form: works without JavaScript, keeps the criteria in the URL and always starts on
 // page 1 because it carries no page field (SPEC 2026-10-31-busca-filtros-paginacao, 5.5).
-export function RequestSearchForm({ basePath, params, showAssignee, defaultOrder }: RequestSearchFormProps) {
+export function RequestSearchForm({ basePath, params, showAssignee, showSla = false, defaultOrder }: RequestSearchFormProps) {
   const statuses = values(params.status);
 
   return (
@@ -58,6 +60,18 @@ export function RequestSearchForm({ basePath, params, showAssignee, defaultOrder
           </select>
         </div>
       ) : null}
+      {showSla ? (
+        <div className="search-field">
+          <label htmlFor="search-sla">Situação do prazo</label>
+          <select id="search-sla" name="sla" defaultValue={first(params.sla)}>
+            <option value="">Todas</option>
+            <option value="on_time">Dentro do prazo</option>
+            <option value="due_soon">Próximo do vencimento</option>
+            <option value="overdue">Vencido</option>
+            <option value="none">Sem prazo</option>
+          </select>
+        </div>
+      ) : null}
       <div className="search-field">
         <label htmlFor="search-from">Aberta de</label>
         <input id="search-from" name="from" type="date" defaultValue={first(params.from)} />
@@ -71,6 +85,7 @@ export function RequestSearchForm({ basePath, params, showAssignee, defaultOrder
         <select id="search-order" name="order" defaultValue={first(params.order) || defaultOrder}>
           <option value="newest">Mais recentes primeiro</option>
           <option value="oldest">Mais antigas primeiro</option>
+          {showSla ? <option value="due">Vencimento mais próximo</option> : null}
         </select>
       </div>
       <div className="search-actions">
