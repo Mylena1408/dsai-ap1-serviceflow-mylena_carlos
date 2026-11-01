@@ -188,6 +188,16 @@ export function assertCanReopen(
 }
 
 /**
+ * SPEC 2026-11-01-fluxos-configuraveis, section 5.3 item 1: stages move with the same people
+ * who complete the request — an attendant of the sector and, with an effective assignee, only
+ * that attendant. The stage rules themselves live in stages.ts.
+ */
+export function assertCanMoveStage(actor: LifecycleUser, request: LifecycleRequest): void {
+  requireSectorAttendant(actor, request);
+  assertCanChangeStatusWithAssignee(actor.id, request);
+}
+
+/**
  * SPEC 2026-11-01-sla-prioridades, section 5.1 (decision P1): an attendant of the sector
  * changes the priority of an open or in-progress request; with an effective assignee, only
  * that attendant. The new priority must differ from the current one.

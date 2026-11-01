@@ -1080,3 +1080,15 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - **SPEC `2026-11-01-fluxos-configuraveis.md`** (item 7 do plano) aprovada com as decisões W1 a W4 conforme propostas: etapas dentro de "Em atendimento", sem mudar o status; avançar e voltar uma etapa por vez (voltar com justificativa) e concluir só na última; cópia do fluxo no início do atendimento; notificação ao solicitante a cada mudança de etapa. Tarefas SF-076 a SF-080 registradas em `TASKS.md`.
 - **Fronteiras com outros itens:** a atribuição continua independente das etapas; a aprovação (item 8) terá SPEC própria e decidirá se vira um tipo de etapa.
+
+## SF-076 — Migration e domínio das etapas (2026-11-01)
+
+- **Migration `20261101400000_service_stages`:** só acrescenta, com a exceção já prevista na SPEC (seção 6): o `CHECK` de tipos da outbox foi apagado e recriado mais amplo para aceitar `request.stage_changed`, sem perda de dados — mesmo procedimento da SPEC de SLA.
+  - `ServiceStage` com índice único parcial do nome entre as ativas (`citext`) e `CHECK`s de nome (1 a 60, sem espaços nas pontas) e posição;
+  - `Request.stageNamesSnapshot` (lista, padrão vazio) e `Request.stageIndex`; o `CHECK` `Request_stage_check` exige que a etapa exista exatamente quando há cópia, aponte para dentro dela e nunca exista com status `OPEN`; a validade dos nomes copiados (até 8, sem repetição) fica numa função `IMMUTABLE`, porque um `CHECK` não percorre listas;
+  - `RequestStageEvent` com `CHECK` de etapas distintas e justificativa de 1 a 1.000 caracteres.
+- **Regras:** `stageCopyOnStart` copia as etapas ativas e entra na primeira; `planStageMove` avança ou volta uma etapa (voltar exige justificativa, com o mesmo `normalizeNote` do cancelamento e da reabertura) e nunca passa das pontas; `assertCanCompleteAtStage` só libera a conclusão na última etapa; `assertCanMoveStage` usa as mesmas pessoas que concluem (atendente do setor; com responsável, só ele).
+- **O evento `request.stage_changed`** só entra na lista de tipos do código na SF-078, quando passar a ser gravado; a migration já o aceita.
+- **Teste existente alterado (só o dublê):** `tests/unit/authorization/index.test.ts` ganhou `stageNamesSnapshot: []` e `stageIndex: null` no objeto tipado como linha do Prisma, como na SF-068. Nenhuma asserção mudou.
+- **Erro meu, pego por um teste existente:** `tests/unit/prisma/migrations.test.ts` proíbe as palavras `INSERT INTO` e `COPY` nas migrations, e um comentário SQL meu dizia "copy". Troquei o comentário por "snapshot" (o teste não foi alterado). A migration ainda não tinha sido publicada; nos bancos locais, o `migrate deploy` seguiu sem pendências.
+- **Resultados:** lint, typecheck e build OK; unitários 469/469 (80 arquivos); integração 214/214 + 1 pulado (47 arquivos); E2E 10/10.

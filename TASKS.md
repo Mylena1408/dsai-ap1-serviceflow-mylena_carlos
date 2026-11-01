@@ -811,7 +811,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-076 — Migration e domínio das etapas
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Migration `20261101400000_service_stages` (tabelas `ServiceStage` e `RequestStageEvent`, colunas `stageNamesSnapshot` e `stageIndex` em `Request`, índice único parcial, função `request_stage_names_valid`, `CHECK`s e o `CHECK` de tipos da outbox recriado com `request.stage_changed`); novo módulo `src/modules/service-stages/` com as regras da configuração; regras de etapa em `src/modules/requests/domain/stages.ts` e `assertCanMoveStage` em `lifecycle.ts`. CA-FLX-11 verificado; regras de CA-FLX-03, 05 e 06 prontas para as próximas tarefas.
 - **Objetivo:** Migration aditiva da seção 6 (tabelas `ServiceStage` e `RequestStageEvent`, colunas `stageNamesSnapshot` e `stageIndex` em `Request`, `CHECK`s e tipo `request.stage_changed` na outbox) e regras puras: validação da configuração, cópia no início, avanço, retorno com justificativa e regra de conclusão na última etapa.
 - **Arquivos/módulos esperados:** `prisma/`, novo módulo `src/modules/service-stages/`, `src/modules/requests/domain/`, limpeza do banco de teste, testes.
 - **Dependências:** SF-075.

@@ -50,6 +50,8 @@ function persistedRequest(requesterId: string, sectorId: string) {
     slaHoursSnapshot: null,
     dueAt: null,
     dueSoonAt: null,
+    stageNamesSnapshot: [],
+    stageIndex: null,
     slaWarningNotifiedAt: null,
     slaBreachNotifiedAt: null,
     completedLate: null,

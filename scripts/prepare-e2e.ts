@@ -37,6 +37,7 @@ async function prepareDatabase(): Promise<void> {
   try {
     await database.$queryRaw`SELECT 1`;
     await database.$transaction([
+      database.requestStageEvent.deleteMany(),
       database.requestFieldValue.deleteMany(),
       database.requestAttachment.deleteMany(),
       database.requestNotification.deleteMany(),
@@ -48,6 +49,7 @@ async function prepareDatabase(): Promise<void> {
       database.request.deleteMany(),
       database.serviceDocumentRequirement.deleteMany(),
       database.serviceField.deleteMany(),
+      database.serviceStage.deleteMany(),
       database.service.deleteMany(),
       database.user.deleteMany(),
       database.category.deleteMany(),

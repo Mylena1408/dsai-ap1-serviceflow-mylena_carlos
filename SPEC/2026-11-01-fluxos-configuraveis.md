@@ -112,7 +112,7 @@ Uma solicitação concluída que é reaberta volta para "Aberta" sem etapa. Quan
 - [ ] **CA-FLX-08** — Cada mudança aparece na linha do tempo, grava `request.stage_changed` na outbox e notifica o solicitante (exceto a entrada na primeira etapa).
 - [ ] **CA-FLX-09** — Reabrir e iniciar de novo cria uma nova cópia do fluxo vigente e começa da primeira etapa.
 - [ ] **CA-FLX-10** — Detalhes, fila e "Minhas solicitações" mostram a etapa atual e a posição; o solicitante vê as etapas percorridas.
-- [ ] **CA-FLX-11** — Migration aditiva; dados existentes não mudam.
+- [x] **CA-FLX-11** — Migration aditiva; dados existentes não mudam. *Verificado em 2026-11-01 (SF-076): migration aplicada sobre dados existentes; serviços ficam sem etapas e solicitações com cópia vazia e sem etapa (`service-stage-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes
 
