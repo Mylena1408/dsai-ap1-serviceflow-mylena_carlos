@@ -223,3 +223,9 @@ SF-068 concluída (ver `NOTES.md`, seção SF-068).
 > siga para a sf-069
 
 SF-069 concluída (ver `NOTES.md`, seção SF-069).
+
+## Continuação — SF-070
+
+> siga para a sf-070
+
+SF-070 concluída; SPEC de SLA e prioridades encerrada (ver `NOTES.md`, seção SF-070).

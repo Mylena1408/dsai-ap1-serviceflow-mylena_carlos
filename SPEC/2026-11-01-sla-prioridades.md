@@ -1,7 +1,7 @@
 # SPEC — SLA e prioridades
 
 **Data:** 2026-11-01
-**Status:** Aprovada em 2026-11-01, com as decisões P1, S1, S2 e S3 da seção 11 conforme propostas (nenhum código implementado)
+**Status:** Aprovada em 2026-11-01, com as decisões P1, S1, S2 e S3 da seção 11 conforme propostas. **Concluída em 2026-11-01** (SF-065 a SF-070; CA-SLA-01 a 10 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§5 "prioridade" e "prazo"; §9 SLA), `SPEC/2026-10-29-plano-escala-100k.md` (item 5 e garantia 7.4), `SPEC/2026-10-31-eventos-outbox-jobs.md` (eventos, job diário e notificações), `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`, `SPEC/2026-10-31-busca-filtros-paginacao.md`
 

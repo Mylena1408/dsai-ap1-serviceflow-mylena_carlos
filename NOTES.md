@@ -999,3 +999,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Teste existente alterado:** a lista exata de tipos de evento da SF-061 recebeu os dois tipos novos, criados pela SPEC. Nenhuma outra asserção mudou.
 - **Erro meu:** o dublê do teste unitário declarava um único parâmetro e o typecheck acusou; corrigido com o tipo da porta.
 - **Resultados:** lint, typecheck e build OK; unitários 398/398 (71 arquivos); integração 186/186 + 1 pulado (42 arquivos); E2E 8/8.
+
+## SF-070 — E2E e revisão do SLA (2026-11-01)
+
+- **E2E (`request-sla.spec.ts`):** o administrador cria um serviço com prioridade Normal e prazo-base de 2 horas; o solicitante abre e vê "Prioridade: Normal" e "Dentro do prazo"; o atendente encontra o item com o filtro "Dentro do prazo" e a ordem por vencimento (e não com "Vencido"), muda para Urgente, vê o histórico "Prioridade: Normal → Urgente" e o vencimento antecipado em exatamente 90 minutos (25% de 2 h, contados da abertura); o solicitante vê a nova prioridade na lista.
+- **Revisão:** README ganhou a seção de SLA e prioridades (inclusive a limitação do job diário no plano gratuito) e a descrição do job diário cita os alertas. A SPEC está marcada como concluída.
+- **Observação no log do servidor do E2E:** aparecem mensagens "Error: The destination stream closed early" do Next.js. Não quebram nenhum teste. A causa provável é o navegador do Playwright interromper uma resposta em streaming ao trocar de página, mas não investiguei nem verifiquei se elas já apareciam antes desta SPEC (as execuções anteriores só filtravam o resultado final).
+- **Pendência para publicar:** aplicar no Neon as migrations `20261101100000_sla_and_priorities` e `20261101200000_sla_due_soon_at` antes do próximo deploy.
+- **Resultados:** lint, typecheck e build OK; unitários 398/398 (71 arquivos); integração 186/186 + 1 pulado (42 arquivos); E2E 9/9.
