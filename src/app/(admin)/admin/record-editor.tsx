@@ -4,6 +4,8 @@ import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import type { AdminUpdateState } from "./actions";
+import { PRIORITY_LABELS, type PriorityValue } from "@/app/_components/request-priority";
+import { ServiceSlaFields } from "./service-sla-fields";
 
 type UpdateAction = (
   previousState: AdminUpdateState,
@@ -42,6 +44,8 @@ type EditableRecord =
       categoryId: string;
       sectorId: string;
       isActive: boolean;
+      defaultPriority: PriorityValue;
+      slaHours: number | null;
     };
 
 type RecordEditorProps = {
@@ -158,6 +162,7 @@ function EditorForm({
                 ))}
               </select>
             </label>
+            <ServiceSlaFields defaultPriority={record.defaultPriority} slaHours={record.slaHours} />
           </>
         ) : null}
       </div>
@@ -221,6 +226,8 @@ export function AdminRecordEditor({
           <span>{record.description}</span>
           <span>Categoria: {categories.find((category) => category.id === record.categoryId)?.name}</span>
           <span>Setor: {sectors.find((sector) => sector.id === record.sectorId)?.name}</span>
+          <span>Prioridade padrão: {PRIORITY_LABELS[record.defaultPriority]}</span>
+          <span>{record.slaHours === null ? "Sem prazo" : `Prazo-base: ${record.slaHours} h`}</span>
         </>
       );
     }

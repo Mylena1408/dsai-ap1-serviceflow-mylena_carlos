@@ -7,6 +7,9 @@ export const serviceInputSchema = z
     description: nonEmptyTextSchema,
     categoryId: entityIdSchema,
     sectorId: entityIdSchema,
+    // Optional so forms and callers without these fields keep the current values.
+    defaultPriority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
+    slaHours: z.union([z.string(), z.number(), z.null()]).optional(),
   })
   .strict();
 

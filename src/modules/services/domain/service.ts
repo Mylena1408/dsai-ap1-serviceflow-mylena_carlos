@@ -1,3 +1,5 @@
+import type { ServicePriority } from "./sla-config";
+
 export interface ServiceRecord {
   id: string;
   name: string;
@@ -5,6 +7,9 @@ export interface ServiceRecord {
   categoryId: string;
   sectorId: string;
   isActive: boolean;
+  /** SPEC 2026-11-01 (SLA e prioridades). */
+  defaultPriority: ServicePriority;
+  slaHours: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -14,6 +19,9 @@ export interface ServiceData {
   description: string;
   categoryId: string;
   sectorId: string;
+  /** Omitted keeps the current value (create: NORMAL and no SLA). */
+  defaultPriority?: ServicePriority;
+  slaHours?: number | null;
 }
 
 export interface PublishedService extends ServiceRecord {

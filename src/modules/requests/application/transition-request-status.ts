@@ -4,6 +4,7 @@ import { validateInput } from "@/server/validation";
 import { requestStatusTransitionInputSchema } from "./request-schemas";
 import type { RequestWithHistory } from "../domain/request";
 import { assertCanChangeStatusWithAssignee } from "../domain/lifecycle";
+import { completedLateAt } from "../domain/sla";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
 
@@ -46,7 +47,9 @@ export async function transitionRequestStatus(
       expectedAssigneeId: currentRequest.assignee?.id ?? null,
       toStatus: parsed.toStatus,
       updatedAt: occurredAt,
-      ...(parsed.toStatus === "COMPLETED" ? { completedAt: occurredAt } : {}),
+      ...(parsed.toStatus === "COMPLETED"
+        ? { completedAt: occurredAt, completedLate: completedLateAt(currentRequest.dueAt ?? null, occurredAt) }
+        : {}),
     });
 
     if (changed !== 1) {

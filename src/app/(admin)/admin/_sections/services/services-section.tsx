@@ -8,6 +8,7 @@ import type { ServiceRecord } from "@/modules/services";
 import { AdminCreateForm } from "../../create-form";
 import { DocumentRequirementsEditor } from "../../document-requirements-editor";
 import { AdminRecordEditor } from "../../record-editor";
+import { ServiceSlaFields } from "../../service-sla-fields";
 import {
   createDocumentRequirementAction,
   createServiceAction,
@@ -63,6 +64,7 @@ export function ServicesSection({
               ))}
             </select>
           </label>
+          <ServiceSlaFields defaultPriority="NORMAL" slaHours={null} />
         </AdminCreateForm>
         <ul className="entity-list">
           {services.map((service) => (
@@ -76,6 +78,8 @@ export function ServicesSection({
                 categoryId: service.categoryId,
                 sectorId: service.sectorId,
                 isActive: service.isActive,
+                defaultPriority: service.defaultPriority,
+                slaHours: service.slaHours,
               }}
               categories={categories}
               sectors={sectors}

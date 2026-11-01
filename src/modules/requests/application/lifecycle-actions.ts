@@ -9,6 +9,7 @@ import {
   type LifecycleUser,
 } from "../domain/lifecycle";
 import type { RequestStatus } from "../domain/request";
+import { dueAtFrom } from "../domain/sla";
 import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner, StatusUpdate } from "./ports";
 
@@ -20,7 +21,10 @@ interface LifecycleChange {
   toStatus: RequestStatus;
   note: string | null;
   decide: (actor: LifecycleUser, request: LifecycleRequest, now: Date) => void;
-  stamps: (now: Date) => Pick<StatusUpdate, "completedAt" | "cancelledAt">;
+  stamps: (
+    now: Date,
+    request: LifecycleRequest,
+  ) => Pick<StatusUpdate, "completedAt" | "cancelledAt" | "completedLate" | "dueAt" | "resetSlaAlerts">;
 }
 
 async function changeLifecycle(
@@ -48,7 +52,7 @@ async function changeLifecycle(
       expectedAssigneeId: request.assignee?.id ?? null,
       toStatus: change.toStatus,
       updatedAt: occurredAt,
-      ...change.stamps(occurredAt),
+      ...change.stamps(occurredAt, request),
     });
 
     // Status or assignee changed after the read (section 5.8).
@@ -109,6 +113,13 @@ export async function reopenRequest(
     toStatus: "OPEN",
     note,
     decide: (actor, request, now) => assertCanReopen(actor, request, now, note),
-    stamps: () => ({ completedAt: null }),
+    // SPEC 2026-11-01, section 5.3: a new due date from the reopening, with the current
+    // priority; the completion result is cleared and new alerts are allowed.
+    stamps: (now, request) => ({
+      completedAt: null,
+      completedLate: null,
+      dueAt: dueAtFrom(now, request.slaHoursSnapshot ?? null, request.priority ?? "NORMAL"),
+      resetSlaAlerts: true,
+    }),
   });
 }

@@ -1,12 +1,9 @@
-import { ValidationError } from "@/server/errors";
 import type { RequestPriority, RequestStatus } from "./request";
 
 // SLA and priorities (SPEC 2026-11-01-sla-prioridades, sections 5.1 to 5.4). Calendar hours
 // (decision S1); the service base SLA is scaled by the priority (decision S2).
 
 export const REQUEST_PRIORITIES: readonly RequestPriority[] = ["LOW", "NORMAL", "HIGH", "URGENT"];
-export const MIN_SLA_HOURS = 1;
-export const MAX_SLA_HOURS = 2_000;
 /** "Due soon" when this fraction of the effective SLA or less remains (section 5.4). */
 export const SLA_WARNING_FRACTION = 0.2;
 
@@ -71,21 +68,6 @@ export function slaSituation(request: SlaState, now: Date): SlaSituation {
 
   const warningWindow = effectiveSlaMinutes(request.slaHoursSnapshot, request.priority) * MINUTE_MS * SLA_WARNING_FRACTION;
   return remaining <= warningWindow ? "due_soon" : "on_time";
-}
-
-/** Base SLA of a service: empty means no SLA; otherwise a whole number from 1 to 2,000. */
-export function parseSlaHours(raw: unknown): number | null {
-  if (raw === null || raw === undefined || raw === "") {
-    return null;
-  }
-
-  const value = typeof raw === "number" ? raw : typeof raw === "string" && /^\d+$/.test(raw.trim()) ? Number(raw) : NaN;
-
-  if (!Number.isInteger(value) || value < MIN_SLA_HOURS || value > MAX_SLA_HOURS) {
-    throw new ValidationError([{ path: ["slaHours"], code: "invalid_value" }]);
-  }
-
-  return value;
 }
 
 export function isRequestPriority(value: unknown): value is RequestPriority {

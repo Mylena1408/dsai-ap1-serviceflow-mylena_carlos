@@ -25,6 +25,15 @@ import {
   type AdminUpdateState,
 } from "../../_shared/action-helpers";
 
+// Only sent when the form has the fields, so a form without them keeps the current values
+// (SPEC 2026-11-01-sla-prioridades, section 5.6).
+function slaFields(formData: FormData) {
+  return {
+    ...(formData.has("defaultPriority") ? { defaultPriority: field(formData, "defaultPriority") } : {}),
+    ...(formData.has("slaHours") ? { slaHours: field(formData, "slaHours") } : {}),
+  };
+}
+
 export async function createServiceAction(
   _previousState: AdminUpdateState,
   formData: FormData,
@@ -35,6 +44,7 @@ export async function createServiceAction(
       description: field(formData, "description"),
       categoryId: field(formData, "categoryId"),
       sectorId: field(formData, "sectorId"),
+      ...slaFields(formData),
     });
   } catch (error) {
     return createFailure(error);
@@ -52,6 +62,7 @@ export async function updateServiceAction(
       description: field(formData, "description"),
       categoryId: field(formData, "categoryId"),
       sectorId: field(formData, "sectorId"),
+      ...slaFields(formData),
     });
   } catch (error) {
     return updateFailure(error);

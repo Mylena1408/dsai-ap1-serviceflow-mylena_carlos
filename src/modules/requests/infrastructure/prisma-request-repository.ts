@@ -223,6 +223,9 @@ function createPrismaRequestTransaction(
           updatedAt: update.updatedAt,
           ...(update.completedAt !== undefined ? { completedAt: update.completedAt } : {}),
           ...(update.cancelledAt ? { cancelledAt: update.cancelledAt } : {}),
+          ...(update.completedLate !== undefined ? { completedLate: update.completedLate } : {}),
+          ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
+          ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
         },
       });
       return result.count;
@@ -238,6 +241,9 @@ function createPrismaRequestTransaction(
           sectorId: true,
           status: true,
           completedAt: true,
+          priority: true,
+          slaHoursSnapshot: true,
+          dueAt: true,
           assignee: { select: lifecycleUser },
         },
       });

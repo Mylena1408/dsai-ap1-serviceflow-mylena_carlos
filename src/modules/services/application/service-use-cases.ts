@@ -2,10 +2,20 @@ import { requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
-import { serviceInputSchema } from "./service-schemas";
+import { serviceInputSchema, type ServiceInput } from "./service-schemas";
 import { assertServiceRelationships } from "../domain/relationships";
-import type { ServiceRecord } from "../domain/service";
+import type { ServiceData, ServiceRecord } from "../domain/service";
+import { parseSlaHours } from "../domain/sla-config";
 import type { ServiceRepository, ServiceTransactionRunner } from "./ports";
+
+function serviceData(parsed: ServiceInput): ServiceData {
+  const { defaultPriority, slaHours, ...base } = parsed;
+  return {
+    ...base,
+    ...(defaultPriority !== undefined ? { defaultPriority } : {}),
+    ...(slaHours !== undefined ? { slaHours: parseSlaHours(slaHours) } : {}),
+  };
+}
 
 export async function listServices(repository: ServiceRepository): Promise<ServiceRecord[]> {
   await requireConfigurationAdministrator();
@@ -19,12 +29,13 @@ export async function createService(
 ): Promise<ServiceRecord> {
   await requireConfigurationAdministrator();
   const parsed = validateInput(serviceInputSchema, input);
+  const data = serviceData(parsed);
 
   return transactions.run(async (transaction) => {
     const relationships = await transaction.loadRelationships(parsed.categoryId, parsed.sectorId);
     assertServiceRelationships(relationships, true);
 
-    return transaction.create(parsed);
+    return transaction.create(data);
   });
 }
 
@@ -36,6 +47,7 @@ export async function updateService(
   await requireConfigurationAdministrator();
   const serviceId = validateInput(entityIdSchema, id);
   const parsed = validateInput(serviceInputSchema, input);
+  const data = serviceData(parsed);
 
   return transactions.run(async (transaction) => {
     const current = await transaction.findState(serviceId);
@@ -47,7 +59,7 @@ export async function updateService(
     const relationships = await transaction.loadRelationships(parsed.categoryId, parsed.sectorId);
     assertServiceRelationships(relationships, current.isActive);
 
-    return transaction.update(serviceId, parsed);
+    return transaction.update(serviceId, data);
   });
 }
 

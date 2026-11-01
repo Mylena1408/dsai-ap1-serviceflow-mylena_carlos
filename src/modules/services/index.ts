@@ -15,6 +15,8 @@ export {
 } from "./domain/relationships";
 export type { ServiceRelationships } from "./domain/relationships";
 export { groupPublishedServices } from "./domain/service";
+export { MAX_SLA_HOURS, MIN_SLA_HOURS, SERVICE_PRIORITIES } from "./domain/sla-config";
+export type { ServicePriority } from "./domain/sla-config";
 export type { PublishedService, ServiceData, ServiceRecord } from "./domain/service";
 
 export async function listServices(database: PrismaClient = prisma): Promise<ServiceRecord[]> {

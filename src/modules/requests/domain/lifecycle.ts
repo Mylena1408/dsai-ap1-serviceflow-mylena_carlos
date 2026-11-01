@@ -1,5 +1,5 @@
 import { ConflictError, NotFoundError, ValidationError } from "@/server/errors";
-import type { RequestStatus } from "./request";
+import type { RequestPriority, RequestStatus } from "./request";
 
 // Assignment, cancellation and reopening rules (SPEC 2026-10-31, sections 5.1 to 5.6).
 // Callers load every state from the database; these functions only decide.
@@ -23,6 +23,10 @@ export interface LifecycleRequest {
   completedAt: Date | null;
   /** Current assignee as stored now, or null when nobody assumed the request. */
   assignee: LifecycleUser | null;
+  /** SLA state (SPEC 2026-11-01); optional so rules that do not need it stay simple. */
+  priority?: RequestPriority;
+  slaHoursSnapshot?: number | null;
+  dueAt?: Date | null;
 }
 
 // Section 5.6. Start and completion keep their own rule in status-transition.ts.

@@ -703,7 +703,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-066 — Configuração no serviço e snapshot
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Prioridade padrão e prazo-base no módulo `services` (`domain/sla-config.ts`, schema, casos de uso) e nos formulários da administração; abertura com snapshot da prioridade, do prazo e do vencimento; conclusão com `completedLate`; reabertura com novo vencimento, resultado limpo e alertas liberados. CA-SLA-01, 02, 03 e 08 verificados; parte de reabertura de CA-SLA-04.
 - **Objetivo:** Prioridade padrão e prazo-base no cadastro de serviço (administração); snapshot e vencimento na abertura; resultado na conclusão; recálculo na reabertura.
 - **Arquivos/módulos esperados:** `src/modules/services/`, `src/modules/requests/`, área administrativa, testes.
 - **Dependências:** SF-065.

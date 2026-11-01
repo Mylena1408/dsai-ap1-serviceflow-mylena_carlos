@@ -201,3 +201,9 @@ SPEC escrita como proposta e aprovada (P1, S1, S2, S3); tarefas SF-065 a SF-070 
 > comece a sf-065
 
 Medição informada (13.479 linhas `added`); SF-065 concluída (ver `NOTES.md`).
+
+## Continuação — SF-066
+
+> siga para a sf-066
+
+SF-066 concluída (ver `NOTES.md`, seção SF-066).

@@ -57,6 +57,8 @@ export function activeService(overrides: Partial<ServiceForRequest> = {}): Servi
     name: "Service",
     description: "Service description",
     isActive: true,
+    defaultPriority: "NORMAL",
+    slaHours: null,
     category: { id: "category-1", name: "Category", isActive: true },
     sector: { id: "sector-1", name: "Sector", isActive: true },
     ...overrides,
@@ -185,6 +187,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     },
     async insertRequest({ openedAt, id, ...data }) {
       store.requests.push({
+        completedLate: null,
         ...data,
         id,
         createdAt: openedAt,
@@ -192,10 +195,6 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         completedAt: null,
         assigneeId: null,
         cancelledAt: null,
-        priority: "NORMAL",
-        slaHoursSnapshot: null,
-        dueAt: null,
-        completedLate: null,
       });
       return { id };
     },
@@ -212,6 +211,8 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       request.updatedAt = update.updatedAt;
       if (update.completedAt !== undefined) request.completedAt = update.completedAt;
       if (update.cancelledAt) request.cancelledAt = update.cancelledAt;
+      if (update.completedLate !== undefined) request.completedLate = update.completedLate;
+      if (update.dueAt !== undefined) request.dueAt = update.dueAt;
       return 1;
     },
     async insertAttachments(attachments) {
@@ -236,6 +237,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
             sectorId: request.sectorId,
             status: request.status,
             completedAt: request.completedAt,
+            priority: request.priority,
+            slaHoursSnapshot: request.slaHoursSnapshot,
+            dueAt: request.dueAt,
             assignee: lifecycleUser(store, request.assigneeId),
           }
         : null;

@@ -4,7 +4,7 @@ import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domai
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
 import type { SearchCriteria } from "../domain/search-criteria";
-import type { RequestStatus, RequestWithHistory } from "../domain/request";
+import type { RequestPriority, RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
 
 export type ActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT";
@@ -44,6 +44,9 @@ export interface ServiceForRequest {
   name: string;
   description: string;
   isActive: boolean;
+  /** SPEC 2026-11-01 (SLA): applied to the request on opening. */
+  defaultPriority: RequestPriority;
+  slaHours: number | null;
   category: { id: string; name: string; isActive: boolean };
   sector: { id: string; name: string; isActive: boolean };
 }
@@ -70,6 +73,12 @@ export interface StatusUpdate {
   completedAt?: Date | null;
   /** Set on cancellation (section 5.4). */
   cancelledAt?: Date;
+  /** SLA result on completion; null clears it (SPEC 2026-11-01, section 5.3). */
+  completedLate?: boolean | null;
+  /** New due date, on reopening. */
+  dueAt?: Date | null;
+  /** Clears the alert marks so a new due date can be alerted again (section 5.5). */
+  resetSlaAlerts?: boolean;
 }
 
 /** Changes the assignee only while status and assignee still equal the values read. */
@@ -141,6 +150,9 @@ export interface RequestTransaction {
       description: string;
       status: RequestStatus;
       openedAt: Date;
+      priority: RequestPriority;
+      slaHoursSnapshot: number | null;
+      dueAt: Date | null;
     },
   ): Promise<{ id: string }>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;

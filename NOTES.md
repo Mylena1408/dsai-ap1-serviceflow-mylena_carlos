@@ -946,3 +946,21 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Falha durante o trabalho:** a primeira edição do schema não achou uma linha porque o `prisma format` tinha realinhado as colunas. O script só grava no fim, então nada foi alterado; foi refeito com padrões tolerantes ao alinhamento.
 - **Testes:** 8 unitários (percentuais, vencimento, bordas da situação, resultado da conclusão, valores) e 4 de integração (padrões, limites, vínculo do vencimento, resultado da conclusão, evento de prioridade e tipos do outbox).
 - **Resultados:** lint, typecheck e build OK; unitários 377/377 (65 arquivos); integração 171/171 + 1 pulado (38 arquivos); E2E 8/8.
+
+## SF-066 — Configuração no serviço e snapshot (2026-11-01)
+
+- **Serviço:**
+  - `ServiceRecord` ganhou `defaultPriority` e `slaHours`;
+  - o schema aceita `defaultPriority` (enum) e `slaHours` (texto, número ou nulo), **opcionais**: quando ausentes, o valor atual fica como está (na criação, `NORMAL` e sem prazo);
+  - `parseSlaHours` (vazio = sem prazo; inteiro de 1 a 2.000) fica em `services/domain/sla-config.ts`.
+  - **Mudança de lugar:** na SF-065 essa validação estava em `requests/domain/sla.ts`. Foi movida porque é configuração do serviço, e importar de `requests` criaria dependência circular (`requests` já importa de `services`).
+- **Ações da administração:** `defaultPriority` e `slaHours` só são enviados quando o formulário tem os campos. Assim o teste antigo `admin-actions.test.ts`, que confere o conteúdo exato enviado, continua passando sem alteração. Formulários de criação e edição ganharam "Prioridade padrão" e "Prazo-base (horas)" (`service-sla-fields.tsx`), e a lista mostra prioridade e prazo de cada serviço.
+- **Solicitação:**
+  - na abertura, grava `priority` (padrão do serviço), `slaHoursSnapshot` e `dueAt` (`dueAtFrom` com o horário do banco);
+  - na conclusão, `completedLate = completedLateAt(dueAt, horário)`;
+  - na reabertura, `dueAt` é recalculado a partir do horário da reabertura com a prioridade atual, `completedLate` é limpo e `slaWarningNotifiedAt` e `slaBreachNotifiedAt` voltam a nulo (alertas liberados, seção 5.5).
+  - `LifecycleRequest` e `StatusUpdate` ganharam os campos opcionais necessários.
+- **Erro meu encontrado pelo typecheck:** na SF-065, o dublê em memória ganhou valores fixos (`priority: "NORMAL"`, sem prazo) **depois** do `...data` na inserção. Com a abertura enviando esses campos, eles teriam sobrescrito o que foi calculado. As linhas repetidas foram removidas.
+- **Testes existentes:** os dublês do módulo `services` (`service-use-cases.test.ts`, `catalog.test.ts`) ganharam os campos novos; nenhuma asserção mudou.
+- **Testes novos:** 4 unitários de ciclo de vida, 2 das ações da administração e 4 de integração.
+- **Resultados:** lint, typecheck e build OK; unitários 383/383 (67 arquivos); integração 175/175 + 1 pulado (39 arquivos); E2E 8/8.

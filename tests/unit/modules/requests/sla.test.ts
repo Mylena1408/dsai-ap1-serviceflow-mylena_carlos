@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { ValidationError } from "@/server/errors";
+import { parseSlaHours } from "@/modules/services/domain/sla-config";
 import {
   completedLateAt,
   dueAtFrom,
   effectiveSlaMinutes,
   isRequestPriority,
-  parseSlaHours,
   slaSituation,
   type SlaState,
 } from "@/modules/requests/domain/sla";

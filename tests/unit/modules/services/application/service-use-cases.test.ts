@@ -54,6 +54,8 @@ function service(name: string, overrides: Partial<ServiceRecord> = {}): ServiceR
     categoryId,
     sectorId,
     isActive: true,
+    defaultPriority: "NORMAL",
+    slaHours: null,
     createdAt: testNow,
     updatedAt: testNow,
     ...overrides,

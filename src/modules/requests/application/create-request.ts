@@ -16,6 +16,7 @@ import {
   type ActiveDocumentRequirement,
 } from "../domain/attachment-requirements";
 import type { RequestWithHistory } from "../domain/request";
+import { dueAtFrom } from "../domain/sla";
 import { buildRequestSnapshot } from "../domain/snapshot";
 import type {
   AttachmentStorage,
@@ -155,6 +156,10 @@ async function openRequest(
     description: parsed.description,
     status: "OPEN",
     openedAt,
+    // SPEC 2026-11-01, sections 5.1 to 5.3: default priority and SLA snapshot of the service.
+    priority: context.service.defaultPriority,
+    slaHoursSnapshot: context.service.slaHours,
+    dueAt: dueAtFrom(openedAt, context.service.slaHours, context.service.defaultPriority),
   });
 
   await transaction.insertStatusEvent({

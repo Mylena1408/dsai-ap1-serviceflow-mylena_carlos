@@ -26,6 +26,8 @@ function service(
     categoryId: `category-${category}`,
     sectorId: `sector-${id}`,
     isActive: true,
+    defaultPriority: "NORMAL",
+    slaHours: null,
     createdAt: new Date(0),
     updatedAt: new Date(0),
     category: { id: `category-${category}`, name: category },
