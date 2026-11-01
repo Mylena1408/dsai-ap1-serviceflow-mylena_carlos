@@ -163,3 +163,9 @@ SPEC de eventos, outbox e jobs escrita como proposta e aprovada (E1 a E4); taref
 > apos a integração faça um relatorio atualizando a quantidade de linhas de codigo produzidos hoje, quantos temos ao total (retirados os iniciais deste sistema) e o que foi implementado, também indique os proximos passos,faça isso em uma tabela
 
 SF-061 concluída (ver `NOTES.md`); relatório em tabela no resumo do dia.
+
+## Continuação — SF-062
+
+> siga
+
+SF-062 concluída (ver `NOTES.md`, seção SF-062).

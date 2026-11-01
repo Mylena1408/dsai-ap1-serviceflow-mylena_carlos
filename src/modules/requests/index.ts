@@ -9,7 +9,11 @@ import * as queries from "./application/request-queries";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 import type { RequestWithHistory } from "./domain/request";
-import { createPrismaAttachmentQueryRepository } from "./infrastructure/prisma-attachment-repository";
+import {
+  createPrismaAttachmentQueryRepository,
+  createPrismaRequestExistenceReader,
+} from "./infrastructure/prisma-attachment-repository";
+import * as orphanCleanup from "./application/orphan-cleanup";
 import {
   createPrismaRequestQueryRepository,
   createPrismaRequestTransactionRunner,
@@ -163,4 +167,15 @@ export async function searchAttendantQueue(
   database: PrismaClient = prisma,
 ): Promise<queries.RequestSearchResult> {
   return queries.searchAttendantQueue(rawParams, createPrismaRequestQueryRepository(database));
+}
+
+export type { OrphanCleanupSummary } from "./application/orphan-cleanup";
+
+/** Removes attachment objects whose request never committed (daily job, SPEC 21.15.5). */
+export async function cleanOrphanAttachmentObjects(
+  now: Date,
+  storage: DocumentStorage = getApplicationDocumentStorage(),
+  database: PrismaClient = prisma,
+): Promise<orphanCleanup.OrphanCleanupSummary> {
+  return orphanCleanup.cleanOrphanAttachmentObjects(storage, createPrismaRequestExistenceReader(database), now);
 }

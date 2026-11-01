@@ -10,6 +10,7 @@ import {
   transitionRequestStatus,
 } from "@/modules/requests";
 import { addComment } from "@/modules/comments";
+import { scheduleEventProcessing } from "@/server/jobs";
 import { ApplicationError, ValidationError } from "@/server/errors";
 
 function field(formData: FormData, name: string): string {
@@ -52,6 +53,7 @@ async function runOnRequest(
     throw error;
   }
 
+  scheduleEventProcessing();
   revalidatePath("/queue");
   revalidatePath(`/queue/${requestId}`);
   redirect(`/queue/${requestId}?notice=${notice}`);

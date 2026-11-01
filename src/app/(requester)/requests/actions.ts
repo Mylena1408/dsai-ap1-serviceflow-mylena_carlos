@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { addComment } from "@/modules/comments";
+import { scheduleEventProcessing } from "@/server/jobs";
 import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
@@ -65,6 +66,7 @@ export async function createRequestAction(formData: FormData): Promise<never> {
     throw error;
   }
 
+  scheduleEventProcessing();
   revalidatePath("/catalog");
   revalidatePath("/requests");
   redirect(`/requests/${requestId}?notice=created`);
@@ -99,6 +101,7 @@ async function runOnOwnRequest(
     throw error;
   }
 
+  scheduleEventProcessing();
   revalidatePath("/requests");
   revalidatePath(`/requests/${requestId}`);
   redirect(`/requests/${requestId}?notice=${notice}`);

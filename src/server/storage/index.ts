@@ -11,7 +11,8 @@ export type DocumentStorageFailure =
   | "NOT_FOUND"
   | "WRITE_FAILED"
   | "READ_FAILED"
-  | "DELETE_FAILED";
+  | "DELETE_FAILED"
+  | "LIST_FAILED";
 
 // The public message stays the generic internal error; `reason` is for server-side
 // handling and logs and never carries keys, file names, content or provider details.
@@ -21,10 +22,31 @@ export class DocumentStorageError extends InternalServerError {
   }
 }
 
+/** One level of a listing: a folder (request id) or an object, with its creation time. */
+export interface StorageEntry {
+  name: string;
+  isFolder: boolean;
+  createdAt: Date | null;
+}
+
 export interface DocumentStorage {
   put(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
   get(key: string): Promise<Uint8Array>;
   remove(key: string): Promise<void>;
+  /**
+   * Lists one level under "requests/" or "requests/<request id>/" (used by the orphan
+   * cleanup, SPEC 21.15.5). Other prefixes are refused.
+   */
+  list(prefix: string): Promise<StorageEntry[]>;
+}
+
+const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+const LIST_PREFIX_PATTERN = new RegExp(`^requests/(${UUID}/)?$`);
+
+function assertListPrefix(prefix: string): void {
+  if (!LIST_PREFIX_PATTERN.test(prefix)) {
+    throw new DocumentStorageError("INVALID_KEY");
+  }
 }
 
 export interface DocumentStorageConfig {
@@ -112,7 +134,7 @@ export function createUnavailableDocumentStorage(): DocumentStorage {
     throw new DocumentStorageError("NOT_CONFIGURED");
   };
 
-  return { put: unavailable, get: unavailable, remove: unavailable };
+  return { put: unavailable, get: unavailable, remove: unavailable, list: unavailable };
 }
 
 const END_TO_END_STORE = Symbol.for("serviceflow.e2eDocumentStorage");
@@ -178,11 +200,20 @@ export function getApplicationDocumentStorage(
     put: async (key, bytes, contentType) => storage().put(key, bytes, contentType),
     get: async (key) => storage().get(key),
     remove: async (key) => storage().remove(key),
+    list: async (prefix) => storage().list(prefix),
   };
 }
 
-export function createMemoryDocumentStorage(): DocumentStorage & { readonly size: number } {
+/** Whether the running application has a document storage (real or E2E memory). */
+export function isDocumentStorageConfigured(env: Record<string, string | undefined> = process.env): boolean {
+  return getEndToEndDocumentStorage(env) !== null || getDocumentStorageConfig("application", env) !== null;
+}
+
+export function createMemoryDocumentStorage(
+  clock: () => Date = () => new Date(),
+): DocumentStorage & { readonly size: number } {
   const objects = new Map<string, Uint8Array>();
+  const createdAt = new Map<string, Date>();
 
   return {
     get size() {
@@ -196,6 +227,7 @@ export function createMemoryDocumentStorage(): DocumentStorage & { readonly size
       }
 
       objects.set(key, new Uint8Array(bytes));
+      createdAt.set(key, clock());
     },
     async get(key) {
       assertStorageKey(key);
@@ -210,6 +242,23 @@ export function createMemoryDocumentStorage(): DocumentStorage & { readonly size
     async remove(key) {
       assertStorageKey(key);
       objects.delete(key);
+      createdAt.delete(key);
+    },
+    async list(prefix) {
+      assertListPrefix(prefix);
+      const entries = new Map<string, StorageEntry>();
+
+      for (const key of objects.keys()) {
+        if (!key.startsWith(prefix)) continue;
+        const [name, ...rest] = key.slice(prefix.length).split("/");
+        entries.set(name, {
+          name,
+          isFolder: rest.length > 0,
+          createdAt: rest.length > 0 ? null : (createdAt.get(key) ?? null),
+        });
+      }
+
+      return [...entries.values()];
     },
   };
 }
@@ -274,6 +323,52 @@ export function createSupabaseDocumentStorage(
         return new Uint8Array(await response.arrayBuffer());
       } catch {
         throw new DocumentStorageError("READ_FAILED");
+      }
+    },
+    async list(prefix) {
+      assertListPrefix(prefix);
+      const entries: StorageEntry[] = [];
+      const pageSize = 1000;
+
+      for (let offset = 0; ; offset += pageSize) {
+        const response = await send(
+          `${config.url}/storage/v1/object/list/${encodeURIComponent(config.bucket)}`,
+          {
+            method: "POST",
+            headers: { ...headers, "content-type": "application/json" },
+            body: JSON.stringify({
+              prefix: prefix.replace(/\/$/, ""),
+              limit: pageSize,
+              offset,
+              sortBy: { column: "name", order: "asc" },
+            }),
+          },
+          "LIST_FAILED",
+        );
+
+        if (!response.ok) {
+          throw new DocumentStorageError("LIST_FAILED");
+        }
+
+        let page: Array<{ name?: unknown; id?: unknown; created_at?: unknown }>;
+        try {
+          page = await response.json();
+        } catch {
+          throw new DocumentStorageError("LIST_FAILED");
+        }
+
+        for (const item of page) {
+          if (typeof item.name !== "string") continue;
+          entries.push({
+            name: item.name,
+            isFolder: item.id === null || item.id === undefined,
+            createdAt: typeof item.created_at === "string" ? new Date(item.created_at) : null,
+          });
+        }
+
+        if (page.length < pageSize) {
+          return entries;
+        }
       }
     },
     async remove(key) {

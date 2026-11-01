@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { AttachmentQueryRepository } from "../application/ports";
+import type { RequestExistenceReader } from "../application/orphan-cleanup";
 
 // The storage key is selected only for the download lookup, never for listings.
 const summary = {
@@ -52,6 +53,18 @@ export function createPrismaAttachmentQueryRepository(
         select: stored,
       });
       return row && toStored(row);
+    },
+  };
+}
+
+export function createPrismaRequestExistenceReader(database: PrismaClient): RequestExistenceReader {
+  return {
+    async existingRequestIds(requestIds) {
+      const rows = await database.request.findMany({
+        where: { id: { in: requestIds } },
+        select: { id: true },
+      });
+      return new Set(rows.map(({ id }) => id));
     },
   };
 }

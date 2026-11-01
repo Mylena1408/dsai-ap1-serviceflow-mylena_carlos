@@ -659,7 +659,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-062 — Processador, `after()` e cron diário
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Processador (`events/application/process-outbox.ts` + `createPrismaOutboxStore`), regras de nova tentativa (`events/domain/retry.ts`), `scheduleEventProcessing` com `after()` nas Server Actions, job diário `runDailyJob` (`src/server/jobs`) e rota `/api/cron/daily` agendada no `vercel.json`, protegida por `CRON_SECRET`. Limpeza de órfãos (`requests/application/orphan-cleanup.ts`) com listagem no adaptador de armazenamento. CA-EVT-03, 04 e 05 verificados. Ainda sem consumidores (SF-063).
 - **Objetivo:** Processador em lote com `FOR UPDATE SKIP LOCKED`, tentativas com espera crescente, disparo por `after()` nas Server Actions e rota `/api/cron/daily` protegida por `CRON_SECRET` com as limpezas da seção 7.
 - **Arquivos/módulos esperados:** `src/modules/events/`, `src/app/api/cron/daily/route.ts`, `vercel.json`, actions, testes.
 - **Dependências:** SF-061.

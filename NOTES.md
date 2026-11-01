@@ -839,3 +839,27 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** lint, typecheck e build OK; unitários 348/348 (59 arquivos); integração 158/158 + 1 pulado (35 arquivos); E2E 7/7.
 - **Banco Neon:** precisa desta migration antes da próxima publicação.
 - **Correção de data:** a SF-061 foi concluída em 31/10 às 22:54 (horário dos commits). A migration recebeu o prefixo `20261101000000` por engano; o nome foi mantido porque ela já está aplicada nos bancos de teste e de desenvolvimento, e o prefixo só ordena as migrations.
+
+## SF-062 — Processador, `after()` e job diário (2026-10-31)
+
+- **Conferido na documentação da Vercel (2026-10-31):** o cron chama a rota com `GET` e `Authorization: Bearer <CRON_SECRET>`; a Vercel recomenda um segredo de 16 caracteres ou mais e avisa que a mesma execução pode chegar duas vezes ou não chegar. No Next 16, `after()` lança erro fora de uma requisição.
+- **Processador:**
+  - a reserva acontece numa transação curta, com `SELECT … FOR UPDATE SKIP LOCKED` sobre eventos disponíveis, e adia `availableAt` em 5 minutos;
+  - cada evento passa por todos os consumidores; com sucesso, recebe `processedAt`;
+  - com falha, `attempts + 1`, `availableAt` com espera de 1, 5 e 30 minutos e depois diária, e `lastErrorCode` só com o código (`failureCode` nunca grava a mensagem); na 10.ª tentativa recebe `failedAt`.
+- **`scheduleEventProcessing()`:** as Server Actions do solicitante e do atendente o chamam depois de cada operação bem-sucedida. Ele agenda o processador com `after()`. Se `after` lançar erro (fora de requisição, como nos testes unitários das ações) ou se o processamento falhar, os eventos ficam para o job diário. Por isso os testes antigos das ações continuaram passando sem mudança.
+- **Job diário (`runDailyJob`):**
+  - processa até 20 lotes de 50 eventos;
+  - apaga eventos processados há mais de 30 dias;
+  - limpa os arquivos órfãos, ou pula a etapa sem armazenamento configurado.
+  - Cada etapa roda mesmo que outra falhe e devolve `ok`, `skipped` ou `error` com código.
+- **Rota `/api/cron/daily`:** 401 sem o segredo certo (comparação em tempo constante); 200 com o resumo, ou 500 se alguma etapa falhar, registrando só os códigos.
+- **`vercel.json`:** `"0 6 * * *"` (06:00 UTC, 03:00 em Brasília). No plano Hobby, a execução cai em qualquer minuto dessa hora.
+- **Limpeza de órfãos (decisão E3):**
+  - o adaptador de armazenamento ganhou `list(prefix)`, que só aceita `requests/` e `requests/<id>/`; a memória guarda a data de criação; no Supabase usa `POST /object/list/{bucket}` com paginação;
+  - a regra fica em `requests/application/orphan-cleanup.ts`: uma pasta cuja solicitação não existe só pode ter órfãos (compensação que falhou), e seus objetos com mais de 24 horas são apagados.
+  - **A listagem do Supabase não foi testada contra um bucket real** (SF-030 pendente), só com HTTP simulado.
+- **Falha durante o trabalho:** o teste de integração novo não carregou porque faltou isolar `@/server/auth` (que puxa o `next-auth`), como os outros testes de integração fazem. Corrigido no teste.
+- **Testes:** 13 unitários (regras de nova tentativa, processador, segredo, listagem, limpeza, rota) e 4 de integração (concorrência real, tentativas e falha definitiva, job diário, limpeza com banco). O teste de concorrência rodou 4 vezes.
+- **Resultados:** lint, typecheck e build OK; unitários 361/361 (62 arquivos); integração 162/162 + 1 pulado (36 arquivos); E2E 7/7.
+- **Pendências para produção:** cadastrar `CRON_SECRET` na Vercel, como Secret com pelo menos 16 caracteres; sem ele, a rota recusa tudo. Aplicar a migration `20261101000000` no Neon antes de publicar.
