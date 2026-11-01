@@ -181,3 +181,9 @@ SF-063 concluída (ver `NOTES.md`, seção SF-063).
 > siga
 
 SF-064 concluída (ver `NOTES.md`, seção SF-064).
+
+## Continuação — publicação dos eventos
+
+> sim,pode prosseguir
+
+Migration no Neon, deploy e verificação só com leitura (ver `NOTES.md`).

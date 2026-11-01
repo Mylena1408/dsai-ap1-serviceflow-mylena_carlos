@@ -910,3 +910,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **SPEC `2026-10-31-eventos-outbox-jobs.md` concluída:** CA-EVT-01 a 09 verificados.
 - **Resultados:** lint, typecheck e build OK; unitários 369/369 (64 arquivos); integração 167/167 + 1 pulado (37 arquivos); E2E 8/8.
 - **Para publicar:** aplicar no Neon a migration `20261101000000_outbox_and_notifications`; o `CRON_SECRET` já está cadastrado na Vercel.
+
+## Publicação dos eventos e notificações (2026-11-01)
+
+- A pedido da responsável:
+  - aplicada no Neon a migration `20261101000000_outbox_and_notifications`; `prisma migrate status`: 10 migrations, banco em dia;
+  - `vercel deploy --prod` do commit `ff65f7e` em https://serviceflow-sand.vercel.app.
+- A Vercel registrou o cron `/api/cron/daily` com `0 6 * * *` (`vercel crons ls`). O `CRON_SECRET` já estava cadastrado.
+- Verificação no site publicado, só com leitura:
+  - a rota do cron responde 401 sem segredo e com segredo errado;
+  - abrir uma notificação sem login redireciona (303) para `/login`, com destino relativo;
+  - solicitante e atendente veem o link "Notificações" e a página com "0 não lidas" (o banco de produção não tinha eventos novos).
+  - Nenhum formulário que grava foi enviado. A primeira execução real do cron é esperada para a próxima janela das 06:00 UTC.
