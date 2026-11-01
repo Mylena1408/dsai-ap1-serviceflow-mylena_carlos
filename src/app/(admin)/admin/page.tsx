@@ -10,6 +10,7 @@ import { listSectors } from "@/modules/sectors";
 import { listServices } from "@/modules/services";
 import { listUsers } from "@/modules/users";
 import { listDocumentRequirements } from "@/modules/document-requirements";
+import { listServiceFields } from "@/modules/service-fields";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { OverviewSection } from "./_sections/overview-section";
 import { SectorsSection } from "./_sections/sectors/sectors-section";
@@ -39,7 +40,11 @@ function selectedAdminSection(section?: string): AdminSection {
   return adminSections.find((item) => item.id === section)?.id ?? "overview";
 }
 
-function announcement(error?: string, notice?: string): string | null {
+function announcement(error?: string, notice?: string, entity?: string): string | null {
+  // Reactivating a custom field fails on the limit or on a repeated label (SPEC 2026-11-01-campos-personalizados, 5.1).
+  if (error === "dependency" && entity === "serviceFields") {
+    return "Não foi possível concluir: o serviço já tem o limite de campos ativos ou outro campo ativo usa o mesmo rótulo.";
+  }
   if (error === "dependency") {
     return "A operação não pode ser concluída enquanto existirem dependências ativas ou solicitações pendentes.";
   }
@@ -70,7 +75,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ error, notice, section }, sectors, categories, users, services, documentRequirements] =
+  const [{ entity, error, notice, section }, sectors, categories, users, services, documentRequirements, serviceFields] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -78,8 +83,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       listUsers(),
       listServices(),
       listDocumentRequirements(),
+      listServiceFields(),
     ]);
-  const message = announcement(error, notice);
+  const message = announcement(error, notice, entity);
   const selectedSection = selectedAdminSection(section);
 
   return (
@@ -148,6 +154,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         <ServicesSection
           categories={categories}
           documentRequirements={documentRequirements}
+          serviceFields={serviceFields}
           section={selectedSection}
           sectors={sectors}
           services={services}

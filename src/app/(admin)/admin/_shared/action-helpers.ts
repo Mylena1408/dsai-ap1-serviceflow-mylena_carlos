@@ -6,7 +6,7 @@ import { ApplicationError } from "@/server/errors";
 import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
-export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements";
+export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields";
 export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services";
 
 export function field(formData: FormData, name: string): string {
@@ -25,6 +25,30 @@ export function documentRequirementFields(formData: FormData) {
     acceptedFormats: formData
       .getAll("acceptedFormats")
       .filter((value): value is string => typeof value === "string"),
+  };
+}
+
+// Custom field form (SPEC 2026-11-01-campos-personalizados, 5.1 and 5.2). Options come one per
+// line; blank limits mean "no limit". Fields the form does not show (options outside lists,
+// limits outside integers) arrive empty. Unexpected values are passed through for validation.
+export function serviceFieldFields(formData: FormData) {
+  const isRequired = field(formData, "isRequired");
+  const limit = (name: string) => {
+    const value = field(formData, name).trim();
+    return value === "" ? null : /^-?\d+$/.test(value) ? Number(value) : value;
+  };
+
+  return {
+    label: field(formData, "label"),
+    helpText: field(formData, "helpText"),
+    type: field(formData, "type"),
+    isRequired: isRequired === "true" ? true : isRequired === "false" ? false : isRequired,
+    options: field(formData, "options")
+      .split(/\r?\n/)
+      .map((option) => option.trim())
+      .filter((option) => option !== ""),
+    minValue: limit("minValue"),
+    maxValue: limit("maxValue"),
   };
 }
 

@@ -1,5 +1,13 @@
+import type { PrismaClient } from "@prisma/client";
+import { prisma } from "@/server/db";
+import * as useCases from "./application/service-field-use-cases";
+import type { ServiceFieldRecord } from "./domain/service-field";
+import {
+  createPrismaServiceFieldRepository,
+  createPrismaServiceFieldTransactionRunner,
+} from "./infrastructure/prisma-service-field-repository";
+
 // Public API of the custom fields module (SPEC 2026-11-01-campos-personalizados).
-// SF-071 exposes the rules; the use cases and the repository come with SF-072 and SF-073.
 
 export {
   MAX_ACTIVE_SERVICE_FIELDS,
@@ -20,3 +28,45 @@ export type {
 } from "./domain/field-value";
 export { serviceFieldInputSchema } from "./application/service-field-schemas";
 export type { ServiceFieldInput } from "./application/service-field-schemas";
+
+export async function listServiceFields(database: PrismaClient = prisma): Promise<ServiceFieldRecord[]> {
+  return useCases.listServiceFields(createPrismaServiceFieldRepository(database));
+}
+
+export async function createServiceField(
+  serviceId: unknown,
+  input: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceFieldRecord> {
+  return useCases.createServiceField(serviceId, input, createPrismaServiceFieldTransactionRunner(database));
+}
+
+export async function updateServiceField(
+  fieldId: unknown,
+  input: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceFieldRecord> {
+  return useCases.updateServiceField(fieldId, input, createPrismaServiceFieldTransactionRunner(database));
+}
+
+export async function moveServiceField(
+  fieldId: unknown,
+  direction: unknown,
+  database: PrismaClient = prisma,
+): Promise<void> {
+  return useCases.moveServiceField(fieldId, direction, createPrismaServiceFieldTransactionRunner(database));
+}
+
+export async function deactivateServiceField(
+  fieldId: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceFieldRecord> {
+  return useCases.deactivateServiceField(fieldId, createPrismaServiceFieldTransactionRunner(database));
+}
+
+export async function reactivateServiceField(
+  fieldId: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceFieldRecord> {
+  return useCases.reactivateServiceField(fieldId, createPrismaServiceFieldTransactionRunner(database));
+}

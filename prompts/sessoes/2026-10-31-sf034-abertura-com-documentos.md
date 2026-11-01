@@ -253,3 +253,9 @@ Decisões F1 a F4 respondidas pela responsável no questionário: todas as propo
 > siga para a sf-071
 
 SF-071 concluída (ver `NOTES.md`, seção SF-071).
+
+## Continuação — SF-072
+
+> siga para a sf-072
+
+SF-072 concluída (ver `NOTES.md`, seção SF-072).

@@ -51,4 +51,6 @@ export const serviceFieldInputSchema = z
     }
   });
 
+export const serviceFieldMoveSchema = z.enum(["up", "down"]);
+
 export type ServiceFieldInput = z.output<typeof serviceFieldInputSchema>;

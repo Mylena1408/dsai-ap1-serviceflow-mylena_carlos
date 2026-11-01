@@ -4,19 +4,26 @@ import {
   type DocumentRequirementRecord,
 } from "@/modules/document-requirements";
 import type { SectorRecord } from "@/modules/sectors";
+import { MAX_ACTIVE_SERVICE_FIELDS, type ServiceFieldRecord } from "@/modules/service-fields";
 import type { ServiceRecord } from "@/modules/services";
 import { AdminCreateForm } from "../../create-form";
 import { DocumentRequirementsEditor } from "../../document-requirements-editor";
 import { AdminRecordEditor } from "../../record-editor";
+import { ServiceFieldsEditor } from "../../service-fields-editor";
 import { ServiceSlaFields } from "../../service-sla-fields";
 import {
   createDocumentRequirementAction,
   createServiceAction,
+  createServiceFieldAction,
   deactivateDocumentRequirementAction,
+  deactivateServiceFieldAction,
   moveDocumentRequirementAction,
+  moveServiceFieldAction,
+  reactivateServiceFieldAction,
   toggleServiceAction,
   updateDocumentRequirementAction,
   updateServiceAction,
+  updateServiceFieldAction,
 } from "./actions";
 
 type ServicesSectionProps = {
@@ -25,6 +32,7 @@ type ServicesSectionProps = {
   categories: CategoryRecord[];
   sectors: SectorRecord[];
   documentRequirements: DocumentRequirementRecord[];
+  serviceFields: ServiceFieldRecord[];
 };
 
 export function ServicesSection({
@@ -33,6 +41,7 @@ export function ServicesSection({
   categories,
   sectors,
   documentRequirements,
+  serviceFields,
 }: ServicesSectionProps) {
   return (
     <section className="admin-section" aria-labelledby="services-heading">
@@ -103,6 +112,28 @@ export function ServicesSection({
                   }))}
                 serviceId={service.id}
                 updateAction={updateDocumentRequirementAction}
+              />
+              <ServiceFieldsEditor
+                createAction={createServiceFieldAction}
+                deactivateAction={deactivateServiceFieldAction}
+                fields={serviceFields
+                  .filter((serviceField) => serviceField.serviceId === service.id)
+                  .map((serviceField) => ({
+                    id: serviceField.id,
+                    label: serviceField.label,
+                    helpText: serviceField.helpText,
+                    type: serviceField.type,
+                    isRequired: serviceField.isRequired,
+                    options: serviceField.options,
+                    minValue: serviceField.minValue,
+                    maxValue: serviceField.maxValue,
+                    isActive: serviceField.isActive,
+                  }))}
+                maxActive={MAX_ACTIVE_SERVICE_FIELDS}
+                moveAction={moveServiceFieldAction}
+                reactivateAction={reactivateServiceFieldAction}
+                serviceId={service.id}
+                updateAction={updateServiceFieldAction}
               />
             </AdminRecordEditor>
           ))}

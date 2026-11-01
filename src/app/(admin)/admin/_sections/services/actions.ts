@@ -12,6 +12,13 @@ import {
   updateDocumentRequirement,
 } from "@/modules/document-requirements";
 import {
+  createServiceField,
+  deactivateServiceField,
+  moveServiceField,
+  reactivateServiceField,
+  updateServiceField,
+} from "@/modules/service-fields";
+import {
   activeState,
   createFailure,
   documentRequirementFields,
@@ -21,6 +28,7 @@ import {
   finishUpdate,
   reportFailure,
   selectedSection,
+  serviceFieldFields,
   updateFailure,
   type AdminUpdateState,
 } from "../../_shared/action-helpers";
@@ -134,4 +142,58 @@ export async function deactivateDocumentRequirementAction(formData: FormData): P
     reportFailure("documentRequirements", section, error);
   }
   return finish("documentRequirements", "status", section);
+}
+
+export async function createServiceFieldAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await createServiceField(field(formData, "serviceId"), serviceFieldFields(formData));
+  } catch (error) {
+    return createFailure(error);
+  }
+  return finishCreate();
+}
+
+export async function updateServiceFieldAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await updateServiceField(field(formData, "id"), serviceFieldFields(formData));
+  } catch (error) {
+    return updateFailure(error);
+  }
+  return finishUpdate();
+}
+
+export async function moveServiceFieldAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await moveServiceField(field(formData, "id"), field(formData, "direction"));
+  } catch (error) {
+    reportFailure("serviceFields", section, error);
+  }
+  return finish("serviceFields", "updated", section);
+}
+
+export async function deactivateServiceFieldAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await deactivateServiceField(field(formData, "id"));
+  } catch (error) {
+    reportFailure("serviceFields", section, error);
+  }
+  return finish("serviceFields", "status", section);
+}
+
+export async function reactivateServiceFieldAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await reactivateServiceField(field(formData, "id"));
+  } catch (error) {
+    reportFailure("serviceFields", section, error);
+  }
+  return finish("serviceFields", "status", section);
 }

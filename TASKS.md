@@ -767,7 +767,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-072 — Configuração dos campos pelo administrador
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Casos de uso de criar, editar, reordenar, desativar e reativar (`service-field-use-cases.ts`), repositório Prisma, cinco ações do servidor só para `ADMIN` e o editor "Campos do formulário" em cada serviço da área administrativa. Ordenação "Subir/Descer" movida para `src/shared/ordering` e usada também pelos documentos. CA-FLD-02 e 03 verificados.
 - **Objetivo:** Casos de uso de criar, editar, reordenar, desativar e reativar; ações do servidor só para `ADMIN`; editor na seção de serviços da área administrativa.
 - **Arquivos/módulos esperados:** `src/modules/service-fields/`, `src/app/(admin)/admin/`, testes.
 - **Dependências:** SF-071.
