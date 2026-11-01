@@ -1,5 +1,5 @@
 // Demonstration mode (SPEC 2026-09-30, section 22): one reusable account per role.
-export const DEMO_ROLES = ["ADMIN", "REQUESTER", "ATTENDANT"] as const;
+export const DEMO_ROLES = ["ADMIN", "REQUESTER", "ATTENDANT", "MANAGER"] as const;
 
 export type DemoRole = (typeof DEMO_ROLES)[number];
 
@@ -20,6 +20,11 @@ export const DEMO_ACCOUNTS: Record<DemoRole, DemoAccount> = {
   ATTENDANT: {
     name: "Atendente (demonstração)",
     email: "demo.atendente@serviceflow.demo",
+  },
+  // SPEC 2026-11-01-aprovacoes, 5.1: manager of the demonstration sector.
+  MANAGER: {
+    name: "Gestor (demonstração)",
+    email: "demo.gestor@serviceflow.demo",
   },
 };
 

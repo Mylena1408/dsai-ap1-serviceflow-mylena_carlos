@@ -2,7 +2,7 @@ import { requireConfigurationAdministrator } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
-import { userCreationInputSchema, userUpdateInputSchema } from "./user-schemas";
+import { roleRequiresSector, userCreationInputSchema, userUpdateInputSchema } from "./user-schemas";
 import type { ManagedUser, UserRole, UserState } from "../domain/user";
 import {
   assertAdministratorCanRetire,
@@ -29,7 +29,7 @@ export async function createUser(
   const passwordHash = await hashPassword(parsed.password);
 
   return transactions.run(async (transaction) => {
-    if (parsed.role === "ATTENDANT") {
+    if (roleRequiresSector(parsed.role)) {
       await assertActiveSector(transaction, parsed.sectorId);
     }
 
@@ -60,7 +60,7 @@ export async function updateUser(
       throw new NotFoundError();
     }
 
-    if (parsed.role === "ATTENDANT") {
+    if (roleRequiresSector(parsed.role)) {
       await assertActiveSector(transaction, parsed.sectorId);
     }
 
@@ -101,7 +101,7 @@ export async function setUserActive(
       throw new NotFoundError();
     }
 
-    if (active && current.role === "ATTENDANT") {
+    if (active && roleRequiresSector(current.role)) {
       await assertActiveSector(transaction, current.sectorId);
     }
 

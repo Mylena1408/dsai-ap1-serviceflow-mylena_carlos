@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { emailSchema, entityIdSchema, nameSchema } from "@/shared/validation";
 
-const userRoleSchema = z.enum(["ADMIN", "REQUESTER", "ATTENDANT"]);
+const userRoleSchema = z.enum(["ADMIN", "REQUESTER", "ATTENDANT", "MANAGER"]);
+
+// Attendants and managers belong to one sector (SPEC 2026-11-01-aprovacoes, 5.1).
+export function roleRequiresSector(role: z.infer<typeof userRoleSchema>): boolean {
+  return role === "ATTENDANT" || role === "MANAGER";
+}
 const sectorAssignmentSchema = entityIdSchema.nullable().optional();
 
 function validateUserRoleSector(
@@ -10,19 +15,19 @@ function validateUserRoleSector(
 ): void {
   const hasSector = user.sectorId !== undefined && user.sectorId !== null;
 
-  if (user.role === "ATTENDANT" && !hasSector) {
+  if (roleRequiresSector(user.role) && !hasSector) {
     context.addIssue({
       code: "custom",
       path: ["sectorId"],
-      message: "Attendants require a sector.",
+      message: "Attendants and managers require a sector.",
     });
   }
 
-  if (user.role !== "ATTENDANT" && hasSector) {
+  if (!roleRequiresSector(user.role) && hasSector) {
     context.addIssue({
       code: "custom",
       path: ["sectorId"],
-      message: "Only attendants may be associated with a sector.",
+      message: "Only attendants and managers may be associated with a sector.",
     });
   }
 }

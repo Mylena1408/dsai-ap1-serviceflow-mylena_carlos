@@ -1150,3 +1150,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Perfil novo nos tipos:** as uniões de perfil do código ganharam `MANAGER`; rótulo "Gestor" na administração e na conversa; a página inicial e "Alterar senha" mandam o gestor para `/approvals`, área que nasce na SF-082 (até lá não há como criar gestores pela interface). A conta de demonstração continua com três perfis até a SF-082.
 - **Teste existente alterado (só o objeto de teste):** `tests/unit/authorization/index.test.ts` ganhou `approvalState: null` no objeto tipado como linha do Prisma.
 - **Resultados:** lint, typecheck e build OK; unitários 513/513 (86 arquivos); integração 233/233 + 1 pulado (51 arquivos); E2E 11/11.
+
+## SF-082 — Perfil Gestor no sistema (2026-11-01)
+
+- **Usuários:** o perfil `MANAGER` entrou na validação; a regra "setor obrigatório" passou a valer para atendente e gestor (`roleRequiresSector`), na criação, na edição e na reativação. As regras específicas de atendente (não deixar setor sem atendente com solicitações pendentes) continuam só para atendentes. Formulários da administração com a opção "Gestor".
+- **Demonstração e sessão:** `DEMO_ROLES` ganhou `MANAGER` ("Gestor (demonstração)", `demo.gestor@serviceflow.demo`), ligado ao mesmo setor de demonstração do atendente; botão "Entrar como Gestor" no login; a sessão aceita o perfil novo. O banco fictício (`seed:demo`) não cria o gestor: a conta nasce no primeiro login de demonstração, como as outras.
+- **Área do gestor:** grupo de rotas `(manager)` com `requireManagerPageAccess` (quem não é gestor volta para a página inicial, que manda cada perfil para a sua área), navegação com "Aprovações" e "Alterar senha", e a página `/approvals` com o título e a explicação. A lista de aprovações entra na SF-085, depois que as decisões existirem (SF-084). As áreas existentes já devolviam qualquer outro perfil para `/`.
+- **Asserção existente alterada (exigida pela SPEC):** `tests/unit/modules/auth/application/demo-sign-in.test.ts` conferia 3 e-mails de demonstração distintos; com a conta do gestor (5.1), são 4.
+- **Resultados:** lint, typecheck e build OK; unitários 513/513 (86 arquivos); integração 237/237 + 1 pulado (52 arquivos); E2E 12/12.

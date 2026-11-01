@@ -107,8 +107,8 @@ Para solicitações que exigem aprovação, o vencimento do SLA é calculado **a
 ## 7. Critérios de aceitação
 
 - [ ] **CA-APR-01** — Serviço sem aprovação: abertura, início, conclusão, SLA e notificações funcionam como hoje, e todas as suítes anteriores passam sem alteração de asserções (exceto as listas exatas exigidas pela SPEC).
-- [ ] **CA-APR-02** — O administrador cadastra gestores (sempre com setor) e marca serviços como "exige aprovação"; outros perfis são negados.
-- [ ] **CA-APR-03** — O gestor entra (senha e demonstração), vai para "Aprovações" e não acessa as áreas de solicitante, atendente ou administração.
+- [ ] **CA-APR-02** — O administrador cadastra gestores (sempre com setor) e marca serviços como "exige aprovação"; outros perfis são negados. *Parcial em 2026-11-01 (SF-082): o administrador cadastra gestores só com setor ativo existente (sem setor, setor inativo e setor inexistente recusados), troca perfis mantendo a regra do setor e não reativa gestor de setor inativo (integração). Falta a opção "exige aprovação" no serviço (SF-083).*
+- [x] **CA-APR-03** — O gestor entra (senha e demonstração), vai para "Aprovações" e não acessa as áreas de solicitante, atendente ou administração. *Verificado em 2026-11-01 (SF-082): "Entrar como Gestor" leva à área "Aprovações"; catálogo, minhas solicitações, fila e administração devolvem o gestor para `/approvals`; "Alterar senha" volta para a área do gestor (E2E); a conta de demonstração é criada uma vez, no setor de demonstração (integração).*
 - [ ] **CA-APR-04** — A solicitação de um serviço com aprovação nasce com aprovação pendente; mudar o serviço depois não altera solicitações existentes.
 - [ ] **CA-APR-05** — Com aprovação pendente, iniciar o atendimento é recusado; após a aprovação, funciona normalmente.
 - [ ] **CA-APR-06** — Só um gestor ativo do setor decide, uma vez; rejeitar exige observação e cancela a solicitação na mesma transação; decisões simultâneas não gravam duas vezes.

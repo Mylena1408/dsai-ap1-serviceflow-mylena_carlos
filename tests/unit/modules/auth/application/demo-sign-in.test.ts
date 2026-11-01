@@ -38,6 +38,7 @@ describe("signInAsDemoUser", () => {
 
   it("uses distinct demonstration e-mails per role", () => {
     const emails = Object.values(DEMO_ACCOUNTS).map(({ email }) => email);
-    expect(new Set(emails).size).toBe(3);
+    // Four roles since SPEC 2026-11-01-aprovacoes (5.1) added the demonstration manager.
+    expect(new Set(emails).size).toBe(4);
   });
 });

@@ -875,7 +875,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-082 — Perfil Gestor no sistema
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Perfil "Gestor" no cadastro de usuários (setor ativo obrigatório, como o atendente), conta "Gestor (demonstração)" no setor de demonstração, sessão aceitando o perfil, área `/approvals` com navegação própria e bloqueio das outras áreas. CA-APR-03 verificado; parte de usuários do CA-APR-02 verificada (a do serviço vem na SF-083).
 - **Objetivo:** Perfil "Gestor" no cadastro de usuários (com setor obrigatório), login com senha e conta de demonstração, área própria e navegação; bloqueio das outras áreas.
 - **Arquivos/módulos esperados:** Módulos de usuários e autenticação, `src/server/authorization`, telas de login e navegação, testes.
 - **Dependências:** SF-081.

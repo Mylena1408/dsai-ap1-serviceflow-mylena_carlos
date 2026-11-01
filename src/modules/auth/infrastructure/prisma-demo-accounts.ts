@@ -42,7 +42,8 @@ export function createPrismaDemoAccountStore(database: PrismaClient): DemoAccoun
       return runSerializableTransaction(
         database,
         async (transaction) => {
-          const sectorId = role === "ATTENDANT" ? await ensureDemoSector(transaction) : null;
+          const sectorId =
+            role === "ATTENDANT" || role === "MANAGER" ? await ensureDemoSector(transaction) : null;
           const current = await transaction.user.findUnique({
             where: { email: account.email },
             select: { id: true },

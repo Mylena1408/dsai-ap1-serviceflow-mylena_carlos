@@ -53,7 +53,7 @@ export interface AdministratorBootstrapStore {
 
 export interface DemoAccountStore {
   /** Creates or restores the demonstration account of `role` and returns its identity. */
-  ensureDemoUser(role: "ADMIN" | "REQUESTER" | "ATTENDANT"): Promise<{
+  ensureDemoUser(role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER"): Promise<{
     id: string;
     name: string;
     email: string;

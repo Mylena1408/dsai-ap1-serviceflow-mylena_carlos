@@ -325,3 +325,9 @@ Decisões A1 a A4 respondidas pela responsável no questionário: todas as propo
 > siga para a sf-081
 
 SF-081 concluída (ver `NOTES.md`, seção SF-081).
+
+## Continuação — SF-082
+
+> siga o teste novamente e logo depois continue para a sf-081
+
+A SF-081 já estava concluída; entendido como a SF-082. PostgreSQL de teste religado, unitários e integração confirmados (513 e 233 + 1 pulado) e SF-082 concluída (ver `NOTES.md`, seção SF-082).

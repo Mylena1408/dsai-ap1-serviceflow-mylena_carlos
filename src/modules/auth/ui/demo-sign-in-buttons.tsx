@@ -8,6 +8,7 @@ const DEMO_OPTIONS = [
   { role: "ADMIN", label: "Entrar como Administrador" },
   { role: "REQUESTER", label: "Entrar como Solicitante" },
   { role: "ATTENDANT", label: "Entrar como Atendente" },
+  { role: "MANAGER", label: "Entrar como Gestor" },
 ] as const;
 
 export function DemoSignInButtons() {

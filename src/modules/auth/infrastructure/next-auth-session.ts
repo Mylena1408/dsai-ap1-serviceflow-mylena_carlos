@@ -5,7 +5,7 @@ import { prisma } from "@/server/db";
 import type { AuthRole } from "../application/ports";
 import { createPrismaAuthUserRepository } from "./prisma-auth-repository";
 
-const ROLES = new Set<string>(["ADMIN", "REQUESTER", "ATTENDANT"]);
+const ROLES = new Set<string>(["ADMIN", "REQUESTER", "ATTENDANT", "MANAGER"]);
 
 function isRole(value: unknown): value is AuthRole {
   return typeof value === "string" && ROLES.has(value);

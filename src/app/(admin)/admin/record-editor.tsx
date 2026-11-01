@@ -122,12 +122,13 @@ function EditorForm({
                 <option value="ADMIN">Administrador</option>
                 <option value="REQUESTER">Solicitante</option>
                 <option value="ATTENDANT">Atendente</option>
+                <option value="MANAGER">Gestor</option>
               </select>
             </label>
             <label>
               Setor da equipe
               <select defaultValue={record.sectorId ?? ""} name="sectorId">
-                <option value="">Selecione se for atendente</option>
+                <option value="">Selecione se for atendente ou gestor</option>
                 {sectors.map((sector) => (
                   <option key={sector.id} value={sector.id}>
                     {sector.name}{sector.isActive ? "" : " (inativo)"}

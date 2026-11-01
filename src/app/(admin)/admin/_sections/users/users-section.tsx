@@ -30,12 +30,13 @@ export function UsersSection({ section, users, sectors }: UsersSectionProps) {
               <option value="ADMIN">Administrador</option>
               <option value="REQUESTER">Solicitante</option>
               <option value="ATTENDANT">Atendente</option>
+              <option value="MANAGER">Gestor</option>
             </select>
           </label>
           <label>
             Setor da equipe
             <select name="sectorId" defaultValue="">
-              <option value="">Selecione se for atendente</option>
+              <option value="">Selecione se for atendente ou gestor</option>
               {sectors
                 .filter((sector) => sector.isActive)
                 .map((sector) => (
