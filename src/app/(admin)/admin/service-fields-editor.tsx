@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
+import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
 
 // Custom fields of a service (SPEC 2026-11-01-campos-personalizados, 5.1 and 5.2).
@@ -178,10 +179,11 @@ function FieldEditForm({
 }
 
 function HiddenTarget({ id }: { id: string }) {
+  const section = useAdminSection();
   return (
     <>
       <input name="id" type="hidden" value={id} />
-      <input name="section" type="hidden" value="services" />
+      <input name="section" type="hidden" value={section} />
     </>
   );
 }

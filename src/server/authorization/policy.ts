@@ -89,3 +89,20 @@ export function assertStatusChangeAllowed(
     sectorId: activeActor.sectorId,
   };
 }
+
+/**
+ * Who configures the catalog (SPEC 2026-11-01-permissoes-configuraveis, 5.3.1): the
+ * administrator in every sector (`sectorId` null), or a holder of "Gerir serviços do setor" only
+ * in the own sector.
+ */
+export interface CatalogEditor {
+  actor: AuthorizationActor;
+  sectorId: string | null;
+}
+
+/** Outside the editor's sector, a service "does not exist" (as in the other read rules). */
+export function assertCatalogSector(editor: CatalogEditor, sectorId: string): void {
+  if (editor.sectorId !== null && editor.sectorId !== sectorId) {
+    throw new NotFoundError();
+  }
+}

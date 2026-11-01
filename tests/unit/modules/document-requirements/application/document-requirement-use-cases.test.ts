@@ -9,6 +9,10 @@ import { createRollbackRunner, nextTestId, testNow } from "../../../support/in-m
 
 const authorization = vi.hoisted(() => ({
   requireConfigurationAdministrator: vi.fn(),
+  // Since SPEC 2026-11-01-permissoes-configuraveis the catalog asks for a catalog editor; here
+  // it is always the administrator controlled by requireConfigurationAdministrator.
+  requireCatalogEditor: vi.fn(async () => ({ actor: await authorization.requireConfigurationAdministrator(), sectorId: null })),
+  assertCatalogSector: vi.fn(),
   requirePublishedCatalogReader: vi.fn(),
 }));
 vi.mock("@/server/authorization", () => authorization);
@@ -36,8 +40,8 @@ function transaction(store: Store): DocumentRequirementTransaction {
     return found;
   };
   return {
-    async serviceExists(id) {
-      return store.serviceIds.includes(id);
+    async findServiceSector(id) {
+      return store.serviceIds.includes(id) ? "sector-1" : null;
     },
     async listForService(id) {
       return store.requirements
@@ -72,6 +76,9 @@ function transaction(store: Store): DocumentRequirementTransaction {
 function repository(store: Store): DocumentRequirementRepository {
   return {
     async listAll() {
+      return [...store.requirements].sort((a, b) => a.position - b.position);
+    },
+    async listForSector() {
       return [...store.requirements].sort((a, b) => a.position - b.position);
     },
     async listActiveForService(id) {

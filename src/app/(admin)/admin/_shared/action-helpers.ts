@@ -7,7 +7,12 @@ import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
 export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions";
-export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services";
+// "sector-services" is the page of a "Gerir serviços do setor" holder (SPEC de permissões, 5.3.1).
+export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services";
+
+function pageFor(section: AdminSection): string {
+  return section === "sector-services" ? "/sector-services?" : `/admin?section=${section}&`;
+}
 
 export function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -61,7 +66,8 @@ export function selectedSection(formData: FormData): AdminSection {
   return section === "users" ||
     section === "sectors" ||
     section === "categories" ||
-    section === "services"
+    section === "services" ||
+    section === "sector-services"
     ? section
     : "overview";
 }
@@ -139,7 +145,7 @@ export function reportFailure(entity: Entity, section: AdminSection, error: unkn
             : error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN"
               ? "access"
               : "unexpected";
-    redirect(`/admin?section=${section}&error=${code}&entity=${entity}`);
+    redirect(`${pageFor(section)}error=${code}&entity=${entity}`);
   }
 
   throw error;
@@ -150,6 +156,6 @@ export async function finish(
   message: string,
   section: AdminSection,
 ): Promise<never> {
-  revalidatePath("/admin");
-  redirect(`/admin?section=${section}&notice=${message}&entity=${entity}`);
+  revalidatePath(section === "sector-services" ? "/sector-services" : "/admin");
+  redirect(`${pageFor(section)}notice=${message}&entity=${entity}`);
 }

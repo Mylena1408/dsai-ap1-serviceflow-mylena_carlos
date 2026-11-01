@@ -1,6 +1,8 @@
 import {
-  requireConfigurationAdministrator,
+  assertCatalogSector,
+  requireCatalogEditor,
   requirePublishedCatalogReader,
+  type CatalogEditor,
 } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
@@ -25,9 +27,9 @@ import type {
 export async function listDocumentRequirements(
   repository: DocumentRequirementRepository,
 ): Promise<DocumentRequirementRecord[]> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
 
-  return repository.listAll();
+  return editor.sectorId === null ? repository.listAll() : repository.listForSector(editor.sectorId);
 }
 
 // What the requester sees before opening a request (SPEC 21.4 item 1). Callers load the
@@ -47,14 +49,18 @@ export async function createDocumentRequirement(
   input: unknown,
   transactions: DocumentRequirementTransactionRunner,
 ): Promise<DocumentRequirementRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, serviceId);
   const parsed = validateInput(documentRequirementInputSchema, input);
 
   return transactions.run(async (transaction) => {
-    if (!(await transaction.serviceExists(id))) {
+    const sectorId = await transaction.findServiceSector(id);
+
+    if (sectorId === null) {
       throw new NotFoundError();
     }
+
+    assertCatalogSector(editor, sectorId);
 
     const existing = await transaction.listForService(id);
     assertCanAddActiveRequirement(existing.filter((requirement) => requirement.isActive).length);
@@ -74,12 +80,12 @@ export async function updateDocumentRequirement(
   input: unknown,
   transactions: DocumentRequirementTransactionRunner,
 ): Promise<DocumentRequirementRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, requirementId);
   const parsed = validateInput(documentRequirementInputSchema, input);
 
   return transactions.run(async (transaction) => {
-    const current = await loadRequirement(transaction, id);
+    const current = await loadRequirement(transaction, id, editor);
 
     // Inactive requirements are history only (no edit, move or reactivation).
     if (!current.isActive) {
@@ -99,12 +105,12 @@ export async function moveDocumentRequirement(
   direction: unknown,
   transactions: DocumentRequirementTransactionRunner,
 ): Promise<void> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, requirementId);
   const move = validateInput(documentRequirementMoveSchema, direction);
 
   await transactions.run(async (transaction) => {
-    const current = await loadRequirement(transaction, id);
+    const current = await loadRequirement(transaction, id, editor);
 
     if (!current.isActive) {
       throw new ConflictError();
@@ -122,11 +128,11 @@ export async function deactivateDocumentRequirement(
   requirementId: unknown,
   transactions: DocumentRequirementTransactionRunner,
 ): Promise<DocumentRequirementRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, requirementId);
 
   return transactions.run(async (transaction) => {
-    const current = await loadRequirement(transaction, id);
+    const current = await loadRequirement(transaction, id, editor);
 
     if (!current.isActive) {
       return current;
@@ -139,12 +145,16 @@ export async function deactivateDocumentRequirement(
 async function loadRequirement(
   transaction: DocumentRequirementTransaction,
   id: string,
+  editor: CatalogEditor,
 ): Promise<DocumentRequirementRecord> {
   const requirement = await transaction.find(id);
 
   if (!requirement) {
     throw new NotFoundError();
   }
+
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.1: only the editor's sector.
+  assertCatalogSector(editor, (await transaction.findServiceSector(requirement.serviceId)) ?? "");
 
   return requirement;
 }

@@ -12,6 +12,7 @@ import { DocumentRequirementsEditor } from "../../document-requirements-editor";
 import { AdminRecordEditor } from "../../record-editor";
 import { ServiceFieldsEditor } from "../../service-fields-editor";
 import { ServiceStagesEditor } from "../../service-stages-editor";
+import { AdminSectionProvider } from "../../section-context";
 import { ServiceSlaFields } from "../../service-sla-fields";
 import {
   createDocumentRequirementAction,
@@ -34,7 +35,7 @@ import {
 } from "./actions";
 
 type ServicesSectionProps = {
-  section: "services";
+  section: "services" | "sector-services";
   services: ServiceRecord[];
   categories: CategoryRecord[];
   sectors: SectorRecord[];
@@ -42,7 +43,8 @@ type ServicesSectionProps = {
   serviceFields: ServiceFieldRecord[];
   serviceStages: ServiceStageRecord[];
   /** Active managers per sector id, to warn about services nobody can approve (SPEC de aprovações, 9). */
-  activeManagersBySector: ReadonlyMap<string, number>;
+  /** Absent on the sector page, which does not read the users (SPEC de permissões, 5.3.1). */
+  activeManagersBySector?: ReadonlyMap<string, number>;
 };
 
 export function ServicesSection({
@@ -56,6 +58,7 @@ export function ServicesSection({
   activeManagersBySector,
 }: ServicesSectionProps) {
   return (
+    <AdminSectionProvider section={section}>
     <section className="admin-section" aria-labelledby="services-heading">
         <div className="section-heading">
           <div>
@@ -109,7 +112,7 @@ export function ServicesSection({
               toggleAction={toggleServiceAction}
               updateAction={updateServiceAction}
             >
-              {service.requiresApproval ? (
+              {service.requiresApproval && activeManagersBySector ? (
                 <p className={(activeManagersBySector.get(service.sectorId) ?? 0) === 0 ? "feedback feedback-error" : "section-description"}>
                   {(activeManagersBySector.get(service.sectorId) ?? 0) === 0
                     ? "Nenhum gestor ativo no setor deste serviço: as solicitações ficarão aguardando aprovação."
@@ -171,5 +174,6 @@ export function ServicesSection({
           ))}
         </ul>
         </section>
+    </AdminSectionProvider>
   );
 }

@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
+import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
 
 type FormAction = (
@@ -134,6 +135,7 @@ function ActiveRequirement({
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  const section = useAdminSection();
 
   if (editing) {
     return (
@@ -167,7 +169,7 @@ function ActiveRequirement({
           <form action={moveAction}>
             <input name="id" type="hidden" value={requirement.id} />
             <input name="direction" type="hidden" value="up" />
-            <input name="section" type="hidden" value="services" />
+            <input name="section" type="hidden" value={section} />
             <button className="button-secondary" type="submit">Subir</button>
           </form>
         ) : null}
@@ -175,13 +177,13 @@ function ActiveRequirement({
           <form action={moveAction}>
             <input name="id" type="hidden" value={requirement.id} />
             <input name="direction" type="hidden" value="down" />
-            <input name="section" type="hidden" value="services" />
+            <input name="section" type="hidden" value={section} />
             <button className="button-secondary" type="submit">Descer</button>
           </form>
         ) : null}
         <form action={deactivateAction}>
           <input name="id" type="hidden" value={requirement.id} />
-          <input name="section" type="hidden" value="services" />
+          <input name="section" type="hidden" value={section} />
           <button className="button-danger" type="submit">Desativar</button>
         </form>
       </div>

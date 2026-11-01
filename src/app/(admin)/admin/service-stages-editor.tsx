@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
+import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
 
 // Attendance flow of a service (SPEC 2026-11-01-fluxos-configuraveis, 5.1 and 5.6).
@@ -47,10 +48,11 @@ function NameInput({ defaultValue }: { defaultValue?: string }) {
 }
 
 function HiddenTarget({ id }: { id: string }) {
+  const section = useAdminSection();
   return (
     <>
       <input name="id" type="hidden" value={id} />
-      <input name="section" type="hidden" value="services" />
+      <input name="section" type="hidden" value={section} />
     </>
   );
 }

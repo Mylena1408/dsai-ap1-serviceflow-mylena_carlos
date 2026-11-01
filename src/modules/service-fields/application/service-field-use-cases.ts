@@ -1,4 +1,9 @@
-import { requireConfigurationAdministrator, requirePublishedCatalogReader } from "@/server/authorization";
+import {
+  assertCatalogSector,
+  requireCatalogEditor,
+  requirePublishedCatalogReader,
+  type CatalogEditor,
+} from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { nextPosition, planPositionMove } from "@/shared/ordering";
@@ -16,9 +21,9 @@ import type { ServiceFieldRepository, ServiceFieldTransaction, ServiceFieldTrans
 // only: answers keep their own snapshots.
 
 export async function listServiceFields(repository: ServiceFieldRepository): Promise<ServiceFieldRecord[]> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
 
-  return repository.listAll();
+  return editor.sectorId === null ? repository.listAll() : repository.listForSector(editor.sectorId);
 }
 
 // What the requester sees before opening a request (section 5.3.1). Callers load the published
@@ -38,14 +43,18 @@ export async function createServiceField(
   input: unknown,
   transactions: ServiceFieldTransactionRunner,
 ): Promise<ServiceFieldRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, serviceId);
   const parsed = validateInput(serviceFieldInputSchema, input);
 
   return transactions.run(async (transaction) => {
-    if (!(await transaction.serviceExists(id))) {
+    const sectorId = await transaction.findServiceSector(id);
+
+    if (sectorId === null) {
       throw new NotFoundError();
     }
+
+    assertCatalogSector(editor, sectorId);
 
     const existing = await transaction.listForService(id);
     const active = existing.filter((field) => field.isActive);
@@ -61,12 +70,12 @@ export async function updateServiceField(
   input: unknown,
   transactions: ServiceFieldTransactionRunner,
 ): Promise<ServiceFieldRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, fieldId);
   const { type, ...changes } = validateInput(serviceFieldInputSchema, input);
 
   return transactions.run(async (transaction) => {
-    const current = await loadField(transaction, id);
+    const current = await loadField(transaction, id, editor);
 
     // Inactive fields are only reactivated, never edited.
     if (!current.isActive) {
@@ -88,12 +97,12 @@ export async function moveServiceField(
   direction: unknown,
   transactions: ServiceFieldTransactionRunner,
 ): Promise<void> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, fieldId);
   const move = validateInput(serviceFieldMoveSchema, direction);
 
   await transactions.run(async (transaction) => {
-    const current = await loadField(transaction, id);
+    const current = await loadField(transaction, id, editor);
 
     if (!current.isActive) {
       throw new ConflictError();
@@ -111,11 +120,11 @@ export async function deactivateServiceField(
   fieldId: unknown,
   transactions: ServiceFieldTransactionRunner,
 ): Promise<ServiceFieldRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, fieldId);
 
   return transactions.run(async (transaction) => {
-    const current = await loadField(transaction, id);
+    const current = await loadField(transaction, id, editor);
 
     return current.isActive ? transaction.update(id, { isActive: false }) : current;
   });
@@ -127,11 +136,11 @@ export async function reactivateServiceField(
   fieldId: unknown,
   transactions: ServiceFieldTransactionRunner,
 ): Promise<ServiceFieldRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, fieldId);
 
   return transactions.run(async (transaction) => {
-    const current = await loadField(transaction, id);
+    const current = await loadField(transaction, id, editor);
 
     if (current.isActive) {
       return current;
@@ -156,12 +165,19 @@ function assertLabelAvailable(activeFields: ReadonlyArray<{ label: string }>, la
   }
 }
 
-async function loadField(transaction: ServiceFieldTransaction, id: string): Promise<ServiceFieldRecord> {
+async function loadField(
+  transaction: ServiceFieldTransaction,
+  id: string,
+  editor: CatalogEditor,
+): Promise<ServiceFieldRecord> {
   const field = await transaction.find(id);
 
   if (!field) {
     throw new NotFoundError();
   }
+
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.1: only the editor's sector.
+  assertCatalogSector(editor, (await transaction.findServiceSector(field.serviceId)) ?? "");
 
   return field;
 }

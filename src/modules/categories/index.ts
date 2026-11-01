@@ -14,6 +14,10 @@ export async function listCategories(database: PrismaClient = prisma): Promise<C
   return useCases.listCategories(createPrismaCategoryRepository(database));
 }
 
+export async function listCategoriesForCatalog(database: PrismaClient = prisma): Promise<CategoryRecord[]> {
+  return useCases.listCategoriesForCatalog(createPrismaCategoryRepository(database));
+}
+
 export async function createCategory(
   input: unknown,
   database: PrismaClient = prisma,

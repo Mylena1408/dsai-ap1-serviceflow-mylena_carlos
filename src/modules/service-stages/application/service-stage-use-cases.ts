@@ -1,4 +1,4 @@
-import { requireConfigurationAdministrator } from "@/server/authorization";
+import { assertCatalogSector, requireCatalogEditor, type CatalogEditor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { nextPosition, planPositionMove } from "@/shared/ordering";
@@ -16,9 +16,9 @@ import type { ServiceStageRepository, ServiceStageTransaction, ServiceStageTrans
 // progress keep the copy taken when their attendance started (decision W3).
 
 export async function listServiceStages(repository: ServiceStageRepository): Promise<ServiceStageRecord[]> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
 
-  return repository.listAll();
+  return editor.sectorId === null ? repository.listAll() : repository.listForSector(editor.sectorId);
 }
 
 export async function createServiceStage(
@@ -26,14 +26,18 @@ export async function createServiceStage(
   input: unknown,
   transactions: ServiceStageTransactionRunner,
 ): Promise<ServiceStageRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, serviceId);
   const { name } = validateInput(serviceStageInputSchema, input);
 
   return transactions.run(async (transaction) => {
-    if (!(await transaction.serviceExists(id))) {
+    const sectorId = await transaction.findServiceSector(id);
+
+    if (sectorId === null) {
       throw new NotFoundError();
     }
+
+    assertCatalogSector(editor, sectorId);
 
     const existing = await transaction.listForService(id);
     const active = existing.filter((stage) => stage.isActive);
@@ -49,12 +53,12 @@ export async function renameServiceStage(
   input: unknown,
   transactions: ServiceStageTransactionRunner,
 ): Promise<ServiceStageRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, stageId);
   const { name } = validateInput(serviceStageInputSchema, input);
 
   return transactions.run(async (transaction) => {
-    const current = await loadStage(transaction, id);
+    const current = await loadStage(transaction, id, editor);
 
     // Inactive stages are only reactivated, never edited.
     if (!current.isActive) {
@@ -75,12 +79,12 @@ export async function moveServiceStage(
   direction: unknown,
   transactions: ServiceStageTransactionRunner,
 ): Promise<void> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, stageId);
   const move = validateInput(serviceStageMoveSchema, direction);
 
   await transactions.run(async (transaction) => {
-    const current = await loadStage(transaction, id);
+    const current = await loadStage(transaction, id, editor);
 
     if (!current.isActive) {
       throw new ConflictError();
@@ -98,11 +102,11 @@ export async function deactivateServiceStage(
   stageId: unknown,
   transactions: ServiceStageTransactionRunner,
 ): Promise<ServiceStageRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, stageId);
 
   return transactions.run(async (transaction) => {
-    const current = await loadStage(transaction, id);
+    const current = await loadStage(transaction, id, editor);
 
     return current.isActive ? transaction.update(id, { isActive: false }) : current;
   });
@@ -114,11 +118,11 @@ export async function reactivateServiceStage(
   stageId: unknown,
   transactions: ServiceStageTransactionRunner,
 ): Promise<ServiceStageRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const id = validateInput(entityIdSchema, stageId);
 
   return transactions.run(async (transaction) => {
-    const current = await loadStage(transaction, id);
+    const current = await loadStage(transaction, id, editor);
 
     if (current.isActive) {
       return current;
@@ -133,12 +137,19 @@ export async function reactivateServiceStage(
   });
 }
 
-async function loadStage(transaction: ServiceStageTransaction, id: string): Promise<ServiceStageRecord> {
+async function loadStage(
+  transaction: ServiceStageTransaction,
+  id: string,
+  editor: CatalogEditor,
+): Promise<ServiceStageRecord> {
   const stage = await transaction.find(id);
 
   if (!stage) {
     throw new NotFoundError();
   }
+
+  // SPEC 2026-11-01-permissoes-configuraveis, 5.3.1: only the editor's sector.
+  assertCatalogSector(editor, (await transaction.findServiceSector(stage.serviceId)) ?? "");
 
   return stage;
 }

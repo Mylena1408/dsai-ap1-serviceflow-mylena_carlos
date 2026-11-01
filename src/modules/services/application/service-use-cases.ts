@@ -1,4 +1,4 @@
-import { requireConfigurationAdministrator } from "@/server/authorization";
+import { assertCatalogSector, requireCatalogEditor } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
@@ -18,19 +18,23 @@ function serviceData(parsed: ServiceInput): ServiceData {
   };
 }
 
+// SPEC 2026-11-01-permissoes-configuraveis, 5.3.1: the administrator configures every service;
+// a holder of "Gerir serviços do setor" only the services of the own sector, never moving one.
 export async function listServices(repository: ServiceRepository): Promise<ServiceRecord[]> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
+  const services = await repository.listByName();
 
-  return repository.listByName();
+  return editor.sectorId === null ? services : services.filter((service) => service.sectorId === editor.sectorId);
 }
 
 export async function createService(
   input: unknown,
   transactions: ServiceTransactionRunner,
 ): Promise<ServiceRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const parsed = validateInput(serviceInputSchema, input);
   const data = serviceData(parsed);
+  assertCatalogSector(editor, parsed.sectorId);
 
   return transactions.run(async (transaction) => {
     const relationships = await transaction.loadRelationships(parsed.categoryId, parsed.sectorId);
@@ -45,7 +49,7 @@ export async function updateService(
   input: unknown,
   transactions: ServiceTransactionRunner,
 ): Promise<ServiceRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const serviceId = validateInput(entityIdSchema, id);
   const parsed = validateInput(serviceInputSchema, input);
   const data = serviceData(parsed);
@@ -57,6 +61,8 @@ export async function updateService(
       throw new NotFoundError();
     }
 
+    assertCatalogSector(editor, current.sectorId);
+    assertCatalogSector(editor, parsed.sectorId);
     const relationships = await transaction.loadRelationships(parsed.categoryId, parsed.sectorId);
     assertServiceRelationships(relationships, current.isActive);
 
@@ -69,7 +75,7 @@ export async function setServiceActive(
   isActive: unknown,
   transactions: ServiceTransactionRunner,
 ): Promise<ServiceRecord> {
-  await requireConfigurationAdministrator();
+  const editor = await requireCatalogEditor();
   const serviceId = validateInput(entityIdSchema, id);
   const active = validateInput(activeStateSchema, isActive);
 
@@ -79,6 +85,8 @@ export async function setServiceActive(
     if (!current) {
       throw new NotFoundError();
     }
+
+    assertCatalogSector(editor, current.sectorId);
 
     if (active) {
       const relationships = await transaction.loadRelationships(

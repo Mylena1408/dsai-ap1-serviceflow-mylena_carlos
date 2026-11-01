@@ -15,6 +15,10 @@ export async function listSectors(database: PrismaClient = prisma): Promise<Sect
   return useCases.listSectors(createPrismaSectorRepository(database));
 }
 
+export async function listSectorsForCatalog(database: PrismaClient = prisma): Promise<SectorRecord[]> {
+  return useCases.listSectorsForCatalog(createPrismaSectorRepository(database));
+}
+
 export async function createSector(
   input: unknown,
   database: PrismaClient = prisma,

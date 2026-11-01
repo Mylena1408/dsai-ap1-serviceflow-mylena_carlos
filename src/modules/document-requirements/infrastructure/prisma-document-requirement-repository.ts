@@ -20,6 +20,13 @@ export function createPrismaDocumentRequirementRepository(
       });
       return rows.map(toDomain);
     },
+    async listForSector(sectorId) {
+      const rows = await database.serviceDocumentRequirement.findMany({
+        where: { service: { sectorId } },
+        orderBy: [{ serviceId: "asc" }, { isActive: "desc" }, { position: "asc" }, { id: "asc" }],
+      });
+      return rows.map(toDomain);
+    },
     async listActiveForService(serviceId) {
       const rows = await database.serviceDocumentRequirement.findMany({
         where: { serviceId, isActive: true },
@@ -34,12 +41,9 @@ function createPrismaDocumentRequirementTransaction(
   transaction: Prisma.TransactionClient,
 ): DocumentRequirementTransaction {
   return {
-    async serviceExists(serviceId) {
-      const service = await transaction.service.findUnique({
-        where: { id: serviceId },
-        select: { id: true },
-      });
-      return service !== null;
+    async findServiceSector(serviceId) {
+      const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { sectorId: true } });
+      return service?.sectorId ?? null;
     },
     listForService(serviceId) {
       return transaction.serviceDocumentRequirement.findMany({

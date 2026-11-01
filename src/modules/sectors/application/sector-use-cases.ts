@@ -1,4 +1,4 @@
-import { requireConfigurationAdministrator } from "@/server/authorization";
+import { requireCatalogEditor, requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
@@ -11,6 +11,15 @@ export async function listSectors(repository: SectorRepository): Promise<SectorR
   await requireConfigurationAdministrator();
 
   return repository.listByName();
+}
+
+// Sector choices of a catalog editor: every sector for the administrator, only the own one for a
+// holder of "Gerir serviços do setor" (SPEC de permissões, 5.3.1).
+export async function listSectorsForCatalog(repository: SectorRepository): Promise<SectorRecord[]> {
+  const editor = await requireCatalogEditor();
+  const sectors = await repository.listByName();
+
+  return editor.sectorId === null ? sectors : sectors.filter((sector) => sector.id === editor.sectorId);
 }
 
 export async function createSector(

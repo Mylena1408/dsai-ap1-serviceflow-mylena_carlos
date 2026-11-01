@@ -1,4 +1,4 @@
-import { requireConfigurationAdministrator } from "@/server/authorization";
+import { requireCatalogEditor, requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
@@ -9,6 +9,13 @@ import type { CategoryRepository, CategoryTransactionRunner } from "./ports";
 
 export async function listCategories(repository: CategoryRepository): Promise<CategoryRecord[]> {
   await requireConfigurationAdministrator();
+
+  return repository.listByName();
+}
+
+// Category choices for the service form of a catalog editor (SPEC de permissões, 5.3.1).
+export async function listCategoriesForCatalog(repository: CategoryRepository): Promise<CategoryRecord[]> {
+  await requireCatalogEditor();
 
   return repository.listByName();
 }

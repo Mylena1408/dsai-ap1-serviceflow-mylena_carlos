@@ -949,7 +949,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-089 — Serviços do setor com permissão
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. `requireCatalogEditor` (administrador em todos os setores; quem tem `SECTOR_SERVICES`, só no próprio) nos casos de uso de serviços, documentos, campos e etapas, com o setor conferido em cada operação; página `/sector-services` com os mesmos formulários da administração e link "Serviços do setor" nas áreas do atendente e do gestor, só para quem tem a permissão. CA-PER-01 e 05 verificados; CA-PER-04 completado; parte das áreas do CA-PER-09 verificada.
 - **Objetivo:** Casos de uso de serviços, documentos, campos e etapas aceitando quem tem `SECTOR_SERVICES` no setor do serviço; página "Serviços do setor" nas áreas do atendente e do gestor; setor sempre vindo do usuário.
 - **Arquivos/módulos esperados:** Módulos de serviços, documentos, campos e etapas, `src/server/authorization`, telas, testes.
 - **Dependências:** SF-088.

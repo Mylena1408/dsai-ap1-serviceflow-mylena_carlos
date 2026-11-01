@@ -14,14 +14,21 @@ export function createPrismaServiceStageRepository(database: PrismaClient): Serv
       });
       return rows.map(toDomain);
     },
+    async listForSector(sectorId) {
+      const rows = await database.serviceStage.findMany({
+        where: { service: { sectorId } },
+        orderBy: [{ serviceId: "asc" }, { isActive: "desc" }, { position: "asc" }, { id: "asc" }],
+      });
+      return rows.map(toDomain);
+    },
   };
 }
 
 function createPrismaServiceStageTransaction(transaction: Prisma.TransactionClient): ServiceStageTransaction {
   return {
-    async serviceExists(serviceId) {
-      const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { id: true } });
-      return service !== null;
+    async findServiceSector(serviceId) {
+      const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { sectorId: true } });
+      return service?.sectorId ?? null;
     },
     listForService(serviceId) {
       return transaction.serviceStage.findMany({

@@ -14,6 +14,13 @@ export function createPrismaServiceFieldRepository(database: PrismaClient): Serv
       });
       return rows.map(toDomain);
     },
+    async listForSector(sectorId) {
+      const rows = await database.serviceField.findMany({
+        where: { service: { sectorId } },
+        orderBy: [{ serviceId: "asc" }, { isActive: "desc" }, { position: "asc" }, { id: "asc" }],
+      });
+      return rows.map(toDomain);
+    },
     async listActiveForService(serviceId) {
       const rows = await database.serviceField.findMany({
         where: { serviceId, isActive: true },
@@ -26,9 +33,9 @@ export function createPrismaServiceFieldRepository(database: PrismaClient): Serv
 
 function createPrismaServiceFieldTransaction(transaction: Prisma.TransactionClient): ServiceFieldTransaction {
   return {
-    async serviceExists(serviceId) {
-      const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { id: true } });
-      return service !== null;
+    async findServiceSector(serviceId) {
+      const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { sectorId: true } });
+      return service?.sectorId ?? null;
     },
     listForService(serviceId) {
       return transaction.serviceField.findMany({

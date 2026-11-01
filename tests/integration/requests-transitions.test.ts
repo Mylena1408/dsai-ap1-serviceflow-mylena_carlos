@@ -10,6 +10,12 @@ import {
 } from "./domain-fixtures";
 
 const authenticated = vi.hoisted(() => ({
+  // The catalog asks for a catalog editor since SPEC 2026-11-01-permissoes-configuraveis.
+  requireCatalogEditor: vi.fn().mockResolvedValue({
+    actor: { id: "admin-from-server-session", role: "ADMIN", sectorId: null, isActive: true },
+    sectorId: null,
+  }),
+  assertCatalogSector: vi.fn(),
   requireStatusChangeActor: vi.fn(),
   requireRequestCreator: vi.fn(),
   requireConfigurationAdministrator: vi.fn().mockResolvedValue({
