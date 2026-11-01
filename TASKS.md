@@ -922,3 +922,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-APR-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-01-aprovacoes.md`.
+
+## Permissões configuráveis — SPEC de 2026-11-01
+
+**Ordem:** SF-087 → SF-088 → SF-089 → SF-090 → SF-091.
+
+### SF-087 — Migration e domínio das permissões
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration da seção 6 (enum `Permission`, tabelas `UserPermission` e `UserPermissionEvent`) e regras puras: quem pode receber cada permissão e verificação com o perfil, o estado e o setor atuais do usuário.
+- **Arquivos/módulos esperados:** `prisma/`, novo módulo `src/modules/permissions/`, `src/server/authorization`, limpeza do banco de teste, testes.
+- **Dependências:** SF-086.
+- **Critérios de conclusão:** CA-PER-10; regras de CA-PER-02 e 04 prontas para as próximas tarefas.
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-01-permissoes-configuraveis.md`.
+
+### SF-088 — Concessão e revogação pelo administrador
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso de conceder e revogar (só administrador, perfis válidos, usuário ativo, sem duplicar), histórico e bloco de permissões na tela de usuários, com as sem efeito marcadas.
+- **Arquivos/módulos esperados:** `src/modules/permissions/`, área administrativa, testes.
+- **Dependências:** SF-087.
+- **Critérios de conclusão:** CA-PER-02, 03 e 04; parte de administração do CA-PER-09.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-01-permissoes-configuraveis.md`.
+
+### SF-089 — Serviços do setor com permissão
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso de serviços, documentos, campos e etapas aceitando quem tem `SECTOR_SERVICES` no setor do serviço; página "Serviços do setor" nas áreas do atendente e do gestor; setor sempre vindo do usuário.
+- **Arquivos/módulos esperados:** Módulos de serviços, documentos, campos e etapas, `src/server/authorization`, telas, testes.
+- **Dependências:** SF-088.
+- **Critérios de conclusão:** CA-PER-01 e 05; parte das áreas do CA-PER-09.
+- **Testes relacionados:** Unitários; integração; suítes anteriores sem alteração de asserções.
+- **SPEC:** `SPEC/2026-11-01-permissoes-configuraveis.md`.
+
+### SF-090 — Leitura ampliada e supervisão da fila
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Aba "Todas do setor" para o gestor com `SECTOR_REQUESTS_READ`; liberar e transferir solicitação de colega para o atendente com `QUEUE_SUPERVISION`, com histórico, eventos e notificações existentes.
+- **Arquivos/módulos esperados:** Módulo de solicitações, telas do gestor e do atendente, testes.
+- **Dependências:** SF-089.
+- **Critérios de conclusão:** CA-PER-06, 07 e 08.
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-01-permissoes-configuraveis.md`.
+
+### SF-091 — E2E e revisão das permissões
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-090.
+- **Critérios de conclusão:** Todos os CA-PER-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-01-permissoes-configuraveis.md`.

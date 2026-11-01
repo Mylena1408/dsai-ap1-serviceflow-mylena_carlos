@@ -1205,3 +1205,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Projeção:** o roadmap inteiro deve terminar entre ~30.000 e ~39.000 linhas; pela opção 2, as funcionalidades adicionais precisariam somar de 61.000 a 70.000. Candidatas listadas na seção 8 do relatório.
 - **Tempo:** 7h34 na fase 3 (cerca de 940 linhas por hora); `diario/tempo-do-projeto.md` atualizado (total mínimo 41h03).
 - **Suítes não executadas de novo para o relatório** (só documentação); a última execução completa foi a da SF-086, com tudo verde.
+
+## SPEC de permissões configuráveis (2026-11-01)
+
+- **SPEC `2026-11-01-permissoes-configuraveis.md`** (item 9 do plano, início da fase 4) aprovada com as decisões K1 a K4 conforme propostas: permissões concedidas por usuário; três permissões (gerir serviços do setor, ver todas as solicitações do setor, supervisionar a fila); sempre no setor atual do usuário; histórico de concessões e revogações. Tarefas SF-087 a SF-091 registradas em `TASKS.md`.
+- **Princípio:** permissões só acrescentam ações dentro do setor; sem nenhuma concedida, o sistema fica como está (garantia 7.4).

@@ -361,3 +361,9 @@ SF-086 concluída; SPEC de aprovações encerrada (ver `NOTES.md`, seção SF-08
 > siga com o relatório da fase 3
 
 Relatório `SPEC/2026-11-01-relatorio-fase-3.md` escrito (ver `NOTES.md`, seção "Relatório da fase 3").
+
+## Continuação — SPEC de permissões configuráveis
+
+> siga com a SPEC de permissões configuráveis
+
+Decisões K1 a K4 respondidas pela responsável no questionário: todas as propostas aceitas (por usuário; três permissões; setor do usuário; com histórico). SPEC `SPEC/2026-11-01-permissoes-configuraveis.md` aprovada e tarefas SF-087 a SF-091 registradas.
