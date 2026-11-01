@@ -349,3 +349,9 @@ SF-084 concluída (ver `NOTES.md`, seção SF-084).
 > siga para a sf-085
 
 SF-085 concluída (ver `NOTES.md`, seção SF-085).
+
+## Continuação — SF-086
+
+> siga para a sf-086
+
+SF-086 concluída; SPEC de aprovações encerrada (ver `NOTES.md`, seção SF-086).

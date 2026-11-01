@@ -1,7 +1,7 @@
 # SPEC — Aprovações com o perfil Gestor
 
 **Data:** 2026-11-01
-**Status:** Aprovada em 2026-11-01, com as decisões A1 a A4 da seção 11 conforme propostas.
+**Status:** Aprovada em 2026-11-01, com as decisões A1 a A4 da seção 11 conforme propostas. **Concluída em 2026-11-01** (SF-081 a SF-086; CA-APR-01 a 10 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§3.3 Gestor; §4 "necessidade ou não de aprovação"; §8 Aprovação), `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seções 3, 5, 9, 10 e 19), `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md`, `SPEC/2026-10-31-eventos-outbox-jobs.md`, `SPEC/2026-11-01-sla-prioridades.md`, `SPEC/2026-11-01-fluxos-configuraveis.md`, `SPEC/2026-10-29-plano-escala-100k.md` (item 8 e garantia 7.4)
 
