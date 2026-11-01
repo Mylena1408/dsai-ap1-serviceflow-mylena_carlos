@@ -143,3 +143,9 @@ SF-059 concluída (ver `NOTES.md`, seção SF-059).
 > prossiga
 
 SF-060 concluída (ver `NOTES.md`, seção SF-060).
+
+## Continuação — publicação
+
+> pode publicar
+
+Deploy de produção e verificação só com leitura (ver `NOTES.md`).

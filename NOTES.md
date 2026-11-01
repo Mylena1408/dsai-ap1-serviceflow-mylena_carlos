@@ -812,3 +812,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **SPEC `2026-10-31-busca-filtros-paginacao.md` concluída:** CA-BUS-01 a 10 verificados.
 - **Resultados:** lint, typecheck e build OK; unitários 346/346 (58 arquivos); integração 155/155 + 1 pulado (34 arquivos); E2E 7/7.
 - **Publicação:** o banco Neon já tem as migrations; o site ainda está na versão anterior aos comentários e à busca.
+
+## Publicação de comentários e busca (2026-10-31)
+
+- A pedido da responsável, `vercel deploy --prod` do commit `2cc83a6` em https://serviceflow-sand.vercel.app (banco Neon já com as 9 migrations).
+- Verificação no site publicado, só com leitura:
+  - o painel do administrador abre;
+  - a fila do atendente mostra o formulário de busca e "Página 1 de 1 — 12 solicitações"; `?q=cadeira` encontra 1 item; `?q=x` mostra a mensagem de critério inválido;
+  - o detalhe tem as seções "Conversa" e "Histórico";
+  - a lista do solicitante mostra busca e "Página 1 de 1 — 3 solicitações", sem o filtro de responsável.
+  - Nenhum formulário que grava foi enviado.
