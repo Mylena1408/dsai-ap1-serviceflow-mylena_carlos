@@ -1,14 +1,32 @@
 import Link from "next/link";
 import { countComments } from "@/modules/comments";
-import { listRequesterRequests } from "@/modules/requests";
+import { searchRequesterRequests, type RequestSearchResult } from "@/modules/requests";
+import { ValidationError } from "@/server/errors";
+import { RequestPagination } from "@/app/_components/request-pagination";
+import { RequestSearchForm } from "@/app/_components/request-search-form";
+import { hasSearchCriteria, type SearchParams } from "@/app/_components/request-search-url";
 import { requireRequesterPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
 const statusLabels = REQUEST_STATUS_LABELS;
 
-export default async function RequestListPage() {
+type RequestListPageProps = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function RequestListPage({ searchParams }: RequestListPageProps) {
   await requireRequesterPageAccess();
-  const requests = await listRequesterRequests();
+  const params = await searchParams;
+  let result: RequestSearchResult | null = null;
+
+  try {
+    result = await searchRequesterRequests(params);
+  } catch (error) {
+    // Invalid criteria show a fixed message instead of a wrongly filtered list.
+    if (!(error instanceof ValidationError)) throw error;
+  }
+
+  const requests = result?.items ?? [];
   const commentCounts = await countComments(requests.map(({ id }) => id));
 
   return (
@@ -20,8 +38,17 @@ export default async function RequestListPage() {
         </div>
         <Link href="/catalog">Voltar ao catálogo</Link>
       </header>
-      {requests.length === 0 ? (
-        <p className="empty-state">Você ainda não abriu solicitações.</p>
+      <RequestSearchForm basePath="/requests" params={params} showAssignee={false} defaultOrder="newest" />
+      {result === null ? (
+        <p className="feedback feedback-error" role="alert">
+          Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.
+        </p>
+      ) : requests.length === 0 ? (
+        <p className="empty-state">
+          {hasSearchCriteria(params)
+            ? "Nenhuma solicitação encontrada com esses critérios."
+            : "Você ainda não abriu solicitações."}
+        </p>
       ) : (
         <ul className="content-list">
           {requests.map((request) => (
@@ -47,6 +74,15 @@ export default async function RequestListPage() {
           ))}
         </ul>
       )}
+      {result && result.total > 0 ? (
+        <RequestPagination
+          basePath="/requests"
+          params={params}
+          page={result.page}
+          pageCount={result.pageCount}
+          total={result.total}
+        />
+      ) : null}
     </main>
   );
 }

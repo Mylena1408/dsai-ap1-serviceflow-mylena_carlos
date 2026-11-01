@@ -72,7 +72,7 @@ test("requester and attendant talk; internal notes stay inside the team", async 
   await comment(page, answer);
   await comment(page, internalNote, true);
   await expect(page.getByText("Nota interna (só atendentes)")).toBeVisible();
-  await page.goto("/queue");
+  await page.goto(`/queue?q=${encodeURIComponent(unique)}`);
   const queueItem = page.locator("ul.content-list > li").filter({ hasText: `${unique} mesa bamba` });
   await expect(queueItem).toContainText("4 comentários");
   await page.goto(`/queue/${cancelledId}`);

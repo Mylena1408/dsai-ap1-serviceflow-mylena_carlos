@@ -625,7 +625,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-059 — Telas de busca, filtros e páginas
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. "Minhas solicitações" e "Fila do meu setor" usam a busca paginada, com formulário GET compartilhado (`request-search-form.tsx`), navegação de páginas (`request-pagination.tsx`) e links que preservam os critérios (`request-search-url.ts`). Verificação no navegador (CA-BUS-03 e 09) na SF-060.
 - **Objetivo:** Formulário GET compartilhado nas listas do solicitante e do atendente, navegação de páginas, mensagens de critério inválido.
 - **Arquivos/módulos esperados:** `src/app/(requester)/requests/page.tsx`, `src/app/(attendant)/queue/page.tsx`, componente compartilhado, testes.
 - **Dependências:** SF-058.

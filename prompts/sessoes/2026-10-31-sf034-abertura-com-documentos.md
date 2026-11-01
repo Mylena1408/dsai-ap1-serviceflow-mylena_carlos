@@ -131,3 +131,9 @@ SF-058 concluída (ver `NOTES.md`, seção SF-058).
 > faça as duas migrações no banco neon(comentarios e indices)
 
 Aplicadas com `prisma migrate deploy`; status em dia.
+
+## Continuação — SF-059
+
+> pode seguir para a SF-059
+
+SF-059 concluída (ver `NOTES.md`, seção SF-059).

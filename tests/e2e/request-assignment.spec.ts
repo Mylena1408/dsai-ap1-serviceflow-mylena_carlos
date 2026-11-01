@@ -131,6 +131,8 @@ test("assignment, transfer, cancellation and reopening across profiles", async (
 
   // The reopened request is back in the colleague's queue, still assigned to them.
   await signInWithPassword(page, colleagueEmail, colleaguePassword);
+  // The queue has 20 items per page; the search keeps the check independent of other specs.
+  await page.goto(`/queue?q=${encodeURIComponent(unique)}&assignee=mine`);
   const item = page.locator("ul.content-list > li").filter({ hasText: `${unique} cadeira quebrada` });
   await expect(item).toContainText("Aberta");
   await expect(item).toContainText("Responsável: você");

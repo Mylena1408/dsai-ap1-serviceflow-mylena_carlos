@@ -779,3 +779,22 @@ Padrão a replicar nas SF-039 e SF-040:
 - A pedido da responsável, aplicadas no banco de produção (Neon) as migrations `20261031200000_request_comments` e `20261031220000_request_list_indexes`, pela conexão direta. `prisma migrate status`: 9 migrations, banco em dia.
 - Ambas só acrescentam (uma tabela e dois índices); a versão publicada do site, anterior aos comentários, continua funcionando sobre o banco atualizado.
 - Uma tentativa anterior de aplicar a migration de comentários tinha sido bloqueada pela permissão automática; esta foi feita depois do pedido explícito.
+
+## SF-059 — Telas de busca, filtros e páginas (2026-10-31)
+
+- **Formulário de busca** (`src/app/_components/request-search-form.tsx`):
+  - `method="get"`, funciona sem JavaScript e deixa os critérios na URL;
+  - campos: termo, status em caixas de marcar, responsável (só na fila), "Aberta de" e "até" com seletor de data, e ordem; os valores atuais vêm preenchidos a partir da URL;
+  - como o formulário não envia `page`, mudar qualquer critério volta para a página 1 (regra 5.5);
+  - "Limpar" volta ao endereço sem parâmetros.
+- **Paginação** (`request-pagination.tsx`): "Anterior", "Página X de Y — N solicitações" e "Próxima". Os links são montados por `searchPageHref`, que mantém só os parâmetros conhecidos e omite a página 1.
+- **Listas:**
+  - `/requests` e `/queue` passaram a usar `searchRequesterRequests` e `searchAttendantQueue`;
+  - critério inválido mostra uma mensagem fixa, sem lista, para não exibir resultado filtrado de forma errada;
+  - sem resultados e com critério ativo, aparece "Nenhuma solicitação encontrada com esses critérios."; sem critério, continua a mensagem de lista vazia de antes;
+  - a marcação de cada item não mudou;
+  - `listRequesterRequests` e `listAttendantQueue` continuam existindo, como a SPEC pede.
+- **E2E de hoje ajustados:** a fila agora mostra 20 itens por página, começando pelas mais antigas, e o banco do E2E acumula solicitações de vários arquivos. Os E2E de atribuição e de comentários passaram a localizar as próprias solicitações pela busca (`/queue?q=…`), em vez de contar com que elas apareçam na primeira página. Os E2E antigos não mudaram e passam.
+- **Ponto de atenção:** `demo-data.spec.ts` (antigo) espera ver na primeira página do solicitante as 3 solicitações fictícias dele. Hoje o solicitante de demonstração tem 8 no E2E; se outros testes passarem de 20 novas, esse teste também precisará buscar.
+- **Testes:** 4 unitários do montador de links.
+- **Resultados:** lint, typecheck e build OK; unitários 346/346 (58 arquivos); integração 155/155 + 1 pulado; E2E 6/6.
