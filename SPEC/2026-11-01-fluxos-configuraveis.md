@@ -1,7 +1,7 @@
 # SPEC — Fluxos configuráveis por serviço
 
 **Data:** 2026-11-01
-**Status:** Aprovada em 2026-11-01, com as decisões W1 a W4 da seção 11 conforme propostas.
+**Status:** Aprovada em 2026-11-01, com as decisões W1 a W4 da seção 11 conforme propostas. **Concluída em 2026-11-01** (SF-076 a SF-080; CA-FLX-01 a 11 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§4 "fluxo de atendimento"; §7 Fluxo de atendimento), `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seções 5, 9 e 19), `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md` (5.3, 5.6, 5.8 e 5.9), `SPEC/2026-10-31-eventos-outbox-jobs.md`, `SPEC/2026-11-01-sla-prioridades.md`, `SPEC/2026-10-29-plano-escala-100k.md` (item 7 e garantia 7.4)
 

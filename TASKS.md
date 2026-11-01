@@ -851,7 +851,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-080 — E2E e revisão dos fluxos
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. E2E `tests/e2e/request-stages.spec.ts` (seção 8 da SPEC), README atualizado e SPEC marcada como concluída. CA-FLX-01 a 11 verificados.
 - **Objetivo:** E2E da seção 8; revisão e documentação.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-079.

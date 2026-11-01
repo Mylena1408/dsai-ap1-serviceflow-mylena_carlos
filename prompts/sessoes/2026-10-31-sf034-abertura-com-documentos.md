@@ -307,3 +307,9 @@ SF-078 concluída (ver `NOTES.md`, seção SF-078).
 > siga para a sf-079
 
 SF-079 concluída (ver `NOTES.md`, seção SF-079).
+
+## Continuação — SF-080
+
+> pode prosseguir
+
+PostgreSQL de teste religado. SF-080 concluída; SPEC de fluxos configuráveis encerrada (ver `NOTES.md`, seção SF-080).

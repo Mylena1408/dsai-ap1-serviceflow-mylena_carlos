@@ -1123,3 +1123,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu nos testes:** no teste de integração usei `queue.requests` em vez de `queue.items`; corrigido.
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit) percorreu início, avanço, retorno com justificativa, avanço até a última etapa, rótulo na fila, conclusão, etapas para o solicitante e a notificação com o nome da etapa.
 - **Resultados:** lint, typecheck e build OK; unitários 503/503 (85 arquivos); integração 227/227 + 1 pulado (50 arquivos); E2E 10/10.
+
+## SF-080 — E2E e revisão dos fluxos (2026-11-01)
+
+- **E2E (`request-stages.spec.ts`):** o administrador cria um serviço e três etapas pelo editor; o solicitante abre; o atendente inicia (entra em "Etapa 1 de 3: Triagem", sem botão de concluir), avança, volta com justificativa, avança até a última, vê o aviso de última etapa, as mudanças e a justificativa no histórico e o rótulo da etapa na fila, e conclui; o solicitante vê as etapas concluídas e a atual, o rótulo na lista e as notificações com o nome das etapas. Passou na primeira execução.
+- **Revisão da SPEC inteira (SF-076 a SF-080):** nenhuma dependência nova; nenhum segredo nos arquivos; a migration só acrescenta, com a exceção prevista (o `CHECK` de tipos da outbox recriado mais amplo); o evento de etapa leva só identificadores e códigos; nenhum log novo com texto digitado. Asserções existentes alteradas: só a lista exata de tipos de evento (exigida pela SPEC). Mudanças só de configuração em testes existentes: `vi.mock` do módulo de etapas em três arquivos, colunas novas em um objeto tipado, `stageEvents: []` nos objetos da linha do tempo e o dublê em memória. README com a seção de fluxos.
+- **Ambiente:** o PostgreSQL de teste tinha sido encerrado de novo por falta de memória; foi religado a pedido da responsável para esta tarefa.
+- **Pendência para publicar:** aplicar no Neon, antes do próximo deploy, as migrations `20261101100000_sla_and_priorities`, `20261101200000_sla_due_soon_at`, `20261101300000_service_fields` e `20261101400000_service_stages`.
+- **Resultados:** lint, typecheck e build OK; unitários 503/503 (85 arquivos); integração 227/227 + 1 pulado (50 arquivos); E2E 11/11.
