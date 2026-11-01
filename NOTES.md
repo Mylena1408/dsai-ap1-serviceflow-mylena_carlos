@@ -887,3 +887,26 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu, corrigido antes do commit:** um teste unitário novo tinha uma verificação sem sentido (um caso impossível com uma expressão confusa); foi removida.
 - **Testes:** 5 unitários da regra e 5 de integração (percurso completo, idempotência, inativos e sem responsável, autorização e leitura, limpeza).
 - **Resultados:** lint, typecheck e build OK; unitários 366/366 (63 arquivos); integração 167/167 + 1 pulado (37 arquivos); E2E 7/7.
+
+## SF-064 — E2E e revisão dos eventos (2026-11-01)
+
+- **E2E (`request-notifications.spec.ts`):**
+  - começa marcando como lidas as notificações acumuladas por outros E2E;
+  - o solicitante abre uma solicitação e comenta: sem responsável, a equipe não é avisada;
+  - o atendente responde e escreve uma nota interna;
+  - o solicitante vê "Notificações, 1 não lidas", sem esperar o cron;
+  - na lista aparece "Novo comentário em Reparo de mobiliário", sem a nota interna;
+  - ao abrir, vai para a solicitação, o contador zera e a lista mostra "Lida".
+- **Defeitos reais encontrados pelo E2E e corrigidos:**
+  1. A rota `/api/notifications/[id]` montava um redirecionamento absoluto a partir de `request.url`. No servidor de desenvolvimento esse endereço era `localhost:3100`, enquanto o navegador estava em `127.0.0.1:3100`: o cookie de sessão não valia no outro host e o usuário caía no login. O mesmo pode acontecer atrás de proxy. Agora o `Location` é relativo (303).
+  2. O contador fica no layout, que o Next preserva em navegações feitas no navegador; depois de abrir a notificação, ele continuava em "1". O link da notificação virou um `<a>` comum (navegação completa) e "Marcar todas como lidas" passou a revalidar o layout (`revalidatePath("/", "layout")`).
+  - **Limitação registrada:** uma notificação que chegue enquanto o usuário navega entre páginas sem recarregar só aparece no contador numa navegação completa ou ao abrir a lista.
+- **Testes:** E2E novo; teste unitário da rota (Location relativo, destino por perfil, notificação de outra pessoa, anônimo e identificador inválido).
+- **Revisão:**
+  - sem segredos versionados; nenhum `console.log`, `dangerouslySetInnerHTML` ou SQL inseguro nos módulos novos (a reserva do outbox usa `$queryRaw` com parâmetros);
+  - nenhuma dependência nova; migrations só aditivas;
+  - os eventos e as notificações não copiam texto;
+  - README com notificações e job diário (inclusive como chamá-lo localmente).
+- **SPEC `2026-10-31-eventos-outbox-jobs.md` concluída:** CA-EVT-01 a 09 verificados.
+- **Resultados:** lint, typecheck e build OK; unitários 369/369 (64 arquivos); integração 167/167 + 1 pulado (37 arquivos); E2E 8/8.
+- **Para publicar:** aplicar no Neon a migration `20261101000000_outbox_and_notifications`; o `CRON_SECRET` já está cadastrado na Vercel.

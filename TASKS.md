@@ -679,7 +679,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-064 — E2E e revisão dos eventos
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. E2E `tests/e2e/request-notifications.spec.ts`, teste da rota de abertura, README e revisão. Dois defeitos encontrados pelo E2E e corrigidos (redirecionamento para outro host; contador desatualizado no layout). CA-EVT-01 a 09 verificados: SPEC concluída.
 - **Objetivo:** E2E da seção 12; revisão de escopo, segurança e documentação; orientação para cadastrar `CRON_SECRET`.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-063.

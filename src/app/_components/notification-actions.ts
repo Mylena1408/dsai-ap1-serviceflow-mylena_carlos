@@ -23,6 +23,7 @@ export async function markAllNotificationsAction(): Promise<never> {
     throw error;
   }
 
-  revalidatePath(path);
+  // The unread counter is rendered by the layouts.
+  revalidatePath("/", "layout");
   redirect(path);
 }

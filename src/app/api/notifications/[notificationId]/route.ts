@@ -6,8 +6,11 @@ type NotificationRouteContext = {
   params: Promise<{ notificationId: string }>;
 };
 
-function redirectTo(request: Request, path: string): Response {
-  return Response.redirect(new URL(path, request.url), 303);
+// Relative Location: the browser stays on the host it is using. Building an absolute URL
+// from request.url sent users to another host (localhost vs 127.0.0.1) without their
+// session cookie, which the E2E caught.
+function redirectTo(_request: Request, path: string): Response {
+  return new Response(null, { status: 303, headers: { Location: path, "Cache-Control": "no-store" } });
 }
 
 // Opening a notification marks it as read and leads to the request page, which applies

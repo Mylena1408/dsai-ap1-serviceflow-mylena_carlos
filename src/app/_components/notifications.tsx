@@ -67,7 +67,9 @@ export function NotificationList({ notifications, markAllAction }: NotificationL
         <ul className="content-list notification-list">
           {notifications.map((notification) => (
             <li key={notification.id} className={notification.readAt ? undefined : "is-unread"}>
-              <Link href={`/api/notifications/${notification.id}`}>{notificationMessage(notification)}</Link>
+              {/* A full navigation: the counter lives in the layout, which a client-side
+                  navigation would keep stale after the notification is marked as read. */}
+              <a href={`/api/notifications/${notification.id}`}>{notificationMessage(notification)}</a>
               <p className="metadata">
                 {notification.readAt ? "Lida" : "Não lida"} ·{" "}
                 <time dateTime={notification.createdAt.toISOString()}>

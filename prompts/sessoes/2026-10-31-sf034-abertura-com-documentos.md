@@ -175,3 +175,9 @@ SF-062 concluída (ver `NOTES.md`, seção SF-062).
 > siga
 
 SF-063 concluída (ver `NOTES.md`, seção SF-063).
+
+## Continuação — SF-064
+
+> siga
+
+SF-064 concluída (ver `NOTES.md`, seção SF-064).

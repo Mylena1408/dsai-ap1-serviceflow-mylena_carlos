@@ -1,7 +1,7 @@
 # SPEC — Eventos de domínio, outbox e jobs agendados (passo 1 do plano)
 
 **Data:** 2026-10-31
-**Status:** Aprovada em 2026-10-31, com as decisões E1 a E4 da seção 15 conforme propostas (nenhum código implementado)
+**Status:** Aprovada em 2026-10-31, com as decisões E1 a E4 da seção 15 conforme propostas. **Concluída em 2026-11-01** (SF-061 a SF-064; CA-EVT-01 a 09 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-10-30-camadas-para-100k.md` (seção 3: "Eventos de domínio + outbox", "Jobs agendados"; passo 1), `SPEC/2026-10-29-plano-escala-100k.md` (itens 5, 10 e 12), `SPEC/2026-09-30-visao-geral.md` (§11 Notificações), `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seção 21.15.5, limpeza de órfãos)
 
@@ -117,7 +117,7 @@ O `payload` guarda **só identificadores e códigos**: nunca texto de comentári
 - [x] **CA-EVT-05** — A rota de cron recusa requisição sem o segredo correto (401) e, com ele, processa pendentes e faz as limpezas da seção 7. *Verificado em 2026-10-31 (SF-062): 401 sem segredo, com segredo curto ou errado (teste da rota e da comparação); com o segredo, o job processa pendentes, apaga eventos processados há mais de 30 dias e pula a limpeza de órfãos sem armazenamento (integração). A limpeza de notificações lidas entra na SF-063.*
 - [x] **CA-EVT-06** — Os destinatários seguem a tabela 8.1; o autor não é notificado; usuário inativo não recebe; o solicitante nunca recebe notificação de nota interna. *Verificado em 2026-10-31 (SF-063): todos os casos da tabela 8.1 (unitário) e o percurso com atribuição, transferência, comentários, nota interna e mudança de status (integração); autor e usuários inativos não recebem; solicitante nunca recebe nota interna; sem responsável, ninguém da equipe.*
 - [x] **CA-EVT-07** — O contador e a página mostram só as notificações do próprio usuário; "marcar todas como lidas" e abrir pelo link marcam como lidas. *Verificado em 2026-10-31 (SF-063): contagem, lista, abrir e "marcar todas" só sobre as notificações do próprio usuário; abrir notificação de outra pessoa não marca nada (integração).*
-- [ ] **CA-EVT-08** — Logo após uma ação (sem esperar o cron), o destinatário vê a notificação.
+- [x] **CA-EVT-08** — Logo após uma ação (sem esperar o cron), o destinatário vê a notificação. *Verificado em 2026-11-01 (SF-064): no E2E, a notificação do comentário do atendente aparece para o solicitante sem o job diário, processada pelo `after()` do servidor.*
 - [x] **CA-EVT-09** — Migration aditiva; suítes anteriores passam sem alteração de asserções. *Verificado em 2026-10-31 (SF-061): migration aditiva aplicada no banco de teste; suítes anteriores sem alteração de asserções.*
 
 ## 12. Estratégia de testes
