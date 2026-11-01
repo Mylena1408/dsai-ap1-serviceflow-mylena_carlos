@@ -10,6 +10,7 @@ import {
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { RequestStageLabel } from "@/app/_components/request-stage";
+import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { StagePanel } from "./stage-panel";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
@@ -104,7 +105,8 @@ export default async function QueueRequestPage({
         <h1>{request.serviceNameSnapshot}</h1>
         <p>
           <span className="status-pill">{statusLabels[request.status]}</span>{" "}
-          <RequestStageLabel request={request} />
+          <RequestStageLabel request={request} />{" "}
+          <RequestApprovalLabel request={request} />
         </p>
         <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>

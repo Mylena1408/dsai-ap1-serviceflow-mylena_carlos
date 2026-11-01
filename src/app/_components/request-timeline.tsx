@@ -8,6 +8,8 @@ type TimelineEntry = {
   title: string;
   actor: string;
   note: string | null;
+  /** Label of the note; reasons by default. */
+  noteLabel?: string;
 };
 
 type RequestTimelineProps = {
@@ -27,6 +29,9 @@ function assignmentTitle(event: RequestWithHistory["assignmentEvents"][number]):
  * section 5.9). Status events keep the texts used before this change.
  */
 export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
+  // A rejection cancels the request with the same note (SPEC 2026-11-01-aprovacoes, 5.3.4); the
+  // note is shown once, on the decision.
+  const rejection = request.approval?.decision === "REJECTED" ? request.approval : null;
   const statusEntries = request.events.map((event) => ({
     id: `status-${event.id}`,
     occurredAt: event.occurredAt,
@@ -34,7 +39,10 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
       ? `${REQUEST_STATUS_LABELS[event.fromStatus]} → ${REQUEST_STATUS_LABELS[event.toStatus]}`
       : `Solicitação aberta: ${REQUEST_STATUS_LABELS[event.toStatus]}`,
     actor: event.actor.name,
-    note: event.note,
+    note:
+      rejection && event.toStatus === "CANCELLED" && event.occurredAt.getTime() === rejection.decidedAt.getTime()
+        ? null
+        : event.note,
   }));
   const assignmentEntries = request.assignmentEvents.map((event) => ({
     id: `assignment-${event.id}`,
@@ -70,6 +78,7 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
           title: `${request.approval.decision === "APPROVED" ? "Aprovada" : "Rejeitada"} por ${request.approval.decider.name}`,
           actor: request.approval.decider.name,
           note: request.approval.note,
+          noteLabel: "Observação",
         },
       ]
     : [];
@@ -95,7 +104,11 @@ export function RequestTimeline({ request, actorLabel }: RequestTimelineProps) {
           {entries.map((entry) => (
             <li key={entry.id}>
               <p>{entry.title}</p>
-              {entry.note ? <p className="history-note">Justificativa: {entry.note}</p> : null}
+              {entry.note ? (
+                <p className="history-note">
+                  {entry.noteLabel ?? "Justificativa"}: {entry.note}
+                </p>
+              ) : null}
               <p>
                 {actorLabel}: {entry.actor}
               </p>

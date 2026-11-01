@@ -17,6 +17,10 @@ export interface RequestQueryRepository {
   findForRequester(requestId: string, requesterId: string): Promise<RequestWithHistory | null>;
   listBySector(sectorId: string): Promise<RequestWithHistory[]>;
   findInSector(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
+  /** Requests of a sector that require approval, pending first (SPEC de aprovações, 5.7). */
+  listForApproval(sectorId: string, onlyPending: boolean): Promise<RequestWithHistory[]>;
+  /** A request of the sector that requires approval, or null. */
+  findForApproval(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
   /** Active attendants of a sector, by name, for the transfer form. */
   listSectorAttendants(sectorId: string): Promise<Array<{ id: string; name: string }>>;
   /**
@@ -201,13 +205,17 @@ export interface AttachmentContentReader {
 }
 
 export interface FieldAnswerQueryRepository {
-  findRequestScope(requestId: string): Promise<{ requesterId: string; sectorId: string } | null>;
+  findRequestScope(
+    requestId: string,
+  ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean } | null>;
   /** Answers of the request in snapshot order. */
   listForRequest(requestId: string): Promise<RequestFieldAnswer[]>;
 }
 
 export interface AttachmentQueryRepository {
-  findRequestScope(requestId: string): Promise<{ requesterId: string; sectorId: string } | null>;
+  findRequestScope(
+    requestId: string,
+  ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean } | null>;
   listForRequest(requestId: string): Promise<RequestAttachmentSummary[]>;
   /** Filters by both identifiers, so an attachment of another request is not found. */
   findInRequest(requestId: string, attachmentId: string): Promise<StoredRequestAttachment | null>;

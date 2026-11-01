@@ -7,6 +7,7 @@ import { requireCurrentActor } from "@/server/authorization";
 import { ApplicationError } from "@/server/errors";
 
 export async function notificationsPathFor(role: string): Promise<string> {
+  if (role === "MANAGER") return "/approvals/notifications";
   return role === "ATTENDANT" ? "/queue/notifications" : "/notifications";
 }
 

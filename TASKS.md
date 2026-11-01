@@ -905,7 +905,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-085 — Telas das aprovações
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Área do gestor: lista "Aprovações" (pendentes ou todas, pendentes primeiro), detalhe só de leitura com respostas, documentos, histórico e os formulários "Aprovar" e "Rejeitar", e página de notificações própria; regra de leitura do gestor (só solicitações do setor que exigem aprovação); situação da aprovação nas listas e nos detalhes de solicitante e atendente. CA-APR-09 verificado.
 - **Objetivo:** Área "Aprovações" do gestor (lista com filtro e detalhe só de leitura com os formulários de decisão) e situação da aprovação nas listas e nos detalhes de solicitante e atendente.
 - **Arquivos/módulos esperados:** Telas do gestor, componentes compartilhados, testes.
 - **Dependências:** SF-084.

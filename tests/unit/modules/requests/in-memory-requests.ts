@@ -168,6 +168,8 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
 }
 
 export function createInMemoryQueryRepository(store: InMemoryRequestStore): RequestQueryRepository {
+  const forApproval = (request: RequestRecord, sectorId: string) =>
+    request.sectorId === sectorId && request.approvalState !== null;
   const find = (predicate: (request: RequestRecord) => boolean) =>
     store.requests.filter(predicate).map((request) => withHistory(store, request));
 
@@ -183,6 +185,12 @@ export function createInMemoryQueryRepository(store: InMemoryRequestStore): Requ
     },
     async findInSector(requestId, sectorId) {
       return find(({ id, sectorId: owner }) => id === requestId && owner === sectorId)[0] ?? null;
+    },
+    async listForApproval(sectorId, onlyPending) {
+      return find((request) => forApproval(request, sectorId) && (!onlyPending || request.approvalState === "PENDING"));
+    },
+    async findForApproval(requestId, sectorId) {
+      return find((request) => request.id === requestId && forApproval(request, sectorId))[0] ?? null;
     },
     async search(scope, criteria) {
       // Scope and paging only; filters are covered by the PostgreSQL integration tests.

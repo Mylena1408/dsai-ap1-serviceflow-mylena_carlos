@@ -20,14 +20,16 @@ export async function GET(request: Request, { params }: NotificationRouteContext
 
   try {
     const actor = await requireCurrentActor();
-    const listPath = actor.role === "ATTENDANT" ? "/queue/notifications" : "/notifications";
+    // Each profile has its own area (SPEC 2026-11-01-aprovacoes, 5.7 for managers).
+    const area = actor.role === "ATTENDANT" ? "/queue" : actor.role === "MANAGER" ? "/approvals" : null;
+    const listPath = area ? `${area}/notifications` : "/notifications";
     const requestId = await openNotification(notificationId);
 
     if (!requestId) {
       return redirectTo(request, listPath);
     }
 
-    return redirectTo(request, actor.role === "ATTENDANT" ? `/queue/${requestId}` : `/requests/${requestId}`);
+    return redirectTo(request, area ? `${area}/${requestId}` : `/requests/${requestId}`);
   } catch (error) {
     if (error instanceof ApplicationError) {
       return redirectTo(request, error.code === "UNAUTHENTICATED" ? "/login" : "/");

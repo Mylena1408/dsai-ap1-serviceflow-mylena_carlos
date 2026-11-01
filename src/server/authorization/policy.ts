@@ -15,6 +15,8 @@ export interface AuthorizationActor {
 export interface RequestAuthorizationScope {
   requesterId: string;
   sectorId: string;
+  /** SPEC 2026-11-01-aprovacoes, 5.8: managers read only requests that require approval. */
+  requiresApproval?: boolean;
 }
 
 export interface AuthorizedStatusActor {
@@ -55,7 +57,11 @@ export function assertRequestReadable(
       request.requesterId === activeActor.id) ||
     (activeActor.role === "ATTENDANT" &&
       activeActor.sectorId !== null &&
-      request.sectorId === activeActor.sectorId);
+      request.sectorId === activeActor.sectorId) ||
+    (activeActor.role === "MANAGER" &&
+      activeActor.sectorId !== null &&
+      request.sectorId === activeActor.sectorId &&
+      request.requiresApproval === true);
 
   if (!canRead) {
     throw new NotFoundError();

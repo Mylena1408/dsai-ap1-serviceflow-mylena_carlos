@@ -9,6 +9,7 @@ import {
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { RequestStageLabel, RequestStageSteps } from "@/app/_components/request-stage";
+import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -79,7 +80,8 @@ export default async function RequestPage({
         <h1>{request.serviceNameSnapshot}</h1>
         <p>
           <span className="status-pill">{statusLabels[request.status]}</span>{" "}
-          <RequestStageLabel request={request} />
+          <RequestStageLabel request={request} />{" "}
+          <RequestApprovalLabel request={request} />
         </p>
         <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>

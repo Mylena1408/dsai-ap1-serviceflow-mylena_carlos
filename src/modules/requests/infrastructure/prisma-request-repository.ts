@@ -188,6 +188,24 @@ export function createPrismaRequestQueryRepository(
       });
       return rows.map(toDomain);
     },
+    async listForApproval(sectorId, onlyPending) {
+      const rows = await database.request.findMany({
+        where: { sectorId, approvalState: onlyPending ? "PENDING" : { not: null } },
+        include: requestWithHistory,
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      });
+      // Pending first, oldest first (SPEC 2026-11-01-aprovacoes, 5.7).
+      return rows
+        .sort((left, right) => Number(right.approvalState === "PENDING") - Number(left.approvalState === "PENDING"))
+        .map(toDomain);
+    },
+    async findForApproval(requestId, sectorId) {
+      const row = await database.request.findFirst({
+        where: { id: requestId, sectorId, approvalState: { not: null } },
+        include: requestWithHistory,
+      });
+      return row && toDomain(row);
+    },
     async findInSector(requestId, sectorId) {
       const row = await database.request.findFirst({
         where: { id: requestId, sectorId },

@@ -104,6 +104,18 @@ export async function listRequesterRequests(
   return queries.listRequesterRequests(createPrismaRequestQueryRepository(database));
 }
 
+// Manager area (SPEC 2026-11-01-aprovacoes, 5.7).
+export async function listManagerApprovals(
+  filter: unknown,
+  database: PrismaClient = prisma,
+): Promise<RequestWithHistory[]> {
+  return queries.listManagerApprovals(filter, createPrismaRequestQueryRepository(database));
+}
+
+export async function getManagerRequest(requestId: unknown, database: PrismaClient = prisma): Promise<RequestWithHistory> {
+  return queries.getManagerRequest(requestId, createPrismaRequestQueryRepository(database));
+}
+
 export async function getRequesterRequest(
   requestId: unknown,
   database: PrismaClient = prisma,

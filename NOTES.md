@@ -1178,3 +1178,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu no teste:** esperei "não encontrado" para um gestor inativo, mas a sessão de um usuário inativo já é recusada antes ("autenticação necessária"), comportamento existente e correto; a expectativa foi separada.
 - **O que fica para a SF-085:** as telas do gestor (lista, detalhe com os formulários de decisão e a página de notificações dele) e a situação da aprovação nas telas de solicitante e atendente.
 - **Resultados:** lint, typecheck e build OK; unitários 525/525 (89 arquivos); integração 248/248 + 1 pulado (54 arquivos); E2E 12/12.
+
+## SF-085 — Telas das aprovações (2026-11-01)
+
+- **Regra de leitura:** `assertRequestReadable` aceita o gestor do setor só quando a solicitação exige aprovação; o escopo lido pelos repositórios de anexos e de respostas passou a informar `requiresApproval`. Comentários continuam fora do alcance do gestor (o escopo deles não traz a informação, então a regra o recusa), como a SPEC pede (5.1.4).
+- **Consultas:** `listManagerApprovals` (pendentes por padrão; "todas" inclui as decididas, com as pendentes primeiro) e `getManagerRequest`, ambas limitadas ao setor do gestor e às solicitações com aprovação.
+- **Telas do gestor:** lista com filtro "Pendentes/Todas"; detalhe com status, situação da aprovação, SLA, descrição, respostas dos campos, documentos e histórico; formulários "Aprovar" (observação opcional) e "Rejeitar" (observação obrigatória, num bloco recolhível que avisa que a rejeição cancela a solicitação), só enquanto pendente; mensagens fixas para observação ausente, decisão já tomada e solicitação indisponível. Notificações do gestor em `/approvals/notifications`; a rota que abre uma notificação leva o gestor ao detalhe em `/approvals/<id>`.
+- **Solicitante e atendente:** rótulo da situação da aprovação ao lado do status e da etapa, nas listas e nos detalhes.
+- **Ajuste encontrado na verificação no navegador:** a observação da rejeição aparecia duas vezes no histórico (no cancelamento e na decisão). A linha do tempo agora mostra a observação só em "Rejeitada por …", com o rótulo "Observação"; um cancelamento comum continua com a justificativa.
+- **Verificação no navegador:** teste E2E temporário (removido antes do commit) com o gestor de demonstração: lista, aprovação com observação, rejeição, notificações do gestor, lista vazia de pendentes; o atendente vê "Aprovada" e o botão de início; o solicitante vê "Rejeitada" e as duas notificações. O E2E definitivo é da SF-086.
+- **Aviso "The destination stream closed early"** apareceu de novo no log do servidor do E2E; já registrado desde a fase 1, sem falha de teste.
+- **Resultados:** lint, typecheck e build OK; unitários 534/534 (91 arquivos); integração 251/251 + 1 pulado (55 arquivos); E2E 12/12.

@@ -3,11 +3,12 @@ import type { FieldAnswerQueryRepository } from "../application/ports";
 
 export function createPrismaFieldAnswerQueryRepository(database: PrismaClient): FieldAnswerQueryRepository {
   return {
-    findRequestScope(requestId) {
-      return database.request.findUnique({
+    async findRequestScope(requestId) {
+      const row = await database.request.findUnique({
         where: { id: requestId },
-        select: { requesterId: true, sectorId: true },
+        select: { requesterId: true, sectorId: true, approvalState: true },
       });
+      return row && { requesterId: row.requesterId, sectorId: row.sectorId, requiresApproval: row.approvalState !== null };
     },
     async listForRequest(requestId) {
       const rows = await database.requestFieldValue.findMany({

@@ -62,6 +62,43 @@ export async function getAttendantRequest(
 }
 
 /**
+ * SPEC 2026-11-01-aprovacoes, 5.7 (decision A4): a manager reads only the requests of the sector
+ * that require approval, pending first; "all" also lists the decided ones.
+ */
+export async function listManagerApprovals(
+  filter: unknown,
+  repository: RequestQueryRepository,
+): Promise<RequestWithHistory[]> {
+  const actor = assertRole(await requireCurrentActor(), "MANAGER");
+
+  if (!actor.sectorId) {
+    throw new NotFoundError();
+  }
+
+  return repository.listForApproval(actor.sectorId, filter !== "all");
+}
+
+export async function getManagerRequest(
+  requestId: unknown,
+  repository: RequestQueryRepository,
+): Promise<RequestWithHistory> {
+  const actor = assertRole(await requireCurrentActor(), "MANAGER");
+  const id = validateInput(entityIdSchema, requestId);
+
+  if (!actor.sectorId) {
+    throw new NotFoundError();
+  }
+
+  const request = await repository.findForApproval(id, actor.sectorId);
+
+  if (!request) {
+    throw new NotFoundError();
+  }
+
+  return request;
+}
+
+/**
  * Colleagues the effective assignee can transfer to (section 5.2): active attendants of the
  * request's sector, except the actor. Same scope as reading the request in the queue.
  */
