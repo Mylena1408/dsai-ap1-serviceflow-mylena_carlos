@@ -193,3 +193,11 @@ Migration no Neon, deploy e verificação só com leitura (ver `NOTES.md`).
 > escreva a SPEC de SLA e prioridades
 
 SPEC escrita como proposta e aprovada (P1, S1, S2, S3); tarefas SF-065 a SF-070 registradas. Nenhum código.
+
+## Continuação — SF-065
+
+> quantas linhas de codigo ate agora?
+
+> comece a sf-065
+
+Medição informada (13.479 linhas `added`); SF-065 concluída (ver `NOTES.md`).

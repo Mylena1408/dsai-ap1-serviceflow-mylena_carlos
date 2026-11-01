@@ -81,6 +81,10 @@ export function storedRequest(overrides: Partial<RequestRecord> = {}): RequestRe
     completedAt: null,
     assigneeId: null,
     cancelledAt: null,
+    priority: "NORMAL",
+    slaHoursSnapshot: null,
+    dueAt: null,
+    completedLate: null,
     ...overrides,
   };
 }
@@ -188,6 +192,10 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
         completedAt: null,
         assigneeId: null,
         cancelledAt: null,
+        priority: "NORMAL",
+        slaHoursSnapshot: null,
+        dueAt: null,
+        completedLate: null,
       });
       return { id };
     },

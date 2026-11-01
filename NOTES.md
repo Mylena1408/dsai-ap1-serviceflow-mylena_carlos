@@ -922,3 +922,27 @@ Padrão a replicar nas SF-039 e SF-040:
   - abrir uma notificação sem login redireciona (303) para `/login`, com destino relativo;
   - solicitante e atendente veem o link "Notificações" e a página com "0 não lidas" (o banco de produção não tinha eventos novos).
   - Nenhum formulário que grava foi enviado. A primeira execução real do cron é esperada para a próxima janela das 06:00 UTC.
+
+## SF-065 — Migration e domínio do SLA (2026-11-01)
+
+- **Migration `20261101100000_sla_and_priorities`:**
+  - enum `RequestPriority` (`LOW`, `NORMAL`, `HIGH`, `URGENT`);
+  - `Service.defaultPriority` (padrão `NORMAL`) e `Service.slaHours`;
+  - em `Request`: `priority`, `slaHoursSnapshot`, `dueAt`, `slaWarningNotifiedAt`, `slaBreachNotifiedAt` e `completedLate`, mais o índice `(sectorId, dueAt)`;
+  - nova tabela `RequestPriorityEvent`.
+  - Uma migration só basta: o problema da SF-047 era acrescentar valor a um enum existente, e aqui o enum é novo.
+- **`CHECK`s:**
+  - `slaHours` e `slaHoursSnapshot` de 1 a 2.000;
+  - `dueAt` preenchido exatamente quando há snapshot;
+  - `completedLate` só em solicitação concluída com SLA;
+  - evento de prioridade sempre muda a prioridade;
+  - `OutboxEvent_type_check` refeito para aceitar `request.priority_changed`, `request.sla_warning` e `request.sla_breached`. É o único ponto da migration que remove algo: um `CHECK`, recriado mais amplo.
+- **Domínio (`requests/domain/sla.ts`):**
+  - `effectiveSlaMinutes`: 25/50/100/200%, minutos arredondados para cima;
+  - `dueAtFrom` (horas corridas a partir de um início) e `completedLateAt`;
+  - `slaSituation`, calculada na exibição: `on_time`, `due_soon`, `overdue`, `completed_on_time`, `completed_late` ou `none`. Exatamente no vencimento ainda é "próximo"; 1 ms depois, "vencido";
+  - `parseSlaHours` (vazio ou inteiro de 1 a 2.000) e `isRequestPriority`.
+- **Tipos:** `RequestRecord` ganhou `priority`, `slaHoursSnapshot`, `dueAt` e `completedLate`. O objeto de teste antigo `persistedRequest` e o dublê em memória ganharam os campos novos, sem mudança de asserção.
+- **Falha durante o trabalho:** a primeira edição do schema não achou uma linha porque o `prisma format` tinha realinhado as colunas. O script só grava no fim, então nada foi alterado; foi refeito com padrões tolerantes ao alinhamento.
+- **Testes:** 8 unitários (percentuais, vencimento, bordas da situação, resultado da conclusão, valores) e 4 de integração (padrões, limites, vínculo do vencimento, resultado da conclusão, evento de prioridade e tipos do outbox).
+- **Resultados:** lint, typecheck e build OK; unitários 377/377 (65 arquivos); integração 171/171 + 1 pulado (38 arquivos); E2E 8/8.

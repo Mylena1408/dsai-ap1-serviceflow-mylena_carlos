@@ -693,7 +693,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-065 — Migration e domínio do SLA
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Migration `20261101100000_sla_and_priorities` (enum `RequestPriority`, colunas em `Service` e `Request`, tabela `RequestPriorityEvent`, índice `(sectorId, dueAt)`, 5 `CHECK`s e o `CHECK` de tipos do outbox ampliado) e regras puras em `src/modules/requests/domain/sla.ts`. CA-SLA-05 e 10 verificados; regras de CA-SLA-04 e 08 prontas para as próximas tarefas.
 - **Objetivo:** Migration aditiva da seção 6 e regras puras: prazo efetivo por prioridade, vencimento, situação nas bordas, resultado da conclusão.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, testes.
 - **Dependências:** SF-064.

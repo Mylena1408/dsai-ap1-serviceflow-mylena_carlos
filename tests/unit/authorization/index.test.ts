@@ -46,6 +46,12 @@ function persistedRequest(requesterId: string, sectorId: string) {
     completedAt: null,
     assigneeId: null,
     cancelledAt: null,
+    priority: "NORMAL" as const,
+    slaHoursSnapshot: null,
+    dueAt: null,
+    slaWarningNotifiedAt: null,
+    slaBreachNotifiedAt: null,
+    completedLate: null,
   };
 }
 

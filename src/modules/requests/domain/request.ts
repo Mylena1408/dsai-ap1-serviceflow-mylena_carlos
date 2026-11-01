@@ -1,4 +1,5 @@
 export type RequestStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+export type RequestPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 
 export interface RequestRecord {
   id: string;
@@ -18,6 +19,11 @@ export interface RequestRecord {
   /** Individual attendant in charge, when someone assumed the request (SPEC 2026-10-31). */
   assigneeId: string | null;
   cancelledAt: Date | null;
+  /** SPEC 2026-11-01 (SLA e prioridades). */
+  priority: RequestPriority;
+  slaHoursSnapshot: number | null;
+  dueAt: Date | null;
+  completedLate: boolean | null;
 }
 
 export interface RequestStatusEventRecord {

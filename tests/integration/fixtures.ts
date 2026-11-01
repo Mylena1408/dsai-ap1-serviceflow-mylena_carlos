@@ -10,6 +10,7 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.requestAttachment.deleteMany(),
     prisma.requestNotification.deleteMany(),
     prisma.outboxEvent.deleteMany(),
+    prisma.requestPriorityEvent.deleteMany(),
     prisma.requestComment.deleteMany(),
     prisma.requestAssignmentEvent.deleteMany(),
     prisma.requestStatusEvent.deleteMany(),

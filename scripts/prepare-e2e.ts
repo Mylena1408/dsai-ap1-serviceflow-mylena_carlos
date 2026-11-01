@@ -40,6 +40,7 @@ async function prepareDatabase(): Promise<void> {
       database.requestAttachment.deleteMany(),
       database.requestNotification.deleteMany(),
       database.outboxEvent.deleteMany(),
+      database.requestPriorityEvent.deleteMany(),
       database.requestComment.deleteMany(),
       database.requestAssignmentEvent.deleteMany(),
       database.requestStatusEvent.deleteMany(),

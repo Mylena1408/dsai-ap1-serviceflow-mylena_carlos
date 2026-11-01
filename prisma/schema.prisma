@@ -20,6 +20,13 @@ enum RequestStatus {
   CANCELLED
 }
 
+enum RequestPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
 enum DocumentFormat {
   PDF
   DOCX
@@ -69,17 +76,20 @@ model User {
   assignmentEventsTo    RequestAssignmentEvent[] @relation("RequestAssignmentEventTo")
   comments              RequestComment[]         @relation("RequestCommentAuthor")
   notifications         RequestNotification[]    @relation("NotificationRecipient")
+  priorityEvents        RequestPriorityEvent[]   @relation("RequestPriorityEventActor")
 }
 
 model Service {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String
-  description String
-  categoryId  String   @db.Uuid
-  sectorId    String   @db.Uuid
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now()) @db.Timestamptz
-  updatedAt   DateTime @updatedAt @db.Timestamptz
+  id              String          @id @default(uuid()) @db.Uuid
+  name            String
+  description     String
+  categoryId      String          @db.Uuid
+  sectorId        String          @db.Uuid
+  isActive        Boolean         @default(true)
+  defaultPriority RequestPriority @default(NORMAL)
+  slaHours        Int?
+  createdAt       DateTime        @default(now()) @db.Timestamptz
+  updatedAt       DateTime        @updatedAt @db.Timestamptz
 
   category             Category                     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   sector               Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
@@ -88,22 +98,28 @@ model Service {
 }
 
 model Request {
-  id                         String        @id @default(uuid()) @db.Uuid
-  requesterId                String        @db.Uuid
-  serviceId                  String        @db.Uuid
-  sectorId                   String        @db.Uuid
+  id                         String          @id @default(uuid()) @db.Uuid
+  requesterId                String          @db.Uuid
+  serviceId                  String          @db.Uuid
+  sectorId                   String          @db.Uuid
   serviceNameSnapshot        String
   serviceDescriptionSnapshot String
-  categoryIdSnapshot         String        @db.Uuid
+  categoryIdSnapshot         String          @db.Uuid
   categoryNameSnapshot       String
   sectorNameSnapshot         String
   description                String
-  status                     RequestStatus @default(OPEN)
-  createdAt                  DateTime      @default(now()) @db.Timestamptz
-  updatedAt                  DateTime      @updatedAt @db.Timestamptz
-  completedAt                DateTime?     @db.Timestamptz
-  assigneeId                 String?       @db.Uuid
-  cancelledAt                DateTime?     @db.Timestamptz
+  status                     RequestStatus   @default(OPEN)
+  createdAt                  DateTime        @default(now()) @db.Timestamptz
+  updatedAt                  DateTime        @updatedAt @db.Timestamptz
+  completedAt                DateTime?       @db.Timestamptz
+  assigneeId                 String?         @db.Uuid
+  cancelledAt                DateTime?       @db.Timestamptz
+  priority                   RequestPriority @default(NORMAL)
+  slaHoursSnapshot           Int?
+  dueAt                      DateTime?       @db.Timestamptz
+  slaWarningNotifiedAt       DateTime?       @db.Timestamptz
+  slaBreachNotifiedAt        DateTime?       @db.Timestamptz
+  completedLate              Boolean?
 
   requester        User                     @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
   assignee         User?                    @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
@@ -112,6 +128,7 @@ model Request {
   events           RequestStatusEvent[]
   attachments      RequestAttachment[]
   assignmentEvents RequestAssignmentEvent[]
+  priorityEvents   RequestPriorityEvent[]
   comments         RequestComment[]
   outboxEvents     OutboxEvent[]
   notifications    RequestNotification[]
@@ -121,6 +138,7 @@ model Request {
   @@index([sectorId, assigneeId])
   @@index([requesterId, createdAt, id])
   @@index([sectorId, createdAt, id])
+  @@index([sectorId, dueAt])
 }
 
 model RequestStatusEvent {
@@ -243,4 +261,18 @@ model RequestNotification {
 
   @@unique([eventId, recipientId])
   @@index([recipientId, readAt, createdAt])
+}
+
+model RequestPriorityEvent {
+  id           String          @id @default(uuid()) @db.Uuid
+  requestId    String          @db.Uuid
+  actorId      String          @db.Uuid
+  fromPriority RequestPriority
+  toPriority   RequestPriority
+  occurredAt   DateTime        @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  actor   User    @relation("RequestPriorityEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId])
 }

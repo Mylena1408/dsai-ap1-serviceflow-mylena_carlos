@@ -103,12 +103,12 @@ A situação é **calculada na hora de exibir**, sempre exata. Ela não depende 
 - [ ] **CA-SLA-02** — O administrador configura prioridade padrão e prazo-base do serviço; valores fora de 1 a 2.000 horas são rejeitados; outros perfis são negados.
 - [ ] **CA-SLA-03** — A solicitação nasce com a prioridade padrão e o snapshot do prazo; mudar o serviço depois não altera solicitações existentes.
 - [ ] **CA-SLA-04** — O vencimento segue a tabela de percentuais por prioridade e é recalculado ao mudar a prioridade (a partir da abertura) e ao reabrir (a partir da reabertura).
-- [ ] **CA-SLA-05** — A situação segue a tabela 5.4 nas bordas (exatamente 20% restantes; exatamente no vencimento).
+- [x] **CA-SLA-05** — A situação segue a tabela 5.4 nas bordas (exatamente 20% restantes; exatamente no vencimento). *Verificado em 2026-11-01 (SF-065): situação nas bordas (1 ms antes dos 20% restantes, exatamente nos 20%, exatamente no vencimento e 1 ms depois) e janela da prioridade atual (`sla.test.ts`).*
 - [ ] **CA-SLA-06** — Só o atendente do setor (o responsável efetivo, se houver) muda a prioridade; a mudança aparece no histórico e gera evento.
 - [ ] **CA-SLA-07** — O job diário gera no máximo um alerta de cada tipo por solicitação; o responsável recebe e, sem responsável, os atendentes ativos do setor.
 - [ ] **CA-SLA-08** — A conclusão registra "no prazo" ou "com atraso"; cancelada não tem resultado.
 - [ ] **CA-SLA-09** — A fila filtra por situação do prazo e ordena por vencimento mais próximo, sem quebrar a busca e a paginação existentes.
-- [ ] **CA-SLA-10** — Migration aditiva; solicitações existentes ficam `NORMAL` e sem prazo.
+- [x] **CA-SLA-10** — Migration aditiva; solicitações existentes ficam `NORMAL` e sem prazo. *Verificado em 2026-11-01 (SF-065): migration aplicada sobre dados existentes; serviços e solicitações ficam `NORMAL` e sem prazo (`sla-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes
 
