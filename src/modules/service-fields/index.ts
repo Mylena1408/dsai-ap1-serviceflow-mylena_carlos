@@ -17,7 +17,13 @@ export {
   assertFieldTypeUnchanged,
 } from "./domain/service-field";
 export type { ServiceFieldDefinition, ServiceFieldRecord, ServiceFieldType } from "./domain/service-field";
-export { FieldAnswersError, assertFieldAnswers, collectFieldAnswers, normalizeFieldValue } from "./domain/field-value";
+export {
+  FieldAnswersError,
+  assertFieldAnswers,
+  collectFieldAnswers,
+  formatFieldAnswer,
+  normalizeFieldValue,
+} from "./domain/field-value";
 export type {
   AnswerableField,
   FieldAnswer,

@@ -10,7 +10,10 @@ import type { AttachmentContentReader, AttachmentQueryRepository } from "./ports
 // who opened it or an attendant of its current sector; administrators are denied. Every
 // denial is a NotFoundError, so the response never reveals that the attachment exists.
 
-async function authorizeRequestRead(requestId: unknown, repository: AttachmentQueryRepository) {
+export async function authorizeRequestRead(
+  requestId: unknown,
+  repository: Pick<AttachmentQueryRepository, "findRequestScope">,
+) {
   const actor = await requireCurrentActor();
   const id = validateInput(entityIdSchema, requestId);
   const scope = await repository.findRequestScope(id);

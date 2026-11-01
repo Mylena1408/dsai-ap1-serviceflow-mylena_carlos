@@ -4,8 +4,10 @@ import {
   effectiveAssigneeId,
   getRequesterRequest,
   listRequestAttachments,
+  listRequestFieldAnswers,
 } from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
+import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -46,11 +48,13 @@ export default async function RequestPage({
   const [{ requestId }, { notice, error }] = await Promise.all([params, searchParams]);
   let request;
   let attachments;
+  let answers;
   let comments;
 
   try {
     request = await getRequesterRequest(requestId);
     attachments = await listRequestAttachments(request.id);
+    answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
@@ -86,6 +90,7 @@ export default async function RequestPage({
         <h2>Sua descrição</h2>
         <p className="request-description">{request.description}</p>
       </article>
+      <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <LifecyclePanel request={request} now={new Date()} />
       <RequestConversation

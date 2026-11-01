@@ -919,6 +919,21 @@ p {
   border-color: var(--danger);
 }
 
+.field-answers {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.field-answers dt {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field-answers dd {
+  margin: 2px 0 0;
+}
+
 .notification-badge {
   display: inline-block;
   min-width: 1.5em;

@@ -4,9 +4,11 @@ import {
   effectiveAssigneeId,
   getAttendantRequest,
   listRequestAttachments,
+  listRequestFieldAnswers,
   listTransferCandidates,
 } from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
+import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { NotFoundError } from "@/server/errors";
 import { requireAttendantPageAccess } from "../../page-access";
 import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
@@ -57,12 +59,14 @@ export default async function QueueRequestPage({
   ]);
   let request;
   let attachments;
+  let answers;
   let comments;
   let candidates: Array<{ id: string; name: string }> = [];
 
   try {
     request = await getAttendantRequest(requestId);
     attachments = await listRequestAttachments(request.id);
+    answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
     if (effectiveAssigneeId(request) === actor.id) {
       candidates = await listTransferCandidates(request.id);
@@ -123,6 +127,7 @@ export default async function QueueRequestPage({
           <button type="submit">Concluir solicitação</button>
         </form>
       ) : null}
+      <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <RequestConversation
         requestId={request.id}

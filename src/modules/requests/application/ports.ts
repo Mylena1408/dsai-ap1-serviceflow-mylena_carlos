@@ -3,6 +3,7 @@ import type { DomainEvent } from "@/modules/events";
 import type { AnswerableField, FieldAnswer } from "@/modules/service-fields";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
+import type { RequestFieldAnswer } from "../domain/field-answer";
 import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
 import type { SearchCriteria } from "../domain/search-criteria";
 import type { RequestPriority, RequestStatus, RequestWithHistory } from "../domain/request";
@@ -151,6 +152,12 @@ export interface AttachmentStorage {
 /** Reads the content of attachments that are referenced by a database row. */
 export interface AttachmentContentReader {
   get(key: string): Promise<Uint8Array>;
+}
+
+export interface FieldAnswerQueryRepository {
+  findRequestScope(requestId: string): Promise<{ requesterId: string; sectorId: string } | null>;
+  /** Answers of the request in snapshot order. */
+  listForRequest(requestId: string): Promise<RequestFieldAnswer[]>;
 }
 
 export interface AttachmentQueryRepository {

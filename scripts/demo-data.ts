@@ -121,6 +121,37 @@ export const DEMO_DOCUMENT_REQUIREMENTS: ReadonlyArray<{
   },
 ];
 
+// Example custom fields (SPEC 2026-11-01-campos-personalizados, section 3 item 6). The
+// service is not used by the end-to-end flows, so their steps stay the same.
+export const DEMO_SERVICE_FIELDS: ReadonlyArray<{
+  service: DemoServiceName;
+  fields: ReadonlyArray<{
+    label: string;
+    helpText?: string;
+    type: "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO";
+    isRequired: boolean;
+    options?: ReadonlyArray<string>;
+    minValue?: number;
+    maxValue?: number;
+  }>;
+}> = [
+  {
+    service: "Manutenção de ar-condicionado",
+    fields: [
+      { label: "Sala ou local", helpText: "Por exemplo: sala 12, 2º andar.", type: "SHORT_TEXT", isRequired: true },
+      {
+        label: "Problema principal",
+        type: "SELECT",
+        isRequired: true,
+        options: ["Não refrigera", "Pingando água", "Ruído", "Não liga"],
+      },
+      { label: "Quantidade de aparelhos", type: "INTEGER", isRequired: false, minValue: 1, maxValue: 20 },
+      { label: "Melhor dia para a visita", type: "DATE", isRequired: false },
+      { label: "O aparelho está ligado agora?", type: "YES_NO", isRequired: false },
+    ],
+  },
+];
+
 export interface DemoDataSummary {
   categories: number;
   services: number;
@@ -334,6 +365,28 @@ export async function seedDemoData(
           })),
         });
         requirementsCreated += requirements.length;
+      }
+
+      for (const { service: serviceName, fields } of DEMO_SERVICE_FIELDS) {
+        const service = services.get(serviceName);
+        if (!service) throw new Error(`Unknown demonstration service: ${serviceName}`);
+
+        // Like the requirements, a service already configured (even by hand) is left alone.
+        if ((await transaction.serviceField.count({ where: { serviceId: service.id } })) > 0) continue;
+
+        await transaction.serviceField.createMany({
+          data: fields.map((field, position) => ({
+            serviceId: service.id,
+            label: field.label,
+            helpText: field.helpText ?? null,
+            type: field.type,
+            isRequired: field.isRequired,
+            options: [...(field.options ?? [])],
+            minValue: field.minValue ?? null,
+            maxValue: field.maxValue ?? null,
+            position,
+          })),
+        });
       }
 
       return {

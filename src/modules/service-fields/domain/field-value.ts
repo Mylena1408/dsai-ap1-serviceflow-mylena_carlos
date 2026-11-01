@@ -186,3 +186,20 @@ export function assertFieldAnswers(result: FieldAnswersResult): FieldAnswer[] {
     ? new FieldAnswersError("stale_form")
     : new FieldAnswersError("invalid", result.errors);
 }
+
+// How an answer is shown in the request details (section 5.4.3): dates as DD/MM/AAAA, yes/no
+// as "Sim"/"Não", integers with Brazilian digit grouping; text as typed.
+export function formatFieldAnswer(type: ServiceFieldRecord["type"], value: string): string {
+  switch (type) {
+    case "DATE": {
+      const match = DATE_PATTERN.exec(value);
+      return match ? `${match[3]}/${match[2]}/${match[1]}` : value;
+    }
+    case "YES_NO":
+      return value === "true" ? "Sim" : value === "false" ? "Não" : value;
+    case "INTEGER":
+      return INTEGER_PATTERN.test(value) ? Number(value).toLocaleString("pt-BR") : value;
+    default:
+      return value;
+  }
+}

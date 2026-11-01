@@ -4,13 +4,16 @@ import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/st
 import * as assignment from "./application/assignment";
 import * as attachmentQueries from "./application/attachment-queries";
 import * as createRequestUseCase from "./application/create-request";
+import * as fieldAnswerQueries from "./application/field-answer-queries";
 import * as lifecycleActions from "./application/lifecycle-actions";
 import * as priorityUseCase from "./application/priority";
 import * as queries from "./application/request-queries";
 import * as slaAlerts from "./application/sla-alerts";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
+import type { RequestFieldAnswer } from "./domain/field-answer";
 import type { RequestWithHistory } from "./domain/request";
+import { createPrismaFieldAnswerQueryRepository } from "./infrastructure/prisma-field-answer-repository";
 import {
   createPrismaAttachmentQueryRepository,
   createPrismaRequestExistenceReader,
@@ -24,6 +27,7 @@ import {
 
 export { buildAttachmentContentDisposition } from "./domain/attachment";
 export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
+export type { RequestFieldAnswer } from "./domain/field-answer";
 export { effectiveAssigneeId, REOPEN_WINDOW_MS } from "./domain/lifecycle";
 export {
   MAX_SEARCH_TERM,
@@ -69,6 +73,13 @@ export async function listRequestAttachments(
     requestId,
     createPrismaAttachmentQueryRepository(database),
   );
+}
+
+export async function listRequestFieldAnswers(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<RequestFieldAnswer[]> {
+  return fieldAnswerQueries.listRequestFieldAnswers(requestId, createPrismaFieldAnswerQueryRepository(database));
 }
 
 export async function getAttachmentDownload(

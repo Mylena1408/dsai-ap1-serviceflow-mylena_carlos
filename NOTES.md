@@ -1059,3 +1059,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes existentes alterados (só configuração, sem mudar asserções):** `requester-actions`, `comment-actions` e `lifecycle-actions-forms` importam o arquivo de ações do solicitante, que agora importa o módulo de campos; cada um ganhou `vi.mock("@/modules/service-fields", () => ({ FieldAnswersError: class {} }))`. O dublê em memória `tests/unit/modules/requests/in-memory-requests.ts` ganhou os campos e as respostas.
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit) abriu um serviço com cinco campos, recebeu a recusa do servidor com quantidade fora do limite, conferiu a mensagem junto do campo e os valores mantidos, corrigiu e abriu a solicitação.
 - **Resultados:** lint, typecheck e build OK; unitários 448/448 (77 arquivos); integração 205/205 + 1 pulado (45 arquivos); E2E 9/9.
+
+## SF-074 — Respostas nos detalhes e serviço de exemplo (2026-11-01)
+
+- **Consulta própria:** as respostas não entraram em `RequestWithHistory` (que vários testes comparam por inteiro); seguem o modelo dos anexos, com `listRequestFieldAnswers` e um repositório só de leitura. A autorização reaproveita `authorizeRequestRead` dos anexos, agora exportada e tipada só com `findRequestScope`: dono ou atendente do setor atual; qualquer recusa é "não encontrado".
+- **Tela:** componente `request-field-answers.tsx`, entre a descrição e os documentos, nos detalhes do solicitante e do atendente; não aparece quando não há respostas. Texto longo mantém as quebras de linha.
+- **Formatação (`formatFieldAnswer`, no módulo de campos):** data `AAAA-MM-DD` vira `DD/MM/AAAA`, sim ou não vira "Sim"/"Não", inteiros ganham separador de milhar; valores fora do formato esperado aparecem como estão, sem adivinhar.
+- **Banco fictício:** `DEMO_SERVICE_FIELDS` configura cinco campos (um de cada tipo, menos texto longo) em "Manutenção de ar-condicionado", escolhido porque nenhum E2E abre esse serviço. Como os documentos de exemplo, só cria quando o serviço ainda não tem campos. O resumo devolvido por `seedDemoData` não ganhou chave nova, porque o teste existente o compara com `toEqual` exato; a contagem é conferida no teste novo.
+- **Verificação no navegador:** teste E2E temporário (removido antes do commit) abriu o serviço de exemplo preenchendo os campos e conferiu o bloco nos detalhes do solicitante e do atendente.
+- **Resultados:** lint, typecheck e build OK; unitários 453/453 (78 arquivos); integração 210/210 + 1 pulado (46 arquivos); E2E 9/9.

@@ -787,7 +787,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-074 — Respostas nos detalhes e serviço de exemplo
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Consulta `listRequestFieldAnswers` com a mesma regra de leitura dos anexos, bloco "Informações do serviço" nos detalhes do solicitante e do atendente (formatado por tipo com `formatFieldAnswer`) e campos de exemplo no serviço "Manutenção de ar-condicionado" do banco fictício. CA-FLD-09 verificado.
 - **Objetivo:** Bloco "Informações do serviço" nos detalhes do solicitante e do atendente, com formatação por tipo; serviço de exemplo com campos no banco fictício.
 - **Arquivos/módulos esperados:** consultas de detalhes em `src/modules/requests/`, telas de detalhes, `scripts/demo-data.ts`, testes.
 - **Dependências:** SF-073.
