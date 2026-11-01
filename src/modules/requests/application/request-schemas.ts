@@ -32,6 +32,18 @@ export const requestStatusTransitionInputSchema = z
   })
   .strict();
 
+// Stage move (SPEC 2026-11-01-fluxos-configuraveis, 5.3); the reason is checked by the domain.
+// `fromStageIndex` is the stage the person was looking at: a move from any other stage is a
+// conflict, so two clicks on "advance" never skip a stage.
+export const requestStageMoveInputSchema = z
+  .object({
+    requestId: entityIdSchema,
+    direction: z.enum(["advance", "return"]),
+    fromStageIndex: z.number().int().min(0),
+    note: z.string().optional(),
+  })
+  .strict();
+
 export const requestAssignmentInputSchema = z
   .object({ requestId: entityIdSchema })
   .strict();

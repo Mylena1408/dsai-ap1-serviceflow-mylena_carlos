@@ -1101,3 +1101,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Falha durante o trabalho:** o primeiro comando que gravava os arquivos do módulo usou heredocs no shell e quebrou por causa de um apóstrofo; nada foi gravado. Os arquivos foram escritos de novo com a ferramenta de edição.
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit) criou três etapas, desceu, renomeou, desativou, criou outra com o mesmo nome em minúsculas e conferiu a recusa da reativação.
 - **Resultados:** lint, typecheck e build OK; unitários 482/482 (82 arquivos); integração 218/218 + 1 pulado (48 arquivos); E2E 10/10.
+
+## SF-078 — Início com cópia, avanço, retorno e conclusão (2026-11-01)
+
+- **Início:** `transitionRequestStatus` para `IN_PROGRESS` lê as etapas ativas do serviço na mesma transação, grava a cópia e a etapa 0 junto com o status, e registra a entrada na primeira etapa (`RequestStageEvent` com `fromStage` nulo) e o evento `request.stage_changed` com direção `start`.
+- **Conclusão:** recusada antes da última etapa (`assertCanCompleteAtStage`). A atualização do status também exige que a etapa ainda seja a lida, para que um retorno concorrente não seja atropelado.
+- **Mover etapa (`moveRequestStage`):** mesmo padrão das outras ações (ator e solicitação relidos na transação, atualização condicional ao status, ao responsável e à etapa, histórico e evento na mesma transação). Exportado em `@/modules/requests`; as telas e ações vêm na SF-079.
+- **Defeito encontrado pelo teste de integração e corrigido:** dois "Avançar" simultâneos passavam os dois, levando a solicitação duas etapas à frente — o segundo pedido lia a etapa já avançada. O pedido agora carrega `fromStageIndex`, a etapa que a pessoa estava vendo; partir de outra etapa é conflito. Esclarecimento registrado na SPEC (5.3.5). O teste foi repetido 4 vezes sem falha.
+- **Reabertura:** limpa a cópia e a etapa (`NO_STAGE`), como exige o `CHECK` do banco para solicitações abertas.
+- **Evento:** payload `{ stageEventId, direction, actorId }` — só identificadores e códigos (SPEC de eventos, 6.1); a justificativa fica só no histórico. O consumidor de notificações ainda ignora esse tipo (SF-079).
+- **Testes existentes alterados:** a lista exata de tipos de evento da SF-061 (`domain-event.test.ts`) recebeu `request.stage_changed`, exigido pela SPEC — única asserção alterada. O dublê em memória das solicitações ganhou etapas, histórico e as colunas novas, e `RequestRecord` ganhou `stageNamesSnapshot` e `stageIndex`.
+- **Resultados:** lint, typecheck e build OK; unitários 493/493 (83 arquivos); integração 224/224 + 1 pulado (49 arquivos); E2E 10/10.

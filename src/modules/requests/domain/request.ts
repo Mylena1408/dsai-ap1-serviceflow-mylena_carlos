@@ -24,6 +24,9 @@ export interface RequestRecord {
   slaHoursSnapshot: number | null;
   dueAt: Date | null;
   completedLate: boolean | null;
+  /** SPEC 2026-11-01-fluxos-configuraveis: flow copy taken at the start and current stage. */
+  stageNamesSnapshot: string[];
+  stageIndex: number | null;
 }
 
 export interface RequestStatusEventRecord {

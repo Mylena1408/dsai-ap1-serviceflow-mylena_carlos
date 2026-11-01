@@ -10,6 +10,7 @@ import {
 } from "../domain/lifecycle";
 import type { RequestStatus } from "../domain/request";
 import { dueAtFrom } from "../domain/sla";
+import { NO_STAGE } from "../domain/stages";
 import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner, StatusUpdate } from "./ports";
 
@@ -24,7 +25,10 @@ interface LifecycleChange {
   stamps: (
     now: Date,
     request: LifecycleRequest,
-  ) => Pick<StatusUpdate, "completedAt" | "cancelledAt" | "completedLate" | "dueAt" | "resetSlaAlerts">;
+  ) => Pick<
+    StatusUpdate,
+    "completedAt" | "cancelledAt" | "completedLate" | "dueAt" | "resetSlaAlerts" | "stageNamesSnapshot" | "stageIndex"
+  >;
 }
 
 async function changeLifecycle(
@@ -120,6 +124,8 @@ export async function reopenRequest(
       completedLate: null,
       dueAt: dueAtFrom(now, request.slaHoursSnapshot ?? null, request.priority ?? "NORMAL"),
       resetSlaAlerts: true,
+      // SPEC 2026-11-01-fluxos-configuraveis, 5.4: no stage until the attendance starts again.
+      ...NO_STAGE,
     }),
   });
 }

@@ -831,7 +831,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-078 — Início com cópia, avanço, retorno e conclusão
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Início do atendimento copia as etapas ativas e entra na primeira (histórico e evento); caso de uso `moveRequestStage` (avançar e voltar com justificativa, a partir da etapa vista pela pessoa); conclusão recusada antes da última etapa e protegida contra mudança de etapa concorrente; reabertura limpa a cópia. Evento `request.stage_changed` com identificadores e códigos. CA-FLX-01, 04, 05, 06, 07 e 09 verificados; CA-FLX-08 parcial (falta a linha do tempo e a notificação, SF-079).
 - **Objetivo:** Cópia do fluxo ao iniciar o atendimento; casos de uso de avançar e voltar com histórico, evento e controle de concorrência; recusa da conclusão antes da última etapa; reabertura limpando a cópia.
 - **Arquivos/módulos esperados:** `src/modules/requests/application/`, repositório de solicitações, testes.
 - **Dependências:** SF-077.

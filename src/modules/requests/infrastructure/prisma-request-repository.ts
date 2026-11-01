@@ -280,6 +280,7 @@ function createPrismaRequestTransaction(
           ...(update.expectedAssigneeId !== undefined
             ? { assigneeId: update.expectedAssigneeId }
             : {}),
+          ...(update.expectedStageIndex !== undefined ? { stageIndex: update.expectedStageIndex } : {}),
         },
         data: {
           status: update.toStatus,
@@ -289,9 +290,35 @@ function createPrismaRequestTransaction(
           ...(update.completedLate !== undefined ? { completedLate: update.completedLate } : {}),
           ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
           ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
+          ...(update.stageNamesSnapshot !== undefined ? { stageNamesSnapshot: update.stageNamesSnapshot } : {}),
+          ...(update.stageIndex !== undefined ? { stageIndex: update.stageIndex } : {}),
         },
       });
       return result.count;
+    },
+    async listActiveStageNames(serviceId) {
+      const stages = await transaction.serviceStage.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: { name: true },
+      });
+      return stages.map(({ name }) => name);
+    },
+    async updateStageIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: {
+          id: update.requestId,
+          status: "IN_PROGRESS",
+          assigneeId: update.expectedAssigneeId,
+          stageIndex: update.expectedStageIndex,
+        },
+        data: { stageIndex: update.stageIndex, updatedAt: update.updatedAt },
+      });
+      return result.count;
+    },
+    async insertStageEvent(event) {
+      const { id } = await transaction.requestStageEvent.create({ data: event, select: { id: true } });
+      return id;
     },
     async insertStatusEvent(event) {
       await transaction.requestStatusEvent.create({ data: event });
@@ -307,6 +334,9 @@ function createPrismaRequestTransaction(
           priority: true,
           slaHoursSnapshot: true,
           dueAt: true,
+          serviceId: true,
+          stageNamesSnapshot: true,
+          stageIndex: true,
           assignee: { select: lifecycleUser },
         },
       });

@@ -37,6 +37,14 @@ export type DomainEvent =
       payload: { fromPriority: EventRequestPriority; toPriority: EventRequestPriority; actorId: string };
     }
   | {
+      // Stage entered (SPEC 2026-11-01-fluxos-configuraveis, 5.5): the consumer reloads the
+      // stage names from the history row, so the payload keeps identifiers and codes only.
+      type: "request.stage_changed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { stageEventId: string; direction: "start" | "advance" | "return"; actorId: string };
+    }
+  | {
       // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
       // writes them, and the consumer reloads the request to find the recipients.
       type: "request.sla_warning" | "request.sla_breached";
@@ -55,6 +63,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.priority_changed",
   "request.sla_warning",
   "request.sla_breached",
+  "request.stage_changed",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -65,6 +74,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.priority_changed": ["fromPriority", "toPriority", "actorId"],
   "request.sla_warning": [],
   "request.sla_breached": [],
+  "request.stage_changed": ["stageEventId", "direction", "actorId"],
 };
 
 /**

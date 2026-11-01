@@ -1,6 +1,7 @@
 import type {
   NewAssignmentEvent,
   NewPriorityEvent,
+  NewStageEvent,
   NewRequestAttachment,
   NewRequestFieldValue,
   RequestQueryRepository,
@@ -21,6 +22,7 @@ import type { AnswerableField } from "@/modules/service-fields";
 export type StoredActor = TransactionActor & { name: string; email: string };
 export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
 export type StoredField = AnswerableField & { serviceId: string; isActive: boolean };
+export type StoredStage = { serviceId: string; name: string; position: number; isActive: boolean };
 type StoredEvent = Omit<RequestStatusEventRecord, "actor">;
 
 export interface InMemoryRequestStore {
@@ -37,6 +39,8 @@ export interface InMemoryRequestStore {
   priorityEvents: NewPriorityEvent[];
   fields: StoredField[];
   fieldValues: NewRequestFieldValue[];
+  stages: StoredStage[];
+  stageEvents: Array<NewStageEvent & { id: string }>;
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -57,6 +61,8 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     priorityEvents: [],
     fields: [],
     fieldValues: [],
+    stages: [],
+    stageEvents: [],
     ...seed,
   };
 }
@@ -97,6 +103,8 @@ export function storedRequest(overrides: Partial<RequestRecord> = {}): RequestRe
     slaHoursSnapshot: null,
     dueAt: null,
     completedLate: null,
+    stageNamesSnapshot: [],
+    stageIndex: null,
     ...overrides,
   };
 }
@@ -216,6 +224,8 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     async insertRequest({ openedAt, id, ...data }) {
       store.requests.push({
         completedLate: null,
+        stageNamesSnapshot: [],
+        stageIndex: null,
         ...data,
         id,
         createdAt: openedAt,
@@ -235,13 +245,40 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
           (update.expectedAssigneeId === undefined || assigneeId === update.expectedAssigneeId),
       );
       if (!request) return 0;
+      if (update.expectedStageIndex !== undefined && request.stageIndex !== update.expectedStageIndex) return 0;
       request.status = update.toStatus;
       request.updatedAt = update.updatedAt;
       if (update.completedAt !== undefined) request.completedAt = update.completedAt;
       if (update.cancelledAt) request.cancelledAt = update.cancelledAt;
       if (update.completedLate !== undefined) request.completedLate = update.completedLate;
       if (update.dueAt !== undefined) request.dueAt = update.dueAt;
+      if (update.stageNamesSnapshot !== undefined) request.stageNamesSnapshot = update.stageNamesSnapshot;
+      if (update.stageIndex !== undefined) request.stageIndex = update.stageIndex;
       return 1;
+    },
+    async listActiveStageNames(serviceId) {
+      return store.stages
+        .filter((stage) => stage.serviceId === serviceId && stage.isActive)
+        .sort((left, right) => left.position - right.position)
+        .map(({ name }) => name);
+    },
+    async updateStageIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, assigneeId, stageIndex }) =>
+          id === update.requestId &&
+          status === "IN_PROGRESS" &&
+          assigneeId === update.expectedAssigneeId &&
+          stageIndex === update.expectedStageIndex,
+      );
+      if (!request) return 0;
+      request.stageIndex = update.stageIndex;
+      request.updatedAt = update.updatedAt;
+      return 1;
+    },
+    async insertStageEvent(event) {
+      const id = `stage-event-${store.stageEvents.length + 1}`;
+      store.stageEvents.push({ ...event, id });
+      return id;
     },
     async insertAttachments(attachments) {
       store.attachments.push(...attachments);
@@ -271,6 +308,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
             priority: request.priority,
             slaHoursSnapshot: request.slaHoursSnapshot,
             dueAt: request.dueAt,
+            serviceId: request.serviceId,
+            stageNamesSnapshot: request.stageNamesSnapshot,
+            stageIndex: request.stageIndex,
             assignee: lifecycleUser(store, request.assigneeId),
           }
         : null;

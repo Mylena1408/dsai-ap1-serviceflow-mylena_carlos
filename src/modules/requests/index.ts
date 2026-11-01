@@ -9,6 +9,7 @@ import * as lifecycleActions from "./application/lifecycle-actions";
 import * as priorityUseCase from "./application/priority";
 import * as queries from "./application/request-queries";
 import * as slaAlerts from "./application/sla-alerts";
+import * as stageUseCase from "./application/stages";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 import type { RequestFieldAnswer } from "./domain/field-answer";
@@ -202,6 +203,11 @@ export type { SlaAlertSummary } from "./application/sla-alerts";
 /** Daily job step: records the SLA alerts owed at `now` (SPEC 2026-11-01, section 5.5). */
 export async function recordSlaAlerts(now: Date, database: PrismaClient = prisma): Promise<slaAlerts.SlaAlertSummary> {
   return slaAlerts.recordSlaAlerts(now, createPrismaSlaAlertStore(database));
+}
+
+// Advance or return one stage of the flow (SPEC 2026-11-01-fluxos-configuraveis, 5.3).
+export async function moveRequestStage(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return stageUseCase.moveRequestStage(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
 }
 
 export async function changeRequestPriority(input: unknown, database: PrismaClient = prisma): Promise<void> {

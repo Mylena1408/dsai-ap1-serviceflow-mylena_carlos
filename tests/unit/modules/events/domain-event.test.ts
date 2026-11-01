@@ -27,6 +27,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.priority_changed",
       "request.sla_warning",
       "request.sla_breached",
+      // Added by SPEC 2026-11-01 (fluxos configuráveis).
+      "request.stage_changed",
     ]);
     expect(
       outboxPayload({

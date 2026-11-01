@@ -295,3 +295,9 @@ SF-076 concluída (ver `NOTES.md`, seção SF-076).
 > siga para a sf-077
 
 SF-077 concluída (ver `NOTES.md`, seção SF-077).
+
+## Continuação — SF-078
+
+> siga para a sf-078
+
+SF-078 concluída (ver `NOTES.md`, seção SF-078).

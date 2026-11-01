@@ -27,6 +27,10 @@ export interface LifecycleRequest {
   priority?: RequestPriority;
   slaHoursSnapshot?: number | null;
   dueAt?: Date | null;
+  /** Flow state (SPEC 2026-11-01-fluxos-configuraveis); optional like the SLA state. */
+  serviceId?: string;
+  stageNamesSnapshot?: string[];
+  stageIndex?: number | null;
 }
 
 // Section 5.6. Start and completion keep their own rule in status-transition.ts.

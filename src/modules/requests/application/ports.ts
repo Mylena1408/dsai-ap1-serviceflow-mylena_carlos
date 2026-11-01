@@ -81,6 +81,29 @@ export interface StatusUpdate {
   dueAt?: Date | null;
   /** Clears the alert marks so a new due date can be alerted again (section 5.5). */
   resetSlaAlerts?: boolean;
+  /** When given, the stage must also be unchanged since the read (SPEC de fluxos, 5.3.5). */
+  expectedStageIndex?: number | null;
+  /** Flow copy set on start and cleared on reopening (SPEC de fluxos, 5.2 and 5.4). */
+  stageNamesSnapshot?: string[];
+  stageIndex?: number | null;
+}
+
+/** Moves the stage only while status, assignee and stage are still the ones read. */
+export interface StageUpdate {
+  requestId: string;
+  expectedAssigneeId: string | null;
+  expectedStageIndex: number;
+  stageIndex: number;
+  updatedAt: Date;
+}
+
+export interface NewStageEvent {
+  requestId: string;
+  actorId: string;
+  fromStage: string | null;
+  toStage: string;
+  note: string | null;
+  occurredAt: Date;
 }
 
 /** Changes the assignee only while status and assignee still equal the values read. */
@@ -178,6 +201,12 @@ export interface RequestTransaction {
   findServiceForRequest(serviceId: string): Promise<ServiceForRequest | null>;
   /** Active document requirements of the service, in display order. */
   listActiveRequirements(serviceId: string): Promise<ActiveDocumentRequirement[]>;
+  /** Names of the active stages of the service, in flow order (SPEC de fluxos, 5.2). */
+  listActiveStageNames(serviceId: string): Promise<string[]>;
+  /** Returns the number of rows changed (0 when the request changed meanwhile). */
+  updateStageIfCurrent(update: StageUpdate): Promise<number>;
+  /** Returns the id of the history row. */
+  insertStageEvent(event: NewStageEvent): Promise<string>;
   /** Active custom fields of the service, in display order. */
   listActiveFields(serviceId: string): Promise<AnswerableField[]>;
   insertRequest(
