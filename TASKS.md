@@ -669,7 +669,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-063 — Notificações na aplicação
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-10-31. Módulo `src/modules/notifications` (regra de destinatários, consumidor idempotente, contagem, lista, leitura e limpeza), consumidor registrado em `src/server/jobs`, link "Notificações" com contador nos layouts do solicitante e do atendente, páginas `/notifications` e `/queue/notifications`, rota `/api/notifications/[id]` e ação "Marcar todas como lidas". CA-EVT-03 completo, CA-EVT-06 e 07 verificados; CA-EVT-08 (no navegador) na SF-064.
 - **Objetivo:** Módulo `notifications`: regra de destinatários (8.1), consumidor idempotente, contador no topo, página `/notifications` e leitura.
 - **Arquivos/módulos esperados:** `src/modules/notifications/`, layout e páginas, testes.
 - **Dependências:** SF-062.

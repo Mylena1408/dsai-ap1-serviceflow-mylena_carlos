@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SignOutButton } from "@/modules/auth";
+import { NotificationsLink } from "@/app/_components/notifications";
 import type { ReactNode } from "react";
 
 export default function AttendantLayout({
@@ -14,6 +15,7 @@ export default function AttendantLayout({
         </Link>
         <nav aria-label="Navegação principal">
           <Link href="/queue">Fila do meu setor</Link>
+          <NotificationsLink href="/queue/notifications" />
           <Link href="/account/password">Alterar senha</Link>
         </nav>
         <SignOutButton />

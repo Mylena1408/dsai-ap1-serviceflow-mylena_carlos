@@ -863,3 +863,27 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes:** 13 unitários (regras de nova tentativa, processador, segredo, listagem, limpeza, rota) e 4 de integração (concorrência real, tentativas e falha definitiva, job diário, limpeza com banco). O teste de concorrência rodou 4 vezes.
 - **Resultados:** lint, typecheck e build OK; unitários 361/361 (62 arquivos); integração 162/162 + 1 pulado (36 arquivos); E2E 7/7.
 - **Pendências para produção:** cadastrar `CRON_SECRET` na Vercel, como Secret com pelo menos 16 caracteres; sem ele, a rota recusa tudo. Aplicar a migration `20261101000000` no Neon antes de publicar.
+
+## SF-063 — Notificações na aplicação (2026-10-31)
+
+- **Regra de destinatários** (`notifications/domain/recipients.ts`): é a tabela 8.1 em função pura.
+  - Mudança de status feita pelo atendente avisa o solicitante. Cancelamento ou reabertura pelo solicitante (o único caso em que o autor é o solicitante) avisa o responsável efetivo.
+  - Atribuição avisa só na transferência: o novo responsável.
+  - Comentário público vai para "o outro lado". Nota interna vai só para o responsável efetivo.
+  - O autor nunca é avisado.
+  - Tipos: `status.<STATUS>`, `assignment.received`, `comment.public`, `comment.internal`.
+- **Consumidor:**
+  - relê a solicitação e calcula o responsável efetivo **no processamento** (com `effectiveAssigneeId` de `requests`);
+  - descarta destinatários inativos;
+  - grava com `createMany(..., skipDuplicates)` sobre a chave única `(eventId, recipientId)`; reprocessar não duplica;
+  - não copia texto: a frase da tela é montada a partir do tipo e do nome do serviço.
+- **Telas:**
+  - "Notificações" com contador de não lidas nos dois layouts (se a contagem falhar, o link aparece sem número);
+  - listas das 50 mais recentes em `/notifications` (solicitante) e `/queue/notifications` (atendente): os dois grupos de rotas não podem ter a mesma URL, então as páginas compartilham o componente;
+  - abrir uma notificação passa por `/api/notifications/[id]`, que marca como lida (só se for do próprio usuário) e redireciona (303) para a página da solicitação, onde valem as regras de acesso de sempre;
+  - "Marcar todas como lidas" é uma Server Action.
+- **Job diário:** ganhou a etapa `purgedNotifications`, que apaga notificações lidas há mais de 90 dias.
+- **Problema encontrado e solução:** os 5 testes unitários de ações (3 antigos e 2 meus) pararam de carregar, sem asserção quebrada: as ações passaram a puxar `@/server/jobs`, que importa o módulo de notificações e, por ele, o `next-auth`. Em vez de mexer de novo nos testes, o agendamento foi para `src/server/jobs/schedule.ts`, que carrega o processador por `import()` só quando o `after()` roda. As ações ficaram leves e os testes antigos voltaram a passar sem alteração.
+- **Erro meu, corrigido antes do commit:** um teste unitário novo tinha uma verificação sem sentido (um caso impossível com uma expressão confusa); foi removida.
+- **Testes:** 5 unitários da regra e 5 de integração (percurso completo, idempotência, inativos e sem responsável, autorização e leitura, limpeza).
+- **Resultados:** lint, typecheck e build OK; unitários 366/366 (63 arquivos); integração 167/167 + 1 pulado (37 arquivos); E2E 7/7.

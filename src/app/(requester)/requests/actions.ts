@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { addComment } from "@/modules/comments";
-import { scheduleEventProcessing } from "@/server/jobs";
+import { scheduleEventProcessing } from "@/server/jobs/schedule";
 import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";

@@ -169,3 +169,9 @@ SF-061 concluída (ver `NOTES.md`); relatório em tabela no resumo do dia.
 > siga
 
 SF-062 concluída (ver `NOTES.md`, seção SF-062).
+
+## Continuação — SF-063
+
+> siga
+
+SF-063 concluída (ver `NOTES.md`, seção SF-063).

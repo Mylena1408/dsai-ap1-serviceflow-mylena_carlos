@@ -10,7 +10,7 @@ import {
   transitionRequestStatus,
 } from "@/modules/requests";
 import { addComment } from "@/modules/comments";
-import { scheduleEventProcessing } from "@/server/jobs";
+import { scheduleEventProcessing } from "@/server/jobs/schedule";
 import { ApplicationError, ValidationError } from "@/server/errors";
 
 function field(formData: FormData, name: string): string {
