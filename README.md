@@ -117,6 +117,20 @@ Os domínios administrativos server-side ficam em `src/modules/sectors/`, `src/m
 
 A política operacional de backup e recuperação do PostgreSQL ainda precisa ser definida para o ambiente de execução. Defina e valide essa política, incluindo um teste de restauração isolado, antes de usar o sistema com dados reais. Consulte também a dependência registrada na seção 18 da SPEC principal; este README não presume frequência, retenção nem objetivos de recuperação.
 
+### Notificações por e-mail
+
+O envio usa a API HTTP da Resend, sem dependência nova (SPEC de e-mail, seção 5.3). Configure no ambiente do servidor, sem prefixo `NEXT_PUBLIC_`:
+
+```env
+EMAIL_API_KEY=<chave da API do provedor>
+EMAIL_FROM=ServiceFlow <avisos@seu-dominio.example>
+APP_BASE_URL=https://<endereço público do ServiceFlow>
+```
+
+- Sem as três variáveis (ou com alguma inválida), nada é enviado: os envios ficam como "não enviado — e-mail não configurado" e a seção "E-mails" da administração avisa quais variáveis faltam, sem mostrar valores. É assim no desenvolvimento e nos testes.
+- O remetente precisa usar um domínio verificado na conta do provedor.
+- Na Vercel, cadastre `EMAIL_API_KEY` como variável **Secret**. Nunca versione a chave.
+
 ## Fluxos disponíveis
 
 - Administradores autenticados configuram usuários, setores, categorias e serviços em `/admin`.
@@ -134,6 +148,7 @@ A política operacional de backup e recuperação do PostgreSQL ainda precisa se
 - Fluxos configuráveis (`SPEC/2026-11-01-fluxos-configuraveis.md`): o administrador define, por serviço, até 8 etapas do atendimento (criar, renomear, reordenar, desativar e reativar). As etapas existem dentro de "Em atendimento": ao iniciar, a solicitação guarda uma cópia das etapas ativas e entra na primeira; o atendente do setor (o responsável, se houver) avança uma etapa por vez ou volta uma etapa com justificativa, e só conclui na última. Mudar o fluxo não altera solicitações em andamento; a reabertura limpa as etapas e o novo início usa o fluxo vigente. A etapa aparece nos detalhes, na fila e em "Minhas solicitações", as mudanças entram no histórico e o solicitante é notificado a cada uma. Serviço sem etapas funciona como antes.
 - Aprovações (`SPEC/2026-11-01-aprovacoes.md`): novo perfil **Gestor**, ligado a um setor (cadastro pela administração; conta "Gestor (demonstração)" no login). Um serviço pode exigir aprovação do gestor: a solicitação nasce "Aberta" com a aprovação pendente, sem prazo de SLA, e ninguém inicia o atendimento antes da decisão. Qualquer gestor ativo do setor decide uma vez, na área "Aprovações": aprovar (observação opcional) libera o atendimento e o prazo passa a contar da aprovação; rejeitar (observação obrigatória) cancela a solicitação. Os gestores são avisados na abertura e o solicitante, da decisão; a situação da aprovação aparece para solicitante e atendente e a decisão entra no histórico. O gestor vê só as solicitações do seu setor que exigem aprovação, só para leitura. Serviço sem aprovação funciona como antes.
 - Permissões configuráveis (`SPEC/2026-11-01-permissoes-configuraveis.md`): na seção de usuários da administração, o administrador concede e revoga, por usuário, permissões adicionais que valem no setor atual da pessoa: **Gerir serviços do setor** (atendente ou gestor; página "Serviços do setor" para criar e editar serviços do próprio setor, com documentos, campos e etapas), **Ver todas as solicitações do setor** (gestor; aba "Todas do setor", só leitura) e **Supervisionar a fila do setor** (atendente; libera ou transfere solicitações que estão com colegas). Concessões e revogações ficam no histórico do usuário; a revogação vale na operação seguinte, sem novo login. Permissões que deixam de valer por mudança de perfil aparecem marcadas "sem efeito". Sem permissões concedidas, tudo funciona como antes.
+- Notificações por e-mail (`SPEC/2026-11-01-notificacoes-email-preferencias.md`): solicitante, atendente e gestor escolhem em "Preferências de e-mail" (link na página de notificações) quais categorias também querem receber por e-mail — mudanças de status, transferências, comentários e notas internas, prazos, etapas e aprovações. Tudo começa desligado e as notificações dentro do sistema continuam sempre ativas. Cada notificação de uma categoria ligada gera um envio, processado depois da ação e pelo job diário, com novas tentativas em caso de falha. O e-mail traz só o aviso, o serviço, um código curto e o link para a solicitação, nunca a descrição, comentários ou documentos. Na seção "E-mails" da administração, o administrador vê se o envio está configurado e os 50 envios mais recentes, sem o conteúdo.
 - A rota inicial encaminha a sessão autenticada à interface do perfil obtido do servidor; o cliente não escolhe papel.
 - A abertura valida no servidor a disponibilidade atual do serviço, categoria e setor e grava snapshots e evento inicial junto da solicitação. Transições persistem status e evento de histórico atomicamente.
 - Administradores configuram, por serviço, até 5 documentos exigidos (PDF, DOCX ou TXT; obrigatórios ou opcionais). O solicitante anexa um arquivo por documento ao abrir a solicitação (até 2 MiB cada, 4 MiB no total); o servidor confere o conteúdo real de cada arquivo.

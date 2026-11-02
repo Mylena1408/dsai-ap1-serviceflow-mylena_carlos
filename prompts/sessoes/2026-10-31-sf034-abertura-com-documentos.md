@@ -427,3 +427,9 @@ SF-094 concluída (ver `NOTES.md`, seção SF-094).
 > faça a sf-095
 
 SF-095 concluída (ver `NOTES.md`, seção SF-095).
+
+## Continuação — SF-096
+
+> faça sf-096
+
+SF-096 concluída e SPEC de notificações por e-mail encerrada (ver `NOTES.md`, seção SF-096).

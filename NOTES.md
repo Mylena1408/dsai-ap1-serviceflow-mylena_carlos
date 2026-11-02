@@ -1298,3 +1298,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Carregamento:** a página da administração só consulta os envios quando a seção está aberta.
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit): com a preferência ligada, o atendente inicia a solicitação; na seção, o administrador vê "Envio não configurado" e uma linha "Não enviado · Atendimento iniciado para Carla Mendes (…) · 0 tentativas · e-mail não configurado", sem a descrição da solicitação; o atendente não abre a seção.
 - **Resultados:** lint, typecheck e build OK; unitários 575/575 (102 arquivos); integração 280/280 + 1 pulado (63 arquivos); E2E 14/14.
+
+## SF-096 — E2E e revisão das notificações por e-mail (2026-11-02)
+
+- **E2E (`tests/e2e/email-notifications.spec.ts`):** o solicitante de demonstração abre "Preferências de e-mail" pela página de notificações, liga só "Mudanças de status" e abre uma solicitação; o atendente inicia o atendimento; o solicitante continua recebendo a notificação na aplicação e desliga a preferência de novo (para não afetar os outros testes); na seção "E-mails", o administrador vê "Envio não configurado" e o envio mais recente como "Não enviado · Atendimento iniciado para Solicitante (demonstração) (…) · 0 tentativas · e-mail não configurado", sem a descrição da solicitação.
+- **README:** item "Notificações por e-mail" em "Fluxos disponíveis" e subseção com `EMAIL_API_KEY`, `EMAIL_FROM` e `APP_BASE_URL` (sem valores reais; a chave só como Secret na Vercel).
+- **Revisão da SPEC (SF-092 a SF-096):** nenhuma dependência alterada (`package.json` e `package-lock.json` sem mudança desde a SPEC); nenhum segredo no repositório (o `.env.example` só tem as variáveis comentadas e vazias); nenhuma asserção de teste existente alterada — o único teste existente modificado foi `tests/integration/fixtures.ts`, para limpar as tabelas novas; uma migration aditiva (`20261101700000_email_notifications`).
+- **Pendente para publicar:** aplicar no Neon as oito migrations pendentes (de `20261101100000_sla_and_priorities` a `20261101700000_email_notifications`). Para enviar de verdade, criar a conta no provedor, verificar o domínio e cadastrar as três variáveis na Vercel.
+- **Resultados:** lint, typecheck e build OK; unitários 575/575 (102 arquivos); integração 280/280 + 1 pulado (63 arquivos); E2E 15/15.

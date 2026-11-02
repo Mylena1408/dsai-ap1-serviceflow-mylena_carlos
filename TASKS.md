@@ -1023,7 +1023,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-096 — E2E e revisão das notificações por e-mail
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. E2E `tests/e2e/email-notifications.spec.ts` (seção 8 da SPEC), README com a seção de notificações por e-mail e a configuração do provedor, SPEC marcada como concluída. CA-MAIL-01 a 10 registrados.
 - **Objetivo:** E2E da seção 8; revisão e documentação.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-095.

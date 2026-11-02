@@ -1,7 +1,7 @@
 # SPEC — Notificações por e-mail e preferências
 
 **Data:** 2026-11-01
-**Status:** Aprovada em 2026-11-01, com as decisões N1 a N5 da seção 11 conforme propostas.
+**Status:** Aprovada em 2026-11-01, com as decisões N1 a N5 da seção 11 conforme propostas. **Concluída em 2026-11-02** (SF-092 a SF-096; CA-MAIL-01 a 10 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§11 Notificações), `SPEC/2026-10-31-eventos-outbox-jobs.md` (seções 6 a 8; e-mail fora de escopo), `SPEC/2026-11-01-sla-prioridades.md` (5.5), `SPEC/2026-11-01-fluxos-configuraveis.md`, `SPEC/2026-11-01-aprovacoes.md` (5.6), `SPEC/2026-10-29-plano-escala-100k.md` (item 10, garantia 7.4 e risco "dependências novas"), `SPEC/2026-11-01-relatorio-fase-3.md` (seção 8)
 
