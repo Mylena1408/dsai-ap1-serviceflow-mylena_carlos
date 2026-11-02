@@ -1121,7 +1121,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-105 — Retenção no job diário
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Tabela única de prazos `RETENTION_PERIODS` e `retentionCutoff` em `src/shared/retention`; o job diário usa a tabela para as limpezas que já existiam e ganhou três passos: notificações não lidas (365 dias), registros de envio de e-mail (180 dias) e auditoria (5 anos). CA-AUD-05 verificado.
 - **Objetivo:** Tabela única de prazos (5.3) e limpezas novas no job diário, com o resumo do que foi removido.
 - **Arquivos/módulos esperados:** `src/server/jobs/`, `src/modules/`, testes.
 - **Dependências:** SF-104.

@@ -1386,3 +1386,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Verificação no navegador:** E2E temporário (removido): o administrador cria um setor e vê "Criou · Setor · …" com "Nome: — → …" e "Ativo: — → Sim"; o filtro "Permissão" vai para a URL; o atendente vai para `/queue`. Ajuste feito depois da captura: "nome · perfil" em vez de parênteses duplos.
 - **Erro meu durante a suíte:** criei arquivos da SF-105 enquanto o E2E rodava sobre o servidor de desenvolvimento; a rodada demorou 6,7 min e `request-search.spec.ts` estourou o tempo no login. Rodado de novo sem mexer em nada, o E2E passou inteiro (16/16, 3,4 min). Não volto a escrever em `src/` com o E2E em andamento.
 - **Resultados:** lint, typecheck e build OK; unitários 671/671 (111 arquivos); integração 303/303 + 1 pulado (68 arquivos); E2E 16/16 (na segunda rodada).
+
+## SF-105 — Retenção no job diário (2026-11-02)
+
+- **Tabela única (`src/shared/retention`):** `RETENTION_PERIODS` com os cinco prazos da seção 5.3 (eventos processados 30 dias e notificações lidas 90 dias, que já existiam; notificações não lidas 365 dias; envios de e-mail 180 dias; auditoria 5 anos) e `retentionCutoff(tipo, agora)`. Anos são anos de calendário em UTC; de 29 de fevereiro, cinco anos antes é 1º de março.
+- **Limpezas novas:** `purgeUnreadNotifications` e `purgeEmailDeliveries` (módulo de notificações) e `purgeAuditEntries` (módulo de auditoria), em funções de infraestrutura próprias, para não mudar as portas existentes nem os dublês dos testes. Envios de notificações apagadas saem junto (cascata que já existia).
+- **Job diário:** as constantes de 30 e 90 dias saíram de `src/server/jobs` para a tabela; o resumo ganhou `purgedUnreadNotifications`, `purgedEmailDeliveries` e `purgedAuditEntries`. Cada passo roda mesmo que um anterior falhe, como os outros.
+- **Resultados:** lint, typecheck e build OK; unitários 675/675 (112 arquivos); integração 306/306 + 1 pulado (69 arquivos); E2E 16/16.

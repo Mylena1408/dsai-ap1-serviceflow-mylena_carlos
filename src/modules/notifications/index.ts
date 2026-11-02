@@ -7,6 +7,7 @@ import { processEmailDeliveries, type EmailRunSummary } from "./application/emai
 import type { NotificationRecord } from "./application/ports";
 import { createPrismaNotificationStore } from "./infrastructure/prisma-notification-store";
 import { createPrismaPreferenceStore } from "./infrastructure/prisma-preference-store";
+import * as retention from "./infrastructure/prisma-retention";
 import { createPrismaEmailLog, createPrismaEmailStore } from "./infrastructure/prisma-email-store";
 import { getEmailOverview as emailOverview, type EmailOverview } from "./application/email-overview";
 import { createHttpEmailTransport, getEmailConfig } from "./infrastructure/http-email-transport";
@@ -57,6 +58,16 @@ export async function openNotification(notificationId: unknown, database: Prisma
 /** Deletes notifications read before `before` (daily cleanup, section 7). */
 export async function purgeReadNotifications(before: Date, database: PrismaClient = prisma): Promise<number> {
   return createPrismaNotificationStore(database).purgeRead(before);
+}
+
+/** Deletes notifications never read, created before `before` (SPEC 2026-11-02-auditoria-lgpd, 5.3). */
+export async function purgeUnreadNotifications(before: Date, database: PrismaClient = prisma): Promise<number> {
+  return retention.purgeUnreadNotifications(database, before);
+}
+
+/** Deletes email delivery records created before `before` (SPEC 2026-11-02-auditoria-lgpd, 5.3). */
+export async function purgeEmailDeliveries(before: Date, database: PrismaClient = prisma): Promise<number> {
+  return retention.purgeEmailDeliveries(database, before);
 }
 
 export type { EmailPreferences } from "./application/preference-use-cases";

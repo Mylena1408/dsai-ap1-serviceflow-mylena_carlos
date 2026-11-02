@@ -1,7 +1,10 @@
+import { purgeAuditEntries } from "@/modules/audit";
 import { purgeProcessedEvents, runOutbox, type EventConsumer, type OutboxRunSummary } from "@/modules/events";
 import {
   notificationConsumer,
+  purgeEmailDeliveries,
   purgeReadNotifications,
+  purgeUnreadNotifications,
   runEmailDeliveries,
   type EmailRunSummary,
 } from "@/modules/notifications";
@@ -12,15 +15,12 @@ import {
   type SlaAlertSummary,
 } from "@/modules/requests";
 import { isDocumentStorageConfigured } from "@/server/storage";
+import { retentionCutoff } from "@/shared/retention";
 
 // Composition of the event consumers and the daily job (SPEC 2026-10-31-eventos-outbox-
 // jobs, sections 4 and 7). Consumers are registered here so modules never import each other.
 
 const consumers: EventConsumer[] = [notificationConsumer()];
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-const PROCESSED_EVENT_RETENTION_MS = 30 * DAY_MS;
-const READ_NOTIFICATION_RETENTION_MS = 90 * DAY_MS;
 
 export function eventConsumers(): readonly EventConsumer[] {
   return consumers;
@@ -44,6 +44,10 @@ export interface DailyJobSummary {
   emails: DailyStep<EmailRunSummary>;
   purgedEvents: DailyStep<number>;
   purgedNotifications: DailyStep<number>;
+  /** Retention (SPEC 2026-11-02-auditoria-lgpd, 5.3). */
+  purgedUnreadNotifications: DailyStep<number>;
+  purgedEmailDeliveries: DailyStep<number>;
+  purgedAuditEntries: DailyStep<number>;
   orphanObjects: DailyStep<OrphanCleanupSummary>;
 }
 
@@ -81,11 +85,25 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   const events = await step(() => runOutbox(consumers, { maxBatches: 20 }));
   // After the events, so the emails they record go out in the same run.
   const emails = await step(() => runEmailDeliveries({ maxBatches: 20 }));
-  const purgedEvents = await step(() => purgeProcessedEvents(new Date(now.getTime() - PROCESSED_EVENT_RETENTION_MS)));
-  const purgedNotifications = await step(() =>
-    purgeReadNotifications(new Date(now.getTime() - READ_NOTIFICATION_RETENTION_MS)),
+  // Retention: the deadlines of `RETENTION_PERIODS` (SPEC 2026-11-02-auditoria-lgpd, 5.3).
+  const purgedEvents = await step(() => purgeProcessedEvents(retentionCutoff("processedEvents", now)));
+  const purgedNotifications = await step(() => purgeReadNotifications(retentionCutoff("readNotifications", now)));
+  const purgedUnreadNotifications = await step(() =>
+    purgeUnreadNotifications(retentionCutoff("unreadNotifications", now)),
   );
+  const purgedEmailDeliveries = await step(() => purgeEmailDeliveries(retentionCutoff("emailDeliveries", now)));
+  const purgedAuditEntries = await step(() => purgeAuditEntries(retentionCutoff("auditEntries", now)));
   const orphanObjects = await orphanStep(now);
 
-  return { slaAlerts, events, emails, purgedEvents, purgedNotifications, orphanObjects };
+  return {
+    slaAlerts,
+    events,
+    emails,
+    purgedEvents,
+    purgedNotifications,
+    purgedUnreadNotifications,
+    purgedEmailDeliveries,
+    purgedAuditEntries,
+    orphanObjects,
+  };
 }

@@ -493,3 +493,9 @@ SF-103 concluída (ver `NOTES.md`, seção SF-103).
 > faça a sf-104
 
 SF-104 concluída (ver `NOTES.md`, seção SF-104).
+
+## Continuação — SF-105
+
+> faça a sf-105
+
+SF-105 concluída (ver `NOTES.md`, seção SF-105).

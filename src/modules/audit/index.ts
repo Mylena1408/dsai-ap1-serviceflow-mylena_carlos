@@ -2,6 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import * as auditTrail from "./application/audit-trail";
 import { createPrismaAuditTrailReader } from "./infrastructure/prisma-audit-trail-reader";
+import * as retention from "./infrastructure/prisma-audit-retention";
 
 // Audit trail and personal data (SPEC 2026-11-02-auditoria-lgpd).
 export {
@@ -48,4 +49,9 @@ export async function listAuditTrail(
   now: Date = new Date(),
 ): Promise<auditTrail.AuditTrail> {
   return auditTrail.listAuditTrail(params, createPrismaAuditTrailReader(database), now);
+}
+
+/** Deletes audit entries that occurred before `before` (retention, section 5.3). */
+export async function purgeAuditEntries(before: Date, database: PrismaClient = prisma): Promise<number> {
+  return retention.purgeAuditEntries(database, before);
 }
