@@ -463,3 +463,9 @@ SF-099 concluída (ver `NOTES.md`, seção SF-099).
 > faça a sf-100
 
 SF-100 concluída (ver `NOTES.md`, seção SF-100).
+
+## Continuação — SF-101
+
+> faça a sf-101
+
+SF-101 concluída e SPEC de painel e relatórios encerrada (ver `NOTES.md`, seção SF-101).

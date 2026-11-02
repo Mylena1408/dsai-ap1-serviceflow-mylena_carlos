@@ -1077,7 +1077,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-101 — E2E e revisão do painel e relatórios
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. E2E `tests/e2e/dashboard.spec.ts` (seção 8 da SPEC), README com o painel e a exportação, SPEC marcada como concluída. CA-DASH-01 a 10 registrados.
 - **Objetivo:** E2E da seção 8; revisão e documentação.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-100.
