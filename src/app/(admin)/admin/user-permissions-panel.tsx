@@ -6,16 +6,13 @@ import {
   type PermissionEventRecord,
   type PermissionRole,
 } from "@/modules/permissions";
+import { PERMISSION_LABELS } from "@/shared/permissions";
 
 // Permissions of one user (SPEC 2026-11-01-permissoes-configuraveis, 5.2 to 5.4).
 
 type RedirectAction = (formData: FormData) => Promise<never>;
 
-export const PERMISSION_LABELS: Record<Permission, string> = {
-  SECTOR_SERVICES: "Gerir serviços do setor",
-  SECTOR_REQUESTS_READ: "Ver todas as solicitações do setor",
-  QUEUE_SUPERVISION: "Supervisionar a fila do setor",
-};
+export { PERMISSION_LABELS };
 
 type UserPermissionsPanelProps = {
   user: { id: string; role: PermissionRole; isActive: boolean; sectorId: string | null };

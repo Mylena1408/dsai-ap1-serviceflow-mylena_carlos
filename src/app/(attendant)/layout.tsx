@@ -18,6 +18,7 @@ export default function AttendantLayout({
           <Link href="/queue">Fila do meu setor</Link>
           <NotificationsLink href="/queue/notifications" />
           <SectorServicesLink />
+          <Link href="/account/data">Meus dados</Link>
           <Link href="/account/password">Alterar senha</Link>
         </nav>
         <SignOutButton />

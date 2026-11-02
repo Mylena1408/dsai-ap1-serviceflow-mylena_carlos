@@ -1,4 +1,5 @@
-import type { AuditAction, AuditActorRole, AuditChange, AuditEntityType, AuditMeta } from "../domain/audit";
+import type { AuditAction, AuditActor, AuditActorRole, AuditChange, AuditEntityType, AuditMeta } from "../domain/audit";
+import type { PersonalDataSource } from "../domain/personal-data";
 
 // The single point that records the audit trail (SPEC 2026-11-02-auditoria-lgpd, decision D5).
 // Transactions of the administrative modules extend it, so the record is written inside the same
@@ -60,4 +61,11 @@ export interface AuditTrailReader {
   actors(): Promise<Array<{ id: string; name: string }>>;
   /** Names of sectors and categories, to read changes of `sectorId` and `categoryId`. */
   names(ids: readonly string[]): Promise<Record<string, string>>;
+}
+
+/** "Meus dados" (section 5.4): the person's own data and the record of each export. */
+export interface PersonalDataReader {
+  load(userId: string): Promise<PersonalDataSource | null>;
+  /** Writes the "EXPORTED" audit entry; the label is the person's current name. */
+  recordExport(actor: AuditActor): Promise<void>;
 }

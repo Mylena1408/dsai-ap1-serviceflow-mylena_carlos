@@ -1,17 +1,11 @@
 import Link from "next/link";
 import { NOTIFICATION_CATEGORIES, type EmailPreferences, type NotificationCategory } from "@/modules/notifications";
+import { NOTIFICATION_CATEGORY_LABELS } from "@/shared/notifications";
 import { saveEmailPreferencesAction } from "./notification-actions";
 
 // "Preferências de notificação" (SPEC 2026-11-01-notificacoes-email-preferencias, 5.1).
 
-const CATEGORY_LABELS: Record<NotificationCategory, string> = {
-  STATUS: "Mudanças de status",
-  ASSIGNMENT: "Solicitações transferidas para você",
-  COMMENTS: "Comentários e notas internas",
-  SLA: "Prazos próximos e vencidos",
-  STAGES: "Mudanças de etapa",
-  APPROVALS: "Aprovações",
-};
+const CATEGORY_LABELS: Record<NotificationCategory, string> = NOTIFICATION_CATEGORY_LABELS;
 
 function feedback(notice?: string): { text: string; error: boolean } | null {
   if (notice === "saved") return { text: "Preferências salvas.", error: false };

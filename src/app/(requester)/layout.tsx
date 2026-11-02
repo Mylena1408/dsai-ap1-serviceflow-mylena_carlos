@@ -17,6 +17,7 @@ export default function RequesterLayout({
           <Link href="/catalog">Catálogo</Link>
           <Link href="/requests">Minhas solicitações</Link>
           <NotificationsLink href="/notifications" />
+          <Link href="/account/data">Meus dados</Link>
           <Link href="/account/password">Alterar senha</Link>
         </nav>
         <SignOutButton />

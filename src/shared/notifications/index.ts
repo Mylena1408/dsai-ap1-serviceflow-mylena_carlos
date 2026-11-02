@@ -48,3 +48,16 @@ export function notificationMessage(notification: MessageSource): string {
     notification.stageName,
   );
 }
+
+/**
+ * Names of the email categories (SPEC 2026-11-01-notificacoes-email-preferencias, 5.1), shared by
+ * the preferences page and "Meus dados" (SPEC 2026-11-02-auditoria-lgpd, 5.4).
+ */
+export const NOTIFICATION_CATEGORY_LABELS = {
+  STATUS: "Mudanças de status",
+  ASSIGNMENT: "Solicitações transferidas para você",
+  COMMENTS: "Comentários e notas internas",
+  SLA: "Prazos próximos e vencidos",
+  STAGES: "Mudanças de etapa",
+  APPROVALS: "Aprovações",
+} as const;

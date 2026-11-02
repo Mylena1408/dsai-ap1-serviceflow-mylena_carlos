@@ -1393,3 +1393,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Limpezas novas:** `purgeUnreadNotifications` e `purgeEmailDeliveries` (módulo de notificações) e `purgeAuditEntries` (módulo de auditoria), em funções de infraestrutura próprias, para não mudar as portas existentes nem os dublês dos testes. Envios de notificações apagadas saem junto (cascata que já existia).
 - **Job diário:** as constantes de 30 e 90 dias saíram de `src/server/jobs` para a tabela; o resumo ganhou `purgedUnreadNotifications`, `purgedEmailDeliveries` e `purgedAuditEntries`. Cada passo roda mesmo que um anterior falhe, como os outros.
 - **Resultados:** lint, typecheck e build OK; unitários 675/675 (112 arquivos); integração 306/306 + 1 pulado (69 arquivos); E2E 16/16.
+
+## SF-106 — "Meus dados" (2026-11-02)
+
+- **Arquivo (`domain/personal-data.ts`):** JSON com chaves em português (`pessoa`, `emailsQueVoceEscolheuReceber`, `solicitacoesQueVoceAbriu`, `comentariosQueVoceEscreveuEmOutrasSolicitacoes`, `notificacoesRecentes` — até 200 —, `permissoesRecebidas`), rótulos legíveis e datas ISO. É montado campo a campo: um hash ou uma nota interna que chegasse por engano não vai para o arquivo (teste). Anexos só pelo nome; removidos pela anonimização aparecem como tal. As observações de aprovação (escritas pelo gestor) não entram, só a situação.
+- **Leitura (`prisma-personal-data-reader.ts`):** cada consulta seleciona só o que o arquivo mostra; comentários das próprias solicitações só públicos; comentários e notas que a pessoa escreveu em solicitações de outros entram (são dela). Ordem por data e id, para ser sempre a mesma.
+- **Caso de uso e rota:** `exportPersonalData` usa só a sessão; registra `EXPORTED` (entidade a própria pessoa, sem campos) antes de devolver o arquivo; pessoa inexistente não gera registro. A rota responde `application/json` como anexo `serviceflow-meus-dados-AAAA-MM-DD.json`, sem cache; sem sessão, 401 com mensagem curta.
+- **Telas:** página "Meus dados" com o que o arquivo contém e o botão "Baixar meus dados"; link "Meus dados" nos menus de solicitante, atendente, gestor, administração e "Serviços do setor".
+- **Rótulos em `src/shared`:** categorias de e-mail (`NOTIFICATION_CATEGORY_LABELS`) e permissões (`PERMISSION_LABELS`) saíram dos componentes para `src/shared`, reexportados onde estavam.
+- **Erros meus nos testes:** o texto esperado da notificação estava errado (o real é "Atendimento iniciado: …"); dois comentários criados no mesmo instante deixavam a ordem indefinida (o teste ganhou horários diferentes e o leitor, desempate por id).
+- **Verificação no navegador:** E2E temporário (removido): o solicitante abre "Meus dados" pelo menu e baixa `serviceflow-meus-dados-2026-11-02.json` com os oito blocos; o administrador vê "Baixou os próprios dados · Usuário · Solicitante (demonstração)" na auditoria.
+- **Resultados:** lint, typecheck e build OK; unitários 682/682 (113 arquivos); integração 309/309 + 1 pulado (70 arquivos); E2E 16/16.

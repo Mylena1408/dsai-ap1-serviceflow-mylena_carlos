@@ -3,6 +3,8 @@ import { prisma } from "@/server/db";
 import * as auditTrail from "./application/audit-trail";
 import { createPrismaAuditTrailReader } from "./infrastructure/prisma-audit-trail-reader";
 import * as retention from "./infrastructure/prisma-audit-retention";
+import * as personalData from "./application/personal-data";
+import { createPrismaPersonalDataReader } from "./infrastructure/prisma-personal-data-reader";
 
 // Audit trail and personal data (SPEC 2026-11-02-auditoria-lgpd).
 export {
@@ -54,4 +56,14 @@ export async function listAuditTrail(
 /** Deletes audit entries that occurred before `before` (retention, section 5.3). */
 export async function purgeAuditEntries(before: Date, database: PrismaClient = prisma): Promise<number> {
   return retention.purgeAuditEntries(database, before);
+}
+
+export type { PersonalDataFile } from "./application/personal-data";
+
+/** "Meus dados" of the signed-in person (section 5.4); each download is recorded in the audit. */
+export async function exportPersonalData(
+  database: PrismaClient = prisma,
+  now: Date = new Date(),
+): Promise<personalData.PersonalDataFile> {
+  return personalData.exportPersonalData(createPrismaPersonalDataReader(database), now);
 }

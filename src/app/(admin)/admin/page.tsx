@@ -111,6 +111,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <p>Gerencie usuários, setores, categorias e serviços.</p>
         </div>
         <div className="page-nav">
+          <Link className="button-link-secondary" href="/account/data">
+            Meus dados
+          </Link>
           <Link className="button-link-secondary" href="/account/password">
             Alterar senha
           </Link>

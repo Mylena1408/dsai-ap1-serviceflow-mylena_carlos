@@ -41,3 +41,10 @@ export function hasPermissionInSector(
 ): boolean {
   return granted.includes(permission) && isPermissionEffective(holder, permission) && holder.sectorId === sectorId;
 }
+
+/** Names on screens and in "Meus dados" (SPEC 2026-11-02-auditoria-lgpd, 5.4). */
+export const PERMISSION_LABELS: Record<Permission, string> = {
+  SECTOR_SERVICES: "Gerir serviços do setor",
+  SECTOR_REQUESTS_READ: "Ver todas as solicitações do setor",
+  QUEUE_SUPERVISION: "Supervisionar a fila do setor",
+};

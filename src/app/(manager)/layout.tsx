@@ -20,6 +20,7 @@ export default function ManagerLayout({
           <Link href="/approvals/dashboard">Painel do setor</Link>
           <NotificationsLink href="/approvals/notifications" />
           <SectorServicesLink />
+          <Link href="/account/data">Meus dados</Link>
           <Link href="/account/password">Alterar senha</Link>
         </nav>
         <SignOutButton />

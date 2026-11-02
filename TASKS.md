@@ -1131,7 +1131,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-106 — "Meus dados"
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Página "Meus dados" (`/account/data`, com link nos menus de todos os perfis) e rota `GET /api/account/data`, que baixa o JSON da própria pessoa (`buildPersonalDataExport`, `createPrismaPersonalDataReader`) e registra cada download na auditoria. CA-AUD-06 verificado.
 - **Objetivo:** Página e download do JSON da própria pessoa (5.4), registrado na auditoria.
 - **Arquivos/módulos esperados:** `src/modules/`, `src/app/`, testes.
 - **Dependências:** SF-105.
