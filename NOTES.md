@@ -1355,3 +1355,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **README:** item "Painel e relatórios" em "Fluxos disponíveis".
 - **Revisão da SPEC (SF-097 a SF-101):** nenhuma dependência nem migration; nenhum segredo; nenhum teste anterior à SPEC alterado (só os testes criados pela própria SPEC mudaram, e só imports ou acréscimos). Mudanças em código existente: utilitários de dia e rótulos movidos para `src/shared` (SF-097) e `period` e `sector` na lista de caminhos públicos dos erros (SF-100).
 - **Resultados:** lint, typecheck e build OK; unitários 641/641 (108 arquivos); integração 291/291 + 1 pulado (65 arquivos); E2E 16/16.
+
+## SPEC de auditoria administrativa e dados pessoais (2026-11-02)
+
+- **SPEC `2026-11-02-auditoria-lgpd.md`** (item 12 do plano, último da fase 4) aprovada com as decisões D1 a D5 conforme propostas: auditoria das alterações administrativas com valores (nome e e-mail só como "alterado"), gravada na mesma transação; prazos fixos de retenção no job diário, sem apagar solicitações; "Meus dados" em JSON baixado pela própria pessoa; anonimização de usuários desativados sem solicitações em andamento, removendo identidade, textos escritos pela pessoa e anexos enviados por ela. Tarefas SF-102 a SF-108 registradas em `TASKS.md`.
+- **Limite registrado na SPEC (seção 2):** organiza o tratamento de dados no sistema, mas não substitui a orientação jurídica da organização sobre bases legais e prazos.

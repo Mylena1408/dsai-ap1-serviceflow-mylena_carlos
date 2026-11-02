@@ -469,3 +469,9 @@ SF-100 concluída (ver `NOTES.md`, seção SF-100).
 > faça a sf-101
 
 SF-101 concluída e SPEC de painel e relatórios encerrada (ver `NOTES.md`, seção SF-101).
+
+## Continuação — SPEC de auditoria administrativa e dados pessoais (LGPD)
+
+> siga para a próxima spec
+
+Proposta escrita a partir do item 12 do plano, da visão geral §10 e da seção 19 da SPEC principal; decisões D1 a D5 aprovadas pela responsável no questionário (todas as opções recomendadas). SPEC `SPEC/2026-11-02-auditoria-lgpd.md` aprovada e tarefas SF-102 a SF-108 registradas.

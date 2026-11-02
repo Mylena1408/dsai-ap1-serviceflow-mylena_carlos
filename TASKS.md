@@ -1084,3 +1084,77 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-DASH-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-02-painel-relatorios.md`.
+
+## Auditoria administrativa e dados pessoais (LGPD) — SPEC de 2026-11-02
+
+**Ordem:** SF-102 → SF-103 → SF-104 → SF-105 → SF-106 → SF-107 → SF-108.
+
+### SF-102 — Migration e domínio da auditoria
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration da seção 6 (tabela `AuditEntry`, `User.anonymizedAt`, `RequestAttachment.removedAt`) e regras puras: campos alterados (campos pessoais só "alterado"; sem mudança, nada), ações e entidades com textos em português.
+- **Arquivos/módulos esperados:** `prisma/`, novo módulo de auditoria, limpeza do banco de teste, testes.
+- **Dependências:** SF-101.
+- **Critérios de conclusão:** CA-AUD-03 (regras) e CA-AUD-10.
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+### SF-103 — Registro da auditoria nos casos de uso administrativos
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Ponto único de gravação dentro das transações existentes de usuários, setores, categorias, serviços, documentos exigidos, campos e etapas (inclusive quem tem "Gerir serviços do setor").
+- **Arquivos/módulos esperados:** `src/modules/` (casos de uso e repositórios), testes.
+- **Dependências:** SF-102.
+- **Critérios de conclusão:** CA-AUD-02 e CA-AUD-03.
+- **Testes relacionados:** Integração por entidade, inclusive falha sem registro.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+### SF-104 — Seção "Auditoria" na administração
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Leitura paginada com filtros por período, entidade e pessoa, juntando o histórico de permissões; tela só do administrador.
+- **Arquivos/módulos esperados:** `src/modules/`, `src/app/`, testes.
+- **Dependências:** SF-103.
+- **Critérios de conclusão:** CA-AUD-04.
+- **Testes relacionados:** Unitários, integração e verificação no navegador.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+### SF-105 — Retenção no job diário
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Tabela única de prazos (5.3) e limpezas novas no job diário, com o resumo do que foi removido.
+- **Arquivos/módulos esperados:** `src/server/jobs/`, `src/modules/`, testes.
+- **Dependências:** SF-104.
+- **Critérios de conclusão:** CA-AUD-05.
+- **Testes relacionados:** Unitários dos prazos; integração perto do limite.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+### SF-106 — "Meus dados"
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Página e download do JSON da própria pessoa (5.4), registrado na auditoria.
+- **Arquivos/módulos esperados:** `src/modules/`, `src/app/`, testes.
+- **Dependências:** SF-105.
+- **Critérios de conclusão:** CA-AUD-06.
+- **Testes relacionados:** Unitários do conteúdo; integração; verificação no navegador.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+### SF-107 — Anonimização
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Ação do administrador nas condições de 5.5, com os efeitos na mesma transação, remoção dos anexos e registro na auditoria.
+- **Arquivos/módulos esperados:** `src/modules/`, `src/app/`, testes.
+- **Dependências:** SF-106.
+- **Critérios de conclusão:** CA-AUD-07, CA-AUD-08 e CA-AUD-09.
+- **Testes relacionados:** Unitários das condições; integração dos efeitos; verificação no navegador.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+### SF-108 — E2E e revisão da auditoria e LGPD
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-107.
+- **Critérios de conclusão:** Todos os CA-AUD-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
