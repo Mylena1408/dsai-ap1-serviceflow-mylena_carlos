@@ -549,3 +549,11 @@ Pergunta: quais contas (pessoas fictícias do seed ou os quatro perfis de demons
 > no lugar crie perfils fictícios que tenham todas as informações necessárias para demonstração
 
 Perguntas sobre o elenco e o momento do carregamento; respostas: "Reusar Ana e Diego (Recomendado)" e "No primeiro clique (Recomendado)". SF-110 concluída (ver `NOTES.md`, seção SF-110).
+
+## Continuação — Publicação
+
+> faça o deploy na vercel
+
+> prossiga
+
+Pergunta sobre como aplicar as migrations (o CLI não lê os valores *Secret*); resposta: "Eu rodo o comando (Recomendado)". A responsável perguntou como obter a URL na Vercel e rodou o comando com o nome de variável errado; com a URL na conversa, apliquei as migrations e publiquei (ver `NOTES.md`, seção "Publicação das fases 3 e 4 e das SF-109 e SF-110").

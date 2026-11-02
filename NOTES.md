@@ -1466,3 +1466,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Proposta da API externa:** tarefas renumeradas para SF-111 a SF-115; continua aguardando aprovação.
 - **Resultados:** lint, typecheck e build OK; unitários 718/718; integração 317/317 + 1 pulado; E2E 18/18.
 - **Publicação:** no próximo deploy, o primeiro clique no site publicado carrega os dados fictícios no Neon (depois das dez migrations pendentes).
+
+## Publicação das fases 3 e 4 e das SF-109 e SF-110 (2026-11-02)
+
+- A pedido da responsável ("faça o deploy na vercel").
+- **Migrations no Neon:** as variáveis do Neon estão na Vercel como *Secret* e o CLI não lê os valores (`vercel env run` avisou que 18 valores não podem ser lidos); baixá-las para um arquivo local foi bloqueado pela permissão automática (gravaria a senha do banco em disco). A responsável escolheu rodar o comando ela mesma; na primeira tentativa usou o nome `DATABASE_URL_UNPOOLED` no lugar de `DATABASE_URL` e o Prisma recusou. Com a URL direta já na conversa, rodei `prisma migrate deploy` só pela linha de comando, sem gravar em arquivo e com a URL ocultada na saída. Aplicadas as 10 migrations pendentes, de `20261101100000_sla_and_priorities` a `20261102200000_audit_actor_reference`.
+- **Deploy:** `vercel deploy --prod` do commit `23517d7` (a proposta da SPEC de API, não versionada, foi junto no envio, sem efeito no site). Situação `Ready`, alias https://serviceflow-sand.vercel.app.
+- **Verificação só com leitura:** `/` responde 200 com "Escolha um perfil" e os quatro botões, sem campo de senha; `/login` e `/admin` sem sessão redirecionam (307) para `/`. Nenhum botão foi clicado: o primeiro clique de qualquer pessoa carrega os dados fictícios no Neon, desativa as contas genéricas antigas e renomeia o "Setor de demonstração" (seção 25).
+- **Segurança:** a URL do Neon com a senha apareceu no chat desta sessão. Ela não está em nenhum arquivo do repositório. Recomendado trocar a senha do banco no Neon (e atualizar a integração da Vercel), como já previsto se o banco receber dados reais.
+- **Pendências:** e-mail real (conta no provedor e as três variáveis); armazenamento de documentos (SF-030).
