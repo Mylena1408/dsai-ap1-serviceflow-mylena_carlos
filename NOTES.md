@@ -1321,3 +1321,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Esclarecimentos registrados na SPEC (5.3 e 5.4):** casas decimais, arredondamento, células vazias e "Concluída no prazo" só para concluídas com prazo.
 - **Reaproveitamento sem duplicação:** o cálculo do dia em São Paulo saiu de `requests/domain/search-criteria.ts` para `src/shared/time` (a busca continua com a mesma API e os mesmos testes); os rótulos de status, prioridade, aprovação e situação do prazo e o código curto saíram de `src/app/_components` e de `notifications/domain/email-content.ts` para `src/shared/requests`, e os arquivos antigos reexportam — nenhuma tela mudou.
 - **Resultados:** lint, typecheck e build OK; unitários 607/607 (105 arquivos); integração 280/280 + 1 pulado (63 arquivos); E2E 15/15.
+
+## SF-098 — Leitura dos indicadores e casos de uso (2026-11-02)
+
+- **Porta `DashboardReader`:** `findSector`, `listSectors`, `currentCounts(scope, now)`, `periodTotals(scope, range)` e `listForExport(scope, range, limit)`. O recorte (`sectorId` ou nulo para a organização) sempre vem do caso de uso.
+- **Implementação Prisma:** contagens com as mesmas regras de `slaSituation` e do filtro da fila; agrupamentos por `groupBy` nos nomes registrados na abertura; média e mediana do tempo até a conclusão, total com prazo e no prazo numa consulta SQL (`avg` e `percentile_cont(0.5)`), parametrizada pelo Prisma. A exportação seleciona só as colunas de 5.4 (nada da descrição nem do solicitante) e a etapa atual pela cópia das etapas.
+- **Casos de uso:** `getDashboard` resolve o recorte pela sessão (administrador: organização ou o setor do filtro, que precisa existir; gestor: só o setor atual, ativo; demais: `AuthorizationError` antes de ler qualquer coisa), lê o período (mostrando o padrão quando recusado) e formata horas, percentual e grupos com as regras da SF-097. `exportDashboardCsv` usa o mesmo recorte, mas recusa período ou setor inválido em vez de exportar o padrão, pede no máximo 10.001 linhas para detectar o excesso e calcula a situação do prazo na hora.
+- **Domínio:** `completionTimesFromAggregate` arredonda média e mediana vindas do banco da mesma forma que `completionTimes` (teste confere que os dois concordam).
+- **Testes da SF-097:** passaram a importar direto de `domain/` (como os outros testes de domínio), porque o `index.ts` do módulo agora carrega a autorização; nenhuma asserção mudou.
+- **Resultados:** lint, typecheck e build OK; unitários 625/625 (106 arquivos); integração 287/287 + 1 pulado (64 arquivos); E2E 15/15.

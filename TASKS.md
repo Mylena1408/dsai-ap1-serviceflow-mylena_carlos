@@ -1047,7 +1047,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-098 — Leitura dos indicadores e casos de uso
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Porta `DashboardReader` (`application/ports.ts`) com implementação Prisma (`infrastructure/prisma-dashboard-reader.ts`: contagens, `groupBy` e média e mediana por `percentile_cont` no PostgreSQL) e casos de uso `getDashboard` e `exportDashboardCsv` (`application/dashboard.ts`) com a autorização de 5.7; funções do módulo `getDashboard(params)` e `exportDashboardCsv(params)`. CA-DASH-03, 04, 05 e 06 verificados; CA-DASH-02 verificado nos casos de uso (telas na SF-099).
 - **Objetivo:** Porta `DashboardReader` com implementação Prisma (agregações no banco) e em memória; casos de uso do painel e da exportação com a autorização de 5.7 (administrador com filtro por setor; gestor só no setor atual).
 - **Arquivos/módulos esperados:** `src/modules/`, testes.
 - **Dependências:** SF-097.

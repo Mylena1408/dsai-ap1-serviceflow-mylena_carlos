@@ -30,6 +30,11 @@ export function completionTimes(durationsMs: readonly number[]): CompletionTimes
   return { averageHours: hours(average), medianHours: hours(median) };
 }
 
+/** The same result from an average and a median computed by the database (section 5.6). */
+export function completionTimesFromAggregate(aggregate: { averageMs: number; medianMs: number } | null): CompletionTimes | null {
+  return aggregate === null ? null : { averageHours: hours(aggregate.averageMs), medianHours: hours(aggregate.medianMs) };
+}
+
 /**
  * Whole percentage of the completed requests with a due date that finished on time; null when
  * none had a due date ("sem prazo definido" on screen).

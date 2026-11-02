@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { barPercentage, completionTimes, onTimePercentage, sortReportGroups } from "@/modules/reports";
+import {
+  barPercentage,
+  completionTimes,
+  completionTimesFromAggregate,
+  onTimePercentage,
+  sortReportGroups,
+} from "@/modules/reports/domain/metrics";
 
 // SPEC 2026-11-02-painel-relatorios, 5.3 and 5.5 (SF-097; CA-DASH-05 and CA-DASH-06).
 
@@ -18,6 +24,17 @@ describe("time to completion (CA-DASH-05)", () => {
 
   it("has nothing to show without completed requests", () => {
     expect(completionTimes([])).toBeNull();
+  });
+
+  it("rounds an average and a median computed by the database the same way (SF-098)", () => {
+    expect(completionTimesFromAggregate({ averageMs: 4 * HOUR, medianMs: 2.5 * HOUR })).toEqual(
+      completionTimes([1 * HOUR, 2 * HOUR, 3 * HOUR, 10 * HOUR]),
+    );
+    expect(completionTimesFromAggregate({ averageMs: 93 * 60 * 1000, medianMs: 93 * 60 * 1000 })).toEqual({
+      averageHours: 1.6,
+      medianHours: 1.6,
+    });
+    expect(completionTimesFromAggregate(null)).toBeNull();
   });
 });
 

@@ -7,7 +7,7 @@ import {
   csvField,
   reportCsvFileName,
   type ReportCsvRow,
-} from "@/modules/reports";
+} from "@/modules/reports/domain/csv";
 import { ValidationError } from "@/server/errors";
 
 // SPEC 2026-11-02-painel-relatorios, 5.4 (SF-097; CA-DASH-08 and CA-DASH-09).

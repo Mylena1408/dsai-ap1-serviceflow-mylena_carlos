@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lastDaysPeriod, parseReportPeriod } from "@/modules/reports";
+import { lastDaysPeriod, parseReportPeriod } from "@/modules/reports/domain/period";
 import { addDays, daysBetweenInclusive, zonedDateTimeOf, zonedDayOf } from "@/shared/time";
 
 // SPEC 2026-11-02-painel-relatorios, 5.2 (SF-097; CA-DASH-04 and CA-DASH-07).

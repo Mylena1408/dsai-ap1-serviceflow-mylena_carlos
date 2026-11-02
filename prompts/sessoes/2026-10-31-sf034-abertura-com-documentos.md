@@ -445,3 +445,9 @@ Proposta escrita a partir do item 11 do plano e da visão geral §13; decisões 
 > faça a sf-097
 
 SF-097 concluída (ver `NOTES.md`, seção SF-097).
+
+## Continuação — SF-098
+
+> faça a sf-098
+
+SF-098 concluída (ver `NOTES.md`, seção SF-098). Pedidos seguintes ("faça a sf-099", "faça a sf-100", "faça a sf-101") chegaram enquanto a suíte rodava e foram feitos em ordem, um commit por tarefa.
