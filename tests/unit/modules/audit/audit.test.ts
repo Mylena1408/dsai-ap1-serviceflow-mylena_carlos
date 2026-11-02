@@ -1,0 +1,142 @@
+import { describe, expect, it } from "vitest";
+import type { AuditAction, AuditEntityType } from "@prisma/client";
+import {
+  AUDIT_ACTIONS,
+  AUDIT_ACTION_LABELS,
+  AUDIT_ENTITY_LABELS,
+  AUDIT_ENTITY_TYPES,
+  auditChanges,
+  describeAuditChange,
+} from "@/modules/audit/domain/audit";
+
+// SPEC 2026-11-02-auditoria-lgpd, 5.1 and 5.2 (SF-102; CA-AUD-02 and CA-AUD-03).
+
+describe("changed fields (CA-AUD-02)", () => {
+  it("records the fields that changed, with their values, in order", () => {
+    expect(
+      auditChanges(
+        "SERVICE",
+        { name: "Reparo", slaHours: 24, requiresApproval: false, defaultPriority: "NORMAL" },
+        { name: "Reparo", slaHours: 12, requiresApproval: true, defaultPriority: "NORMAL" },
+      ),
+    ).toEqual([
+      { field: "slaHours", before: 24, after: 12 },
+      { field: "requiresApproval", before: false, after: true },
+    ]);
+  });
+
+  it("records nothing when nothing really changed", () => {
+    expect(auditChanges("SECTOR", { name: "TI", isActive: true }, { name: "TI", isActive: true })).toEqual([]);
+    expect(auditChanges("DOCUMENT_REQUIREMENT", { acceptedFormats: ["PDF", "TXT"] }, { acceptedFormats: ["PDF", "TXT"] })).toEqual([]);
+    expect(auditChanges("SERVICE", { slaHours: null }, { slaHours: undefined })).toEqual([]);
+  });
+
+  it("compares lists and dates by value", () => {
+    expect(auditChanges("DOCUMENT_REQUIREMENT", { acceptedFormats: ["PDF"] }, { acceptedFormats: ["PDF", "DOCX"] })).toEqual([
+      { field: "acceptedFormats", before: ["PDF"], after: ["PDF", "DOCX"] },
+    ]);
+    const date = new Date("2026-11-02T12:00:00.000Z");
+    expect(auditChanges("USER", { anonymizedAt: null }, { anonymizedAt: date })).toEqual([
+      { field: "anonymizedAt", before: null, after: "2026-11-02T12:00:00.000Z" },
+    ]);
+    expect(auditChanges("USER", { anonymizedAt: date }, { anonymizedAt: new Date(date) })).toEqual([]);
+  });
+
+  it("records every field with a value on creation", () => {
+    expect(auditChanges("SERVICE_STAGE", null, { name: "Triagem", position: 0, isActive: true, helpText: null })).toEqual([
+      { field: "name", before: null, after: "Triagem" },
+      { field: "position", before: null, after: 0 },
+      { field: "isActive", before: null, after: true },
+    ]);
+  });
+
+  it("keeps a field that disappeared from the new state", () => {
+    expect(auditChanges("SERVICE_FIELD", { helpText: "Dica" }, {})).toEqual([{ field: "helpText", before: "Dica", after: null }]);
+  });
+});
+
+describe("personal data and secrets (CA-AUD-03)", () => {
+  it("says only that the name or e-mail of a user changed", () => {
+    const changes = auditChanges(
+      "USER",
+      { name: "Carla Mendes", email: "carla@exemplo.test", role: "REQUESTER" },
+      { name: "Carla M. Souza", email: "carla.souza@exemplo.test", role: "ATTENDANT" },
+    );
+
+    expect(changes).toEqual([
+      { field: "name", personal: true },
+      { field: "email", personal: true },
+      { field: "role", before: "REQUESTER", after: "ATTENDANT" },
+    ]);
+    expect(JSON.stringify(changes)).not.toMatch(/Carla|exemplo\.test/);
+  });
+
+  it("hides the name and e-mail of a new user too", () => {
+    expect(auditChanges("USER", null, { name: "Diego", email: "diego@exemplo.test", role: "ATTENDANT" })).toEqual([
+      { field: "name", personal: true },
+      { field: "email", personal: true },
+      { field: "role", before: null, after: "ATTENDANT" },
+    ]);
+  });
+
+  it("keeps the name of other entities, which is not personal data", () => {
+    expect(auditChanges("SECTOR", { name: "TI" }, { name: "Tecnologia" })).toEqual([{ field: "name", before: "TI", after: "Tecnologia" }]);
+  });
+
+  it("never records passwords, hashes, secrets or tokens", () => {
+    const changes = auditChanges(
+      "USER",
+      { passwordHash: "$argon2id$old", password: "old", apiToken: "a", clientSecret: "b", isActive: true },
+      { passwordHash: "$argon2id$new", password: "new", apiToken: "c", clientSecret: "d", isActive: false },
+    );
+
+    expect(changes).toEqual([{ field: "isActive", before: true, after: false }]);
+  });
+});
+
+describe("texts (section 5.2)", () => {
+  it("describes each change in Portuguese", () => {
+    expect(describeAuditChange({ field: "slaHours", before: 24, after: 12 })).toBe("Prazo-base (horas): 24 → 12");
+    expect(describeAuditChange({ field: "requiresApproval", before: false, after: true })).toBe("Exige aprovação: Não → Sim");
+    expect(describeAuditChange({ field: "email", personal: true })).toBe("E-mail: alterado");
+    expect(describeAuditChange({ field: "helpText", before: null, after: "Dica" })).toBe("Texto de ajuda: — → Dica");
+    expect(describeAuditChange({ field: "acceptedFormats", before: ["PDF"], after: ["PDF", "DOCX"] })).toBe(
+      "Formatos aceitos: PDF → PDF, DOCX",
+    );
+    expect(describeAuditChange({ field: "unknownField", before: 1, after: 2 })).toBe("unknownField: 1 → 2");
+  });
+
+  it("lets the screen name ids and enum values", () => {
+    const names: Record<string, string> = { s1: "Infraestrutura", s2: "Pessoas" };
+    const format = (field: string, value: unknown) => (field === "sectorId" && typeof value === "string" ? names[value] : undefined);
+
+    expect(describeAuditChange({ field: "sectorId", before: "s1", after: "s2" }, format)).toBe("Setor: Infraestrutura → Pessoas");
+    expect(describeAuditChange({ field: "sectorId", before: null, after: "s2" }, format)).toBe("Setor: — → Pessoas");
+  });
+
+  it("has a text for every action and entity of the database", () => {
+    const actions: Record<AuditAction, true> = {
+      CREATED: true,
+      UPDATED: true,
+      REORDERED: true,
+      DEACTIVATED: true,
+      REACTIVATED: true,
+      ANONYMIZED: true,
+      EXPORTED: true,
+    };
+    const entities: Record<AuditEntityType, true> = {
+      USER: true,
+      SECTOR: true,
+      CATEGORY: true,
+      SERVICE: true,
+      DOCUMENT_REQUIREMENT: true,
+      SERVICE_FIELD: true,
+      SERVICE_STAGE: true,
+    };
+
+    expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());
+    expect([...AUDIT_ENTITY_TYPES].sort()).toEqual(Object.keys(entities).sort());
+    for (const action of AUDIT_ACTIONS) expect(AUDIT_ACTION_LABELS[action]).toBeTruthy();
+    for (const entity of AUDIT_ENTITY_TYPES) expect(AUDIT_ENTITY_LABELS[entity]).toBeTruthy();
+  });
+});

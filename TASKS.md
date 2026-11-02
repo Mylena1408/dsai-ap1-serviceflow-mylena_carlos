@@ -1091,7 +1091,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-102 — Migration e domínio da auditoria
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Migration `20261102100000_audit_trail` (enums `AuditAction` e `AuditEntityType`, tabela `AuditEntry`, colunas `User.anonymizedAt` e `RequestAttachment.removedAt`) e regras puras em `src/modules/audit/domain/audit.ts`: campos alterados (nome e e-mail de usuário só como "alterado"; senhas, hashes, segredos e tokens nunca), textos das ações, entidades e campos. CA-AUD-10 verificado; regras de CA-AUD-02 e 03 cobertas por unitários (o registro nos casos de uso vem na SF-103).
 - **Objetivo:** Migration da seção 6 (tabela `AuditEntry`, `User.anonymizedAt`, `RequestAttachment.removedAt`) e regras puras: campos alterados (campos pessoais só "alterado"; sem mudança, nada), ações e entidades com textos em português.
 - **Arquivos/módulos esperados:** `prisma/`, novo módulo de auditoria, limpeza do banco de teste, testes.
 - **Dependências:** SF-101.

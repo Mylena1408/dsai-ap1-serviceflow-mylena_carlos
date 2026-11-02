@@ -116,7 +116,7 @@ A limpeza roda no job diário e informa quantos registros removeu de cada tipo. 
 - [ ] **CA-AUD-07** — A anonimização só é aceita nas condições de 5.5.1 e é recusada nos demais casos sem alterar nada.
 - [ ] **CA-AUD-08** — Depois da anonimização, nome, e-mail, textos escritos pela pessoa, anexos, preferências e notificações não existem mais; a conta não autentica; solicitações, histórico e números do painel continuam.
 - [ ] **CA-AUD-09** — A anonimização entra na auditoria sem os dados antigos.
-- [ ] **CA-AUD-10** — Migration aditiva; nenhuma dependência nova.
+- [x] **CA-AUD-10** — Migration aditiva; nenhuma dependência nova. *Verificado em 2026-11-02 (SF-102): migration só com criações (dois enums, uma tabela com índices e chave para o autor, duas colunas que aceitam nulo); ninguém começa anonimizado, nenhum anexo removido e nenhum registro de auditoria (`audit-schema.test.ts`); nenhuma dependência nova.*
 
 ## 8. Estratégia de testes
 

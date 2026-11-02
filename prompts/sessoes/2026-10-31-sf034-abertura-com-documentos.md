@@ -475,3 +475,9 @@ SF-101 concluída e SPEC de painel e relatórios encerrada (ver `NOTES.md`, seç
 > siga para a próxima spec
 
 Proposta escrita a partir do item 12 do plano, da visão geral §10 e da seção 19 da SPEC principal; decisões D1 a D5 aprovadas pela responsável no questionário (todas as opções recomendadas). SPEC `SPEC/2026-11-02-auditoria-lgpd.md` aprovada e tarefas SF-102 a SF-108 registradas.
+
+## Continuação — SF-102
+
+> perfeito,pode prosseguir
+
+Resposta à pergunta sobre segurança: a SPEC não muda o login de demonstração nem cria barreiras novas; as ações novas seguem o modelo por perfil. Seguida a SPEC aprovada sem as mudanças opcionais (bloquear a anonimização das contas de demonstração; auditoria visível a todos). SF-102 concluída (ver `NOTES.md`, seção SF-102).
