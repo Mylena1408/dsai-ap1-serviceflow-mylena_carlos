@@ -1,4 +1,5 @@
 import { ValidationError } from "@/server/errors";
+import { SAO_PAULO_TIME_ZONE, addDays, calendarDayError, startOfZonedDay } from "@/shared/time";
 import type { RequestStatus } from "./request";
 
 // Search, filters, order and pages of the request lists (SPEC 2026-10-31-busca-filtros-
@@ -7,7 +8,7 @@ import type { RequestStatus } from "./request";
 export const SEARCH_PAGE_SIZE = 20;
 export const MIN_SEARCH_TERM = 2;
 export const MAX_SEARCH_TERM = 100;
-export const SEARCH_TIME_ZONE = "America/Sao_Paulo";
+export const SEARCH_TIME_ZONE = SAO_PAULO_TIME_ZONE;
 
 const STATUSES: readonly RequestStatus[] = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
 const ASSIGNEE_FILTERS = ["all", "mine", "unassigned"] as const;
@@ -57,47 +58,15 @@ function many(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function timeZoneOffsetMs(instant: number, timeZone: string): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(new Date(instant));
-  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
-  const asUtc = Date.UTC(value("year"), value("month") - 1, value("day"), value("hour"), value("minute"), value("second"));
-  return asUtc - instant;
-}
-
 /** Midnight of a calendar day (YYYY-MM-DD) in the given time zone, as an instant. */
 export function startOfDayInTimeZone(day: string, timeZone: string = SEARCH_TIME_ZONE): Date {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  const error = calendarDayError(day);
 
-  if (!match) {
-    invalid("invalid_format");
+  if (error) {
+    invalid(error);
   }
 
-  const [year, month, date] = [Number(match[1]), Number(match[2]), Number(match[3])];
-  const utcMidnight = Date.UTC(year, month - 1, date);
-  const check = new Date(utcMidnight);
-
-  if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== date) {
-    invalid("invalid_value");
-  }
-
-  // Two passes absorb a daylight-saving change between the guess and the result.
-  let instant = utcMidnight - timeZoneOffsetMs(utcMidnight, timeZone);
-  instant = utcMidnight - timeZoneOffsetMs(instant, timeZone);
-  return new Date(instant);
-}
-
-function nextDay(day: string): string {
-  const [year, month, date] = day.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, date + 1)).toISOString().slice(0, 10);
+  return startOfZonedDay(day, timeZone);
 }
 
 /** Section 5.2: 2 to 100 characters after trimming; empty means no search. */
@@ -147,7 +116,7 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
   const openedFrom = from ? startOfDayInTimeZone(from) : null;
   // Validates the last day before deriving the next one from it.
   const lastDay = to ? startOfDayInTimeZone(to) : null;
-  const openedBefore = to ? startOfDayInTimeZone(nextDay(to)) : null;
+  const openedBefore = to ? startOfDayInTimeZone(addDays(to, 1)) : null;
 
   if (openedFrom && lastDay && openedFrom.getTime() > lastDay.getTime()) {
     invalid("invalid_value");

@@ -1037,7 +1037,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-097 — Domínio do painel e do CSV
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Novo módulo `src/modules/reports` (só domínio): período (`parseReportPeriod`, `lastDaysPeriod`), cálculos (`completionTimes`, `onTimePercentage`, `sortReportGroups`, `barPercentage`) e CSV (`buildRequestsCsv`, `csvField`, `assertReportCsvSize`, `reportCsvFileName`). Utilitários de dia em São Paulo em `src/shared/time` e rótulos das solicitações em `src/shared/requests`, reaproveitados pelas telas existentes. Regras de CA-DASH-04, 05, 06, 07 e 08 cobertas por unitários; os critérios serão marcados nas tarefas seguintes, que ligam as regras ao banco e às telas.
 - **Objetivo:** Regras puras: período (opções, limites de 366 dias, fuso `America/Sao_Paulo`), média, mediana e percentual no prazo, ordenação dos grupos e montagem do CSV (colunas, formato e proteção contra fórmulas).
 - **Arquivos/módulos esperados:** `src/modules/` (novo módulo de relatórios), testes.
 - **Dependências:** SF-096.

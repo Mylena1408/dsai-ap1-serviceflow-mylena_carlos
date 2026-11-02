@@ -1,17 +1,11 @@
 import { slaSituation, type RequestWithHistory, type SlaSituation } from "@/modules/requests";
+import { SLA_SITUATION_LABELS } from "@/shared/requests";
 import { PRIORITY_LABELS } from "./request-priority";
 
 // Priority, due date and SLA situation of a request (SPEC 2026-11-01-sla-prioridades,
 // sections 5.4 and 5.6). The situation is computed when displayed, so it is always exact.
 
-export const SLA_SITUATION_LABELS: Record<SlaSituation, string> = {
-  none: "Sem prazo",
-  on_time: "Dentro do prazo",
-  due_soon: "Próximo do vencimento",
-  overdue: "Vencido",
-  completed_on_time: "Concluída no prazo",
-  completed_late: "Concluída com atraso",
-};
+export { SLA_SITUATION_LABELS };
 
 type SlaRequest = Pick<
   RequestWithHistory,

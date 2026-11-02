@@ -1,4 +1,5 @@
 import { notificationMessage, type MessageSource } from "@/shared/notifications";
+import { requestShortCode } from "@/shared/requests";
 
 // Content of a notification email (SPEC 2026-11-01-notificacoes-email-preferencias, 5.4): the
 // notification text, the service, the short code and the links. Nothing else about the request
@@ -22,10 +23,7 @@ const AREAS: Record<EmailRecipientRole, { request: string; notifications: string
   MANAGER: { request: "/approvals", notifications: "/approvals/notifications" },
 };
 
-/** The first block of the identifier, as people quote a request in a conversation. */
-export function requestShortCode(requestId: string): string {
-  return requestId.slice(0, 8).toUpperCase();
-}
+export { requestShortCode };
 
 /** `baseUrl` is the configured origin (APP_BASE_URL), without a trailing slash. */
 export function buildNotificationEmail(source: EmailContentSource, baseUrl: string): EmailContent {

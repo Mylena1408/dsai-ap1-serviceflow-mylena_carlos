@@ -76,6 +76,7 @@ O setor de uma solicitação é o registrado na abertura (`sectorId`), como na f
 
 - Categorias e setores aparecem pelo nome registrado na abertura, para que renomear ou desativar não apague o histórico. Grupos ordenados do maior para o menor; empate, por nome.
 - Sem solicitações no recorte, cada indicador mostra 0 (ou "—" para tempos e percentuais) e o painel diz "Nenhuma solicitação no período".
+- *Esclarecido em 2026-11-02 (SF-097): tempos em horas com uma casa decimal; percentual no prazo em número inteiro, arredondado; barras proporcionais ao maior grupo.*
 
 ### 5.4 Exportação CSV **(decisão R4)**
 
@@ -85,6 +86,7 @@ O setor de uma solicitação é o registrado na abertura (`sectorId`), como na f
 - Formato: UTF-8 com BOM, separador `;`, datas em `AAAA-MM-DD HH:MM` no fuso `America/Sao_Paulo`, nomes de status em português. Campos que começam com `=`, `+`, `-`, `@`, tabulação ou retorno recebem um apóstrofo na frente (proteção contra fórmulas em planilhas).
 - Limite de **10.000 linhas**; acima disso a exportação é recusada com a mensagem "Escolha um período menor".
 - Nome do arquivo: `serviceflow-solicitacoes-<início>-a-<fim>.csv`.
+- *Esclarecido em 2026-11-02 (SF-097): linhas terminadas em CRLF; o valor que tem `;`, aspas ou quebra de linha vai entre aspas; células sem valor (sem aprovação, sem etapa, sem responsável, datas ausentes) ficam vazias; "Concluída no prazo" é "Sim" ou "Não" só para concluídas com prazo, vazia nas demais.*
 
 ### 5.5 Gráficos **(decisão R3)**
 

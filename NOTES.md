@@ -1311,3 +1311,13 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - **SPEC `2026-11-02-painel-relatorios.md`** (item 11 do plano) aprovada com as decisões R1 a R5 conforme propostas: painel para o administrador (organização, com filtro por setor) e para o gestor (só o próprio setor); indicadores da visão geral §13 com período de 7, 30 ou 90 dias ou intervalo de até 366 dias; barras em HTML e CSS (sem dependência nova); CSV com colunas mínimas, sem dados do solicitante, até 10.000 linhas; cálculo sob demanda por agregação no banco, sem migration. Tarefas SF-097 a SF-101 registradas em `TASKS.md`.
 - **Mudança de escopo registrada (seção 2 da SPEC):** o administrador e o gestor passam a ler **números agregados e colunas mínimas** de solicitações; o detalhe de cada solicitação continua com as regras de leitura atuais, e o painel não tem links para solicitações.
+
+## SF-097 — Domínio do painel e do CSV (2026-11-02)
+
+- **Módulo novo `src/modules/reports`**, só com `domain/` por enquanto:
+  - `period.ts`: `parseReportPeriod(raw, now)` lê `period` (7, 30 — padrão —, 90 ou `custom`), `from` e `to` da URL; devolve o período (primeiro e último dia, limites `from` inclusivo e `before` exclusivo à meia-noite de São Paulo) e, quando recusa, o motivo (`invalid_option`, `missing_dates`, `invalid_date`, `inverted_range`, `future_date`, `too_long`) junto do período padrão, para a tela mostrar a mensagem e os 30 dias (SPEC 5.2).
+  - `metrics.ts`: média e mediana em horas com uma casa decimal; percentual no prazo inteiro, nulo sem prazo; grupos do maior para o menor e empate por nome (`Intl.Collator` pt-BR); largura das barras.
+  - `csv.ts`: as 15 colunas de 5.4, BOM, `;`, CRLF, datas `AAAA-MM-DD HH:MM` em São Paulo, rótulos em português, apóstrofo antes de `=`, `+`, `-`, `@`, tabulação e retorno, aspas quando há `;`, aspas ou quebra de linha; limite de 10.000 linhas (`too_many_rows`). A linha é montada campo a campo, então dados a mais numa linha nunca chegam ao arquivo.
+- **Esclarecimentos registrados na SPEC (5.3 e 5.4):** casas decimais, arredondamento, células vazias e "Concluída no prazo" só para concluídas com prazo.
+- **Reaproveitamento sem duplicação:** o cálculo do dia em São Paulo saiu de `requests/domain/search-criteria.ts` para `src/shared/time` (a busca continua com a mesma API e os mesmos testes); os rótulos de status, prioridade, aprovação e situação do prazo e o código curto saíram de `src/app/_components` e de `notifications/domain/email-content.ts` para `src/shared/requests`, e os arquivos antigos reexportam — nenhuma tela mudou.
+- **Resultados:** lint, typecheck e build OK; unitários 607/607 (105 arquivos); integração 280/280 + 1 pulado (63 arquivos); E2E 15/15.
