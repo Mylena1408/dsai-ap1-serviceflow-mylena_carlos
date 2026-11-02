@@ -1,3 +1,4 @@
+import type { NotificationCategory } from "../domain/email";
 import type { NotificationType } from "../domain/recipients";
 
 export interface NotificationRecord {
@@ -37,4 +38,12 @@ export interface NotificationStore {
   /** Marks one notification of this recipient as read; returns its request id, or null. */
   markRead(notificationId: string, recipientId: string): Promise<string | null>;
   purgeRead(before: Date): Promise<number>;
+}
+
+/** Email preferences (SPEC 2026-11-01-notificacoes-email-preferencias, 5.1). */
+export interface NotificationPreferenceStore {
+  /** Categories with email on; a category without a row is off. */
+  enabledCategories(userId: string): Promise<Set<NotificationCategory>>;
+  /** Writes the choice of every category of this user at once. */
+  save(userId: string, choices: Record<NotificationCategory, boolean>, at: Date): Promise<void>;
 }

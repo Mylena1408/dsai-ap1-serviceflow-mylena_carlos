@@ -409,3 +409,9 @@ Proposta escrita a partir do item 10 do plano; decisões N1 a N5 aprovadas pela 
 > faça a sf-092
 
 SF-092 concluída (ver `NOTES.md`, seção SF-092, inclusive o banco de dev apagado por engano e restaurado).
+
+## Continuação — SF-093
+
+> faça a sf-093
+
+SF-093 concluída (ver `NOTES.md`, seção SF-093).

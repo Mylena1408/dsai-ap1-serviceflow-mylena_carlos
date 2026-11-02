@@ -53,9 +53,11 @@ export async function NotificationsLink({ href }: { href: string }) {
 type NotificationListProps = {
   notifications: NotificationRecord[];
   markAllAction: () => Promise<never>;
+  /** "Preferências de notificação" of the area (SPEC 2026-11-01-notificacoes-email-preferencias). */
+  preferencesHref: string;
 };
 
-export function NotificationList({ notifications, markAllAction }: NotificationListProps) {
+export function NotificationList({ notifications, markAllAction, preferencesHref }: NotificationListProps) {
   const unread = notifications.filter(({ readAt }) => readAt === null).length;
 
   return (
@@ -65,6 +67,9 @@ export function NotificationList({ notifications, markAllAction }: NotificationL
           <p className="eyebrow">Avisos</p>
           <h1>Notificações</h1>
           <p>{unread === 1 ? "1 não lida" : `${unread} não lidas`} entre as 50 mais recentes.</p>
+          <p>
+            <Link href={preferencesHref}>Preferências de e-mail</Link>
+          </p>
         </div>
         {unread > 0 ? (
           <form action={markAllAction}>

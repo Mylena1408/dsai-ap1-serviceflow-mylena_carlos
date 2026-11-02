@@ -7,5 +7,9 @@ export default async function RequesterNotificationsPage() {
   await requireRequesterPageAccess();
   const notifications = await listNotifications();
 
-  return <NotificationList notifications={notifications} markAllAction={markAllNotificationsAction} />;
+  return <NotificationList
+      notifications={notifications}
+      markAllAction={markAllNotificationsAction}
+      preferencesHref="/notifications/preferences"
+    />;
 }

@@ -7,5 +7,9 @@ export default async function ManagerNotificationsPage() {
   await requireManagerPageAccess();
   const notifications = await listNotifications();
 
-  return <NotificationList notifications={notifications} markAllAction={markAllNotificationsAction} />;
+  return <NotificationList
+      notifications={notifications}
+      markAllAction={markAllNotificationsAction}
+      preferencesHref="/approvals/notifications/preferences"
+    />;
 }

@@ -7,5 +7,9 @@ export default async function AttendantNotificationsPage() {
   await requireAttendantPageAccess();
   const notifications = await listNotifications();
 
-  return <NotificationList notifications={notifications} markAllAction={markAllNotificationsAction} />;
+  return <NotificationList
+      notifications={notifications}
+      markAllAction={markAllNotificationsAction}
+      preferencesHref="/queue/notifications/preferences"
+    />;
 }

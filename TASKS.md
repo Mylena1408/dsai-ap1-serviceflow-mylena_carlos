@@ -993,7 +993,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-093 — Página "Preferências de notificação"
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Casos de uso `getEmailPreferences` e `updateEmailPreferences` (sempre da pessoa logada; administrador recusado), store Prisma e página "Preferências de notificação" em `/notifications/preferences`, `/queue/notifications/preferences` e `/approvals/notifications/preferences`, com o link "Preferências de e-mail" na lista de notificações. CA-MAIL-03 verificado.
 - **Objetivo:** Casos de uso para ler e alterar as próprias preferências e a página ligada às notificações de solicitante, atendente e gestor.
 - **Arquivos/módulos esperados:** `src/modules/notifications/`, `src/app/`, testes.
 - **Dependências:** SF-092.
