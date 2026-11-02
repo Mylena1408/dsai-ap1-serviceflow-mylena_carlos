@@ -1151,7 +1151,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-108 — E2E e revisão da auditoria e LGPD
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. E2E `tests/e2e/audit-lgpd.spec.ts` com os três cenários da seção 8; CA-AUD-01 verificado pela comparação dos testes desde `7c8b943`; README com auditoria, retenção, "Meus dados" e anonimização; SPEC de auditoria e LGPD concluída (CA-AUD-01 a 10).
 - **Objetivo:** E2E da seção 8; revisão e documentação.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-107.

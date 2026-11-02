@@ -1,7 +1,7 @@
 # SPEC — Auditoria administrativa e dados pessoais (LGPD)
 
 **Data:** 2026-11-02
-**Status:** Aprovada em 2026-11-02, com as decisões D1 a D5 da seção 11 conforme propostas.
+**Status:** Aprovada em 2026-11-02, com as decisões D1 a D5 da seção 11 conforme propostas. **Concluída em 2026-11-02** (SF-102 a SF-108; CA-AUD-01 a 10 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§10 Histórico e auditoria), `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seção 19, "políticas mais detalhadas de retenção, exportação e anonimização de dados"; seção 21.15), `SPEC/2026-10-31-eventos-outbox-jobs.md` (job diário e limpezas), `SPEC/2026-11-01-permissoes-configuraveis.md` (histórico de permissões), `SPEC/2026-11-01-notificacoes-email-preferencias.md` (envios), `SPEC/2026-10-29-plano-escala-100k.md` (item 12 e garantia 7.4), `SPEC/2026-10-30-camadas-para-100k.md` (camada "Auditoria e observabilidade")
 
@@ -116,7 +116,7 @@ A limpeza roda no job diário e informa quantos registros removeu de cada tipo. 
 
 ## 7. Critérios de aceitação
 
-- [ ] **CA-AUD-01** — Sem uso das novas ações, as telas e regras existentes não mudam e as suítes anteriores passam sem alteração de asserções.
+- [x] **CA-AUD-01** — Sem uso das novas ações, as telas e regras existentes não mudam e as suítes anteriores passam sem alteração de asserções. *Verificado em 2026-11-02 (SF-108): de `7c8b943` (antes desta SPEC) até o fim da SF-107, os testes que já existiam só ganharam a limpeza da tabela nova (`fixtures.ts`), o dublê `audited` dos casos de uso em memória e o campo `anonymizedAt` nos dados de teste de usuários, além de testes novos; nenhuma asserção antiga mudou e nenhum E2E anterior foi alterado. As suítes completas passam: unitários 695, integração 314 + 1 pulado (bucket real), E2E 17. As telas só ganharam o que é novo (seção "Auditoria", "Meus dados", painel "Anonimização" para desativados, anexo removido); a listagem de anexos não removidos mantém exatamente os mesmos campos.*
 - [x] **CA-AUD-02** — Cada ação da tabela 5.1 gera exatamente um registro na mesma transação; se a alteração falha, nada é registrado; uma alteração sem mudança real não gera registro. *Verificado em 2026-11-02 (SF-103): criação, alteração, reordenação, desativação e reativação de usuários, setores, categorias, serviços, documentos, campos e etapas geram um registro cada, na transação da alteração; recusas (por exemplo, categoria com serviço ativo) não registram nada; alterar sem mudar nada, mover o primeiro item para cima ou desativar o que já está inativo não geram registro (unitário e integração).*
 - [x] **CA-AUD-03** — Os registros trazem pessoa, perfil, ação, entidade e campos alterados com valores; nome e e-mail de usuário aparecem só como "alterado"; senhas e hashes nunca aparecem. *Verificado em 2026-11-02 (SF-103): cada registro guarda a pessoa da sessão e o perfil dela (administrador, ou atendente com "Gerir serviços do setor"), a ação, a entidade com o nome do momento e os campos alterados com valores (SLA, aprovação, prioridade, formatos, posição); nome e e-mail de usuário aparecem só como "alterado"; senhas e hashes nunca entram, nem quando a senha é trocada (integração confere o texto completo dos registros).*
 - [x] **CA-AUD-04** — Só o administrador vê a seção "Auditoria", com filtros por período, entidade e pessoa, 50 por página, incluindo as concessões e revogações de permissões. *Verificado em 2026-11-02 (SF-104): só o administrador lê a auditoria (solicitante, atendente e gestor recusados; o atendente que abre a seção vai para `/queue`); lista do mais recente ao mais antigo, 50 por página, com filtros por período (as opções do painel), tipo (inclusive "Permissão") e pessoa, todos na URL, e inclui as concessões e revogações do histórico de permissões, sem copiá-las (unitário, integração e navegador).*
@@ -131,7 +131,7 @@ A limpeza roda no job diário e informa quantos registros removeu de cada tipo. 
 
 - **Unitários:** cálculo dos campos alterados (inclusive campos pessoais e "sem mudança"); textos das ações; prazos de retenção; montagem do arquivo de "Meus dados"; condições e efeitos da anonimização com portas em memória.
 - **Integração:** registro na mesma transação de cada caso de uso administrativo (e nenhum registro quando ele falha); filtros e páginas da auditoria; limpeza por retenção perto do limite; exportação só da própria pessoa; anonimização sobre o banco, inclusive o armazenamento em memória dos anexos.
-- **E2E:** o administrador altera o SLA de um serviço e vê o registro na "Auditoria"; o solicitante baixa "Meus dados"; o administrador desativa e anonimiza uma pessoa e a solicitação dela aparece com "Pessoa anonimizada" e o conteúdo removido.
+- **E2E:** o administrador altera o SLA de um serviço e vê o registro na "Auditoria"; o solicitante baixa "Meus dados"; o administrador desativa e anonimiza uma pessoa e a solicitação dela aparece com "Pessoa anonimizada" e o conteúdo removido. *Feito em `tests/e2e/audit-lgpd.spec.ts` (SF-108); a pessoa do teste também não consegue mais entrar depois da anonimização.*
 
 ## 9. Riscos
 

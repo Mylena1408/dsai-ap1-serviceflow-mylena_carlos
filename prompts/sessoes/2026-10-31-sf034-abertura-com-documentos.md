@@ -515,3 +515,9 @@ Resumo do estado (SF-001 a SF-106 registradas; SF-107 e SF-108 não iniciadas; p
 > pode começar a SF-107
 
 SF-107 concluída (ver `NOTES.md`, seção SF-107).
+
+## Continuação — SF-108
+
+> pode prosseguir
+
+SF-108 concluída (ver `NOTES.md`, seção SF-108).
