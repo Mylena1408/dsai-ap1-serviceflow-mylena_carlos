@@ -857,7 +857,7 @@ Solicitada pela responsável pelo projeto: "tire as contas sem senha, a página 
 ### 25.2 Carregamento no primeiro clique
 
 - Ao clicar num botão de perfil, se o banco ainda não tiver os dados fictícios, eles são carregados antes da entrada, numa transação; os cliques seguintes não carregam nada de novo e **não desfazem** mudanças feitas na administração (por exemplo, um serviço desativado continua desativado).
-- O marcador de "já carregado" é a existência das solicitações fictícias de Ana, Bruno ou Carla, como no `npm run seed:demo`.
+- O marcador de "já carregado" é a existência de uma solicitação fictícia de Ana, Bruno ou Carla **com aprovação**. *Corrigido em 2026-11-02 (defeito encontrado no site publicado): o marcador anterior, "qualquer solicitação de Ana, Bruno ou Carla", reconhecia os dados do seed de 2026-10-30 (sem aprovações) como já carregados, e o primeiro clique não carregava o conjunto atual nem desativava as contas genéricas. As solicitações antigas continuam no banco.*
 - Falha no carregamento não impede a entrada: o erro é registrado no log do servidor só pelo código, e a pessoa entra com o que existir.
 - `npm run seed:demo` continua existindo e carrega os mesmos dados (inclusive restaurando itens de demonstração desativados, como antes).
 

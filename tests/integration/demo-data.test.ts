@@ -17,6 +17,7 @@ import {
   LEGACY_DEMO_SECTOR_NAME,
 } from "@/modules/auth/domain/demo-accounts";
 import { slaSituation } from "@/modules/requests/domain/sla";
+import { createDomainRequest } from "./domain-fixtures";
 
 // SPEC 2026-09-30, sections 22.6, 22.7 and 25 (CA-DEMO-07, CA-DEMO-08, CA-FIC-01 to 04).
 describe("demonstration data", () => {
@@ -159,6 +160,36 @@ describe("demonstration data", () => {
     await expect(prisma.sector.findMany({ select: { id: true, name: true } })).resolves.toEqual([
       { id: legacySector.id, name: DEMO_SECTOR_NAME },
     ]);
+  });
+
+  // Defect found on the published site (2026-11-02): it had the data of the seed of 2026-10-30
+  // (requests of Ana, Bruno and Carla, no approvals) and the first click loaded nothing.
+  it("loads the current set over the data of the previous seed", async () => {
+    const legacySector = await prisma.sector.create({ data: { name: LEGACY_DEMO_SECTOR_NAME } });
+    const legacyAdmin = await prisma.user.create({
+      data: { name: "Administrador (demonstração)", email: LEGACY_DEMO_EMAILS[0]!, role: "ADMIN", passwordHash: "!demo" },
+    });
+    const ana = await prisma.user.create({
+      data: { name: "Ana Souza", email: DEMO_ACCOUNTS.REQUESTER.email, role: "REQUESTER", passwordHash: "!demo" },
+    });
+    const category = await prisma.category.create({ data: { name: "TI" } });
+    const service = await prisma.service.create({
+      data: { name: "Criação de conta de acesso", description: "Antiga", categoryId: category.id, sectorId: legacySector.id },
+    });
+    const old = await createDomainRequest({ requesterId: ana.id, serviceId: service.id, sectorId: legacySector.id });
+
+    await expect(ensureDemoDataLoaded(prisma, now)).resolves.toMatchObject({ requestsCreated: DEMO_REQUESTS.length });
+
+    await expect(prisma.request.count()).resolves.toBe(DEMO_REQUESTS.length + 1);
+    await expect(prisma.request.findUniqueOrThrow({ where: { id: old.id } })).resolves.toMatchObject({
+      description: old.description,
+      sectorNameSnapshot: LEGACY_DEMO_SECTOR_NAME,
+    });
+    await expect(prisma.user.findUniqueOrThrow({ where: { id: legacyAdmin.id } })).resolves.toMatchObject({ isActive: false });
+    await expect(prisma.sector.findUniqueOrThrow({ where: { id: legacySector.id } })).resolves.toMatchObject({
+      name: DEMO_SECTOR_NAME,
+    });
+    await expect(ensureDemoDataLoaded(prisma, now)).resolves.toBeNull();
   });
 
   it("signs each button in as its fictitious person, without duplicating anyone", async () => {

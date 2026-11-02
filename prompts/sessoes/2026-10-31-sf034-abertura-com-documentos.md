@@ -557,3 +557,9 @@ Perguntas sobre o elenco e o momento do carregamento; respostas: "Reusar Ana e D
 > prossiga
 
 Pergunta sobre como aplicar as migrations (o CLI não lê os valores *Secret*); resposta: "Eu rodo o comando (Recomendado)". A responsável perguntou como obter a URL na Vercel e rodou o comando com o nome de variável errado; com a URL na conversa, apliquei as migrations e publiquei (ver `NOTES.md`, seção "Publicação das fases 3 e 4 e das SF-109 e SF-110").
+
+## Continuação — Conferência do site publicado
+
+> faça o primeiro clique e confira as telas
+
+Percorri os quatro perfis no site publicado; encontrei o defeito do marcador de carregamento da SF-110, corrigi, testei e publiquei de novo (ver `NOTES.md`, seção "SF-110 — Defeito do marcador de carregamento").

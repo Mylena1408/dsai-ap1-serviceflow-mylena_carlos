@@ -1475,3 +1475,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Verificação só com leitura:** `/` responde 200 com "Escolha um perfil" e os quatro botões, sem campo de senha; `/login` e `/admin` sem sessão redirecionam (307) para `/`. Nenhum botão foi clicado: o primeiro clique de qualquer pessoa carrega os dados fictícios no Neon, desativa as contas genéricas antigas e renomeia o "Setor de demonstração" (seção 25).
 - **Segurança:** a URL do Neon com a senha apareceu no chat desta sessão. Ela não está em nenhum arquivo do repositório. Recomendado trocar a senha do banco no Neon (e atualizar a integração da Vercel), como já previsto se o banco receber dados reais.
 - **Pendências:** e-mail real (conta no provedor e as três variáveis); armazenamento de documentos (SF-030).
+
+## SF-110 — Defeito do marcador de carregamento, encontrado no site publicado (2026-11-02)
+
+- **Pedido:** "faça o primeiro clique e confira as telas". Percorri o site publicado com Playwright (script fora do repositório), entrando com os quatro perfis só para ler.
+- **Defeito meu:** os cenários novos não apareceram (a Ana tinha só as 3 solicitações do seed de 30/10, o Paulo "Nenhuma aprovação pendente") e as contas genéricas continuaram ativas. Causa: o marcador de "já carregado" era "qualquer solicitação de Ana, Bruno ou Carla"; o Neon tinha as do seed antigo, então o carregador pulou tudo, inclusive a desativação das contas antigas, que fica dentro dele. A integração só tinha testado banco vazio e banco com contas antigas sem solicitações.
+- **O que o primeiro clique fez mesmo assim:** a entrada ajustou as quatro pessoas (Marina, Ana, Diego e Paulo) e renomeou o "Setor de demonstração" para "Central de Serviços" (`ensureDemoSector`, chamado também pela entrada).
+- **Correção:** o marcador passou a ser "solicitação de Ana, Bruno ou Carla com aprovação" (o seed antigo não tinha aprovações). Registrado na seção 25.2 da SPEC. As solicitações antigas continuam no banco, ao lado das novas.
+- **Teste novo:** integração com o banco no estado da produção (setor e conta antigos, Ana com uma solicitação sem aprovação): carrega as 14, mantém a antiga, desativa a conta antiga, renomeia o setor e não carrega de novo. Falha no código anterior e passa no corrigido.
+- **Resultados:** lint, typecheck e build OK; unitários 718/718; integração 318/318 + 1 pulado; E2E 18/18.

@@ -39,6 +39,15 @@ const PEOPLE: Record<PersonKey, { name: string; email: string; role: DemoRole }>
 };
 
 const REQUESTER_EMAILS = [PEOPLE.ana.email, PEOPLE.bruno.email, PEOPLE.carla.email];
+
+/**
+ * Marks that the current fictitious requests were loaded (section 25.2): a request of Ana, Bruno
+ * or Carla with an approval. The data loaded before section 25 (seed of 2026-10-30) has requests
+ * of the same people but no approval, so it does not count and the current set is still loaded.
+ */
+function loadedMarker(requesterIds: string[]): Prisma.RequestWhereInput {
+  return { requesterId: { in: requesterIds }, approvalState: { not: null } };
+}
 const HOUR_MS = 60 * 60 * 1000;
 
 export interface DemoDataSummary {
@@ -353,11 +362,8 @@ export async function loadDemoData(database: PrismaClient = prisma, now: Date = 
       const requirementsCreated = await saveRequirements(transaction, services);
       await saveFields(transaction, services);
 
-      // The fictitious requesters' history marks a previous run (section 25.2).
-      const previous = await transaction.request.count({
-        where: { requesterId: { in: [people.ana, people.bruno, people.carla] } },
-      });
-      const requestsCreated = previous === 0 ? await saveRequests(transaction, { now, people, services, sector }) : 0;
+      const loaded = await transaction.request.count({ where: loadedMarker([people.ana, people.bruno, people.carla]) });
+      const requestsCreated = loaded === 0 ? await saveRequests(transaction, { now, people, services, sector }) : 0;
 
       return {
         categories: DEMO_CATALOG.length,
@@ -382,7 +388,7 @@ export async function ensureDemoDataLoaded(
   const requesters = await database.user.findMany({ where: { email: { in: REQUESTER_EMAILS } }, select: { id: true } });
 
   if (requesters.length > 0) {
-    const loaded = await database.request.count({ where: { requesterId: { in: requesters.map(({ id }) => id) } } });
+    const loaded = await database.request.count({ where: loadedMarker(requesters.map(({ id }) => id)) });
     if (loaded > 0) return null;
   }
 
