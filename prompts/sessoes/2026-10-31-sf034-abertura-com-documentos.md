@@ -521,3 +521,9 @@ SF-107 concluída (ver `NOTES.md`, seção SF-107).
 > pode prosseguir
 
 SF-108 concluída (ver `NOTES.md`, seção SF-108).
+
+## Continuação — Relatório da fase 4
+
+> pode continuar
+
+Com a fase 4 do plano concluída (SF-087 a SF-108), o próximo passo exigido pela SPEC de camadas (seção 6) era o relatório da fase. Relatório escrito em `SPEC/2026-11-02-relatorio-fase-4.md` (ver `NOTES.md`, seção "Relatório da fase 4").

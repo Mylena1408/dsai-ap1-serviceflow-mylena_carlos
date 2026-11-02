@@ -34,6 +34,8 @@ O total é um **mínimo**: em três dias só se sabe quando as sessões começar
 | 31/10 a 01/11 | 22:05 | 03:56 | 5h51 | Medido (transcrição) | SF-057 a SF-060 (busca), SF-061 a SF-064 (eventos e notificações), publicação, SF-065 a SF-070 (SLA) |
 | 01/11 | 11:06 | 11:25 | 0h19 | Medido (transcrição) | Push da SF-070, medições e relatório da fase 2 |
 | 01/11 (fase 3) | 11:25 | 18:59 | 7h34 | Medido (transcrição) | SPECs de campos, fluxos e aprovações; SF-071 a SF-086; relatório da fase 3 |
+| 01/11 a 02/11 (fase 4) | 18:59 | 03:12 | 8h13 | Medido (transcrição) | SPECs de permissões, e-mail, painel e auditoria; SF-087 a SF-106 |
+| 02/11 | 10:07 | 11:47 | 1h40 | Medido (transcrição) | SF-107, SF-108 |
 
 ## 3. Tempo por fase
 
@@ -69,3 +71,5 @@ Ao fim de cada sessão, acrescentar uma linha na seção 2 com início, fim e tr
 **Nota (2026-11-01):** a linha "31/10 (tarde, revisado)" substitui a linha parcial de 31/10, que fica só como histórico. Com as quatro linhas medidas pela transcrição (3h48 + 0h25 + 5h51 + 0h19 = 10h23), o total mínimo passa a **33h29**, mais até 8h02 de 29 e 30/10. A fase 2 (de 31/10, 16:21, a 01/11, 03:56) levou 9h20 (`SPEC/2026-11-01-relatorio-fase-2.md`, seção 7).
 
 **Nota (2026-11-01, fase 3):** com a linha "01/11 (fase 3)" (7h34), o total mínimo passa a **41h03**, mais até 8h02 de 29 e 30/10.
+
+**Nota (2026-11-02, fase 4):** com as linhas "01/11 a 02/11 (fase 4)" (8h13) e "02/11" (1h40), o total mínimo passa a **50h56**, mais até 8h02 de 29 e 30/10. O relatório da fase 4 (`SPEC/2026-11-02-relatorio-fase-4.md`) foi escrito na sessão de 02/11 à tarde.

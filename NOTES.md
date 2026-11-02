@@ -1427,3 +1427,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CA-AUD-01:** `git diff 7c8b943 HEAD -- tests` (só arquivos modificados) mostrou apenas fixtures e testes novos: limpeza de `auditEntry` em `fixtures.ts`, o dublê `audited` em seis testes de casos de uso em memória e `anonymizedAt` nos dados de teste de usuários. Nenhuma asserção antiga mudou e nenhum E2E anterior foi alterado.
 - **Aviso no log do servidor:** "The destination stream closed early" apareceu de novo, desta vez durante o download de "Meus dados" no E2E, que passou. Também aparece no E2E de documentos: vem do jeito como o navegador de teste recebe downloads, não de defeito das rotas.
 - **Resultados:** lint, typecheck e build OK; unitários 695/695 (114 arquivos); integração 314/314 + 1 pulado (71 arquivos); E2E 17/17.
+
+## Relatório da fase 4 (2026-11-02)
+
+- **Documento:** `SPEC/2026-11-02-relatorio-fase-4.md`.
+- **Medição:** 30.733 linhas `added` acumuladas (`bc8fb85`); a fase 4 somou 8.543 (permissões 1.364, e-mail 1.586, painel 2.068, auditoria 3.372), contra 22.000 a 33.000 estimadas: razão de 2,6 a 3,9, um pouco abaixo das fases 2 e 3 por causa da auditoria (1,5 a 2,1).
+- **Projeção:** o roadmap inteiro (com a fase 5: itens 14, 15 e 16) deve terminar entre ~34.000 e ~41.000 linhas; pela opção 2, as funcionalidades adicionais precisariam somar de 59.000 a 66.000.
+- **Tempo:** 9h53 na fase 4 (cerca de 860 linhas por hora); `diario/tempo-do-projeto.md` atualizado (total mínimo 50h56).
+- **Publicação:** dez migrations pendentes no Neon.
+- **Suítes não executadas de novo para o relatório** (só documentação); a última execução completa foi a da SF-108, com tudo verde.
