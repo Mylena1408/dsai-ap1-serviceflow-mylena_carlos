@@ -1306,3 +1306,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão da SPEC (SF-092 a SF-096):** nenhuma dependência alterada (`package.json` e `package-lock.json` sem mudança desde a SPEC); nenhum segredo no repositório (o `.env.example` só tem as variáveis comentadas e vazias); nenhuma asserção de teste existente alterada — o único teste existente modificado foi `tests/integration/fixtures.ts`, para limpar as tabelas novas; uma migration aditiva (`20261101700000_email_notifications`).
 - **Pendente para publicar:** aplicar no Neon as oito migrations pendentes (de `20261101100000_sla_and_priorities` a `20261101700000_email_notifications`). Para enviar de verdade, criar a conta no provedor, verificar o domínio e cadastrar as três variáveis na Vercel.
 - **Resultados:** lint, typecheck e build OK; unitários 575/575 (102 arquivos); integração 280/280 + 1 pulado (63 arquivos); E2E 15/15.
+
+## SPEC de painel, indicadores e relatórios (2026-11-02)
+
+- **SPEC `2026-11-02-painel-relatorios.md`** (item 11 do plano) aprovada com as decisões R1 a R5 conforme propostas: painel para o administrador (organização, com filtro por setor) e para o gestor (só o próprio setor); indicadores da visão geral §13 com período de 7, 30 ou 90 dias ou intervalo de até 366 dias; barras em HTML e CSS (sem dependência nova); CSV com colunas mínimas, sem dados do solicitante, até 10.000 linhas; cálculo sob demanda por agregação no banco, sem migration. Tarefas SF-097 a SF-101 registradas em `TASKS.md`.
+- **Mudança de escopo registrada (seção 2 da SPEC):** o administrador e o gestor passam a ler **números agregados e colunas mínimas** de solicitações; o detalhe de cada solicitação continua com as regras de leitura atuais, e o painel não tem links para solicitações.

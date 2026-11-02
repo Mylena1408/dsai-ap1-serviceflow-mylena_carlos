@@ -1030,3 +1030,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-MAIL-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-01-notificacoes-email-preferencias.md`.
+
+## Painel, indicadores e relatórios — SPEC de 2026-11-02
+
+**Ordem:** SF-097 → SF-098 → SF-099 → SF-100 → SF-101.
+
+### SF-097 — Domínio do painel e do CSV
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Regras puras: período (opções, limites de 366 dias, fuso `America/Sao_Paulo`), média, mediana e percentual no prazo, ordenação dos grupos e montagem do CSV (colunas, formato e proteção contra fórmulas).
+- **Arquivos/módulos esperados:** `src/modules/` (novo módulo de relatórios), testes.
+- **Dependências:** SF-096.
+- **Critérios de conclusão:** CA-DASH-04 (regras de dia), CA-DASH-05, CA-DASH-06 (ordem), CA-DASH-07 e CA-DASH-08 (formato).
+- **Testes relacionados:** Unitários.
+- **SPEC:** `SPEC/2026-11-02-painel-relatorios.md`.
+
+### SF-098 — Leitura dos indicadores e casos de uso
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Porta `DashboardReader` com implementação Prisma (agregações no banco) e em memória; casos de uso do painel e da exportação com a autorização de 5.7 (administrador com filtro por setor; gestor só no setor atual).
+- **Arquivos/módulos esperados:** `src/modules/`, testes.
+- **Dependências:** SF-097.
+- **Critérios de conclusão:** CA-DASH-02, CA-DASH-03, CA-DASH-04 e CA-DASH-06.
+- **Testes relacionados:** Unitários dos casos de uso; integração das consultas.
+- **SPEC:** `SPEC/2026-11-02-painel-relatorios.md`.
+
+### SF-099 — Telas do painel
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Seção "Painel" na administração (`/admin?section=dashboard`) e página "Painel do setor" do gestor (`/approvals/dashboard`), com filtros de período e setor na URL e barras em HTML e CSS.
+- **Arquivos/módulos esperados:** `src/app/`, testes.
+- **Dependências:** SF-098.
+- **Critérios de conclusão:** CA-DASH-02 (telas), CA-DASH-07 (mensagens) e CA-DASH-09 (painel).
+- **Testes relacionados:** Unitários dos componentes quando houver regra; integração; verificação no navegador.
+- **SPEC:** `SPEC/2026-11-02-painel-relatorios.md`.
+
+### SF-100 — Exportação CSV
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Rota `/api/reports/requests.csv`, com a mesma autorização e recorte do painel, limite de 10.000 linhas e nome do arquivo de 5.4.
+- **Arquivos/módulos esperados:** `src/app/api/`, `src/modules/`, testes.
+- **Dependências:** SF-099.
+- **Critérios de conclusão:** CA-DASH-08 e CA-DASH-09 (CSV).
+- **Testes relacionados:** Integração da rota.
+- **SPEC:** `SPEC/2026-11-02-painel-relatorios.md`.
+
+### SF-101 — E2E e revisão do painel e relatórios
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-100.
+- **Critérios de conclusão:** Todos os CA-DASH-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-02-painel-relatorios.md`.

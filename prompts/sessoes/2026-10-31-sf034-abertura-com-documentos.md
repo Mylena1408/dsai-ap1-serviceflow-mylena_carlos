@@ -433,3 +433,9 @@ SF-095 concluída (ver `NOTES.md`, seção SF-095).
 > faça sf-096
 
 SF-096 concluída e SPEC de notificações por e-mail encerrada (ver `NOTES.md`, seção SF-096).
+
+## Continuação — SPEC de painel, indicadores e relatórios
+
+> siga para a próxima spec
+
+Proposta escrita a partir do item 11 do plano e da visão geral §13; decisões R1 a R5 aprovadas pela responsável no questionário (todas as opções recomendadas). SPEC `SPEC/2026-11-02-painel-relatorios.md` aprovada e tarefas SF-097 a SF-101 registradas.
