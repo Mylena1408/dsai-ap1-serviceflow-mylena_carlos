@@ -2,9 +2,11 @@ import type { SectorRecord } from "@/modules/sectors";
 import type { ManagedUser } from "@/modules/users";
 import type { Permission, PermissionOverview } from "@/modules/permissions";
 import { UserPermissionsPanel } from "../../user-permissions-panel";
+import { AnonymizedUserItem, UserAnonymizationPanel } from "../../user-anonymization-panel";
 import { AdminCreateForm } from "../../create-form";
 import { AdminRecordEditor } from "../../record-editor";
 import {
+  anonymizeUserAction,
   createUserAction,
   grantPermissionAction,
   revokePermissionAction,
@@ -55,7 +57,10 @@ export function UsersSection({ section, users, sectors, permissions }: UsersSect
             </label>
         </AdminCreateForm>
         <ul className="entity-list">
-          {users.map((user) => (
+          {users.map((user) =>
+            user.anonymizedAt ? (
+              <AnonymizedUserItem key={user.id} user={user} />
+            ) : (
             <AdminRecordEditor
               key={user.id}
               record={{ kind: "user", ...user }}
@@ -73,8 +78,10 @@ export function UsersSection({ section, users, sectors, permissions }: UsersSect
                 revokeAction={revokePermissionAction}
                 user={user}
               />
+              <UserAnonymizationPanel action={anonymizeUserAction} user={user} />
             </AdminRecordEditor>
-          ))}
+            ),
+          )}
         </ul>
         </section>
   );

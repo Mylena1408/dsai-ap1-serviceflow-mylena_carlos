@@ -12,6 +12,13 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "dependency" && entity === "permissions") {
     return "Usuários inativos não recebem permissões.";
   }
+  // SPEC 2026-11-02-auditoria-lgpd, 5.5.1 and 5.5.2: conditions and explicit confirmation.
+  if (error === "dependency" && entity === "anonymization") {
+    return "Só é possível anonimizar pessoas desativadas, sem solicitações abertas ou em atendimento, e nunca a própria conta.";
+  }
+  if (error === "validation" && entity === "anonymization") {
+    return "Confirme que entende que a anonimização é irreversível.";
+  }
   // Reactivating a stage fails on the limit or on a repeated name (SPEC 2026-11-01-fluxos-configuraveis, 5.1).
   if (error === "dependency" && entity === "serviceStages") {
     return "Não foi possível concluir: o serviço já tem o limite de etapas ativas ou outra etapa ativa usa o mesmo nome.";
@@ -34,5 +41,6 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (notice === "created") return "Registro criado.";
   if (notice === "updated") return "Alterações salvas.";
   if (notice === "status") return "Estado atualizado.";
+  if (notice === "anonymized") return "Pessoa anonimizada.";
   return null;
 }

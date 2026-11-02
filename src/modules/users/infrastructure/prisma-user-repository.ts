@@ -17,6 +17,7 @@ const publicUserSelect = {
   isActive: true,
   createdAt: true,
   updatedAt: true,
+  anonymizedAt: true,
 } satisfies Prisma.UserSelect;
 
 // Compile-time check that the selected columns match the domain type.
@@ -41,7 +42,7 @@ function createPrismaUserTransaction(transaction: Prisma.TransactionClient): Use
     findState(userId) {
       return transaction.user.findUnique({
         where: { id: userId },
-        select: { id: true, role: true, sectorId: true, isActive: true },
+        select: { id: true, role: true, sectorId: true, isActive: true, anonymizedAt: true },
       });
     },
     findSectorActivity(sectorId) {

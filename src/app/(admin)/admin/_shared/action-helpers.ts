@@ -6,7 +6,7 @@ import { ApplicationError } from "@/server/errors";
 import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
-export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions";
+export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions" | "anonymization";
 // "sector-services" is the page of a "Gerir serviços do setor" holder (SPEC de permissões, 5.3.1).
 export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services";
 

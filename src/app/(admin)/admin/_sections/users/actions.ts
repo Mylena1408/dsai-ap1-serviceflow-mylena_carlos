@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  anonymizeUser,
   createUser,
   setUserActive,
   updateUser,
@@ -86,4 +87,18 @@ export async function grantPermissionAction(formData: FormData): Promise<never> 
 
 export async function revokePermissionAction(formData: FormData): Promise<never> {
   return changePermission(formData, false);
+}
+
+// SPEC 2026-11-02-auditoria-lgpd, 5.5: irreversible, only with the explicit confirmation.
+export async function anonymizeUserAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await anonymizeUser({
+      userId: field(formData, "userId"),
+      confirmed: field(formData, "confirmed") === "true",
+    });
+  } catch (error) {
+    reportFailure("anonymization", section, error);
+  }
+  return finish("anonymization", "anonymized", section);
 }

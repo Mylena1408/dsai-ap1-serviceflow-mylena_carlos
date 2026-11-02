@@ -12,6 +12,7 @@ const summary = {
   detectedFormat: true,
   sizeBytes: true,
   createdAt: true,
+  removedAt: true,
 } satisfies Prisma.RequestAttachmentSelect;
 
 const stored = {
@@ -21,13 +22,18 @@ const stored = {
   storageKey: true,
 } satisfies Prisma.RequestAttachmentSelect;
 
+// The removal time appears only for a removed file (CA-AUD-01: other listings keep their fields).
+function withRemoval<Row extends { removedAt: Date | null }>({ removedAt, ...row }: Row) {
+  return removedAt === null ? row : { ...row, removedAt };
+}
+
 // Compile-time checks that the selected rows match the domain types.
 const toSummary = (
   row: Prisma.RequestAttachmentGetPayload<{ select: typeof summary }>,
-): RequestAttachmentSummary => row;
+): RequestAttachmentSummary => withRemoval(row);
 const toStored = (
   row: Prisma.RequestAttachmentGetPayload<{ select: typeof stored }>,
-): StoredRequestAttachment => row;
+): StoredRequestAttachment => withRemoval(row);
 
 export function createPrismaAttachmentQueryRepository(
   database: PrismaClient,
@@ -50,7 +56,8 @@ export function createPrismaAttachmentQueryRepository(
     },
     async findInRequest(requestId, attachmentId) {
       const row = await database.requestAttachment.findFirst({
-        where: { id: attachmentId, requestId },
+        // A file removed by an anonymization is never served (SPEC 2026-11-02-auditoria-lgpd, 5.5.3).
+        where: { id: attachmentId, requestId, removedAt: null },
         select: stored,
       });
       return row && toStored(row);

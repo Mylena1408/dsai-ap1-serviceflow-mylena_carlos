@@ -38,6 +38,7 @@ function user(overrides: Partial<StoredUser> = {}): StoredUser {
     isActive: true,
     createdAt: testNow,
     updatedAt: testNow,
+    anonymizedAt: null,
     passwordHash: "hash:initial",
     ...overrides,
   };
@@ -52,6 +53,7 @@ const publicView = (stored: StoredUser): ManagedUser => ({
   isActive: stored.isActive,
   createdAt: stored.createdAt,
   updatedAt: stored.updatedAt,
+  anonymizedAt: stored.anonymizedAt,
 });
 
 function transaction(store: Store): UserTransaction {
@@ -66,7 +68,7 @@ function transaction(store: Store): UserTransaction {
     async findState(id) {
       const found = store.users.find((item) => item.id === id);
       return found
-        ? { id: found.id, role: found.role, sectorId: found.sectorId, isActive: found.isActive }
+        ? { id: found.id, role: found.role, sectorId: found.sectorId, isActive: found.isActive, anonymizedAt: found.anonymizedAt }
         : null;
     },
     async findSectorActivity(id) {
@@ -184,5 +186,14 @@ describe("user use cases", () => {
 
     await expect(createUser({ name: "", email: "x" }, deps(store))).rejects.toBeInstanceOf(ValidationError);
     await expect(setUserActive(nextTestId(), true, deps(store))).rejects.toBeInstanceOf(NotFoundError);
+  });
+  it("never edits or reactivates an anonymized person (SPEC 2026-11-02-auditoria-lgpd, 5.5.2)", async () => {
+    const anonymized = user({ name: "Pessoa anonimizada abc", isActive: false, anonymizedAt: testNow });
+    const store = seed([anonymized]);
+    const changes = { name: "Nome novo", email: "novo@example.test", role: "REQUESTER", sectorId: null };
+
+    await expect(setUserActive(anonymized.id, true, deps(store))).rejects.toBeInstanceOf(ConflictError);
+    await expect(updateUser(anonymized.id, changes, deps(store))).rejects.toBeInstanceOf(ConflictError);
+    expect(store.users[0]).toMatchObject({ name: "Pessoa anonimizada abc", isActive: false });
   });
 });

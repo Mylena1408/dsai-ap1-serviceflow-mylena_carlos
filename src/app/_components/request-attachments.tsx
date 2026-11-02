@@ -29,15 +29,22 @@ export function RequestAttachments({ requestId, attachments }: RequestAttachment
               {attachment.requirementNameSnapshot} (
               {attachment.requirementRequiredSnapshot ? "obrigatório" : "opcional"})
             </p>
-            <a
-              href={`/api/requests/${requestId}/attachments/${attachment.id}`}
-              download={attachment.originalFilename}
-            >
-              Baixar {attachment.originalFilename}
-            </a>
-            <p>
-              {attachment.detectedFormat} · {formatSize(attachment.sizeBytes)}
-            </p>
+            {attachment.removedAt ? (
+              // SPEC 2026-11-02-auditoria-lgpd, 5.5.3: the file left with the anonymization.
+              <p>Arquivo removido na anonimização</p>
+            ) : (
+              <>
+                <a
+                  href={`/api/requests/${requestId}/attachments/${attachment.id}`}
+                  download={attachment.originalFilename}
+                >
+                  Baixar {attachment.originalFilename}
+                </a>
+                <p>
+                  {attachment.detectedFormat} · {formatSize(attachment.sizeBytes)}
+                </p>
+              </>
+            )}
           </li>
         ))}
       </ul>

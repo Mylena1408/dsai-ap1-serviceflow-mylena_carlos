@@ -1141,7 +1141,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-107 — Anonimização
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Caso de uso `anonymizeUser` (módulo `users`, regras em `domain/anonymization.ts`, efeitos em `infrastructure/prisma-anonymization.ts`) com confirmação explícita; painel "Anonimização" na lista de usuários, só para pessoas desativadas, e a pessoa anonimizada mostrada só para leitura; anexos removidos aparecem como tais e não são mais baixados. CA-AUD-07, CA-AUD-08 e CA-AUD-09 verificados.
 - **Objetivo:** Ação do administrador nas condições de 5.5, com os efeitos na mesma transação, remoção dos anexos e registro na auditoria.
 - **Arquivos/módulos esperados:** `src/modules/`, `src/app/`, testes.
 - **Dependências:** SF-106.

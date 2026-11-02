@@ -9,6 +9,11 @@ export interface RequestAttachmentSummary {
   detectedFormat: DetectedDocumentFormat;
   sizeBytes: number;
   createdAt: Date;
+  /**
+   * Present only when an anonymization removed the file (SPEC 2026-11-02-auditoria-lgpd, 5.5.3),
+   * so attachments never touched by it keep exactly the fields they had (CA-AUD-01).
+   */
+  removedAt?: Date;
 }
 
 /** Server-only fields needed to serve the content. */

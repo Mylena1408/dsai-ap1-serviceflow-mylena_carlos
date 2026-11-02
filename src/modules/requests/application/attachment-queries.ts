@@ -47,7 +47,8 @@ export async function getAttachmentDownload(
   const id = await authorizeRequestRead(requestId, repository);
   const attachment = await repository.findInRequest(id, validateInput(entityIdSchema, attachmentId));
 
-  if (!attachment) {
+  // A file removed by an anonymization is never served (SPEC 2026-11-02-auditoria-lgpd, 5.5.3).
+  if (!attachment || attachment.removedAt) {
     throw new NotFoundError();
   }
 

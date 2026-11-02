@@ -10,6 +10,8 @@ export interface ManagedUser {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  /** When the person was anonymized (SPEC 2026-11-02-auditoria-lgpd, 5.5); null otherwise. */
+  anonymizedAt: Date | null;
 }
 
 export interface UserState {
@@ -17,4 +19,5 @@ export interface UserState {
   role: UserRole;
   sectorId: string | null;
   isActive: boolean;
+  anonymizedAt: Date | null;
 }

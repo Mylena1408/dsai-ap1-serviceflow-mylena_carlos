@@ -154,6 +154,17 @@ describe("attachment queries (SPEC 21.5)", () => {
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
+  it("never serves a file removed by an anonymization (SPEC 2026-11-02-auditoria-lgpd, 5.5.3)", async () => {
+    authorization.requireCurrentActor.mockResolvedValue(actors.owner);
+    const removed = { ...attachment, removedAt: new Date("2026-11-02T12:00:00.000Z") };
+    const reader = storage();
+
+    await expect(
+      getAttachmentDownload(requestId, attachmentId, { ...repository(), findInRequest: async () => removed }, reader),
+    ).rejects.toBeInstanceOf(NotFoundError);
+    expect(reader.get).not.toHaveBeenCalled();
+  });
+
   it("never serves content that differs from the recorded metadata", async () => {
     authorization.requireCurrentActor.mockResolvedValue(actors.owner);
     const truncated = content.slice(0, content.length - 1);

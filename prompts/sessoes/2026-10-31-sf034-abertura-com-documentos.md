@@ -505,3 +505,13 @@ SF-105 concluída (ver `NOTES.md`, seção SF-105).
 > faça a sf-106
 
 SF-106 concluída (ver `NOTES.md`, seção SF-106).
+
+## Continuação — SF-107
+
+> me diga qual o status do projeto
+
+Resumo do estado (SF-001 a SF-106 registradas; SF-107 e SF-108 não iniciadas; pendências antigas SF-028, SF-029, SF-030/SF-033).
+
+> pode começar a SF-107
+
+SF-107 concluída (ver `NOTES.md`, seção SF-107).

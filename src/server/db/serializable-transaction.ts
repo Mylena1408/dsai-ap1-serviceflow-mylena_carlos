@@ -22,15 +22,20 @@ export function rethrowPersistenceError(error: unknown, policy: PersistenceError
   throw error instanceof Error ? error : new Error(policy.fallbackMessage);
 }
 
-/** Runs `work` in a Serializable transaction and translates persistence errors. */
+/**
+ * Runs `work` in a Serializable transaction and translates persistence errors. `timeoutMs`
+ * raises Prisma's default limit (5 s) for work that also waits on an external service.
+ */
 export async function runSerializableTransaction<T>(
   database: PrismaClient,
   work: (transaction: Prisma.TransactionClient) => Promise<T>,
   policy: PersistenceErrorPolicy,
+  options: { timeoutMs?: number } = {},
 ): Promise<T> {
   try {
     return await database.$transaction(work, {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      ...(options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }),
     });
   } catch (error) {
     rethrowPersistenceError(error, policy);

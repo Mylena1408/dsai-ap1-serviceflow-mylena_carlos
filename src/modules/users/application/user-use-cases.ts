@@ -9,6 +9,7 @@ import {
   assertAdministratorCanRetire,
   assertAttendantCanLeaveSector,
 } from "../domain/user-rules";
+import { assertNotAnonymized } from "../domain/anonymization";
 import type {
   UserCommandDependencies,
   UserRepository,
@@ -63,6 +64,9 @@ export async function updateUser(
       throw new NotFoundError();
     }
 
+    // SPEC 2026-11-02-auditoria-lgpd, 5.5.2: the anonymization is irreversible.
+    assertNotAnonymized(current);
+
     if (roleRequiresSector(parsed.role)) {
       await assertActiveSector(transaction, parsed.sectorId);
     }
@@ -106,6 +110,9 @@ export async function setUserActive(
     if (!current) {
       throw new NotFoundError();
     }
+
+    // SPEC 2026-11-02-auditoria-lgpd, 5.5.2: the anonymization is irreversible.
+    assertNotAnonymized(current);
 
     if (active && roleRequiresSector(current.role)) {
       await assertActiveSector(transaction, current.sectorId);
