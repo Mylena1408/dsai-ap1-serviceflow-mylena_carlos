@@ -65,13 +65,15 @@ export async function createDocumentRequirement(
     const existing = await transaction.listForService(id);
     assertCanAddActiveRequirement(existing.filter((requirement) => requirement.isActive).length);
 
-    return transaction.create({
-      serviceId: id,
-      name: parsed.name,
-      isRequired: parsed.isRequired,
-      acceptedFormats: parsed.acceptedFormats,
-      position: nextRequirementPosition(existing),
-    });
+    return transaction.audited({ actor: editor.actor, action: "CREATED", entityType: "DOCUMENT_REQUIREMENT" }, () =>
+      transaction.create({
+        serviceId: id,
+        name: parsed.name,
+        isRequired: parsed.isRequired,
+        acceptedFormats: parsed.acceptedFormats,
+        position: nextRequirementPosition(existing),
+      }),
+    );
   });
 }
 
@@ -92,11 +94,13 @@ export async function updateDocumentRequirement(
       throw new ConflictError();
     }
 
-    return transaction.update(id, {
-      name: parsed.name,
-      isRequired: parsed.isRequired,
-      acceptedFormats: parsed.acceptedFormats,
-    });
+    return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "DOCUMENT_REQUIREMENT", entityId: id }, () =>
+      transaction.update(id, {
+        name: parsed.name,
+        isRequired: parsed.isRequired,
+        acceptedFormats: parsed.acceptedFormats,
+      }),
+    );
   });
 }
 
@@ -118,9 +122,13 @@ export async function moveDocumentRequirement(
 
     const activeRequirements = await transaction.listActiveForService(current.serviceId);
 
-    for (const update of planRequirementMove(activeRequirements, id, move)) {
-      await transaction.update(update.id, { position: update.position });
-    }
+    // One entry for the moved requirement; the neighbours only make room for it.
+    await transaction.audited({ actor: editor.actor, action: "REORDERED", entityType: "DOCUMENT_REQUIREMENT", entityId: id }, async () => {
+      for (const update of planRequirementMove(activeRequirements, id, move)) {
+        await transaction.update(update.id, { position: update.position });
+      }
+      return { id };
+    });
   });
 }
 
@@ -138,7 +146,9 @@ export async function deactivateDocumentRequirement(
       return current;
     }
 
-    return transaction.update(id, { isActive: false });
+    return transaction.audited({ actor: editor.actor, action: "DEACTIVATED", entityType: "DOCUMENT_REQUIREMENT", entityId: id }, () =>
+      transaction.update(id, { isActive: false }),
+    );
   });
 }
 

@@ -20,7 +20,7 @@ describe("audit schema (SF-102)", () => {
     await expect(prisma.requestAttachment.count({ where: { removedAt: { not: null } } })).resolves.toBe(0);
   });
 
-  it("stores an entry with its changes, empty by default, and keeps its actor", async () => {
+  it("stores an entry with its changes, empty by default, and its actor as given", async () => {
     const admin = await createDomainUser({ role: "ADMIN" });
     const sector = await createDomainSector();
 
@@ -47,8 +47,11 @@ describe("audit schema (SF-102)", () => {
     });
     expect(exported.changes).toEqual([]);
 
-    // The actor of an entry cannot be deleted: anonymization keeps the person, never deletes it.
-    await expect(prisma.user.delete({ where: { id: admin.id } })).rejects.toThrow();
+    // The actor is the session's user id, kept as text without a foreign key (SF-103).
+    const fromSession = await prisma.auditEntry.create({
+      data: { actorId: "admin-from-server-session", actorRole: "ADMIN", action: "CREATED", entityType: "SECTOR", entityId: sector.id, entityLabel: "x" },
+    });
+    expect(fromSession.actorId).toBe("admin-from-server-session");
   });
 
   it("accepts the new nullable columns", async () => {

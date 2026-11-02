@@ -1,3 +1,4 @@
+import type { AuditScope } from "@/modules/audit";
 import type { CategoryRecord } from "../domain/category";
 
 export interface CategoryRepository {
@@ -5,7 +6,7 @@ export interface CategoryRepository {
 }
 
 /** Operations available inside a category transaction. */
-export interface CategoryTransaction {
+export interface CategoryTransaction extends AuditScope {
   exists(categoryId: string): Promise<boolean>;
   create(name: string): Promise<CategoryRecord>;
   update(categoryId: string, data: { name?: string; isActive?: boolean }): Promise<CategoryRecord>;

@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, Service } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { PublishedService, ServiceRecord } from "../domain/service";
 import type {
   PublishedCatalogRepository,
@@ -65,6 +66,7 @@ export function createPrismaPublishedCatalogRepository(
 
 function createPrismaServiceTransaction(transaction: Prisma.TransactionClient): ServiceTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     findState(serviceId) {
       return transaction.service.findUnique({
         where: { id: serviceId },

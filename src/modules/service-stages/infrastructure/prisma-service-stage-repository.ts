@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, ServiceStage } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { ServiceStageRecord } from "../domain/service-stage";
 import type { ServiceStageRepository, ServiceStageTransaction, ServiceStageTransactionRunner } from "../application/ports";
 
@@ -26,6 +27,7 @@ export function createPrismaServiceStageRepository(database: PrismaClient): Serv
 
 function createPrismaServiceStageTransaction(transaction: Prisma.TransactionClient): ServiceStageTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     async findServiceSector(serviceId) {
       const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { sectorId: true } });
       return service?.sectorId ?? null;

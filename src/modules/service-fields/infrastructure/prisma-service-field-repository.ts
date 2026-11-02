@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, ServiceField } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { ServiceFieldRecord } from "../domain/service-field";
 import type { ServiceFieldRepository, ServiceFieldTransaction, ServiceFieldTransactionRunner } from "../application/ports";
 
@@ -33,6 +34,7 @@ export function createPrismaServiceFieldRepository(database: PrismaClient): Serv
 
 function createPrismaServiceFieldTransaction(transaction: Prisma.TransactionClient): ServiceFieldTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     async findServiceSector(serviceId) {
       const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { sectorId: true } });
       return service?.sectorId ?? null;

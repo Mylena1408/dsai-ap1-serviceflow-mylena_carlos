@@ -5,8 +5,10 @@ import {
   AUDIT_ACTION_LABELS,
   AUDIT_ENTITY_LABELS,
   AUDIT_ENTITY_TYPES,
+  activeStateAction,
   auditChanges,
   describeAuditChange,
+  planAuditEntry,
 } from "@/modules/audit/domain/audit";
 
 // SPEC 2026-11-02-auditoria-lgpd, 5.1 and 5.2 (SF-102; CA-AUD-02 and CA-AUD-03).
@@ -138,5 +140,46 @@ describe("texts (section 5.2)", () => {
     expect([...AUDIT_ENTITY_TYPES].sort()).toEqual(Object.keys(entities).sort());
     for (const action of AUDIT_ACTIONS) expect(AUDIT_ACTION_LABELS[action]).toBeTruthy();
     for (const entity of AUDIT_ENTITY_TYPES) expect(AUDIT_ENTITY_LABELS[entity]).toBeTruthy();
+  });
+});
+
+describe("planning an entry (SF-103; CA-AUD-02)", () => {
+  const meta = { actor: { id: "admin-1", role: "ADMIN" as const }, entityType: "USER" as const, entityId: "u1", entityLabel: "Carla" };
+
+  it("keeps only the audited fields of the entity, so hashes never reach the record", () => {
+    const entry = planAuditEntry(
+      { ...meta, action: "UPDATED" },
+      { name: "Carla", role: "REQUESTER", passwordHash: "$argon2id$a", updatedAt: new Date(1) },
+      { name: "Carla", role: "ATTENDANT", passwordHash: "$argon2id$b", updatedAt: new Date(2) },
+    );
+
+    expect(entry).toEqual({
+      actorId: "admin-1",
+      actorRole: "ADMIN",
+      action: "UPDATED",
+      entityType: "USER",
+      entityId: "u1",
+      entityLabel: "Carla",
+      changes: [{ field: "role", before: "REQUESTER", after: "ATTENDANT" }],
+    });
+  });
+
+  it("plans nothing for an update, move, deactivation or reactivation without change", () => {
+    const state = { name: "Carla", isActive: true };
+    for (const action of ["UPDATED", "REORDERED", "DEACTIVATED", "REACTIVATED"] as const) {
+      expect(planAuditEntry({ ...meta, action }, state, state)).toBeNull();
+    }
+  });
+
+  it("always plans a creation, an anonymization and an export", () => {
+    const state = { isActive: false };
+    expect(planAuditEntry({ ...meta, action: "CREATED" }, null, state)?.changes).toEqual([{ field: "isActive", before: null, after: false }]);
+    expect(planAuditEntry({ ...meta, action: "ANONYMIZED" }, state, state)?.changes).toEqual([]);
+    expect(planAuditEntry({ ...meta, action: "EXPORTED" }, state, state)?.action).toBe("EXPORTED");
+  });
+
+  it("names deactivation and reactivation from the requested state", () => {
+    expect(activeStateAction(false)).toBe("DEACTIVATED");
+    expect(activeStateAction(true)).toBe("REACTIVATED");
   });
 });

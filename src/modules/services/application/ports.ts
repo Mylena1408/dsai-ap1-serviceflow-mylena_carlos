@@ -1,3 +1,4 @@
+import type { AuditScope } from "@/modules/audit";
 import type { ServiceRelationships } from "../domain/relationships";
 import type { PublishedService, ServiceData, ServiceRecord } from "../domain/service";
 
@@ -20,7 +21,7 @@ export interface ServiceState {
 }
 
 /** Operations available inside a service transaction. */
-export interface ServiceTransaction {
+export interface ServiceTransaction extends AuditScope {
   findState(serviceId: string): Promise<ServiceState | null>;
   loadRelationships(categoryId: string, sectorId: string): Promise<ServiceRelationships>;
   create(data: ServiceData): Promise<ServiceRecord>;

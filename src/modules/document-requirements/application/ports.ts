@@ -1,3 +1,4 @@
+import type { AuditScope } from "@/modules/audit";
 import type {
   DocumentRequirementData,
   DocumentRequirementRecord,
@@ -14,7 +15,7 @@ export interface DocumentRequirementRepository {
 }
 
 /** Operations available inside a document requirement transaction. */
-export interface DocumentRequirementTransaction {
+export interface DocumentRequirementTransaction extends AuditScope {
   /** Sector of the service, or null when it does not exist (SPEC de permissões, 5.3.1). */
   findServiceSector(serviceId: string): Promise<string | null>;
   listForService(serviceId: string): Promise<Array<OrderedRequirement & { isActive: boolean }>>;

@@ -1,5 +1,6 @@
 import { assertCatalogSector, requireCatalogEditor } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
+import { activeStateAction } from "@/modules/audit";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
 import { serviceInputSchema, type ServiceInput } from "./service-schemas";
@@ -40,7 +41,7 @@ export async function createService(
     const relationships = await transaction.loadRelationships(parsed.categoryId, parsed.sectorId);
     assertServiceRelationships(relationships, true);
 
-    return transaction.create(data);
+    return transaction.audited({ actor: editor.actor, action: "CREATED", entityType: "SERVICE" }, () => transaction.create(data));
   });
 }
 
@@ -66,7 +67,9 @@ export async function updateService(
     const relationships = await transaction.loadRelationships(parsed.categoryId, parsed.sectorId);
     assertServiceRelationships(relationships, current.isActive);
 
-    return transaction.update(serviceId, data);
+    return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE", entityId: serviceId }, () =>
+      transaction.update(serviceId, data),
+    );
   });
 }
 
@@ -96,6 +99,9 @@ export async function setServiceActive(
       assertServiceRelationships(relationships, true);
     }
 
-    return transaction.update(serviceId, { isActive: active });
+    return transaction.audited(
+      { actor: editor.actor, action: activeStateAction(active), entityType: "SERVICE", entityId: serviceId },
+      () => transaction.update(serviceId, { isActive: active }),
+    );
   });
 }

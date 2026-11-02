@@ -61,7 +61,9 @@ export async function createServiceField(
     assertCanAddActiveField(active.length);
     assertLabelAvailable(active, parsed.label);
 
-    return transaction.create({ serviceId: id, ...parsed, position: nextPosition(existing) });
+    return transaction.audited({ actor: editor.actor, action: "CREATED", entityType: "SERVICE_FIELD" }, () =>
+      transaction.create({ serviceId: id, ...parsed, position: nextPosition(existing) }),
+    );
   });
 }
 
@@ -88,7 +90,9 @@ export async function updateServiceField(
     );
     assertLabelAvailable(others, changes.label);
 
-    return transaction.update(id, changes);
+    return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
+      transaction.update(id, changes),
+    );
   });
 }
 
@@ -110,9 +114,13 @@ export async function moveServiceField(
 
     const active = (await transaction.listForService(current.serviceId)).filter((field) => field.isActive);
 
-    for (const update of planPositionMove(active, id, move)) {
-      await transaction.update(update.id, { position: update.position });
-    }
+    // One entry for the moved field; the neighbours only make room for it.
+    await transaction.audited({ actor: editor.actor, action: "REORDERED", entityType: "SERVICE_FIELD", entityId: id }, async () => {
+      for (const update of planPositionMove(active, id, move)) {
+        await transaction.update(update.id, { position: update.position });
+      }
+      return { id };
+    });
   });
 }
 
@@ -126,7 +134,11 @@ export async function deactivateServiceField(
   return transactions.run(async (transaction) => {
     const current = await loadField(transaction, id, editor);
 
-    return current.isActive ? transaction.update(id, { isActive: false }) : current;
+    return current.isActive
+      ? transaction.audited({ actor: editor.actor, action: "DEACTIVATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
+          transaction.update(id, { isActive: false }),
+        )
+      : current;
   });
 }
 
@@ -151,7 +163,9 @@ export async function reactivateServiceField(
     assertCanAddActiveField(active.length);
     assertLabelAvailable(active, current.label);
 
-    return transaction.update(id, { isActive: true, position: nextPosition(existing) });
+    return transaction.audited({ actor: editor.actor, action: "REACTIVATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
+      transaction.update(id, { isActive: true, position: nextPosition(existing) }),
+    );
   });
 }
 

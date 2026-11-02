@@ -1,5 +1,6 @@
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
+import { activeStateAction } from "@/modules/audit";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
 import { roleRequiresSector, userCreationInputSchema, userUpdateInputSchema } from "./user-schemas";
@@ -24,7 +25,7 @@ export async function createUser(
   input: unknown,
   { transactions, hashPassword }: UserCommandDependencies,
 ): Promise<ManagedUser> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const parsed = validateInput(userCreationInputSchema, input);
   const passwordHash = await hashPassword(parsed.password);
 
@@ -33,13 +34,15 @@ export async function createUser(
       await assertActiveSector(transaction, parsed.sectorId);
     }
 
-    return transaction.create({
-      name: parsed.name,
-      email: parsed.email,
-      passwordHash,
-      role: parsed.role,
-      sectorId: parsed.sectorId,
-    });
+    return transaction.audited({ actor, action: "CREATED", entityType: "USER" }, () =>
+      transaction.create({
+        name: parsed.name,
+        email: parsed.email,
+        passwordHash,
+        role: parsed.role,
+        sectorId: parsed.sectorId,
+      }),
+    );
   });
 }
 
@@ -48,7 +51,7 @@ export async function updateUser(
   input: unknown,
   { transactions, hashPassword }: UserCommandDependencies,
 ): Promise<ManagedUser> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const userId = validateInput(entityIdSchema, id);
   const parsed = validateInput(userUpdateInputSchema, input);
   const passwordHash = parsed.password ? await hashPassword(parsed.password) : undefined;
@@ -75,13 +78,16 @@ export async function updateUser(
       isActive: current.isActive,
     });
 
-    return transaction.update(userId, {
-      name: parsed.name,
-      email: parsed.email,
-      role: parsed.role,
-      sectorId: parsed.sectorId,
-      ...(passwordHash ? { passwordHash } : {}),
-    });
+    // A new password alone is not recorded: hashes never enter the audit (section 5.1).
+    return transaction.audited({ actor, action: "UPDATED", entityType: "USER", entityId: userId }, () =>
+      transaction.update(userId, {
+        name: parsed.name,
+        email: parsed.email,
+        role: parsed.role,
+        sectorId: parsed.sectorId,
+        ...(passwordHash ? { passwordHash } : {}),
+      }),
+    );
   });
 }
 
@@ -90,7 +96,7 @@ export async function setUserActive(
   isActive: unknown,
   { transactions }: Pick<UserCommandDependencies, "transactions">,
 ): Promise<ManagedUser> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const userId = validateInput(entityIdSchema, id);
   const active = validateInput(activeStateSchema, isActive);
 
@@ -112,7 +118,9 @@ export async function setUserActive(
       isActive: active,
     });
 
-    return transaction.update(userId, { isActive: active });
+    return transaction.audited({ actor, action: activeStateAction(active), entityType: "USER", entityId: userId }, () =>
+      transaction.update(userId, { isActive: active }),
+    );
   });
 }
 

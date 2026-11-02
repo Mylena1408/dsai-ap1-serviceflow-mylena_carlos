@@ -481,3 +481,9 @@ Proposta escrita a partir do item 12 do plano, da visão geral §10 e da seção
 > perfeito,pode prosseguir
 
 Resposta à pergunta sobre segurança: a SPEC não muda o login de demonstração nem cria barreiras novas; as ações novas seguem o modelo por perfil. Seguida a SPEC aprovada sem as mudanças opcionais (bloquear a anonimização das contas de demonstração; auditoria visível a todos). SF-102 concluída (ver `NOTES.md`, seção SF-102).
+
+## Continuação — SF-103
+
+> faça a sf-103
+
+SF-103 concluída (ver `NOTES.md`, seção SF-103).

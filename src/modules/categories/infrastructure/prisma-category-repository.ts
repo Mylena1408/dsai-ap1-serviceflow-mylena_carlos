@@ -1,5 +1,6 @@
 import type { Category, Prisma, PrismaClient } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { CategoryRecord } from "../domain/category";
 import type {
   CategoryRepository,
@@ -23,6 +24,7 @@ function createPrismaCategoryTransaction(
   transaction: Prisma.TransactionClient,
 ): CategoryTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     async exists(categoryId) {
       const current = await transaction.category.findUnique({
         where: { id: categoryId },

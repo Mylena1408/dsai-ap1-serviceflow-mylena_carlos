@@ -146,3 +146,80 @@ export function describeAuditChange(change: AuditChange, format?: AuditValueForm
 
   return `${label}: ${readable(change.field, change.before, format)} → ${readable(change.field, change.after, format)}`;
 }
+
+/** Fields kept in a record for each entity (section 5.1); anything else, like hashes, is left out. */
+export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>> = {
+  USER: ["name", "email", "role", "sectorId", "isActive"],
+  SECTOR: ["name", "isActive"],
+  CATEGORY: ["name", "isActive"],
+  SERVICE: ["name", "description", "categoryId", "sectorId", "defaultPriority", "slaHours", "requiresApproval", "isActive"],
+  DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],
+  SERVICE_FIELD: ["label", "helpText", "type", "isRequired", "options", "minValue", "maxValue", "position", "isActive"],
+  SERVICE_STAGE: ["name", "position", "isActive"],
+};
+
+export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
+
+export interface AuditActor {
+  id: string;
+  role: AuditActorRole;
+}
+
+/** What a use case says about a change; the states come from the database. */
+export interface AuditMeta {
+  actor: AuditActor;
+  action: AuditAction;
+  entityType: AuditEntityType;
+  /** Absent for a creation: the entity gets its id from the change itself. */
+  entityId?: string;
+}
+
+export interface PlannedAuditEntry {
+  actorId: string;
+  actorRole: AuditActorRole;
+  action: AuditAction;
+  entityType: AuditEntityType;
+  entityId: string;
+  entityLabel: string;
+  changes: AuditChange[];
+}
+
+/** Actions that only exist when something changed (CA-AUD-02). */
+const CHANGE_ACTIONS: readonly AuditAction[] = ["UPDATED", "REORDERED", "DEACTIVATED", "REACTIVATED"];
+
+function audited(entityType: AuditEntityType, state: object | null): AuditSnapshot | null {
+  if (state === null) return null;
+  const source = state as Record<string, AuditInputValue>;
+  return Object.fromEntries(AUDITED_FIELDS[entityType].filter((field) => field in source).map((field) => [field, source[field]]));
+}
+
+/**
+ * The entry to write for a change, or null when there is nothing to record: an update,
+ * reordering, deactivation or reactivation that changed no audited field.
+ */
+export function planAuditEntry(
+  meta: AuditMeta & { entityId: string; entityLabel: string },
+  before: object | null,
+  after: object,
+): PlannedAuditEntry | null {
+  const changes = auditChanges(meta.entityType, audited(meta.entityType, before), audited(meta.entityType, after) ?? {});
+
+  if (CHANGE_ACTIONS.includes(meta.action) && changes.length === 0) {
+    return null;
+  }
+
+  return {
+    actorId: meta.actor.id,
+    actorRole: meta.actor.role,
+    action: meta.action,
+    entityType: meta.entityType,
+    entityId: meta.entityId,
+    entityLabel: meta.entityLabel,
+    changes,
+  };
+}
+
+/** Deactivation or reactivation, from the requested state. */
+export function activeStateAction(isActive: boolean): AuditAction {
+  return isActive ? "REACTIVATED" : "DEACTIVATED";
+}

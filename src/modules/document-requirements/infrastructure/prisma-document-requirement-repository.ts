@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, ServiceDocumentRequirement } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { DocumentRequirementRecord } from "../domain/document-requirement";
 import type {
   DocumentRequirementRepository,
@@ -41,6 +42,7 @@ function createPrismaDocumentRequirementTransaction(
   transaction: Prisma.TransactionClient,
 ): DocumentRequirementTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     async findServiceSector(serviceId) {
       const service = await transaction.service.findUnique({ where: { id: serviceId }, select: { sectorId: true } });
       return service?.sectorId ?? null;

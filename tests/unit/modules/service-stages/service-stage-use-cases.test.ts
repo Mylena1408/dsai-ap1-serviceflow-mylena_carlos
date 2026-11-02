@@ -41,6 +41,8 @@ function transaction(store: Store): ServiceStageTransaction {
     return found;
   };
   return {
+    // SPEC 2026-11-02-auditoria-lgpd (SF-103): recording is covered by the integration tests.
+    audited: (_meta, change) => change(),
     async findServiceSector(id) {
       return store.serviceIds.includes(id) ? "sector-1" : null;
     },

@@ -101,6 +101,7 @@ A limpeza roda no job diário e informa quantos registros removeu de cada tipo. 
 ## 6. Dados (migration somente aditiva)
 
 - Nova tabela `AuditEntry` (`id`, `occurredAt`, `actorId`, `actorRole`, `action`, `entityType`, `entityId`, `entityLabel`, `changes` JSON), com índices por data, entidade e pessoa.
+  *Esclarecido em 2026-11-02 (SF-103): `actorId` guarda o identificador da pessoa da sessão como texto, sem chave estrangeira. As pessoas nunca são apagadas (só anonimizadas), a tela busca o nome pelo identificador, e os testes de integração anteriores simulam a sessão com identificadores que não existem no banco. A migration `20261102200000_audit_actor_reference` altera só a tabela `AuditEntry`, criada pela SF-102 e ainda vazia em todos os bancos (exceção registrada à regra "só aditivas").*
 - Nova coluna `User.anonymizedAt` (nula por padrão).
 - Nova coluna `RequestAttachment.removedAt` (nula por padrão), para listar o anexo removido.
 - Nenhuma coluna existente muda de tipo; nenhum dado existente é alterado pela migration.
@@ -108,8 +109,8 @@ A limpeza roda no job diário e informa quantos registros removeu de cada tipo. 
 ## 7. Critérios de aceitação
 
 - [ ] **CA-AUD-01** — Sem uso das novas ações, as telas e regras existentes não mudam e as suítes anteriores passam sem alteração de asserções.
-- [ ] **CA-AUD-02** — Cada ação da tabela 5.1 gera exatamente um registro na mesma transação; se a alteração falha, nada é registrado; uma alteração sem mudança real não gera registro.
-- [ ] **CA-AUD-03** — Os registros trazem pessoa, perfil, ação, entidade e campos alterados com valores; nome e e-mail de usuário aparecem só como "alterado"; senhas e hashes nunca aparecem.
+- [x] **CA-AUD-02** — Cada ação da tabela 5.1 gera exatamente um registro na mesma transação; se a alteração falha, nada é registrado; uma alteração sem mudança real não gera registro. *Verificado em 2026-11-02 (SF-103): criação, alteração, reordenação, desativação e reativação de usuários, setores, categorias, serviços, documentos, campos e etapas geram um registro cada, na transação da alteração; recusas (por exemplo, categoria com serviço ativo) não registram nada; alterar sem mudar nada, mover o primeiro item para cima ou desativar o que já está inativo não geram registro (unitário e integração).*
+- [x] **CA-AUD-03** — Os registros trazem pessoa, perfil, ação, entidade e campos alterados com valores; nome e e-mail de usuário aparecem só como "alterado"; senhas e hashes nunca aparecem. *Verificado em 2026-11-02 (SF-103): cada registro guarda a pessoa da sessão e o perfil dela (administrador, ou atendente com "Gerir serviços do setor"), a ação, a entidade com o nome do momento e os campos alterados com valores (SLA, aprovação, prioridade, formatos, posição); nome e e-mail de usuário aparecem só como "alterado"; senhas e hashes nunca entram, nem quando a senha é trocada (integração confere o texto completo dos registros).*
 - [ ] **CA-AUD-04** — Só o administrador vê a seção "Auditoria", com filtros por período, entidade e pessoa, 50 por página, incluindo as concessões e revogações de permissões.
 - [ ] **CA-AUD-05** — O job diário aplica os prazos da tabela 5.3, informa o que removeu e não apaga nada dentro do prazo.
 - [ ] **CA-AUD-06** — Cada pessoa baixa só os próprios dados, no conteúdo de 5.4, sem hash de senha nem notas internas de outras pessoas; a exportação entra na auditoria.

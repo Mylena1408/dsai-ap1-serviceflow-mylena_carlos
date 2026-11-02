@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient, Sector } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { SectorRecord } from "../domain/sector";
 import type {
   SectorRepository,
@@ -21,6 +22,7 @@ export function createPrismaSectorRepository(database: PrismaClient): SectorRepo
 
 function createPrismaSectorTransaction(transaction: Prisma.TransactionClient): SectorTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     async exists(sectorId) {
       const current = await transaction.sector.findUnique({
         where: { id: sectorId },

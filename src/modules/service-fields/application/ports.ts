@@ -1,3 +1,4 @@
+import type { AuditScope } from "@/modules/audit";
 import type { PositionedItem } from "@/shared/ordering";
 import type { ServiceFieldDefinition, ServiceFieldRecord } from "../domain/service-field";
 
@@ -11,7 +12,7 @@ export interface ServiceFieldRepository {
 }
 
 /** Operations available inside a custom field transaction. */
-export interface ServiceFieldTransaction {
+export interface ServiceFieldTransaction extends AuditScope {
   /** Sector of the service, or null when it does not exist (SPEC de permissões, 5.3.1). */
   findServiceSector(serviceId: string): Promise<string | null>;
   listForService(serviceId: string): Promise<Array<PositionedItem & { label: string; isActive: boolean }>>;

@@ -36,6 +36,8 @@ function repository(store: Store): CategoryRepository {
 
 function transaction(store: Store): CategoryTransaction {
   return {
+    // SPEC 2026-11-02-auditoria-lgpd (SF-103): recording is covered by the integration tests.
+    audited: (_meta, change) => change(),
     async exists(id) {
       return store.categories.some((item) => item.id === id);
     },

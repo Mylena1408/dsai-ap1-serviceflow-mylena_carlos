@@ -61,6 +61,8 @@ function transaction(store: Store): UserTransaction {
     return found;
   };
   return {
+    // SPEC 2026-11-02-auditoria-lgpd (SF-103): recording is covered by the integration tests.
+    audited: (_meta, change) => change(),
     async findState(id) {
       const found = store.users.find((item) => item.id === id);
       return found

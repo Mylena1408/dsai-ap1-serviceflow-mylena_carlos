@@ -48,6 +48,8 @@ function transaction(store: Store): SectorTransaction {
     return found;
   };
   return {
+    // SPEC 2026-11-02-auditoria-lgpd (SF-103): recording is covered by the integration tests.
+    audited: (_meta, change) => change(),
     async exists(id) {
       return store.sectors.some((item) => item.id === id);
     },

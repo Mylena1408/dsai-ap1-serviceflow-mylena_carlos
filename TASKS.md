@@ -1101,7 +1101,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-103 — Registro da auditoria nos casos de uso administrativos
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Ponto único `audited(meta, alteração)` no módulo `audit` (`application/ports.ts`, `infrastructure/prisma-audit-scope.ts`), usado pelas transações de usuários, setores, categorias, serviços, documentos exigidos, campos e etapas; 22 casos de uso administrativos registram a ação. Migration `20261102200000_audit_actor_reference` (autor como texto, sem chave estrangeira). CA-AUD-02 e CA-AUD-03 verificados.
 - **Objetivo:** Ponto único de gravação dentro das transações existentes de usuários, setores, categorias, serviços, documentos exigidos, campos e etapas (inclusive quem tem "Gerir serviços do setor").
 - **Arquivos/módulos esperados:** `src/modules/` (casos de uso e repositórios), testes.
 - **Dependências:** SF-102.

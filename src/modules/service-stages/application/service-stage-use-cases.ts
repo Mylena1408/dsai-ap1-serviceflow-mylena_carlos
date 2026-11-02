@@ -44,7 +44,9 @@ export async function createServiceStage(
     assertCanAddActiveStage(active.length);
     assertStageNameAvailable(active, name);
 
-    return transaction.create({ serviceId: id, name, position: nextPosition(existing) });
+    return transaction.audited({ actor: editor.actor, action: "CREATED", entityType: "SERVICE_STAGE" }, () =>
+      transaction.create({ serviceId: id, name, position: nextPosition(existing) }),
+    );
   });
 }
 
@@ -70,7 +72,9 @@ export async function renameServiceStage(
     );
     assertStageNameAvailable(others, name);
 
-    return transaction.update(id, { name });
+    return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE_STAGE", entityId: id }, () =>
+      transaction.update(id, { name }),
+    );
   });
 }
 
@@ -92,9 +96,13 @@ export async function moveServiceStage(
 
     const active = (await transaction.listForService(current.serviceId)).filter((stage) => stage.isActive);
 
-    for (const update of planPositionMove(active, id, move)) {
-      await transaction.update(update.id, { position: update.position });
-    }
+    // One entry for the moved stage; the neighbours only make room for it.
+    await transaction.audited({ actor: editor.actor, action: "REORDERED", entityType: "SERVICE_STAGE", entityId: id }, async () => {
+      for (const update of planPositionMove(active, id, move)) {
+        await transaction.update(update.id, { position: update.position });
+      }
+      return { id };
+    });
   });
 }
 
@@ -108,7 +116,11 @@ export async function deactivateServiceStage(
   return transactions.run(async (transaction) => {
     const current = await loadStage(transaction, id, editor);
 
-    return current.isActive ? transaction.update(id, { isActive: false }) : current;
+    return current.isActive
+      ? transaction.audited({ actor: editor.actor, action: "DEACTIVATED", entityType: "SERVICE_STAGE", entityId: id }, () =>
+          transaction.update(id, { isActive: false }),
+        )
+      : current;
   });
 }
 
@@ -133,7 +145,9 @@ export async function reactivateServiceStage(
     assertCanAddActiveStage(active.length);
     assertStageNameAvailable(active, current.name);
 
-    return transaction.update(id, { isActive: true, position: nextPosition(existing) });
+    return transaction.audited({ actor: editor.actor, action: "REACTIVATED", entityType: "SERVICE_STAGE", entityId: id }, () =>
+      transaction.update(id, { isActive: true, position: nextPosition(existing) }),
+    );
   });
 }
 

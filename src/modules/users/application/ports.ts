@@ -1,3 +1,4 @@
+import type { AuditScope } from "@/modules/audit";
 import type { ManagedUser, UserRole, UserState } from "../domain/user";
 
 export interface UserRepository {
@@ -23,7 +24,7 @@ export interface UserChanges {
 }
 
 /** Operations available inside a user transaction. */
-export interface UserTransaction {
+export interface UserTransaction extends AuditScope {
   findState(userId: string): Promise<UserState | null>;
   findSectorActivity(sectorId: string): Promise<{ isActive: boolean } | null>;
   countActiveAdministrators(): Promise<number>;

@@ -1,5 +1,6 @@
 import { requireCatalogEditor, requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
+import { activeStateAction } from "@/modules/audit";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
 import { categoryInputSchema } from "./category-schemas";
@@ -24,10 +25,12 @@ export async function createCategory(
   input: unknown,
   transactions: CategoryTransactionRunner,
 ): Promise<CategoryRecord> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const { name } = validateInput(categoryInputSchema, input);
 
-  return transactions.run((transaction) => transaction.create(name));
+  return transactions.run((transaction) =>
+    transaction.audited({ actor, action: "CREATED", entityType: "CATEGORY" }, () => transaction.create(name)),
+  );
 }
 
 export async function updateCategory(
@@ -35,7 +38,7 @@ export async function updateCategory(
   input: unknown,
   transactions: CategoryTransactionRunner,
 ): Promise<CategoryRecord> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const categoryId = validateInput(entityIdSchema, id);
   const { name } = validateInput(categoryInputSchema, input);
 
@@ -44,7 +47,9 @@ export async function updateCategory(
       throw new NotFoundError();
     }
 
-    return transaction.update(categoryId, { name });
+    return transaction.audited({ actor, action: "UPDATED", entityType: "CATEGORY", entityId: categoryId }, () =>
+      transaction.update(categoryId, { name }),
+    );
   });
 }
 
@@ -53,7 +58,7 @@ export async function setCategoryActive(
   isActive: unknown,
   transactions: CategoryTransactionRunner,
 ): Promise<CategoryRecord> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const categoryId = validateInput(entityIdSchema, id);
   const active = validateInput(activeStateSchema, isActive);
 
@@ -66,6 +71,8 @@ export async function setCategoryActive(
       assertCategoryCanBeDeactivated(await transaction.hasActiveService(categoryId));
     }
 
-    return transaction.update(categoryId, { isActive: active });
+    return transaction.audited({ actor, action: activeStateAction(active), entityType: "CATEGORY", entityId: categoryId }, () =>
+      transaction.update(categoryId, { isActive: active }),
+    );
   });
 }

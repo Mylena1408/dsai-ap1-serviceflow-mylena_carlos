@@ -1,5 +1,6 @@
 import { requireCatalogEditor, requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
+import { activeStateAction } from "@/modules/audit";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
 import { sectorInputSchema } from "./sector-schemas";
@@ -26,10 +27,12 @@ export async function createSector(
   input: unknown,
   transactions: SectorTransactionRunner,
 ): Promise<SectorRecord> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const { name } = validateInput(sectorInputSchema, input);
 
-  return transactions.run((transaction) => transaction.create(name));
+  return transactions.run((transaction) =>
+    transaction.audited({ actor, action: "CREATED", entityType: "SECTOR" }, () => transaction.create(name)),
+  );
 }
 
 export async function updateSector(
@@ -37,7 +40,7 @@ export async function updateSector(
   input: unknown,
   transactions: SectorTransactionRunner,
 ): Promise<SectorRecord> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const sectorId = validateInput(entityIdSchema, id);
   const { name } = validateInput(sectorInputSchema, input);
 
@@ -46,7 +49,9 @@ export async function updateSector(
       throw new NotFoundError();
     }
 
-    return transaction.update(sectorId, { name });
+    return transaction.audited({ actor, action: "UPDATED", entityType: "SECTOR", entityId: sectorId }, () =>
+      transaction.update(sectorId, { name }),
+    );
   });
 }
 
@@ -55,7 +60,7 @@ export async function setSectorActive(
   isActive: unknown,
   transactions: SectorTransactionRunner,
 ): Promise<SectorRecord> {
-  await requireConfigurationAdministrator();
+  const actor = await requireConfigurationAdministrator();
   const sectorId = validateInput(entityIdSchema, id);
   const active = validateInput(activeStateSchema, isActive);
 
@@ -70,6 +75,8 @@ export async function setSectorActive(
       );
     }
 
-    return transaction.update(sectorId, { isActive: active });
+    return transaction.audited({ actor, action: activeStateAction(active), entityType: "SECTOR", entityId: sectorId }, () =>
+      transaction.update(sectorId, { isActive: active }),
+    );
   });
 }

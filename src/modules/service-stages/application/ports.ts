@@ -1,3 +1,4 @@
+import type { AuditScope } from "@/modules/audit";
 import type { PositionedItem } from "@/shared/ordering";
 import type { ServiceStageRecord } from "../domain/service-stage";
 
@@ -9,7 +10,7 @@ export interface ServiceStageRepository {
 }
 
 /** Operations available inside a stage configuration transaction. */
-export interface ServiceStageTransaction {
+export interface ServiceStageTransaction extends AuditScope {
   /** Sector of the service, or null when it does not exist (SPEC de permissões, 5.3.1). */
   findServiceSector(serviceId: string): Promise<string | null>;
   listForService(serviceId: string): Promise<Array<PositionedItem & { name: string; isActive: boolean }>>;

@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
+import { createPrismaAuditScope } from "@/modules/audit";
 import type { ManagedUser } from "../domain/user";
 import type {
   UserRepository,
@@ -36,6 +37,7 @@ export function createPrismaUserRepository(database: PrismaClient): UserReposito
 
 function createPrismaUserTransaction(transaction: Prisma.TransactionClient): UserTransaction {
   return {
+    ...createPrismaAuditScope(transaction),
     findState(userId) {
       return transaction.user.findUnique({
         where: { id: userId },
