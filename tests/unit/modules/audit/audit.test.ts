@@ -125,6 +125,8 @@ describe("texts (section 5.2)", () => {
       REACTIVATED: true,
       ANONYMIZED: true,
       EXPORTED: true,
+      REVOKED: true,
+      SECRET_ROTATED: true,
     };
     const entities: Record<AuditEntityType, true> = {
       USER: true,
@@ -134,6 +136,8 @@ describe("texts (section 5.2)", () => {
       DOCUMENT_REQUIREMENT: true,
       SERVICE_FIELD: true,
       SERVICE_STAGE: true,
+      API_TOKEN: true,
+      WEBHOOK: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

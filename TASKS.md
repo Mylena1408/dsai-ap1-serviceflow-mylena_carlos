@@ -1190,7 +1190,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-111 — Migration e domínio da API e dos webhooks
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-02. Migration `20261102300000_api_tokens_and_webhooks` (enums `ApiTokenScope` e `WebhookDeliveryStatus`, tabelas `ApiToken`, `ApiRateWindow`, `WebhookEndpoint` e `WebhookDelivery`, valores `REVOKED`, `SECRET_ROTATED`, `API_TOKEN` e `WEBHOOK` na auditoria, restrições da seção 6); módulos `api-tokens` e `webhooks` com as regras puras. CA-API-13 parcial; regras de CA-API-02, 03, 04, 08, 10 e 11 cobertas por unitários (os casos de uso vêm nas SF-112 a SF-114).
 - **Objetivo:** Migration aditiva da seção 6 (`ApiToken`, `ApiRateWindow`, `WebhookEndpoint`, `WebhookDelivery`, tipos novos da auditoria) e regras puras: geração, hash, validade e escopo do token; regra de URL do webhook; cifragem do segredo; assinatura; corpo da entrega; janela do limite; espera entre tentativas.
 - **Arquivos/módulos esperados:** `prisma/`, novos módulos de API e de webhooks (`domain/`), limpeza do banco de teste, testes.
 - **Dependências:** SF-110.

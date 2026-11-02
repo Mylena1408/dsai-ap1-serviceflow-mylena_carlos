@@ -9,6 +9,9 @@ export const AUDIT_ACTIONS = [
   "REACTIVATED",
   "ANONYMIZED",
   "EXPORTED",
+  // SPEC 2026-11-02-api-externa-webhooks, 5.7: token revocation and a new webhook secret.
+  "REVOKED",
+  "SECRET_ROTATED",
 ] as const;
 
 export const AUDIT_ENTITY_TYPES = [
@@ -19,6 +22,8 @@ export const AUDIT_ENTITY_TYPES = [
   "DOCUMENT_REQUIREMENT",
   "SERVICE_FIELD",
   "SERVICE_STAGE",
+  "API_TOKEN",
+  "WEBHOOK",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -44,6 +49,8 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   DOCUMENT_REQUIREMENT: [],
   SERVICE_FIELD: [],
   SERVICE_STAGE: [],
+  API_TOKEN: [],
+  WEBHOOK: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -57,6 +64,8 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   REACTIVATED: "Reativou",
   ANONYMIZED: "Anonimizou",
   EXPORTED: "Baixou os próprios dados",
+  REVOKED: "Revogou",
+  SECRET_ROTATED: "Gerou novo segredo",
 };
 
 export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
@@ -67,6 +76,8 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   DOCUMENT_REQUIREMENT: "Documento exigido",
   SERVICE_FIELD: "Campo personalizado",
   SERVICE_STAGE: "Etapa",
+  API_TOKEN: "Token de API",
+  WEBHOOK: "Webhook",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -90,6 +101,11 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   maxValue: "Máximo",
   options: "Opções",
   position: "Posição",
+  scope: "Escopo",
+  expiresAt: "Válido até",
+  revokedAt: "Revogado em",
+  url: "Endereço",
+  eventTypes: "Eventos",
 };
 
 function normalize(value: AuditInputValue): AuditValue {
@@ -156,6 +172,9 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],
   SERVICE_FIELD: ["label", "helpText", "type", "isRequired", "options", "minValue", "maxValue", "position", "isActive"],
   SERVICE_STAGE: ["name", "position", "isActive"],
+  // Never the token value, its hash or the webhook secret (SPEC 2026-11-02-api-externa-webhooks, 5.7).
+  API_TOKEN: ["name", "scope", "expiresAt", "revokedAt"],
+  WEBHOOK: ["name", "url", "eventTypes", "isActive"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

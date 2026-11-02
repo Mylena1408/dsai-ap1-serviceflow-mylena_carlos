@@ -61,6 +61,8 @@ enum AuditAction {
   REACTIVATED
   ANONYMIZED
   EXPORTED
+  REVOKED
+  SECRET_ROTATED
 }
 
 enum AuditEntityType {
@@ -71,6 +73,22 @@ enum AuditEntityType {
   DOCUMENT_REQUIREMENT
   SERVICE_FIELD
   SERVICE_STAGE
+  API_TOKEN
+  WEBHOOK
+}
+
+/// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
+enum ApiTokenScope {
+  READ
+  WRITE
+}
+
+/// SPEC 2026-11-02-api-externa-webhooks, 5.6.
+enum WebhookDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+  CANCELLED
 }
 
 enum RequestStatus {
@@ -156,6 +174,8 @@ model User {
   permissionEventsActed UserPermissionEvent[]    @relation("UserPermissionEventActor")
   notificationPrefs     NotificationPreference[]
   emailDeliveries       EmailDelivery[]
+  apiTokens             ApiToken[]               @relation("ApiTokenOwner")
+  apiTokensRevoked      ApiToken[]               @relation("ApiTokenRevoker")
 }
 
 model Service {
@@ -542,4 +562,74 @@ model AuditEntry {
   @@index([occurredAt, id])
   @@index([entityType, entityId])
   @@index([actorId, occurredAt])
+}
+
+/// Personal API token (SPEC 2026-11-02-api-externa-webhooks, 5.1 and 6). Only the SHA-256 of the
+/// value is kept; the value is shown once. Revoked or expired tokens never authenticate.
+model ApiToken {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  name        String
+  scope       ApiTokenScope
+  tokenHash   String        @unique
+  lastFour    String
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+  expiresAt   DateTime      @db.Timestamptz
+  lastUsedAt  DateTime?     @db.Timestamptz
+  revokedAt   DateTime?     @db.Timestamptz
+  revokedById String?       @db.Uuid
+
+  user        User            @relation("ApiTokenOwner", fields: [userId], references: [id], onDelete: Restrict)
+  revokedBy   User?           @relation("ApiTokenRevoker", fields: [revokedById], references: [id], onDelete: Restrict)
+  rateWindows ApiRateWindow[]
+
+  @@index([userId, createdAt])
+}
+
+/// Calls of one token in one minute (SPEC 2026-11-02-api-externa-webhooks, 5.5, decision A6).
+model ApiRateWindow {
+  tokenId     String   @db.Uuid
+  windowStart DateTime @db.Timestamptz
+  count       Int
+
+  token ApiToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@id([tokenId, windowStart])
+  @@index([windowStart])
+}
+
+/// Outgoing webhook (SPEC 2026-11-02-api-externa-webhooks, 5.6, decision A5). The signing secret
+/// is stored encrypted with a key that lives only in an environment variable.
+model WebhookEndpoint {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  url             String
+  eventTypes      String[]
+  isActive        Boolean  @default(true)
+  encryptedSecret String
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  deliveries WebhookDelivery[]
+}
+
+/// One delivery of one event to one webhook; the body is copied because outbox events are purged.
+model WebhookDelivery {
+  id            String                @id @default(uuid()) @db.Uuid
+  endpointId    String                @db.Uuid
+  eventId       String                @db.Uuid
+  eventType     String
+  body          Json
+  status        WebhookDeliveryStatus @default(PENDING)
+  attempts      Int                   @default(0)
+  availableAt   DateTime              @db.Timestamptz
+  createdAt     DateTime              @db.Timestamptz
+  deliveredAt   DateTime?             @db.Timestamptz
+  lastErrorCode String?
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Restrict)
+
+  @@unique([eventId, endpointId])
+  @@index([status, availableAt])
+  @@index([createdAt])
 }

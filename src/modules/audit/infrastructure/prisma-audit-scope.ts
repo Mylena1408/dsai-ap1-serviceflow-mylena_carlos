@@ -78,6 +78,21 @@ async function loadState(
       });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-02-api-externa-webhooks, 5.7: never the token hash or the webhook secret.
+    case "API_TOKEN": {
+      const row = await transaction.apiToken.findUnique({
+        where: { id },
+        select: { name: true, scope: true, expiresAt: true, revokedAt: true },
+      });
+      return row && { label: row.name, state: row };
+    }
+    case "WEBHOOK": {
+      const row = await transaction.webhookEndpoint.findUnique({
+        where: { id },
+        select: { name: true, url: true, eventTypes: true, isActive: true },
+      });
+      return row && { label: row.name, state: row };
+    }
   }
 }
 

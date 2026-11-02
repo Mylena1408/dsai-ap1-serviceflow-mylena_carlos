@@ -134,6 +134,8 @@ Migration **aditiva**:
 
 Nenhuma tabela existente muda.
 
+*Esclarecido em 2026-11-02 (SF-111):* migration `20261102300000_api_tokens_and_webhooks`. Além de `REVOKED`, a troca de segredo do webhook ganhou a ação própria `SECRET_ROTATED` ("Gerou novo segredo"), porque a regra da auditoria descarta qualquer campo com "secret" no nome e uma troca de segredo ficaria sem registro. Restrições no banco: nome de token e de webhook sem espaços nas pontas e com 1 a 60 caracteres; `tokenHash` em SHA-256 hexadecimal; `lastFour` com 4 caracteres; validade depois da criação; revogação sempre com quem revogou; contagem da janela a partir de 1; URL de até 2.000 caracteres; ao menos um tipo de evento, todos da lista aceita pela outbox; até 6 tentativas; data de entrega só na entrega feita. As janelas do limite saem junto com o token; um webhook com entregas não pode ser apagado (só desativado).
+
 ## 7. Critérios de aceitação
 
 - [ ] **CA-API-01** — Sem tokens e sem webhooks, nada muda: telas e suítes anteriores passam sem alteração de asserções; a sessão do navegador não autentica `/api/v1`.
@@ -148,7 +150,7 @@ Nenhuma tabela existente muda.
 - [ ] **CA-API-10** — O administrador cadastra webhook só com URL permitida e só com a chave de cifragem configurada; o segredo aparece uma única vez e fica cifrado no banco; sem a chave, a seção avisa e nada é enviado.
 - [ ] **CA-API-11** — Cada evento assinado gera uma entrega por webhook ativo, sem duplicar no reprocessamento; o corpo traz só identificadores e códigos; a assinatura confere com o segredo; redirecionamento e endereço privado são recusados; falhas têm novas tentativas com espera crescente até 6 tentativas.
 - [ ] **CA-API-12** — Criação e revogação de token e mudanças de webhook aparecem na auditoria sem valor, hash ou segredo; "Meus dados" lista os tokens sem valor; anonimizar revoga os tokens; o job diário aplica a retenção de 5.7.
-- [ ] **CA-API-13** — Nenhuma dependência nova; uma migration aditiva.
+- [ ] **CA-API-13** — Nenhuma dependência nova; uma migration aditiva. *Parcial em 2026-11-02 (SF-111): a migration só cria tipos, tabelas, índices e restrições e acrescenta valores a dois enums da auditoria (integração do schema); `package.json` sem mudança. A conferência final é na SF-115.*
 
 ## 8. Estratégia de testes
 

@@ -573,3 +573,9 @@ Push dos 8 commits para `origin/main` (até `dcfb9a8`), depois de conferir que a
 > aprovo as decisões A1 a A6 da API
 
 SPEC `2026-11-02-api-externa-webhooks.md` aprovada; tarefas SF-111 a SF-115 registradas.
+
+## Continuação — SF-111
+
+> pode começar a SF-111
+
+SF-111 concluída (ver `NOTES.md`, seção SF-111).
