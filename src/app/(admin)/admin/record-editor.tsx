@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import type { AdminUpdateState } from "./actions";
 import { PRIORITY_LABELS, type PriorityValue } from "@/app/_components/request-priority";
 import { ServiceSlaFields } from "./service-sla-fields";
+import { ROLE_LABELS } from "@/shared/admin-labels";
 
 type UpdateAction = (
   previousState: AdminUpdateState,
@@ -65,12 +66,7 @@ const initialState: AdminUpdateState = {
   message: "",
 };
 
-const roleLabels = {
-  ADMIN: "Administrador",
-  REQUESTER: "Solicitante",
-  ATTENDANT: "Atendente",
-  MANAGER: "Gestor",
-} as const;
+const roleLabels = ROLE_LABELS;
 
 function EditorForm({
   record,

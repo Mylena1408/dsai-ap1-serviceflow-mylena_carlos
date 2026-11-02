@@ -1111,7 +1111,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-104 — Seção "Auditoria" na administração
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Seção "Auditoria" na administração (`/admin?section=audit`, `_sections/audit/audit-section.tsx`), caso de uso `listAuditTrail` (`application/audit-trail.ts`) e leitor `createPrismaAuditTrailReader`, que junta os registros de auditoria e o histórico de permissões numa consulta com filtros e páginas de 50. CA-AUD-04 verificado.
 - **Objetivo:** Leitura paginada com filtros por período, entidade e pessoa, juntando o histórico de permissões; tela só do administrador.
 - **Arquivos/módulos esperados:** `src/modules/`, `src/app/`, testes.
 - **Dependências:** SF-103.

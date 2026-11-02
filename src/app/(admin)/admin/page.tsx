@@ -15,6 +15,8 @@ import { listServiceStages } from "@/modules/service-stages";
 import { listPermissionOverview } from "@/modules/permissions";
 import { getEmailOverview } from "@/modules/notifications";
 import { getDashboard } from "@/modules/reports";
+import { listAuditTrail } from "@/modules/audit";
+import { AuditSection } from "./_sections/audit/audit-section";
 import { DashboardView } from "@/app/_components/dashboard-view";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { announcement } from "./_shared/announcement";
@@ -34,6 +36,9 @@ type AdminPageProps = {
     from?: string;
     to?: string;
     sector?: string;
+    type?: string;
+    actor?: string;
+    page?: string;
   }>;
 };
 
@@ -45,6 +50,7 @@ const adminSections = [
   { id: "services", label: "Serviços" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
+  { id: "audit", label: "Auditoria" },
 ] as const;
 
 type AdminSection = (typeof adminSections)[number]["id"];
@@ -74,7 +80,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section, period, from, to, sector }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
+  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -92,6 +98,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const emailOverview = selectedSection === "emails" ? await getEmailOverview() : null;
   // SPEC 2026-11-02-painel-relatorios, 5.1: computed only when the section is open.
   const dashboard = selectedSection === "dashboard" ? await getDashboard({ period, from, to, sector }) : null;
+  // SPEC 2026-11-02-auditoria-lgpd, 5.2: read only when the section is open.
+  const auditTrail =
+    selectedSection === "audit" ? await listAuditTrail({ period, from, to, entity: type, actor, page }) : null;
 
   return (
     <main className="page-shell">
@@ -184,6 +193,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <DashboardView action="/admin" dashboard={dashboard} hidden={{ section: "dashboard" }} />
         </section>
       ) : null}
+
+      {auditTrail ? <AuditSection trail={auditTrail} /> : null}
         </div>
       ) : null}
     </main>

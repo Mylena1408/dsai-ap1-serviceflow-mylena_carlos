@@ -1535,3 +1535,16 @@ p {
   gap: 8px 12px;
   margin-top: 12px;
 }
+
+/* Audit section (SPEC 2026-11-02-auditoria-lgpd, 5.2). */
+.audit-filters {
+  margin-bottom: 16px;
+}
+
+.audit-changes {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}

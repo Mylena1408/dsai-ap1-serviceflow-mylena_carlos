@@ -4,7 +4,8 @@ import { barPercentage, type Dashboard, type ReportGroup, type ReportPeriodError
 // the current situation, the period indicators and bars in HTML and CSS with their numbers.
 // No link leads to a request: the read rules of each request do not change (5.7).
 
-const PERIOD_ERRORS: Record<ReportPeriodError, string> = {
+/** Also used by the audit section, which has the same period filter. */
+export const PERIOD_ERRORS: Record<ReportPeriodError, string> = {
   invalid_option: "Escolha um dos períodos da lista.",
   missing_dates: "Informe a data de início e a de fim do intervalo.",
   invalid_date: "Informe datas válidas.",

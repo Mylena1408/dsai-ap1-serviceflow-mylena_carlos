@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
 import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
+import { FIELD_TYPE_LABELS as SHARED_FIELD_TYPE_LABELS } from "@/shared/admin-labels";
 
 // Custom fields of a service (SPEC 2026-11-01-campos-personalizados, 5.1 and 5.2).
 
@@ -41,14 +42,7 @@ type ServiceFieldsEditorProps = {
   reactivateAction: RedirectAction;
 };
 
-export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
-  SHORT_TEXT: "Texto curto",
-  LONG_TEXT: "Texto longo",
-  INTEGER: "Número inteiro",
-  DATE: "Data",
-  SELECT: "Lista de opções",
-  YES_NO: "Sim ou não",
-};
+export const FIELD_TYPE_LABELS: Record<FieldType, string> = SHARED_FIELD_TYPE_LABELS;
 
 const initialState: AdminUpdateState = {
   status: "error",

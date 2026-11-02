@@ -487,3 +487,9 @@ Resposta à pergunta sobre segurança: a SPEC não muda o login de demonstraçã
 > faça a sf-103
 
 SF-103 concluída (ver `NOTES.md`, seção SF-103).
+
+## Continuação — SF-104
+
+> faça a sf-104
+
+SF-104 concluída (ver `NOTES.md`, seção SF-104).
