@@ -14,6 +14,8 @@ import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
 import { listPermissionOverview } from "@/modules/permissions";
 import { getEmailOverview } from "@/modules/notifications";
+import { getDashboard } from "@/modules/reports";
+import { DashboardView } from "@/app/_components/dashboard-view";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { announcement } from "./_shared/announcement";
 import { OverviewSection } from "./_sections/overview-section";
@@ -28,6 +30,10 @@ type AdminPageProps = {
     entity?: string;
     notice?: string;
     section?: string;
+    period?: string;
+    from?: string;
+    to?: string;
+    sector?: string;
   }>;
 };
 
@@ -38,6 +44,7 @@ const adminSections = [
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
   { id: "emails", label: "E-mails" },
+  { id: "dashboard", label: "Painel" },
 ] as const;
 
 type AdminSection = (typeof adminSections)[number]["id"];
@@ -67,7 +74,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
+  const [{ entity, error, notice, section, period, from, to, sector }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -83,6 +90,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const selectedSection = selectedAdminSection(section);
   // SPEC 2026-11-01-notificacoes-email-preferencias, 5.5: read only when the section is open.
   const emailOverview = selectedSection === "emails" ? await getEmailOverview() : null;
+  // SPEC 2026-11-02-painel-relatorios, 5.1: computed only when the section is open.
+  const dashboard = selectedSection === "dashboard" ? await getDashboard({ period, from, to, sector }) : null;
 
   return (
     <main className="page-shell">
@@ -160,6 +169,21 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       ) : null}
 
       {emailOverview ? <EmailsSection overview={emailOverview} /> : null}
+
+      {dashboard ? (
+        <section className="admin-section" aria-labelledby="dashboard-heading">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Indicadores</p>
+              <h2 id="dashboard-heading">Painel</h2>
+              <p className="section-description">
+                Números consolidados das solicitações de toda a organização ou de um setor.
+              </p>
+            </div>
+          </div>
+          <DashboardView action="/admin" dashboard={dashboard} hidden={{ section: "dashboard" }} />
+        </section>
+      ) : null}
         </div>
       ) : null}
     </main>

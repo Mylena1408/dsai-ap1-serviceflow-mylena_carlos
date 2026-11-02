@@ -1330,3 +1330,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Domínio:** `completionTimesFromAggregate` arredonda média e mediana vindas do banco da mesma forma que `completionTimes` (teste confere que os dois concordam).
 - **Testes da SF-097:** passaram a importar direto de `domain/` (como os outros testes de domínio), porque o `index.ts` do módulo agora carrega a autorização; nenhuma asserção mudou.
 - **Resultados:** lint, typecheck e build OK; unitários 625/625 (106 arquivos); integração 287/287 + 1 pulado (64 arquivos); E2E 15/15.
+
+## SF-099 — Telas do painel (2026-11-02)
+
+- **Componente `DashboardView`:** formulário GET (setor só para o administrador, período, datas e "Aplicar"); mensagens das recusas (`dashboardFilterMessages`); "Situação atual" e "No período" com o recorte e as datas por extenso; tempo em horas com vírgula decimal ("12,5 h", média e mediana); "—" e "sem prazo definido" quando não há o que medir; grupos em tabela (nome e quantidade) com a barra proporcional ao maior grupo (`aria-hidden`, o número fica escrito). Não há link para solicitações.
+- **Administração:** item "Painel" no menu; o painel só é calculado quando a seção está aberta, como em "E-mails".
+- **Gestor:** página `/approvals/dashboard` e link "Painel do setor" no menu da área; o setor da URL não é lido.
+- **CSS:** classes `dashboard-*` nas cores do tema, em grade que se adapta; no celular (390 px) não há rolagem horizontal.
+- **Verificação no navegador:** E2E temporário (removido antes do commit) com o banco fictício: administrador vê 5 abertas, 3 em atendimento, 12 abertas no período, 4 concluídas, 26 h de tempo médio, "sem prazo definido" e os grupos; o filtro de setor vai para a URL; o gestor vê só o "Setor de demonstração"; o atendente é levado para `/queue` nas duas rotas. Capturas conferidas no computador e no celular.
+- **Resultados:** lint, typecheck e build OK; unitários 631/631 (107 arquivos); integração 287/287 + 1 pulado (64 arquivos); E2E 15/15.

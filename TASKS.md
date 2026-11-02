@@ -1057,7 +1057,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-099 — Telas do painel
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Componente `src/app/_components/dashboard-view.tsx` (filtros GET na URL, situação atual, indicadores do período e barras em HTML e CSS com tabela), seção "Painel" na administração (`/admin?section=dashboard`, calculada só com a seção aberta) e página "Painel do setor" do gestor (`/approvals/dashboard`, com link no menu). CA-DASH-02 e CA-DASH-07 verificados; CA-DASH-09 verificado no painel (CSV na SF-100).
 - **Objetivo:** Seção "Painel" na administração (`/admin?section=dashboard`) e página "Painel do setor" do gestor (`/approvals/dashboard`), com filtros de período e setor na URL e barras em HTML e CSS.
 - **Arquivos/módulos esperados:** `src/app/`, testes.
 - **Dependências:** SF-098.

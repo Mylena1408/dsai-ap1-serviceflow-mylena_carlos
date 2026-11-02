@@ -17,6 +17,7 @@ export default function ManagerLayout({
         </Link>
         <nav aria-label="Navegação principal">
           <Link href="/approvals">Aprovações</Link>
+          <Link href="/approvals/dashboard">Painel do setor</Link>
           <NotificationsLink href="/approvals/notifications" />
           <SectorServicesLink />
           <Link href="/account/password">Alterar senha</Link>

@@ -451,3 +451,9 @@ SF-097 concluída (ver `NOTES.md`, seção SF-097).
 > faça a sf-098
 
 SF-098 concluída (ver `NOTES.md`, seção SF-098). Pedidos seguintes ("faça a sf-099", "faça a sf-100", "faça a sf-101") chegaram enquanto a suíte rodava e foram feitos em ordem, um commit por tarefa.
+
+## Continuação — SF-099
+
+> faça a sf-099
+
+SF-099 concluída (ver `NOTES.md`, seção SF-099).
