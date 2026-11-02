@@ -14,7 +14,7 @@ export type {
   EventRequestPriority,
   EventRequestStatus,
 } from "./domain/domain-event";
-export { MAX_EVENT_ATTEMPTS, retryDelayMs } from "./domain/retry";
+export { MAX_EVENT_ATTEMPTS, failureCode, retryDelayMs } from "./domain/retry";
 export { recordOutboxEvent } from "./infrastructure/prisma-outbox";
 export type { ClaimedEvent, EventConsumer } from "./application/ports";
 export type { OutboxRunSummary } from "./application/process-outbox";

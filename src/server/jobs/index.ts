@@ -1,5 +1,10 @@
 import { purgeProcessedEvents, runOutbox, type EventConsumer, type OutboxRunSummary } from "@/modules/events";
-import { notificationConsumer, purgeReadNotifications } from "@/modules/notifications";
+import {
+  notificationConsumer,
+  purgeReadNotifications,
+  runEmailDeliveries,
+  type EmailRunSummary,
+} from "@/modules/notifications";
 import {
   cleanOrphanAttachmentObjects,
   recordSlaAlerts,
@@ -26,11 +31,17 @@ export async function processEventsNow(): Promise<OutboxRunSummary> {
   return runOutbox(consumers);
 }
 
+/** Sends the emails the events just recorded (SPEC 2026-11-01-notificacoes-email-preferencias, 5.3). */
+export async function processEmailsNow(): Promise<EmailRunSummary> {
+  return runEmailDeliveries();
+}
+
 export type DailyStep<T> = { status: "ok"; result: T } | { status: "skipped" } | { status: "error"; code: string };
 
 export interface DailyJobSummary {
   slaAlerts: DailyStep<SlaAlertSummary>;
   events: DailyStep<OutboxRunSummary>;
+  emails: DailyStep<EmailRunSummary>;
   purgedEvents: DailyStep<number>;
   purgedNotifications: DailyStep<number>;
   orphanObjects: DailyStep<OrphanCleanupSummary>;
@@ -68,11 +79,13 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   // SLA alerts first, so their notifications go out in the same run (SPEC 2026-11-01, 5.5).
   const slaAlerts = await step(() => recordSlaAlerts(now));
   const events = await step(() => runOutbox(consumers, { maxBatches: 20 }));
+  // After the events, so the emails they record go out in the same run.
+  const emails = await step(() => runEmailDeliveries({ maxBatches: 20 }));
   const purgedEvents = await step(() => purgeProcessedEvents(new Date(now.getTime() - PROCESSED_EVENT_RETENTION_MS)));
   const purgedNotifications = await step(() =>
     purgeReadNotifications(new Date(now.getTime() - READ_NOTIFICATION_RETENTION_MS)),
   );
   const orphanObjects = await orphanStep(now);
 
-  return { slaAlerts, events, purgedEvents, purgedNotifications, orphanObjects };
+  return { slaAlerts, events, emails, purgedEvents, purgedNotifications, orphanObjects };
 }

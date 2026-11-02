@@ -3,12 +3,16 @@ import type { EventConsumer } from "@/modules/events";
 import { prisma } from "@/server/db";
 import * as useCases from "./application/notification-use-cases";
 import * as preferences from "./application/preference-use-cases";
+import { processEmailDeliveries, type EmailRunSummary } from "./application/email-delivery";
 import type { NotificationRecord } from "./application/ports";
 import { createPrismaNotificationStore } from "./infrastructure/prisma-notification-store";
 import { createPrismaPreferenceStore } from "./infrastructure/prisma-preference-store";
+import { createPrismaEmailStore } from "./infrastructure/prisma-email-store";
+import { createHttpEmailTransport, getEmailConfig } from "./infrastructure/http-email-transport";
 
 // In-app notifications (SPEC 2026-10-31-eventos-outbox-jobs, section 8).
 export { plannedNotifications } from "./domain/recipients";
+export { notificationMessage } from "@/shared/notifications";
 export type { NotificationType } from "./domain/recipients";
 // Email notifications and preferences (SPEC 2026-11-01-notificacoes-email-preferencias).
 export {
@@ -64,4 +68,26 @@ export async function getEmailPreferences(database: PrismaClient = prisma): Prom
 /** Turns email on for the categories listed and off for the others, for the signed-in person. */
 export async function updateEmailPreferences(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return preferences.updateEmailPreferences(input, createPrismaPreferenceStore(database));
+}
+
+export type { EmailRunSummary } from "./application/email-delivery";
+
+/** Whether EMAIL_API_KEY, EMAIL_FROM and APP_BASE_URL are all set and valid (values never leave). */
+export function isEmailConfigured(env: Record<string, string | undefined> = process.env): boolean {
+  return getEmailConfig(env) !== null;
+}
+
+/**
+ * Sends the pending emails that are due (SPEC 2026-11-01-notificacoes-email-preferencias, 5.3).
+ * Without configuration they are recorded as not sent; `fetchImpl` is replaced only in tests.
+ */
+export async function runEmailDeliveries(
+  options: { maxBatches?: number } = {},
+  database: PrismaClient = prisma,
+  env: Record<string, string | undefined> = process.env,
+  fetchImpl: typeof fetch = fetch,
+): Promise<EmailRunSummary> {
+  const config = getEmailConfig(env);
+  const sender = config ? { transport: createHttpEmailTransport(config, fetchImpl), baseUrl: config.baseUrl } : null;
+  return processEmailDeliveries(createPrismaEmailStore(database), sender, options);
 }

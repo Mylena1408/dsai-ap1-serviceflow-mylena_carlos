@@ -415,3 +415,9 @@ SF-092 concluída (ver `NOTES.md`, seção SF-092, inclusive o banco de dev apag
 > faça a sf-093
 
 SF-093 concluída (ver `NOTES.md`, seção SF-093).
+
+## Continuação — SF-094
+
+> faça a sf-094
+
+SF-094 concluída (ver `NOTES.md`, seção SF-094).

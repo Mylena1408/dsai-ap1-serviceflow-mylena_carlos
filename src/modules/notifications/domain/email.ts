@@ -45,8 +45,11 @@ export function wantsEmail(type: NotificationType, enabledCategories: ReadonlySe
 export const EMAIL_DELIVERY_STATUSES = ["PENDING", "SENT", "FAILED", "SKIPPED"] as const;
 export type EmailDeliveryStatus = (typeof EMAIL_DELIVERY_STATUSES)[number];
 
-/** 5.3.2 and 5.2.4: why a delivery was not sent. Recorded as its code, never retried. */
-export type EmailSkipReason = "not_configured" | "recipient_inactive";
+/**
+ * 5.3.2 and 5.2.4: why a delivery was not sent. Recorded as its code, never retried. A person
+ * whose profile changed to one without notification pages (administrator) has no link to follow.
+ */
+export type EmailSkipReason = "not_configured" | "recipient_inactive" | "recipient_without_area";
 
 export type EmailDeliveryOutcome =
   | { kind: "sent" }

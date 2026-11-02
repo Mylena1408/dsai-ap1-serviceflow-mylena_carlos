@@ -10,10 +10,12 @@ export function scheduleEventProcessing(): void {
   try {
     after(async () => {
       try {
-        const { processEventsNow } = await import("./index");
+        const { processEventsNow, processEmailsNow } = await import("./index");
         await processEventsNow();
+        // SPEC 2026-11-01-notificacoes-email-preferencias, 5.3.3: emails go out right after too.
+        await processEmailsNow();
       } catch {
-        // The daily job retries every pending event.
+        // The daily job retries every pending event and email.
       }
     });
   } catch {

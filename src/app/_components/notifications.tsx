@@ -1,37 +1,11 @@
 import Link from "next/link";
-import {
-  countUnreadNotifications,
-  type NotificationRecord,
-  type NotificationType,
-} from "@/modules/notifications";
+import { countUnreadNotifications, type NotificationRecord } from "@/modules/notifications";
+import { notificationMessage } from "@/shared/notifications";
 
-// In-app notifications (SPEC 2026-10-31-eventos-outbox-jobs, section 8.2). Messages are built
-// from the type and the service name; no comment, note or reason text is ever copied.
+// In-app notifications (SPEC 2026-10-31-eventos-outbox-jobs, section 8.2). The text of each
+// notification lives in the notifications module, shared with the emails.
 
-const MESSAGES: Record<NotificationType, (service: string, stage?: string) => string> = {
-  "status.IN_PROGRESS": (service) => `Atendimento iniciado: ${service}`,
-  "status.COMPLETED": (service) => `Solicitação concluída: ${service}`,
-  "status.CANCELLED": (service) => `Solicitação cancelada: ${service}`,
-  "status.OPEN": (service) => `Solicitação reaberta: ${service}`,
-  "assignment.received": (service) => `Uma solicitação foi transferida para você: ${service}`,
-  "comment.public": (service) => `Novo comentário em ${service}`,
-  "comment.internal": (service) => `Nova nota interna em ${service}`,
-  "sla.warning": (service) => `Prazo próximo do vencimento: ${service}`,
-  "sla.breached": (service) => `Prazo vencido: ${service}`,
-  "approval.requested": (service) => `Aprovação pendente: ${service}`,
-  "approval.approved": (service) => `Solicitação aprovada: ${service}`,
-  "approval.rejected": (service) => `Solicitação rejeitada: ${service}`,
-  // The stage name is missing once the event is purged (after 30 days).
-  "stage.changed": (service, stage) =>
-    stage ? `Sua solicitação passou para a etapa ${stage}: ${service}` : `Sua solicitação mudou de etapa: ${service}`,
-};
-
-export function notificationMessage(notification: NotificationRecord): string {
-  return (MESSAGES[notification.type] ?? ((service: string) => `Novidade em ${service}`))(
-    notification.serviceName,
-    notification.stageName,
-  );
-}
+export { notificationMessage };
 
 /** Top bar link with the unread count; never breaks the page if counting fails. */
 export async function NotificationsLink({ href }: { href: string }) {

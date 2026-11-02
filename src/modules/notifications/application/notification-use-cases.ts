@@ -3,6 +3,7 @@ import { effectiveAssigneeId } from "@/modules/requests";
 import { requireCurrentActor } from "@/server/authorization";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
+import { wantsEmail } from "../domain/email";
 import { plannedNotifications, type NotifiableEvent } from "../domain/recipients";
 import type { NotificationRecord, NotificationRequestState, NotificationStore } from "./ports";
 
@@ -55,16 +56,18 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
       }
 
       const active = await store.activeUserIds(planned.map(({ recipientId }) => recipientId));
+      const recipients = planned.filter(({ recipientId }) => active.has(recipientId));
+      // SPEC 2026-11-01-notificacoes-email-preferencias, 5.2: the preference at this moment decides.
+      const emailCategories = recipients.length > 0 ? await store.emailCategories([...active]) : new Map();
       await store.insertMany(
-        planned
-          .filter(({ recipientId }) => active.has(recipientId))
-          .map(({ recipientId, type }) => ({
-            eventId: event.id,
-            requestId: event.requestId,
-            recipientId,
-            type,
-            createdAt: event.occurredAt,
-          })),
+        recipients.map(({ recipientId, type }) => ({
+          eventId: event.id,
+          requestId: event.requestId,
+          recipientId,
+          type,
+          createdAt: event.occurredAt,
+          sendEmail: wantsEmail(type, emailCategories.get(recipientId) ?? new Set()),
+        })),
       );
     },
   };

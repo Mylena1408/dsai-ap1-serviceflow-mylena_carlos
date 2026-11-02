@@ -1,20 +1,9 @@
 // Who is notified of each event (SPEC 2026-10-31-eventos-outbox-jobs, section 8.1).
 // Pure rules over identifiers; the consumer loads the request state when processing.
 
-export type NotificationType =
-  | "status.IN_PROGRESS"
-  | "status.COMPLETED"
-  | "status.CANCELLED"
-  | "status.OPEN"
-  | "assignment.received"
-  | "comment.public"
-  | "comment.internal"
-  | "sla.warning"
-  | "sla.breached"
-  | "stage.changed"
-  | "approval.requested"
-  | "approval.approved"
-  | "approval.rejected";
+import type { NotificationType } from "@/shared/notifications";
+
+export type { NotificationType };
 
 export interface NotificationContext {
   requesterId: string;

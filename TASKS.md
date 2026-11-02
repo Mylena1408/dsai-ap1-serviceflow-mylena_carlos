@@ -1003,7 +1003,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-094 — Registro e envio dos e-mails
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. O consumidor de notificações registra o envio junto da notificação, conforme a preferência daquele momento; `runEmailDeliveries` processa os pendentes logo após a resposta e no job diário, com novas tentativas; conteúdo da seção 5.4 em `domain/email-content.ts`; porta `EmailTransport` com implementação HTTP (Resend, via `fetch`) configurada por `EMAIL_API_KEY`, `EMAIL_FROM` e `APP_BASE_URL` (só comentadas e vazias no `.env.example`). CA-MAIL-01, 04, 05, 06, 07 e 08 verificados.
 - **Objetivo:** Registro do envio junto da notificação, conforme a preferência; processamento dos pendentes após a resposta e no job diário, com novas tentativas; conteúdo da seção 5.4; porta `EmailTransport` com implementação HTTP via `fetch` e configuração por variáveis de ambiente (`.env.example` só com variáveis vazias).
 - **Arquivos/módulos esperados:** `src/modules/notifications/`, `src/server/jobs`, `.env.example`, testes.
 - **Dependências:** SF-093.
