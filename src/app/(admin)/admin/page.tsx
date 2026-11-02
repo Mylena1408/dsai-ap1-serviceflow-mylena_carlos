@@ -25,6 +25,8 @@ import { SectorsSection } from "./_sections/sectors/sectors-section";
 import { ServicesSection } from "./_sections/services/services-section";
 import { UsersSection } from "./_sections/users/users-section";
 import { EmailsSection } from "./_sections/emails/emails-section";
+import { ApiTokensSection } from "./_sections/api-tokens/api-tokens-section";
+import { listAllApiTokens } from "@/modules/api-tokens";
 
 type AdminPageProps = {
   searchParams: Promise<{
@@ -51,6 +53,7 @@ const adminSections = [
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
   { id: "audit", label: "Auditoria" },
+  { id: "api-tokens", label: "Acesso à API" },
 ] as const;
 
 type AdminSection = (typeof adminSections)[number]["id"];
@@ -101,6 +104,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   // SPEC 2026-11-02-auditoria-lgpd, 5.2: read only when the section is open.
   const auditTrail =
     selectedSection === "audit" ? await listAuditTrail({ period, from, to, entity: type, actor, page }) : null;
+  // SPEC 2026-11-02-api-externa-webhooks, 5.8: read only when the section is open.
+  const apiTokens = selectedSection === "api-tokens" ? await listAllApiTokens() : null;
 
   return (
     <main className="page-shell">
@@ -198,6 +203,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       ) : null}
 
       {auditTrail ? <AuditSection trail={auditTrail} /> : null}
+
+      {apiTokens ? <ApiTokensSection tokens={apiTokens} /> : null}
         </div>
       ) : null}
     </main>

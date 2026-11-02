@@ -1200,7 +1200,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-112 — Tokens pessoais
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-02. Casos de uso de criar, listar e revogar (pessoa e administrador) com auditoria; autenticação da chamada (`authenticateApiRequest`) com dono e perfil lidos a cada chamada, contagem atômica de 60 chamadas por minuto e escopo; contexto do servidor (`runAsApiUser`) que faz o dono do token ser o usuário dos casos de uso durante a chamada; página "Acesso à API" (`/account/api-tokens`) nas três áreas e seção "Acesso à API" na administração. CA-API-02 verificado; CA-API-03, 04, 08 e 12 parciais.
 - **Objetivo:** Casos de uso de criar, listar e revogar tokens (pessoa e administrador); autenticação por token com o contexto do servidor (`AsyncLocalStorage`), perfil e estado lidos do banco a cada chamada; limite de 60 chamadas por minuto; páginas "Acesso à API" nas áreas e lista do administrador; auditoria.
 - **Arquivos/módulos esperados:** Módulo de API (`application/`, `infrastructure/`), `src/server/auth`, páginas das áreas e da administração, testes.
 - **Dependências:** SF-111.

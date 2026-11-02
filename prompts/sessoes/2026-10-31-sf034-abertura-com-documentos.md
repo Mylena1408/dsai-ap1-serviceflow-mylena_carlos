@@ -579,3 +579,9 @@ SPEC `2026-11-02-api-externa-webhooks.md` aprovada; tarefas SF-111 a SF-115 regi
 > pode começar a SF-111
 
 SF-111 concluída (ver `NOTES.md`, seção SF-111).
+
+## Continuação — SF-112
+
+> pode começar a SF-112
+
+SF-112 concluída (ver `NOTES.md`, seção SF-112).

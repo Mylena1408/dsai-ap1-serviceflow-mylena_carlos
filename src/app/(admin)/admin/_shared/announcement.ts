@@ -42,5 +42,7 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (notice === "updated") return "Alterações salvas.";
   if (notice === "status") return "Estado atualizado.";
   if (notice === "anonymized") return "Pessoa anonimizada.";
+  // SPEC 2026-11-02-api-externa-webhooks, 5.1: revocation counts on the next call.
+  if (notice === "revoked" && entity === "apiTokens") return "Token revogado. Ele deixa de funcionar na próxima chamada.";
   return null;
 }

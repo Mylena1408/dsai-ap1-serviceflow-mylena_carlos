@@ -9,6 +9,7 @@ vi.mock("@/modules/audit", async () => {
   return { ...audit, AUDIT_TRAIL_ENTITIES: [...audit.AUDIT_ENTITY_TYPES, "PERMISSION"] };
 });
 vi.mock("@/modules/permissions", async () => import("@/shared/permissions"));
+vi.mock("@/modules/api-tokens", async () => import("@/modules/api-tokens/domain/token"));
 vi.mock("@/modules/reports", async () => {
   const { barPercentage } = await import("@/modules/reports/domain/metrics");
   return { barPercentage };
@@ -122,6 +123,15 @@ describe("texts of the audit section", () => {
     expect(format("type", "SELECT")).toBe("Lista de opções");
     expect(format("name", "Reparo")).toBeUndefined();
     expect(format("slaHours", 24)).toBeUndefined();
+  });
+
+  // SPEC 2026-11-02-api-externa-webhooks, 5.7 (SF-112).
+  it("formats the scope and the dates of an API token", () => {
+    const format = auditValueFormatter({});
+
+    expect(format("scope", "WRITE")).toBe("Leitura e escrita");
+    expect(format("expiresAt", "2026-12-02T15:00:00.000Z")).toBe(new Date("2026-12-02T15:00:00.000Z").toLocaleString("pt-BR"));
+    expect(format("revokedAt", "2026-11-02T15:00:00.000Z")).not.toContain("T15:00");
   });
 
   it("titles every kind of record", () => {

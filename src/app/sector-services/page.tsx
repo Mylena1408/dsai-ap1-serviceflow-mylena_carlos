@@ -54,6 +54,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
         <nav aria-label="Navegação principal">
           <Link href={home}>Voltar à minha área</Link>
           <Link href="/account/data">Meus dados</Link>
+          <Link href="/account/api-tokens">Acesso à API</Link>
           <Link href="/account/password">Alterar senha</Link>
         </nav>
         <SignOutButton />

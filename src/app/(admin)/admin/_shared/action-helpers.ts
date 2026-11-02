@@ -6,9 +6,9 @@ import { ApplicationError } from "@/server/errors";
 import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
-export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions" | "anonymization";
+export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions" | "anonymization" | "apiTokens";
 // "sector-services" is the page of a "Gerir serviços do setor" holder (SPEC de permissões, 5.3.1).
-export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services";
+export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services" | "api-tokens";
 
 function pageFor(section: AdminSection): string {
   return section === "sector-services" ? "/sector-services?" : `/admin?section=${section}&`;
@@ -67,7 +67,8 @@ export function selectedSection(formData: FormData): AdminSection {
     section === "sectors" ||
     section === "categories" ||
     section === "services" ||
-    section === "sector-services"
+    section === "sector-services" ||
+    section === "api-tokens"
     ? section
     : "overview";
 }

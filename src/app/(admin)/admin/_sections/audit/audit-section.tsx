@@ -9,6 +9,7 @@ import {
   type AuditTrailItem,
   type AuditValue,
 } from "@/modules/audit";
+import { API_TOKEN_SCOPE_LABELS } from "@/modules/api-tokens";
 import { FIELD_TYPE_LABELS, ROLE_LABELS } from "@/shared/admin-labels";
 import { PRIORITY_LABELS } from "@/shared/requests";
 import { PERIOD_ERRORS } from "@/app/_components/dashboard-view";
@@ -33,7 +34,7 @@ export function auditFilterMessages(errors: AuditTrail["errors"]): string[] {
   ];
 }
 
-/** Values people can read: sector and category names, profiles, priorities and field types. */
+/** Values people can read: sector and category names, profiles, priorities, field types, token scopes and dates. */
 export function auditValueFormatter(names: Record<string, string>) {
   return (field: string, value: AuditValue): string | undefined => {
     if (typeof value !== "string") return undefined;
@@ -41,6 +42,9 @@ export function auditValueFormatter(names: Record<string, string>) {
     if (field === "role") return ROLE_LABELS[value as keyof typeof ROLE_LABELS];
     if (field === "defaultPriority") return PRIORITY_LABELS[value as keyof typeof PRIORITY_LABELS];
     if (field === "type") return FIELD_TYPE_LABELS[value as keyof typeof FIELD_TYPE_LABELS];
+    // SPEC 2026-11-02-api-externa-webhooks, 5.7: token scope and dates.
+    if (field === "scope") return API_TOKEN_SCOPE_LABELS[value as keyof typeof API_TOKEN_SCOPE_LABELS];
+    if (field === "expiresAt" || field === "revokedAt") return new Date(value).toLocaleString("pt-BR");
     return undefined;
   };
 }

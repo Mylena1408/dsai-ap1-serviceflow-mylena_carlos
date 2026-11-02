@@ -21,6 +21,7 @@ export default function ManagerLayout({
           <NotificationsLink href="/approvals/notifications" />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>
+          <Link href="/account/api-tokens">Acesso à API</Link>
           <Link href="/account/password">Alterar senha</Link>
         </nav>
         <SignOutButton />
