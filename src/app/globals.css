@@ -1527,3 +1527,11 @@ p {
   font-weight: 650;
   text-align: right;
 }
+
+.dashboard-export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}

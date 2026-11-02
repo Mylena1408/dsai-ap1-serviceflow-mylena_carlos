@@ -1067,7 +1067,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-100 — Exportação CSV
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-02. Rota `GET /api/reports/requests.csv` (`src/app/api/reports/requests.csv/route.ts`) com a mesma autorização e recorte do painel, `text/csv` como anexo, sem cache, e recusas com mensagem curta em português; botão "Exportar CSV" no painel (formulário GET com o período em uso e o setor do administrador). CA-DASH-08 e CA-DASH-09 verificados.
 - **Objetivo:** Rota `/api/reports/requests.csv`, com a mesma autorização e recorte do painel, limite de 10.000 linhas e nome do arquivo de 5.4.
 - **Arquivos/módulos esperados:** `src/app/api/`, `src/modules/`, testes.
 - **Dependências:** SF-099.

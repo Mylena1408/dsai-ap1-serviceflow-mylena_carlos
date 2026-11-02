@@ -9,7 +9,7 @@ vi.mock("@/modules/reports", async () => {
   return { barPercentage };
 });
 
-import { DashboardView, dashboardFilterMessages } from "@/app/_components/dashboard-view";
+import { DashboardView, dashboardExportParams, dashboardFilterMessages } from "@/app/_components/dashboard-view";
 import { lastDaysPeriod } from "@/modules/reports/domain/period";
 
 // SPEC 2026-11-02-painel-relatorios, 5.1 to 5.5 and 5.7 (SF-099; CA-DASH-02, 07 and 09).
@@ -109,5 +109,31 @@ describe("messages of refused filters (CA-DASH-07)", () => {
       "Setor não encontrado. Mostrando toda a organização.",
     ]);
     expect(dashboardFilterMessages({ period: null, sector: null })).toEqual([]);
+  });
+});
+
+describe("export button (SF-100; CA-DASH-08)", () => {
+  it("downloads what the screen shows: the period in use and the administrator's sector", () => {
+    expect(dashboardExportParams(dashboard)).toEqual({ period: "30" });
+    expect(
+      dashboardExportParams({
+        ...dashboard,
+        sector: { id: "s1", name: "Infraestrutura" },
+        period: { ...dashboard.period, option: "custom", firstDay: "2026-10-01", lastDay: "2026-10-31" },
+      }),
+    ).toEqual({ period: "custom", from: "2026-10-01", to: "2026-10-31", sector: "s1" });
+    // A manager's sector always comes from the session, never from the URL.
+    expect(dashboardExportParams({ ...dashboard, audience: "sector", sector: { id: "s1", name: "Infraestrutura" } })).toEqual({
+      period: "30",
+    });
+  });
+
+  it("is a GET form to the export route, absent for a manager without an active sector", () => {
+    const html = render(dashboard);
+
+    expect(html).toContain('<form class="dashboard-export" action="/api/reports/requests.csv" method="get">');
+    expect(html).toContain('<input type="hidden" name="period" value="30"/>');
+    expect(html).toContain(">Exportar CSV</button>");
+    expect(render({ ...dashboard, audience: "sector", sectors: [], withoutSector: true })).not.toContain("Exportar CSV");
   });
 });

@@ -63,6 +63,8 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "search",
   "priority",
   "fields",
+  "period",
+  "sector",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

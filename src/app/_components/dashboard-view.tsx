@@ -79,6 +79,33 @@ function GroupTable({ title, groups }: { title: string; groups: ReportGroup[] })
   );
 }
 
+/**
+ * Parameters of the CSV export for what the screen shows (SPEC 5.4): the period in use (the
+ * default one when the requested period was refused) and the administrator's sector.
+ */
+export function dashboardExportParams(dashboard: Dashboard): Record<string, string> {
+  const { period } = dashboard;
+  return {
+    period: period.option,
+    ...(period.option === "custom" ? { from: period.firstDay, to: period.lastDay } : {}),
+    ...(dashboard.audience === "organization" && dashboard.sector ? { sector: dashboard.sector.id } : {}),
+  };
+}
+
+function ExportForm({ dashboard }: { dashboard: Dashboard }) {
+  return (
+    <form method="get" action="/api/reports/requests.csv" className="dashboard-export">
+      {Object.entries(dashboardExportParams(dashboard)).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+      <button className="button-secondary" type="submit">
+        Exportar CSV
+      </button>
+      <span className="metadata">Solicitações abertas no período, até 10.000 linhas, sem dados do solicitante.</span>
+    </form>
+  );
+}
+
 type DashboardViewProps = {
   dashboard: Dashboard;
   /** Path of the GET form, e.g. "/admin" or "/approvals/dashboard". */
@@ -161,6 +188,7 @@ export function DashboardView({ dashboard, action, hidden = {} }: DashboardViewP
         <p className="metadata">
           {scopeName} · de {day(period.firstDay)} a {day(period.lastDay)}.
         </p>
+        {dashboard.withoutSector ? null : <ExportForm dashboard={dashboard} />}
         {dashboard.empty ? <p className="empty-state">Nenhuma solicitação no período.</p> : null}
         <dl className="dashboard-indicators">
           <Indicator label="Abertas no período" value={String(totals.opened)} />

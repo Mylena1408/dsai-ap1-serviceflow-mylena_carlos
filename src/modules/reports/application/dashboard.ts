@@ -168,11 +168,12 @@ export async function exportDashboardCsv(raw: RawParams, reader: DashboardReader
   const resolved = await resolveScope(raw, reader);
   const { period, error } = parseReportPeriod(raw, now);
 
+  // Public codes only: "too_big" is kept for the row limit (assertReportCsvSize).
   if (error) {
-    throw new ValidationError([{ path: ["period"], code: error }]);
+    throw new ValidationError([{ path: ["period"], code: "invalid_value" }]);
   }
   if (resolved.sectorError) {
-    throw new ValidationError([{ path: ["sector"], code: resolved.sectorError }]);
+    throw new ValidationError([{ path: ["sector"], code: "invalid_value" }]);
   }
 
   const rows = resolved.scope

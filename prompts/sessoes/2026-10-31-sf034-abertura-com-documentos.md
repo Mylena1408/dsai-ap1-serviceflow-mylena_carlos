@@ -457,3 +457,9 @@ SF-098 concluída (ver `NOTES.md`, seção SF-098). Pedidos seguintes ("faça a 
 > faça a sf-099
 
 SF-099 concluída (ver `NOTES.md`, seção SF-099).
+
+## Continuação — SF-100
+
+> faça a sf-100
+
+SF-100 concluída (ver `NOTES.md`, seção SF-100).

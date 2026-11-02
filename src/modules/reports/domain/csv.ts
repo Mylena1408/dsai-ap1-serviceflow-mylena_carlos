@@ -107,7 +107,7 @@ function csvLine(row: ReportCsvRow): string {
 /** Refuses an export above the row limit ("Escolha um período menor"). */
 export function assertReportCsvSize(rowCount: number): void {
   if (rowCount > REPORT_CSV_MAX_ROWS) {
-    throw new ValidationError([{ path: ["period"], code: "too_many_rows" }]);
+    throw new ValidationError([{ path: ["period"], code: "too_big" }]);
   }
 }
 
