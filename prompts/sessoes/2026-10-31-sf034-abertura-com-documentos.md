@@ -391,3 +391,9 @@ SF-089 concluída (ver `NOTES.md`, seção SF-089).
 > siga para a sf-090
 
 SF-090 concluída (ver `NOTES.md`, seção SF-090).
+
+## Continuação — SF-091
+
+> faça o sf-091
+
+SF-091 concluída e SPEC de permissões configuráveis encerrada (ver `NOTES.md`, seção SF-091).

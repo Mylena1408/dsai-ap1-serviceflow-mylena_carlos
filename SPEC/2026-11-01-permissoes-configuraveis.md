@@ -1,7 +1,7 @@
 # SPEC — Permissões configuráveis
 
 **Data:** 2026-11-01
-**Status:** Aprovada em 2026-11-01, com as decisões K1 a K4 da seção 11 conforme propostas.
+**Status:** Aprovada em 2026-11-01, com as decisões K1 a K4 da seção 11 conforme propostas. **Concluída em 2026-11-01** (SF-087 a SF-091; CA-PER-01 a 10 verificados).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-visao-geral.md` (§3.4 "permissões"; §12 Permissões), `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seção 10), `SPEC/2026-10-31-atribuicao-cancelamento-reabertura.md` (5.2 e 5.7), `SPEC/2026-11-01-aprovacoes.md` (decisão A4), `SPEC/2026-10-29-plano-escala-100k.md` (item 9 e garantia 7.4), `SPEC/2026-11-01-relatorio-fase-3.md`
 
