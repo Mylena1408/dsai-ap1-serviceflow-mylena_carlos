@@ -1183,3 +1183,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-FIC-01 a CA-FIC-05.
 - **Testes relacionados:** Unitários dos dados fictícios (coerência de status, prazos e aprovação); integração do carregamento (banco vazio, idempotência, banco com contas antigas); E2E de cada perfil vendo os dados; todas as suítes.
 - **SPEC:** Seção 25 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
+
+## API externa com tokens e webhooks — SPEC de 2026-11-02
+
+**Ordem:** SF-111 → SF-112 → SF-113 → SF-114 → SF-115.
+
+### SF-111 — Migration e domínio da API e dos webhooks
+
+- **Estado:** Pendente.
+- **Objetivo:** Migration aditiva da seção 6 (`ApiToken`, `ApiRateWindow`, `WebhookEndpoint`, `WebhookDelivery`, tipos novos da auditoria) e regras puras: geração, hash, validade e escopo do token; regra de URL do webhook; cifragem do segredo; assinatura; corpo da entrega; janela do limite; espera entre tentativas.
+- **Arquivos/módulos esperados:** `prisma/`, novos módulos de API e de webhooks (`domain/`), limpeza do banco de teste, testes.
+- **Dependências:** SF-110.
+- **Critérios de conclusão:** Regras de CA-API-02, 03, 04, 08, 10 e 11; CA-API-13 (migration aditiva).
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-02-api-externa-webhooks.md`.
+
+### SF-112 — Tokens pessoais
+
+- **Estado:** Pendente.
+- **Objetivo:** Casos de uso de criar, listar e revogar tokens (pessoa e administrador); autenticação por token com o contexto do servidor (`AsyncLocalStorage`), perfil e estado lidos do banco a cada chamada; limite de 60 chamadas por minuto; páginas "Acesso à API" nas áreas e lista do administrador; auditoria.
+- **Arquivos/módulos esperados:** Módulo de API (`application/`, `infrastructure/`), `src/server/auth`, páginas das áreas e da administração, testes.
+- **Dependências:** SF-111.
+- **Critérios de conclusão:** CA-API-02, 03, 08 e a parte de tokens de CA-API-12.
+- **Testes relacionados:** Unitários dos casos de uso e do contexto; integração da autenticação e do limite; verificação no navegador.
+- **SPEC:** `SPEC/2026-11-02-api-externa-webhooks.md`.
+
+### SF-113 — Rotas /api/v1 e OpenAPI
+
+- **Estado:** Pendente.
+- **Objetivo:** Rotas da seção 5.4 sobre os casos de uso existentes, formato de respostas e erros, cabeçalhos, escopos e `/api/v1/openapi.json` com o teste de correspondência.
+- **Arquivos/módulos esperados:** `src/app/api/v1/`, módulo de API, testes.
+- **Dependências:** SF-112.
+- **Critérios de conclusão:** CA-API-01, 04, 05, 06, 07 e 09.
+- **Testes relacionados:** Unitários do mapeamento de erros e do OpenAPI; integração de cada rota com cada perfil.
+- **SPEC:** `SPEC/2026-11-02-api-externa-webhooks.md`.
+
+### SF-114 — Webhooks
+
+- **Estado:** Pendente.
+- **Objetivo:** Cadastro, alteração, desativação e troca de segredo pelo administrador; consumidor da outbox que registra as entregas; envio com assinatura, verificação de endereço, sem redirecionamento, tempo-limite e novas tentativas, logo após a resposta e no job diário; seção "Webhooks"; retenção, "Meus dados" e anonimização.
+- **Arquivos/módulos esperados:** Módulo de webhooks, `src/server/jobs`, seção da administração, módulos de auditoria e usuários, testes.
+- **Dependências:** SF-113.
+- **Critérios de conclusão:** CA-API-10, 11 e o restante de CA-API-12.
+- **Testes relacionados:** Unitários; integração com um servidor HTTP local de teste; verificação no navegador.
+- **SPEC:** `SPEC/2026-11-02-api-externa-webhooks.md`.
+
+### SF-115 — E2E e revisão da API e dos webhooks
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8; README com a criação de token, exemplos de chamada e a verificação da assinatura; revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-114.
+- **Critérios de conclusão:** Todos os CA-API-01 a 13 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-02-api-externa-webhooks.md`.

@@ -563,3 +563,13 @@ Pergunta sobre como aplicar as migrations (o CLI não lê os valores *Secret*); 
 > faça o primeiro clique e confira as telas
 
 Percorri os quatro perfis no site publicado; encontrei o defeito do marcador de carregamento da SF-110, corrigi, testei e publiquei de novo (ver `NOTES.md`, seção "SF-110 — Defeito do marcador de carregamento").
+
+## Continuação — Push e aprovação da SPEC de API
+
+> faça o push para o GitHub
+
+Push dos 8 commits para `origin/main` (até `dcfb9a8`), depois de conferir que a senha do Neon não aparece em nenhum deles.
+
+> aprovo as decisões A1 a A6 da API
+
+SPEC `2026-11-02-api-externa-webhooks.md` aprovada; tarefas SF-111 a SF-115 registradas.
