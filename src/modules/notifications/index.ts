@@ -7,7 +7,8 @@ import { processEmailDeliveries, type EmailRunSummary } from "./application/emai
 import type { NotificationRecord } from "./application/ports";
 import { createPrismaNotificationStore } from "./infrastructure/prisma-notification-store";
 import { createPrismaPreferenceStore } from "./infrastructure/prisma-preference-store";
-import { createPrismaEmailStore } from "./infrastructure/prisma-email-store";
+import { createPrismaEmailLog, createPrismaEmailStore } from "./infrastructure/prisma-email-store";
+import { getEmailOverview as emailOverview, type EmailOverview } from "./application/email-overview";
 import { createHttpEmailTransport, getEmailConfig } from "./infrastructure/http-email-transport";
 
 // In-app notifications (SPEC 2026-10-31-eventos-outbox-jobs, section 8).
@@ -90,4 +91,15 @@ export async function runEmailDeliveries(
   const config = getEmailConfig(env);
   const sender = config ? { transport: createHttpEmailTransport(config, fetchImpl), baseUrl: config.baseUrl } : null;
   return processEmailDeliveries(createPrismaEmailStore(database), sender, options);
+}
+
+export type { EmailOverview } from "./application/email-overview";
+export type { EmailDeliveryRecord } from "./application/ports";
+
+/** The administrator's "E-mails" section (5.5): configured or not, and the latest deliveries. */
+export async function getEmailOverview(
+  database: PrismaClient = prisma,
+  env: Record<string, string | undefined> = process.env,
+): Promise<EmailOverview> {
+  return emailOverview(createPrismaEmailLog(database), isEmailConfigured(env));
 }

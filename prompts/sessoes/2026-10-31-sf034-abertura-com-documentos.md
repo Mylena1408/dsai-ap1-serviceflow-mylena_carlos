@@ -421,3 +421,9 @@ SF-093 concluída (ver `NOTES.md`, seção SF-093).
 > faça a sf-094
 
 SF-094 concluída (ver `NOTES.md`, seção SF-094).
+
+## Continuação — SF-095
+
+> faça a sf-095
+
+SF-095 concluída (ver `NOTES.md`, seção SF-095).

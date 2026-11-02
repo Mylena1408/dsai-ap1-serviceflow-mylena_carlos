@@ -1290,3 +1290,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Verificação no navegador:** teste E2E temporário (removido antes do commit): com "Mudanças de status" ligada para o solicitante, o atendente inicia a solicitação e, sem job diário, o envio aparece como "não enviado — não configurado", provando o processamento logo após a resposta.
 - **Para os e-mails saírem de verdade:** a responsável precisa criar a conta no provedor, verificar o domínio do remetente e cadastrar as três variáveis na Vercel. Nenhum valor real entrou no repositório.
 - **Resultados:** lint, typecheck e build OK; unitários 573/573 (101 arquivos); integração 278/278 + 1 pulado (62 arquivos); E2E 14/14.
+
+## SF-095 — Seção "E-mails" na administração (2026-11-01)
+
+- **Caso de uso `getEmailOverview`:** exige o administrador **antes** de ler qualquer coisa e devolve `configured` (de `isEmailConfigured`, que só diz sim ou não) e os 50 envios mais recentes pela porta nova `EmailDeliveryLog` (separada de `EmailDeliveryStore`, para o processamento não depender da listagem).
+- **Tela:** nova seção "E-mails" no menu da administração. Mostra a situação do envio (sem configuração, avisa quais variáveis faltam, pelos nomes, nunca pelos valores) e a lista: situação (Pendente, Enviado, Falhou, Não enviado), tipo da notificação em texto curto, nome e e-mail do destinatário, data de registro e de envio, tentativas e motivo ("e-mail não configurado", "pessoa inativa", "perfil sem área de notificações" ou o código do erro). Não mostra o assunto, o corpo nem nada da solicitação.
+- **Carregamento:** a página da administração só consulta os envios quando a seção está aberta.
+- **Verificação no navegador:** teste E2E temporário (removido antes do commit): com a preferência ligada, o atendente inicia a solicitação; na seção, o administrador vê "Envio não configurado" e uma linha "Não enviado · Atendimento iniciado para Carla Mendes (…) · 0 tentativas · e-mail não configurado", sem a descrição da solicitação; o atendente não abre a seção.
+- **Resultados:** lint, typecheck e build OK; unitários 575/575 (102 arquivos); integração 280/280 + 1 pulado (63 arquivos); E2E 14/14.

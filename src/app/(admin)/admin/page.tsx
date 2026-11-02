@@ -13,12 +13,14 @@ import { listDocumentRequirements } from "@/modules/document-requirements";
 import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
 import { listPermissionOverview } from "@/modules/permissions";
+import { getEmailOverview } from "@/modules/notifications";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { announcement } from "./_shared/announcement";
 import { OverviewSection } from "./_sections/overview-section";
 import { SectorsSection } from "./_sections/sectors/sectors-section";
 import { ServicesSection } from "./_sections/services/services-section";
 import { UsersSection } from "./_sections/users/users-section";
+import { EmailsSection } from "./_sections/emails/emails-section";
 
 type AdminPageProps = {
   searchParams: Promise<{
@@ -35,6 +37,7 @@ const adminSections = [
   { id: "sectors", label: "Setores" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
+  { id: "emails", label: "E-mails" },
 ] as const;
 
 type AdminSection = (typeof adminSections)[number]["id"];
@@ -78,6 +81,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     ]);
   const message = announcement(error, notice, entity);
   const selectedSection = selectedAdminSection(section);
+  // SPEC 2026-11-01-notificacoes-email-preferencias, 5.5: read only when the section is open.
+  const emailOverview = selectedSection === "emails" ? await getEmailOverview() : null;
 
   return (
     <main className="page-shell">
@@ -153,6 +158,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           services={services}
         />
       ) : null}
+
+      {emailOverview ? <EmailsSection overview={emailOverview} /> : null}
         </div>
       ) : null}
     </main>

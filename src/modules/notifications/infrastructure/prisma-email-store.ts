@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import type { NotificationType } from "../domain/recipients";
-import type { EmailDeliveryStore } from "../application/ports";
+import type { EmailDeliveryLog, EmailDeliveryStore } from "../application/ports";
 import { stageNamesOf } from "./prisma-notification-store";
 
 export function createPrismaEmailStore(database: PrismaClient): EmailDeliveryStore {
@@ -80,6 +80,33 @@ export function createPrismaEmailStore(database: PrismaClient): EmailDeliverySto
           lastErrorCode: state.lastErrorCode,
         },
       });
+    },
+  };
+}
+
+export function createPrismaEmailLog(database: PrismaClient): EmailDeliveryLog {
+  return {
+    async listRecent(limit) {
+      const rows = await database.emailDelivery.findMany({
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: limit,
+        select: {
+          id: true,
+          status: true,
+          attempts: true,
+          createdAt: true,
+          sentAt: true,
+          lastErrorCode: true,
+          recipient: { select: { name: true, email: true } },
+          notification: { select: { type: true } },
+        },
+      });
+      return rows.map(({ recipient, notification, ...row }) => ({
+        ...row,
+        recipientName: recipient.name,
+        recipientEmail: recipient.email,
+        type: notification.type as NotificationType,
+      }));
     },
   };
 }

@@ -1,4 +1,4 @@
-import type { EmailDeliveryState, NotificationCategory } from "../domain/email";
+import type { EmailDeliveryState, EmailDeliveryStatus, NotificationCategory } from "../domain/email";
 import type { NotificationType } from "../domain/recipients";
 
 export interface NotificationRecord {
@@ -83,4 +83,22 @@ export interface EmailDeliveryStore {
   /** Reserves up to `limit` pending deliveries that are due, skipping those another run holds. */
   claimPending(limit: number, leaseMs: number): Promise<{ deliveries: PendingEmailDelivery[]; now: Date }>;
   save(deliveryId: string, state: EmailDeliveryState): Promise<void>;
+}
+
+/** One line of the administrator's follow-up (5.5): never the content of the email. */
+export interface EmailDeliveryRecord {
+  id: string;
+  recipientName: string;
+  recipientEmail: string;
+  type: NotificationType;
+  status: EmailDeliveryStatus;
+  attempts: number;
+  createdAt: Date;
+  sentAt: Date | null;
+  lastErrorCode: string | null;
+}
+
+export interface EmailDeliveryLog {
+  /** Most recent first. */
+  listRecent(limit: number): Promise<EmailDeliveryRecord[]>;
 }

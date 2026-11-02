@@ -1013,7 +1013,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-095 — Seção "E-mails" na administração
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Seção "E-mails" na administração (`_sections/emails/emails-section.tsx`), só para o administrador: situação da configuração (sem valores) e os 50 envios mais recentes (destinatário, tipo, situação, tentativas, datas e motivo), sem conteúdo. Caso de uso `getEmailOverview` com a porta `EmailDeliveryLog`. CA-MAIL-09 verificado.
 - **Objetivo:** Situação da configuração e os 50 envios mais recentes, sem conteúdo, só para o administrador.
 - **Arquivos/módulos esperados:** `src/modules/notifications/`, `src/app/(admin)/admin/`, testes.
 - **Dependências:** SF-094.
