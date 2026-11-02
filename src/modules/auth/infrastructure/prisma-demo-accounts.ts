@@ -5,19 +5,41 @@ import { runSerializableTransaction } from "@/server/db/serializable-transaction
 import * as demo from "../application/demo-sign-in";
 import type { AuthenticatedCredentials } from "../application/authenticate-credentials";
 import type { DemoAccountStore } from "../application/ports";
-import { DEMO_ACCOUNTS, DEMO_SECTOR_NAME } from "../domain/demo-accounts";
+import { DEMO_ACCOUNTS, DEMO_SECTOR_NAME, LEGACY_DEMO_SECTOR_NAME } from "../domain/demo-accounts";
 import { hashPassword } from "./argon2-password";
 
 const identitySelect = { id: true, name: true, email: true } satisfies Prisma.UserSelect;
 
-async function ensureDemoSector(transaction: Prisma.TransactionClient): Promise<string> {
+/**
+ * The active demonstration sector (SPEC 2026-09-30, section 25.1). Without it, the sector of
+ * the previous name is renamed (reactivated if needed); otherwise a new one is created.
+ */
+export async function ensureDemoSector(transaction: Prisma.TransactionClient): Promise<string> {
   const existing = await transaction.sector.findFirst({
-    where: { name: DEMO_SECTOR_NAME, isActive: true },
-    select: { id: true },
+    where: { name: DEMO_SECTOR_NAME },
+    orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
+    select: { id: true, isActive: true },
   });
 
   if (existing) {
+    if (!existing.isActive) {
+      await transaction.sector.update({ where: { id: existing.id }, data: { isActive: true } });
+    }
     return existing.id;
+  }
+
+  const legacy = await transaction.sector.findFirst({
+    where: { name: LEGACY_DEMO_SECTOR_NAME },
+    orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
+    select: { id: true },
+  });
+
+  if (legacy) {
+    await transaction.sector.update({
+      where: { id: legacy.id },
+      data: { name: DEMO_SECTOR_NAME, isActive: true },
+    });
+    return legacy.id;
   }
 
   const created = await transaction.sector.create({

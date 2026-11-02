@@ -45,7 +45,7 @@ test("short SLA: situation on screens, priority change and new due date", async 
   await form.locator('[name="name"]').fill(service);
   await form.locator('[name="description"]').fill("Serviço com prazo curto para o teste.");
   await form.locator('[name="categoryId"]').selectOption({ label: "Manutenção" });
-  await form.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await form.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await form.locator('[name="defaultPriority"]').selectOption("NORMAL");
   await form.locator('[name="slaHours"]').fill("2");
   await form.getByRole("button", { name: "Criar serviço" }).click();

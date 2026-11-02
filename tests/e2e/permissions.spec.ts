@@ -59,14 +59,14 @@ test("permissions: sector services, queue supervision and revocation", async ({ 
     await userForm.locator('[name="email"]').fill(colleague.email);
     await userForm.locator('[name="password"]').fill(colleaguePassword);
     await userForm.locator('[name="role"]').selectOption("ATTENDANT");
-    await userForm.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+    await userForm.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
     await userForm.getByRole("button", { name: "Criar usuário" }).click();
     await expect(userForm.getByRole("status")).toHaveText("Registro criado.");
 
-    await setPermission(page, "Atendente (demonstração)", "Gerir serviços do setor", "Conceder");
-    await setPermission(page, "Atendente (demonstração)", "Supervisionar a fila do setor", "Conceder");
-    await expect(permissionsOf(page, "Atendente (demonstração)")).toContainText(
-      "Gerir serviços do setor: concedida por Administrador (demonstração)",
+    await setPermission(page, "Diego Rocha", "Gerir serviços do setor", "Conceder");
+    await setPermission(page, "Diego Rocha", "Supervisionar a fila do setor", "Conceder");
+    await expect(permissionsOf(page, "Diego Rocha")).toContainText(
+      "Gerir serviços do setor: concedida por Marina Alves",
     );
     await signOut(page);
 
@@ -78,7 +78,7 @@ test("permissions: sector services, queue supervision and revocation", async ({ 
     await serviceForm.locator('[name="name"]').fill(service);
     await serviceForm.locator('[name="description"]').fill("Serviço criado pelo atendente com permissão.");
     await serviceForm.locator('[name="categoryId"]').selectOption({ label: "TI" });
-    await serviceForm.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+    await serviceForm.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
     await serviceForm.getByRole("button", { name: "Criar serviço" }).click();
     await expect(serviceForm.getByRole("status")).toHaveText("Registro criado.");
     const fields = page.locator("ul.entity-list > li").filter({ hasText: service }).getByRole("region", { name: "Campos do formulário" });
@@ -86,26 +86,38 @@ test("permissions: sector services, queue supervision and revocation", async ({ 
     await fields.getByRole("button", { name: "Adicionar campo" }).click();
     await expect(fields.locator("ol.requirement-list")).toContainText("Sala de uso");
 
-    // The attendant transfers a request held by a colleague (CA-PER-07, 08).
+    // The attendant (Diego) transfers a request held by another colleague (CA-PER-07, 08). Since
+    // SPEC section 25 the attendant button is Diego himself, so the holder is a second colleague.
     const diego = await database.user.findUniqueOrThrow({ where: { email: "diego.rocha@exemplo.test" } });
-    const open = await database.request.findFirstOrThrow({ where: { status: "OPEN", sectorId: diego.sectorId! } });
-    await database.request.update({ where: { id: open.id }, data: { assigneeId: diego.id } });
+    const holder = await database.user.create({
+      data: {
+        name: `${unique} Fábio Nunes`,
+        email: `${unique}-fabio@exemplo.test`,
+        role: "ATTENDANT",
+        sectorId: diego.sectorId,
+        passwordHash: "!e2e-unusable",
+      },
+    });
+    const open = await database.request.findFirstOrThrow({
+      where: { status: "OPEN", sectorId: diego.sectorId!, approvalState: null },
+    });
+    await database.request.update({ where: { id: open.id }, data: { assigneeId: holder.id } });
     await page.goto(`/queue/${open.id}`);
     await expect(page.getByText("Você supervisiona a fila do setor: pode liberar ou transferir.")).toBeVisible();
     const targets = page.locator("#transfer-assignee option");
-    await expect(targets).not.toContainText(["Diego Rocha"]);
+    await expect(targets).not.toContainText([holder.name]);
     await page.locator("#transfer-assignee").selectOption({ label: colleague.name });
     await page.getByRole("button", { name: "Transferir" }).click();
     await expect(page.locator("p.feedback")).toHaveText("Solicitação transferida.");
-    await expect(page.locator("ol.history-list")).toContainText(`Transferida de Diego Rocha para ${colleague.name}`);
+    await expect(page.locator("ol.history-list")).toContainText(`Transferida de ${holder.name} para ${colleague.name}`);
 
     // The revocation removes the page at once, while the attendant stays signed in (CA-PER-04).
     const adminContext = await browser.newContext();
     const admin = await adminContext.newPage();
     await enterAs(admin, "Administrador");
-    await setPermission(admin, "Atendente (demonstração)", "Gerir serviços do setor", "Revogar");
-    await expect(permissionsOf(admin, "Atendente (demonstração)")).toContainText(
-      "Gerir serviços do setor: revogada por Administrador (demonstração)",
+    await setPermission(admin, "Diego Rocha", "Gerir serviços do setor", "Revogar");
+    await expect(permissionsOf(admin, "Diego Rocha")).toContainText(
+      "Gerir serviços do setor: revogada por Marina Alves",
     );
     await adminContext.close();
     await page.goto("/sector-services");

@@ -57,7 +57,7 @@ test("approvals: blocked start, manager decisions and what each profile sees", a
   await form.locator('[name="name"]').fill(service);
   await form.locator('[name="description"]').fill("Serviço com aprovação para o teste.");
   await form.locator('[name="categoryId"]').selectOption({ label: "TI" });
-  await form.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await form.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await form.locator('[name="slaHours"]').fill("8");
   await form.getByLabel("Exige aprovação do gestor").check();
   await form.getByRole("button", { name: "Criar serviço" }).click();
@@ -95,7 +95,7 @@ test("approvals: blocked start, manager decisions and what each profile sees", a
   await page.getByRole("button", { name: "Confirmar rejeição" }).click();
   await expect(page.locator("p.feedback")).toHaveText("Solicitação rejeitada.");
   await expect(page.locator("article")).toContainText("Rejeitada");
-  await expect(page.locator("ol.history-list")).toContainText("Rejeitada por Gestor (demonstração)");
+  await expect(page.locator("ol.history-list")).toContainText("Rejeitada por Paulo Ribeiro");
   await expect(page.locator("ol.history-list")).toContainText("Observação: Já existe um monitor reserva no setor");
 
   await page.goto(`/approvals/${approvedId}`);
@@ -104,8 +104,11 @@ test("approvals: blocked start, manager decisions and what each profile sees", a
   await expect(page.locator("p.feedback")).toHaveText("Solicitação aprovada.");
   await expect(page.getByRole("button", { name: "Aprovar" })).toHaveCount(0);
 
+  // The fictitious data keeps one approval of its own pending (SPEC 2026-09-30, section 25.3),
+  // so the check is that the two decided requests left the pending list.
   await page.goto("/approvals");
-  await expect(page.getByText("Nenhuma aprovação pendente.")).toBeVisible();
+  await expect(page.locator("main")).not.toContainText(`${unique} notebook para o estagiário`);
+  await expect(page.locator("main")).not.toContainText(`${unique} segundo monitor`);
   await page.goto("/approvals?filter=all");
   await expect(page.locator("ul.content-list")).toContainText("Aprovada");
   await expect(page.locator("ul.content-list")).toContainText("Rejeitada");

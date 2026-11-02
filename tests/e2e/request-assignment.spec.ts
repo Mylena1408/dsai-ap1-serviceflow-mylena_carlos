@@ -11,7 +11,7 @@ const colleagueName = `${unique} Colega`;
 const colleagueEmail = `${unique}@example.test`;
 const colleaguePassword = "E2E-only-colleague-password";
 const service = "Reparo de mobiliário";
-const demoAttendant = "Atendente (demonstração)";
+const demoAttendant = "Diego Rocha";
 
 async function enterAs(page: Page, profile: "Administrador" | "Solicitante" | "Atendente") {
   await page.goto("/");
@@ -64,7 +64,7 @@ test("assignment, transfer, cancellation and reopening across profiles", async (
   await userForm.locator('[name="email"]').fill(colleagueEmail);
   await userForm.locator('[name="password"]').fill(colleaguePassword);
   await userForm.locator('[name="role"]').selectOption("ATTENDANT");
-  await userForm.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await userForm.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await userForm.getByRole("button", { name: "Criar usuário" }).click();
   await expect(userForm.getByRole("status")).toHaveText("Registro criado.");
   await signOut(page);

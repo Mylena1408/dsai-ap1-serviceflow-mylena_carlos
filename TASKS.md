@@ -1170,3 +1170,16 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ENT-01 a CA-ENT-04.
 - **Testes relacionados:** Unitários da página raiz e dos redirecionamentos; E2E de entrada por perfil e dos fluxos que entravam pelo formulário; todas as suítes.
 - **SPEC:** Seção 24 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.
+
+
+## Perfis fictícios completos — alteração de SPEC de 2026-11-02
+
+### SF-110 — Pessoas fictícias nos botões e dados no primeiro clique
+
+- **Estado:** Concluída em 2026-11-02. Botões entram como Marina Alves, Ana Souza, Diego Rocha e Paulo Ribeiro (Central de Serviços); contas genéricas desativadas e setor antigo renomeado; novo módulo `demo` com 14 solicitações fictícias (todos os status, responsável, SLA, aprovação, conversa, respostas e notificações) carregadas no primeiro clique e por `npm run seed:demo`. CA-FIC-01 a 05 verificados.
+- **Objetivo:** Os quatro botões entram como Marina Alves, Ana Souza, Diego Rocha e Paulo Ribeiro; setor "Central de Serviços"; contas genéricas desativadas; dados fictícios completos (status, responsável, SLA, aprovação, comentários, notificações) carregados no primeiro clique e por `npm run seed:demo`.
+- **Arquivos/módulos esperados:** `src/modules/auth` (contas e composição da entrada), novo módulo `src/modules/demo` (dados e carregamento), `auth.ts`, `scripts/demo-data.ts`, `scripts/seed-demo-data.ts`, testes unitários, de integração e E2E, README.
+- **Dependências:** SF-045, SF-109.
+- **Critérios de conclusão:** CA-FIC-01 a CA-FIC-05.
+- **Testes relacionados:** Unitários dos dados fictícios (coerência de status, prazos e aprovação); integração do carregamento (banco vazio, idempotência, banco com contas antigas); E2E de cada perfil vendo os dados; todas as suítes.
+- **SPEC:** Seção 25 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.

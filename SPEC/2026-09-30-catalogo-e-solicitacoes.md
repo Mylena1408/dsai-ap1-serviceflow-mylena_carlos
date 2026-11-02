@@ -824,7 +824,7 @@ Solicitada pela responsável pelo projeto: ao abrir o site, a pessoa não deve v
 ### 24.2 Consequências registradas
 
 - Contas criadas pela administração não têm como entrar pela interface; o uso pelo navegador passa a ser só pelas contas de demonstração.
-- A página "Alterar senha" continua existindo, sem mudança, mas as contas de demonstração não a usam, porque a senha delas é descartada (seção 22.2).
+- A página "Alterar senha" continua existindo, sem mudança, mas as contas de demonstração não a usam, porque a senha delas é descartada (seção 22.2). *Atualizado em 2026-11-02 (seção 25.1): a página fica como representação didática.*
 - **Testes existentes alterados por esta alteração:** os que esperavam o redirecionamento para `/login` passam a esperar `/`; os E2E que entravam pelo formulário passam a entrar pela rota do Auth.js, e os que abriam `/login` passam a abrir `/`.
 
 ### 24.3 Critérios de aceitação
@@ -833,3 +833,49 @@ Solicitada pela responsável pelo projeto: ao abrir o site, a pessoa não deve v
 - [x] **CA-ENT-02** — `/login` redireciona para `/`; nenhuma página da aplicação mostra campo de senha para entrar. *Verificado em 2026-11-02 (SF-109): unitário e E2E do redirecionamento; o componente do formulário foi removido do código (`LoginForm`).*
 - [x] **CA-ENT-03** — Página protegida sem sessão e o botão "Sair" levam a `/`. *Verificado em 2026-11-02 (SF-109): E2E com `/admin`, `/catalog` e `/queue` sem sessão e com "Sair" em todos os E2E; unitários da rota de notificação e das preferências.*
 - [x] **CA-ENT-04** — A autenticação por e-mail e senha no servidor continua recusando conta inativa, anonimizada ou de demonstração; lint, typecheck, build e as suítes unitária, de integração e E2E passam. *Verificado em 2026-11-02 (SF-109): testes de integração da autenticação sem alteração; E2E da anonimização recusa a pessoa pela rota do Auth.js; lint, typecheck, build, unitários 696/696, integração 314/314 + 1 pulado, E2E 18/18.*
+
+
+## 25. Alteração aprovada — 2026-11-02 — Perfis fictícios completos para demonstração
+
+Solicitada pela responsável pelo projeto: "tire as contas sem senha, a página de alterar senha fica como representação didática" e "no lugar crie perfis fictícios que tenham todas as informações necessárias para demonstração". Opções escolhidas: os quatro botões continuam (seção 24) e passam a entrar como **pessoas fictícias completas**, reaproveitando Ana Souza e Diego Rocha; os dados fictícios são carregados **no primeiro clique**. Esta alteração substitui a tabela da seção 22.2 e o primeiro item da seção 22.6 ("nada é criado automaticamente"); o restante das seções 22 e 24 continua valendo.
+
+### 25.1 Pessoas fictícias
+
+| Botão | Pessoa | E-mail | Perfil e setor |
+|---|---|---|---|
+| Entrar como Administrador | Marina Alves | `marina.alves@exemplo.test` | Administradora |
+| Entrar como Solicitante | Ana Souza | `ana.souza@exemplo.test` | Solicitante |
+| Entrar como Atendente | Diego Rocha | `diego.rocha@exemplo.test` | Atendente da **Central de Serviços** |
+| Entrar como Gestor | Paulo Ribeiro | `paulo.ribeiro@exemplo.test` | Gestor da **Central de Serviços** |
+
+- Bruno Lima e Carla Mendes continuam como solicitantes fictícios, sem botão.
+- O setor de demonstração passa a se chamar **Central de Serviços**. Num banco que já tem o "Setor de demonstração", ele é renomeado (as solicitações antigas mantêm o nome registrado na abertura).
+- **As contas genéricas saem:** "Administrador (demonstração)", "Solicitante (demonstração)", "Atendente (demonstração)" e "Gestor (demonstração)" (`demo.*@serviceflow.demo`) não são mais criadas. Num banco que já as tem, elas são **desativadas** no carregamento (pessoas nunca são apagadas; o histórico continua).
+- Domínio reservado `exemplo.test`: nenhum e-mail chega a uma caixa real. O repositório continua sem senhas: as pessoas fictícias têm o hash de um valor aleatório descartado e não entram por senha.
+- **"Alterar senha"** continua no menu como **representação didática** da funcionalidade da seção 20: a tela e as regras existem e são testadas, mas as pessoas fictícias não sabem a senha atual.
+
+### 25.2 Carregamento no primeiro clique
+
+- Ao clicar num botão de perfil, se o banco ainda não tiver os dados fictícios, eles são carregados antes da entrada, numa transação; os cliques seguintes não carregam nada de novo e **não desfazem** mudanças feitas na administração (por exemplo, um serviço desativado continua desativado).
+- O marcador de "já carregado" é a existência das solicitações fictícias de Ana, Bruno ou Carla, como no `npm run seed:demo`.
+- Falha no carregamento não impede a entrada: o erro é registrado no log do servidor só pelo código, e a pessoa entra com o que existir.
+- `npm run seed:demo` continua existindo e carrega os mesmos dados (inclusive restaurando itens de demonstração desativados, como antes).
+
+### 25.3 O que os dados fictícios mostram
+
+Além do catálogo, documentos exigidos e campos das seções 22.6 e 22.7:
+
+- **Solicitações** de Ana, Bruno e Carla em todos os status: abertas, em atendimento, concluídas e canceladas, com histórico coerente.
+- **Responsável:** Diego assumiu as solicitações em atendimento (com o evento de atribuição no histórico).
+- **SLA:** alguns serviços têm prazo-base e prioridade padrão, e as solicitações deles mostram as situações "dentro do prazo", "próximo do vencimento" e "vencido"; concluídas com prazo indicam se terminaram no prazo.
+- **Aprovação:** "Solicitação de equipamento" exige aprovação do gestor; há uma solicitação aguardando Paulo, uma aprovada por ele e uma rejeitada com observação.
+- **Conversa:** comentários públicos de Ana e Diego e uma nota interna de Diego.
+- **Notificações** não lidas para Ana, Diego e Paulo.
+
+### 25.4 Critérios de aceitação
+
+- [x] **CA-FIC-01** — Num banco vazio, o primeiro clique em qualquer botão carrega os dados fictícios e entra como a pessoa da tabela 25.1; um segundo clique não duplica nada nem desfaz mudanças da administração. *Verificado em 2026-11-02 (SF-110): integração do carregamento no primeiro clique (banco vazio carrega; segunda chamada não carrega nada e mantém um serviço desativado pela administração); unitário do provedor de demonstração (carrega antes de entrar; falha no carregamento não impede a entrada e só o código vai ao log); integração da entrada de cada botão como a pessoa da tabela 25.1.*
+- [x] **CA-FIC-02** — Nenhuma conta genérica de demonstração é criada; num banco que já as tem, elas ficam inativas e o "Setor de demonstração" vira "Central de Serviços". *Verificado em 2026-11-02 (SF-110): integração com as quatro contas genéricas e o "Setor de demonstração" num banco existente: as contas ficam inativas e o setor é renomeado (mesmo identificador); nenhum código cria contas `demo.*`.*
+- [x] **CA-FIC-03** — Ana vê solicitações em todos os status, com responsável, SLA, aprovação, comentários e notificações; Diego vê a fila da Central de Serviços com essas situações e a nota interna; Paulo vê uma aprovação pendente e o painel do setor com números; Marina vê as pessoas fictícias e os dados no painel e na auditoria. *Verificado em 2026-11-02 (SF-110): unitário da coerência dos 14 cenários e da cobertura (quatro status, três estados de aprovação, cancelamento, nota interna); integração (histórico por status, responsável e atribuição, aprovação pendente, aprovada e rejeitada, prazos dentro, próximo e vencido, concluídas no prazo e com atraso, comentários, respostas de campos, notificações não lidas de Ana, Diego e Paulo); E2E `demo-data.spec.ts` (Ana vê os quatro status, Diego vê a nota interna e é o responsável, Paulo vê a aprovação pendente, Marina vê as pessoas e os documentos). O painel com números é coberto pelo E2E `dashboard.spec.ts`, que roda sobre os mesmos dados.*
+- [x] **CA-FIC-04** — As pessoas fictícias não autenticam por senha; nenhum valor de senha está no repositório; "Alterar senha" continua acessível. *Verificado em 2026-11-02 (SF-110): integração recusa a senha das quatro pessoas e de Bruno; o repositório não tem valor de senha das pessoas fictícias (hash de valor aleatório descartado); E2E `manager-access.spec.ts` abre "Alterar senha".*
+- [x] **CA-FIC-05** — Lint, typecheck, build e as suítes unitária, de integração e E2E passam. *Verificado em 2026-11-02 (SF-110): lint, typecheck, build, unitários 718/718, integração 317/317 + 1 pulado, E2E 18/18.*

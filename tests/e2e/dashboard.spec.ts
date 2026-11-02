@@ -80,7 +80,7 @@ test("the dashboard shows consolidated numbers to the administrator and the mana
   await expect(page.getByRole("heading", { name: "Painel", exact: true })).toBeVisible();
   await expect(page.getByText("Toda a organização · de")).toBeVisible();
   await expect(groupRow(page, "Por setor", otherSector)).toContainText("1");
-  await expect(groupRow(page, "Por setor", "Setor de demonstração")).toBeVisible();
+  await expect(groupRow(page, "Por setor", "Central de Serviços")).toBeVisible();
   await expect(page.getByText(unique + " texto")).toHaveCount(0);
 
   // Filtering by the new sector: one request opened, no sector groups.
@@ -114,7 +114,7 @@ test("the dashboard shows consolidated numbers to the administrator and the mana
   await enterAs(page, "Gestor");
   await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: "Painel do setor" }).click();
   await expect(page.getByRole("heading", { name: "Painel do setor" })).toBeVisible();
-  await expect(page.getByText("Setor de demonstração · de")).toBeVisible();
+  await expect(page.getByText("Central de Serviços · de")).toBeVisible();
   await expect(page.locator("#dashboard-sector")).toHaveCount(0);
   const managerCsv = await downloadCsv(page);
   expect(managerCsv.lines.length).toBeGreaterThan(1);

@@ -77,7 +77,7 @@ test("a status change the requester chose to receive is registered as an email f
   await expect(page.getByRole("status")).toContainText("Envio não configurado");
   const delivery = page.locator("ul.email-delivery-list > li").first();
   await expect(delivery).toContainText(
-    "Não enviado · Atendimento iniciado para Solicitante (demonstração) (demo.solicitante@serviceflow.demo)",
+    "Não enviado · Atendimento iniciado para Ana Souza (ana.souza@exemplo.test)",
   );
   await expect(delivery).toContainText("0 tentativas · e-mail não configurado");
   await expect(page.locator("ul.email-delivery-list")).not.toContainText(unique);

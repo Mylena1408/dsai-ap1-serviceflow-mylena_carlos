@@ -71,7 +71,7 @@ test("documents are configured, required, sent, downloaded and protected", async
   await serviceForm.locator('[name="name"]').fill(serviceName);
   await serviceForm.locator('[name="description"]').fill("Serviço de exemplo com documentos exigidos.");
   await serviceForm.locator('[name="categoryId"]').selectOption({ label: "RH" });
-  await serviceForm.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await serviceForm.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await serviceForm.getByRole("button", { name: "Criar serviço" }).click();
   const serviceItem = services.locator("li.entity-item").filter({ hasText: serviceName });
   await expect(serviceItem).toBeVisible();

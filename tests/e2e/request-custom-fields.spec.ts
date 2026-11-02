@@ -67,7 +67,7 @@ test("custom fields: configuration, refused opening with kept values and answers
   await form.locator('[name="name"]').fill(service);
   await form.locator('[name="description"]').fill("Serviço com campos para o teste.");
   await form.locator('[name="categoryId"]').selectOption({ label: "TI" });
-  await form.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await form.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await form.getByRole("button", { name: "Criar serviço" }).click();
   await expect(form.getByRole("status")).toHaveText("Registro criado.");
 

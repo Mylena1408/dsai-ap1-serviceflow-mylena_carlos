@@ -539,3 +539,13 @@ Proposta `SPEC/2026-11-02-api-externa-webhooks.md` escrita (item 14 do plano), c
 > abro o website da aplicação, não desejo ver a tela de login e senha, isso viola as restrições do projeto
 
 Pergunta feita com três opções (tirar só o formulário; sem tela de login; formulário num endereço separado). Resposta: "Sem tela de login". SF-109 concluída (ver `NOTES.md`, seção SF-109).
+
+## Continuação — SF-110
+
+> tire as contas sem senha, a pagina de alterar senha fica como representação didática
+
+Pergunta: quais contas (pessoas fictícias do seed ou os quatro perfis de demonstração)? Resposta: "Os 4 perfis de demonstração". Como isso deixaria o site sem entrada, nova pergunta; resposta: "Manter os 4 botões".
+
+> no lugar crie perfils fictícios que tenham todas as informações necessárias para demonstração
+
+Perguntas sobre o elenco e o momento do carregamento; respostas: "Reusar Ana e Diego (Recomendado)" e "No primeiro clique (Recomendado)". SF-110 concluída (ver `NOTES.md`, seção SF-110).

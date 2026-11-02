@@ -57,7 +57,7 @@ test("audit of an SLA change, \"Meus dados\" and anonymization", async ({ page }
   await serviceForm.locator('[name="name"]').fill(service);
   await serviceForm.locator('[name="description"]').fill("Serviço do teste de auditoria.");
   await serviceForm.locator('[name="categoryId"]').selectOption({ label: "Manutenção" });
-  await serviceForm.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await serviceForm.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await serviceForm.locator('[name="slaHours"]').fill("24");
   await serviceForm.getByRole("button", { name: "Criar serviço" }).click();
   await expect(serviceForm.getByRole("status")).toHaveText("Registro criado.");
@@ -82,7 +82,7 @@ test("audit of an SLA change, \"Meus dados\" and anonymization", async ({ page }
   await page.goto("/admin?section=audit&type=SERVICE");
   const serviceEntry = page.locator("ul.audit-list > li").filter({ hasText: `Alterou · Serviço · ${service}` });
   await expect(serviceEntry).toContainText("Prazo-base (horas): 24 → 12");
-  await expect(serviceEntry).toContainText("Administrador (demonstração) · Administrador");
+  await expect(serviceEntry).toContainText("Marina Alves · Administrador");
   await signOut(page);
 
   // Paula opens a request, downloads her data and cancels the request (CA-AUD-06).

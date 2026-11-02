@@ -16,44 +16,68 @@ export const demoCredentialFields = {
   role: { label: "Perfil", type: "text" },
 };
 
-export const authConfig = {
-  secret: process.env.AUTH_SECRET,
-  pages: {
-    signIn: "/",
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 8 * 60 * 60,
-  },
-  cookies: {
-    sessionToken: {
-      name: isProduction ? "__Secure-authjs.session-token" : "authjs.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: isProduction,
+export interface AuthConfigOptions {
+  /**
+   * Runs before a demonstration sign-in (SPEC 2026-09-30, section 25.2): loads the fictitious
+   * data on the first click. A failure is logged by code only and does not block the sign-in.
+   */
+  beforeDemoSignIn?: () => Promise<unknown>;
+}
+
+async function prepareDemo(options: AuthConfigOptions): Promise<void> {
+  try {
+    await options.beforeDemoSignIn?.();
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "UNKNOWN";
+    console.error(`Demonstration data could not be loaded (${code}).`);
+  }
+}
+
+export function createAuthConfig(options: AuthConfigOptions = {}) {
+  return {
+    secret: process.env.AUTH_SECRET,
+    pages: {
+      signIn: "/",
+    },
+    session: {
+      strategy: "jwt",
+      maxAge: 8 * 60 * 60,
+    },
+    cookies: {
+      sessionToken: {
+        name: isProduction ? "__Secure-authjs.session-token" : "authjs.session-token",
+        options: {
+          httpOnly: true,
+          sameSite: "lax",
+          path: "/",
+          secure: isProduction,
+        },
       },
     },
-  },
-  providers: [
-    Credentials({
-      credentials: authCredentialFields,
-      authorize: (credentials) =>
-        authenticateCredentials({
-          email: credentials?.email,
-          password: credentials?.password,
-        }),
-    }),
-    Credentials({
-      id: "demo",
-      name: "Demonstração",
-      credentials: demoCredentialFields,
-      authorize: (credentials) => signInAsDemoUser({ role: credentials?.role }),
-    }),
-  ],
-  callbacks: {
-    jwt: async ({ token, user }) => refreshSessionToken(token, user?.id),
-    session: async ({ session, token }) => sessionFromToken(session, token),
-  },
-} satisfies NextAuthConfig;
+    providers: [
+      Credentials({
+        credentials: authCredentialFields,
+        authorize: (credentials) =>
+          authenticateCredentials({
+            email: credentials?.email,
+            password: credentials?.password,
+          }),
+      }),
+      Credentials({
+        id: "demo",
+        name: "Demonstração",
+        credentials: demoCredentialFields,
+        authorize: async (credentials) => {
+          await prepareDemo(options);
+          return signInAsDemoUser({ role: credentials?.role });
+        },
+      }),
+    ],
+    callbacks: {
+      jwt: async ({ token, user }) => refreshSessionToken(token, user?.id),
+      session: async ({ session, token }) => sessionFromToken(session, token),
+    },
+  } satisfies NextAuthConfig;
+}
+
+export const authConfig = createAuthConfig();

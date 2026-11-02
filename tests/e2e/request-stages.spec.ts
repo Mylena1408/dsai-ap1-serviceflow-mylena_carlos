@@ -49,7 +49,7 @@ test("attendance flow: stages configured, moved with history and seen by the req
   await form.locator('[name="name"]').fill(service);
   await form.locator('[name="description"]').fill("Serviço com fluxo para o teste.");
   await form.locator('[name="categoryId"]').selectOption({ label: "TI" });
-  await form.locator('[name="sectorId"]').selectOption({ label: "Setor de demonstração" });
+  await form.locator('[name="sectorId"]').selectOption({ label: "Central de Serviços" });
   await form.getByRole("button", { name: "Criar serviço" }).click();
   await expect(form.getByRole("status")).toHaveText("Registro criado.");
 

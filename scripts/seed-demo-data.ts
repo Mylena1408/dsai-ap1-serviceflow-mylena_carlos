@@ -23,8 +23,8 @@ async function main(): Promise<void> {
     console.log(
       [
         "Dados de demonstração prontos:",
-        `- ${summary.categories} categorias e ${summary.services} serviços no Setor de demonstração`,
-        `- ${summary.users} usuários (contas de demonstração e fictícios, sem senha utilizável)`,
+        `- ${summary.categories} categorias e ${summary.services} serviços na Central de Serviços`,
+        `- ${summary.users} pessoas fictícias, sem senha utilizável`,
         `- ${summary.requestsCreated} solicitações criadas nesta execução`,
         `- ${summary.requirementsCreated} documentos exigidos criados nesta execução`,
       ].join("\n"),
