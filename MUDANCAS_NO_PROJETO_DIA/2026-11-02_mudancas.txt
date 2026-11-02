@@ -1,0 +1,173 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 02/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-01_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 02/11 ate a SF-106 (1b6b358 -> f479ebe)
+Registro detalhado : NOTES.md (secoes SF-096 a SF-106), TASKS.md,
+                     diario/2026-11-02.md (a SF-096 ficou em
+                     diario/2026-11-01.md, por ser a mesma sessao),
+                     prompts/sessoes/2026-10-31-sf034-abertura-com-documentos.md
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- NOTIFICACOES POR E-MAIL CONCLUIDAS (SF-096): E2E da preferencia ligada ate
+  o envio "nao enviado - e-mail nao configurado"; SPEC encerrada
+  (CA-MAIL-01 a 10).
+- PAINEL, INDICADORES E RELATORIOS CONCLUIDOS (SF-097 a SF-101), SPEC
+  SPEC/2026-11-02-painel-relatorios.md (decisoes R1 a R5, CA-DASH-01 a 10):
+    * administrador: secao "Painel" (organizacao inteira ou um setor);
+    * gestor: "Painel do setor" (so o proprio setor);
+    * situacao atual, numeros do periodo (7, 30, 90 dias ou intervalo),
+      tempo ate a conclusao, percentual no prazo e barras por categoria,
+      setor e status, em HTML e CSS (sem dependencia nova);
+    * "Exportar CSV" com colunas minimas, sem dados do solicitante.
+- AUDITORIA E LGPD EM ANDAMENTO (SF-102 a SF-106 concluidas, de SF-102 a
+  SF-108), SPEC
+  SPEC/2026-11-02-auditoria-lgpd.md (decisoes D1 a D5):
+    * trilha de auditoria das alteracoes administrativas (usuarios, setores,
+      categorias, servicos, documentos, campos e etapas), gravada na mesma
+      transacao; nome e e-mail so como "alterado"; senhas nunca;
+    * secao "Auditoria" na administracao, junto com o historico de
+      permissoes, com filtros e paginas de 50;
+    * retencao no job diario: notificacoes nao lidas (365 dias), envios de
+      e-mail (180 dias) e auditoria (5 anos); solicitacoes nunca;
+    * "Meus dados": cada perfil baixa um JSON com os proprios dados.
+  Faltam a anonimizacao (SF-107) e o E2E e revisao (SF-108).
+- PERGUNTA RESPONDIDA (seguranca): a SPEC de auditoria NAO muda o login de
+  demonstracao nem cria barreiras novas; as acoes novas seguem o modelo por
+  perfil, acessivel pelos botoes "Entrar como...".
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:19 | 38b1b88 | [OK]   | SF-096: E2E e revisao das notificacoes por
+    |       |         |        | e-mail; README.
+ 2  | 00:52 | bd41733 | [OK]   | SPEC de painel e relatorios (SF-097 a
+    |       |         |        | SF-101), decisoes R1 a R5.
+ 3  | 01:03 | a47d7f2 | [OK]   | SF-097: dominio do painel e do CSV; dia em
+    |       |         |        | Sao Paulo e rotulos em src/shared.
+ 4  | 01:14 | ce1ac58 | [OK]   | SF-098: leitura dos indicadores (PostgreSQL)
+    |       |         |        | e casos de uso com autorizacao.
+ 5  | 01:23 | f1a987a | [OK]   | SF-099: telas do painel (administracao e
+    |       |         |        | gestor).
+ 6  | 01:32 | 83b10a7 | [OK]   | SF-100: exportacao CSV.
+ 7  | 01:45 | 7c8b943 | [OK]   | SF-101: E2E e revisao do painel; README.
+ 8  | 01:49 | a7949cb | [OK]   | SPEC de auditoria e LGPD (SF-102 a SF-108),
+    |       |         |        | decisoes D1 a D5.
+ 9  | 02:03 | 4d032fe | [OK]   | SF-102: migration e dominio da auditoria.
+ 10 | 02:22 | 63909eb | [OK]   | SF-103: auditoria nos 22 casos de uso
+    |       |         |        | administrativos; autor como texto.
+ 11 | 02:46 | 7903a37 | [OK]   | SF-104: secao "Auditoria".
+ 12 | 02:54 | c3298ee | [OK]   | SF-105: retencao no job diario.
+ 13 | 03:07 | f479ebe | [OK]   | SF-106: "Meus dados".
+ 14 | (este)|    -    |   -    | Estas anotacoes (01/11 e 02/11).
+
+ Alguns pushes ficaram parados pedindo login do GitHub; foram concluidos
+ pela responsavel com "git push origin main".
+
+-------------------------------------------------------------------------------
+ 3. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-095) | Fim (SF-106)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 575/575 (102 arquivos) | 682/682 (113 arquivos)
+ Integracao     | 280/280 + 1 pulado     | 309/309 + 1 pulado (70 arquivos)
+ E2E            | 14/14                  | 16/16
+ Lint/typecheck/build | OK               | OK
+
+ Falhas encontradas e corrigidas (todas registradas no NOTES.md):
+ - SF-101: o E2E novo do painel criava uma solicitacao em nome do solicitante
+   de demonstracao e fazia o demo-data.spec.ts ver duas "Aberta". Corrigido
+   no teste novo (solicitante proprio); o teste antigo nao mudou.
+ - SF-103: 26 testes de integracao antigos simulam a sessao com um
+   administrador que nao existe no banco; o registro de auditoria exigia
+   chave estrangeira. O autor passou a texto, por uma migration nova
+   (20261102200000_audit_actor_reference) sobre a tabela da SF-102, ainda
+   vazia: excecao registrada a regra "so migrations aditivas". Os testes
+   antigos nao mudaram; os dubles de transacao de 7 testes unitarios
+   ganharam uma linha (sem mudar assercoes).
+ - SF-104: uma rodada do E2E falhou por tempo porque arquivos foram criados
+   em src/ durante a execucao; repetida sem mudancas, passou inteira.
+ - Erros pequenos nos proprios testes novos (ordem de atributos do React,
+   texto esperado de notificacao, ordem de registros com o mesmo horario).
+
+-------------------------------------------------------------------------------
+ 4. MEDICAO (cloc --diff via sh scripts/cloc-diff.sh, TypeScript/JavaScript)
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA (1b6b358 -> f479ebe)  |  2.252 |  2.379 |      1  |  4.632
+   removidas no dia                       |     77 |      0 |      0  |     77
+   saldo liquido no dia                   |        |        |         |  4.555
+ Adicionadas desde a linha de base        | 13.829 | 15.408 |    546  | 29.783
+ (baseline-ap2 -> f479ebe)                |        |        |         |
+   removidas desde a linha de base        |  2.537 |      9 |      0  |  2.546
+   saldo liquido desde a linha de base    |        |        |         | 27.237
+ Codigo executavel total no repositorio   | 16.094 | 21.193 |    693  | 37.980
+ (cloc em f479ebe)                        |        |        |         |
+
+ Meta: 100.000 linhas adicionadas -> 29.783 = 29,8%.
+
+ Soma dos dois dias (01/11 e 02/11): 17.132 linhas adicionadas.
+
+-------------------------------------------------------------------------------
+ 5. COMO USAR (novidades de 02/11)
+-------------------------------------------------------------------------------
+
+1) Painel: /admin > Painel (administrador) ou "Painel do setor" no menu do
+   gestor. Escolha o periodo (e o setor, no caso do administrador) e clique
+   em "Aplicar". "Exportar CSV" baixa as solicitacoes abertas no periodo.
+2) Auditoria: /admin > Auditoria. Filtros por periodo, tipo (inclusive
+   "Permissao") e pessoa; 50 registros por pagina.
+3) Meus dados: link "Meus dados" no menu de qualquer perfil; o botao
+   "Baixar meus dados" gera o arquivo serviceflow-meus-dados-AAAA-MM-DD.json.
+4) Retencao: roda sozinha no job diario (/api/cron/daily); o resumo do job
+   informa quantos registros foram removidos de cada tipo.
+5) Banco local depois de puxar os commits:
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 6. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+[ ] SF-107: anonimizacao (so usuarios desativados, sem solicitacoes em
+    andamento; remove identidade, textos escritos pela pessoa e anexos).
+[ ] SF-108: E2E e revisao da auditoria e LGPD; README.
+[ ] Relatorio da fase 4 (permissoes, e-mail, painel, auditoria e LGPD).
+[ ] Opcional (a decidir pela responsavel): impedir a anonimizacao das
+    quatro contas de demonstracao.
+
+-------------------------------------------------------------------------------
+ 7. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- PUBLICACAO: o site continua no commit ff65f7e. Antes de publicar, aplicar
+  no Neon 10 migrations: as 8 de 01/11 (de 20261101100000_sla_and_priorities
+  a 20261101700000_email_notifications) e as 2 de hoje
+  (20261102100000_audit_trail e 20261102200000_audit_actor_reference).
+  Publicar so quando a responsavel pedir.
+- ANONIMIZACAO (quando pronta): e irreversivel; no site publicado, qualquer
+  visitante que entre como administrador podera usa-la nos dados ficticios.
+- E-MAIL REAL: exige conta na Resend, dominio verificado e as variaveis
+  EMAIL_API_KEY (Secret), EMAIL_FROM e APP_BASE_URL na Vercel.
+- SEGURANCA: modo demonstracao continua valendo na Vercel; so dados
+  ficticios. A senha do Neon foi colada na conversa (banco didatico);
+  trocar se o banco receber dados reais.
+- SF-030 continua pendente (credenciais do Supabase).
+- Os pushes podem pedir login do GitHub de novo; se travarem, rodar
+  "git push origin main" no terminal e concluir o login.
+
+===============================================================================

@@ -1,0 +1,197 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 01/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-10-31_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 01/11 00:00 a 23:59 (3260a2b -> 1b6b358)
+Registro detalhado : NOTES.md (secoes SF-063 a SF-095 e publicacao de
+                     01/11), TASKS.md, diario/2026-11-01.md,
+                     prompts/sessoes/2026-10-31-sf034-abertura-com-documentos.md,
+                     SPEC/2026-11-01-*.md (relatorios das fases 2 e 3)
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- EVENTOS E NOTIFICACOES NA APLICACAO CONCLUIDOS (SF-063, SF-064):
+  notificacoes como primeiro consumidor dos eventos; contador no topo e
+  pagina "Notificacoes" para solicitante e atendente.
+- PUBLICACAO NA VERCEL (00:20, a pedido da responsavel): migration dos
+  eventos aplicada no Neon; site https://serviceflow-sand.vercel.app no
+  commit ff65f7e; cron diario /api/cron/daily registrado (06:00 UTC).
+  Depois disso NAO houve nova publicacao.
+- SEIS SPECs ESCRITAS, APROVADAS E CONCLUIDAS NO DIA:
+    * SLA e prioridades ............... SF-065 a SF-070 (CA-SLA)
+    * Campos personalizados ........... SF-071 a SF-075 (CA-FLD)
+    * Fluxos configuraveis (etapas) ... SF-076 a SF-080 (CA-FLX)
+    * Aprovacoes com perfil Gestor .... SF-081 a SF-086 (CA-APR)
+    * Permissoes configuraveis ........ SF-087 a SF-091 (CA-PER)
+  e a SPEC de notificacoes por e-mail e preferencias foi aprovada, com
+  SF-092 a SF-095 concluidas no dia (SF-096 ficou para 02/11).
+- RELATORIOS DE FASE: fase 2 (nucleo de atendimento) e fase 3
+  (configurabilidade), com registro de tempo.
+- INCIDENTE (SF-092): gerar a migration com banco sombra apagou o banco de
+  DESENVOLVIMENTO local (serviceflow_dev). Restaurado com as migrations e o
+  seed:demo. Regra registrada: o SQL de migration so e gerado comparando
+  arquivos de schema, nunca com banco sombra.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:00 | 9caa8b6 | [OK]   | SF-063: notificacoes na aplicacao (primeiro
+    |       |         |        | consumidor dos eventos).
+ 2  | 00:14 | ff65f7e | [OK]   | SF-064: E2E das notificacoes e revisao dos
+    |       |         |        | eventos.
+ 3  | 00:20 | e8fabcb | [OK]   | Registro da publicacao e do cron diario.
+ 4  | 00:22 | 28f19f4 | [OK]   | SPEC de SLA e prioridades (SF-065 a SF-070).
+ 5  | 00:31 | 90c38e9 | [OK]   | SF-065: migration e dominio do SLA.
+ 6  | 00:44 | 147fc8b | [OK]   | SF-066: prazo e prioridade no servico,
+    |       |         |        | snapshot na abertura, resultado na conclusao.
+ 7  | 01:05 | d3b92b6 | [OK]   | SF-067: mudanca de prioridade com vencimento
+    |       |         |        | recalculado.
+ 8  | 01:21 | d295880 | [OK]   | SF-068: prioridade e situacao do prazo nas
+    |       |         |        | telas; filtro e ordem por vencimento na fila.
+ 9  | 01:54 | 53686e3 | [OK]   | SF-069: alertas de prazo no job diario.
+ 10 | 02:37 | 0038b7e | [OK]   | SF-070: E2E do SLA e revisao da SPEC.
+ 11 | 11:12 | 3ce959a | [OK]   | Relatorio da fase 2 e registro de tempo.
+ 12 | 11:42 | fb3437f | [OK]   | SPEC de campos personalizados (SF-071 a
+    |       |         |        | SF-075) e decisao sobre a meta.
+ 13 | 12:06 | 5785830 | [OK]   | SF-071: migration e dominio dos campos.
+ 14 | 12:19 | 992ac6a | [OK]   | SF-072: configuracao dos campos (admin).
+ 15 | 12:42 | 599c520 | [OK]   | SF-073: campos na abertura da solicitacao.
+ 16 | 13:04 | 1f2f9dd | [OK]   | SF-074: respostas nos detalhes; servico de
+    |       |         |        | exemplo no banco ficticio.
+ 17 | 13:44 | 158336b | [OK]   | SF-075: E2E dos campos e revisao da SPEC.
+ 18 | 13:54 | 00fd924 | [OK]   | SPEC de fluxos configuraveis (SF-076 a
+    |       |         |        | SF-080).
+ 19 | 14:04 | 0d699e9 | [OK]   | SF-076: migration e dominio das etapas.
+ 20 | 14:14 | a0f0877 | [OK]   | SF-077: configuracao das etapas (admin).
+ 21 | 14:26 | d97d49d | [OK]   | SF-078: etapas no atendimento (copia no
+    |       |         |        | inicio, avanco, retorno, conclusao).
+ 22 | 14:40 | bda99f2 | [OK]   | SF-079: etapas nas telas, na linha do tempo e
+    |       |         |        | notificacao ao solicitante.
+ 23 | 15:52 | 3c918b6 | [OK]   | SF-080: E2E dos fluxos e revisao da SPEC.
+ 24 | 16:14 | 893161c | [OK]   | SPEC de aprovacoes com o perfil Gestor
+    |       |         |        | (SF-081 a SF-086).
+ 25 | 16:32 | 71d6ea2 | [OK]   | SF-081: migration e dominio das aprovacoes e
+    |       |         |        | do perfil Gestor.
+ 26 | 17:19 | ed25f90 | [OK]   | SF-082: Gestor no cadastro, no login de
+    |       |         |        | demonstracao e na area de aprovacoes.
+ 27 | 18:15 | 2d950bb | [OK]   | SF-083: servico com aprovacao; abertura
+    |       |         |        | pendente; inicio bloqueado.
+ 28 | 18:36 | 9247529 | [OK]   | SF-084: decisao do gestor (rejeicao cancela),
+    |       |         |        | prazo e notificacoes.
+ 29 | 18:48 | bb1b5eb | [OK]   | SF-085: area do gestor e situacao da
+    |       |         |        | aprovacao nas telas.
+ 30 | 18:56 | 334a890 | [OK]   | SF-086: E2E das aprovacoes e revisao.
+ 31 | 19:00 | 97e05d0 | [OK]   | Relatorio da fase 3 e registro de tempo.
+ 32 | 19:03 | 739cf69 | [OK]   | SPEC de permissoes configuraveis (SF-087 a
+    |       |         |        | SF-091).
+ 33 | 19:10 | c87f63b | [OK]   | SF-087: migration e dominio das permissoes.
+ 34 | 19:26 | fb197c9 | [OK]   | SF-088: concessao e revogacao com historico.
+ 35 | 20:00 | cc87d5d | [OK]   | SF-089: "Servicos do setor" para quem tem a
+    |       |         |        | permissao de gerir servicos.
+ 36 | 20:47 | 2c67861 | [OK]   | SF-090: leitura ampliada do gestor e
+    |       |         |        | supervisao da fila.
+ 37 | 21:29 | e9b7cef | [OK]   | SF-091: E2E e revisao das permissoes.
+ 38 | 21:32 | 2fc1748 | [OK]   | SPEC de notificacoes por e-mail (SF-092 a
+    |       |         |        | SF-096).
+ 39 | 21:42 | a2a58cc | [OK]   | SF-092: migration e dominio dos e-mails.
+ 40 | 21:54 | cc925bf | [OK]   | SF-093: pagina de preferencias de e-mail.
+ 41 | 22:08 | 7dd4b82 | [OK]   | SF-094: registro e envio dos e-mails
+    |       |         |        | (API HTTP da Resend via fetch).
+ 42 | 22:23 | 1b6b358 | [OK]   | SF-095: secao "E-mails" na administracao.
+    |       |         |        | (enviado ao GitHub em 02/11, depois de novo
+    |       |         |        | login no Git Credential Manager)
+
+-------------------------------------------------------------------------------
+ 3. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-062) | Fim do dia (SF-095)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 361 (62 arquivos)      | 575/575 (102 arquivos)
+ Integracao     | 162 + 1 pulado         | 280/280 + 1 pulado (63 arquivos)
+ E2E            | 7                      | 14/14
+ Lint/typecheck/build | OK               | OK
+
+ O teste pulado e o do bucket real do Supabase (sem credenciais, SF-030).
+
+-------------------------------------------------------------------------------
+ 4. MEDICAO (cloc --diff via sh scripts/cloc-diff.sh, TypeScript/JavaScript)
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA (3260a2b -> 1b6b358)  |  5.414 |  7.030 |     56  | 12.500
+   removidas no dia                       |     55 |      0 |      0  |     55
+   saldo liquido no dia                   |        |        |         | 12.445
+ Adicionadas desde a linha de base        | 11.653 | 13.029 |    545  | 25.227
+ (baseline-ap2 -> 1b6b358)                |        |        |         |
+   removidas desde a linha de base        |  2.536 |      9 |      0  |  2.545
+   saldo liquido desde a linha de base    |        |        |         | 22.682
+ Codigo executavel total no repositorio   | 13.919 | 18.814 |    692  | 33.425
+ (cloc em 1b6b358)                        |        |        |         |
+
+ Meta: 100.000 linhas adicionadas -> 25.227 = 25,2%.
+
+-------------------------------------------------------------------------------
+ 5. COMO USAR (novidades de 01/11)
+-------------------------------------------------------------------------------
+
+1) SLA e prioridades: em /admin > Servicos, prioridade padrao e prazo-base
+   em horas (opcional). Fila, detalhes e "Minhas solicitacoes" mostram
+   vencimento e situacao; o atendente muda a prioridade; o job diario avisa
+   prazo proximo e vencido.
+2) Campos personalizados: em /admin > Servicos, ate 10 campos por servico
+   (texto, numero, data, lista, sim ou nao). Exemplo no banco ficticio:
+   "Manutencao de ar-condicionado".
+3) Fluxos configuraveis: ate 8 etapas por servico; o atendente avanca uma
+   etapa por vez ou volta com justificativa; so conclui na ultima.
+4) Aprovacoes: perfil Gestor ("Entrar como Gestor"); servico pode exigir
+   aprovacao; o gestor aprova ou rejeita em "Aprovacoes".
+5) Permissoes: em /admin > Usuarios, conceder "Gerir servicos do setor",
+   "Ver todas as solicitacoes do setor" ou "Supervisionar a fila do setor".
+6) E-mails: cada pessoa escolhe as categorias em "Preferencias de e-mail"
+   (link na pagina de notificacoes). Sem EMAIL_API_KEY, EMAIL_FROM e
+   APP_BASE_URL, os envios ficam "nao enviado - e-mail nao configurado";
+   o administrador acompanha em /admin > E-mails.
+7) Banco local depois de puxar os commits:
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 6. PROXIMOS PASSOS (como estavam no fim do dia)
+-------------------------------------------------------------------------------
+
+[ ] SF-096: E2E e revisao das notificacoes por e-mail.
+[ ] Fase 4 restante: painel e relatorios (item 11); auditoria e LGPD
+    (item 12); depois, relatorio da fase 4.
+[ ] Antes de publicar: aplicar no Neon as migrations novas do dia.
+
+-------------------------------------------------------------------------------
+ 7. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- PUBLICACAO: o site esta no commit ff65f7e (eventos e notificacoes). Faltam
+  no Neon 8 migrations do dia: 20261101100000_sla_and_priorities,
+  20261101200000_sla_due_soon_at, 20261101300000_service_fields,
+  20261101400000_service_stages, 20261101500000_manager_role,
+  20261101500100_approvals, 20261101600000_user_permissions e
+  20261101700000_email_notifications. Publicar so quando a responsavel pedir.
+- E-MAIL REAL: exige conta na Resend, dominio verificado e as tres variaveis
+  na Vercel (EMAIL_API_KEY como Secret). Nenhuma chave no repositorio.
+- SEGURANCA: o modo demonstracao continua valendo na Vercel; quem tiver o
+  link entra como administrador. So dados ficticios.
+- SF-030 continua pendente (credenciais do Supabase).
+- A senha do Neon foi colada na conversa (banco didatico); trocar se o banco
+  receber dados reais. Ela nao esta em nenhum arquivo.
+
+===============================================================================
