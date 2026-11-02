@@ -1484,3 +1484,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Correção:** o marcador passou a ser "solicitação de Ana, Bruno ou Carla com aprovação" (o seed antigo não tinha aprovações). Registrado na seção 25.2 da SPEC. As solicitações antigas continuam no banco, ao lado das novas.
 - **Teste novo:** integração com o banco no estado da produção (setor e conta antigos, Ana com uma solicitação sem aprovação): carrega as 14, mantém a antiga, desativa a conta antiga, renomeia o setor e não carrega de novo. Falha no código anterior e passa no corrigido.
 - **Resultados:** lint, typecheck e build OK; unitários 718/718; integração 318/318 + 1 pulado; E2E 18/18.
+
+## Publicação da correção do marcador (2026-11-02)
+
+- A pedido da responsável ("publique a correção"): `vercel deploy --prod` do commit `b9c88f3`, situação `Ready`, sem migration nova.
+- **Conferência no site publicado (Playwright, script fora do repositório):** o primeiro clique depois da publicação carregou o conjunto atual. Ana vê solicitações nos quatro status e as notificações "Atendimento iniciado" e "Novo comentário" em Declaração de vínculo; Diego vê na fila "Responsável: você", "Concluída no prazo", "Concluída com atraso", "Rejeitada", "Aprovada" e, na página 2, "Vencido", "Próximo do vencimento", "Dentro do prazo" e "Aguardando aprovação", e a declaração com 3 comentários; Paulo vê a solicitação de equipamento aguardando aprovação e o painel da Central de Serviços; Marina vê as seis pessoas ativas e as contas genéricas como "Inativo"; o setor antigo não existe mais (renomeado).
+- **Efeito esperado, registrado:** as solicitações do seed de 30/10 continuam no Neon ao lado das novas (algumas com a mesma descrição), com o histórico original ("Solicitante (demonstração)", "Setor de demonstração" no registro da abertura). Nenhuma regra permite apagá-las.
