@@ -6,7 +6,7 @@ export async function requireRequesterPageAccess(): Promise<void> {
   try {
     await requirePublishedCatalogReader();
   } catch (error) {
-    if (error instanceof AuthenticationError) redirect("/login");
+    if (error instanceof AuthenticationError) redirect("/");
     if (error instanceof AuthorizationError) redirect("/");
     throw error;
   }

@@ -23,7 +23,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
-    url: "http://127.0.0.1:3100/login",
+    url: "http://127.0.0.1:3100/",
     env: {
       NODE_ENV: "development",
       DATABASE_URL: testDatabaseUrl,

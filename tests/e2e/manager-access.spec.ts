@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 // the "Aprovações" area and is sent back to it from every other area.
 
 test("the manager signs in to the approvals area and cannot open the other areas", async ({ page }) => {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: "Entrar como Gestor" }).click();
 

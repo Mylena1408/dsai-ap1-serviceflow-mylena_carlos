@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { ENTRANCE } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 
@@ -11,15 +12,15 @@ const internalNote = `${unique} Peça encomendada; avisar o almoxarifado.`;
 const markup = `${unique} <b>texto</b>`;
 
 async function enterAs(page: Page, profile: "Solicitante" | "Atendente") {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: `Entrar como ${profile}` }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 async function openRequest(page: Page, description: string): Promise<string> {

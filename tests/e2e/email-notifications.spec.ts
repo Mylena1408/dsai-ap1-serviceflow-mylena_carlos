@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { ENTRANCE } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 
@@ -9,15 +10,15 @@ import { seedDemoData } from "../../scripts/demo-data";
 const unique = `e2e-email-${Date.now()}`;
 
 async function enterAs(page: Page, profile: "Administrador" | "Solicitante" | "Atendente") {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: `Entrar como ${profile}` }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 async function setStatusEmails(page: Page, on: boolean) {

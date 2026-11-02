@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { ENTRANCE } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 
@@ -12,15 +13,15 @@ const colleague = { name: `${unique} Eva Lopes`, email: `${unique}@exemplo.test`
 const colleaguePassword = "E2E-only-colleague-password";
 
 async function enterAs(page: Page, profile: "Administrador" | "Atendente") {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: `Entrar como ${profile}` }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 function permissionsOf(page: Page, userName: string): Locator {

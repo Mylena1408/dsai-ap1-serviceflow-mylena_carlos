@@ -527,3 +527,15 @@ SF-108 concluída (ver `NOTES.md`, seção SF-108).
 > pode continuar
 
 Com a fase 4 do plano concluída (SF-087 a SF-108), o próximo passo exigido pela SPEC de camadas (seção 6) era o relatório da fase. Relatório escrito em `SPEC/2026-11-02-relatorio-fase-4.md` (ver `NOTES.md`, seção "Relatório da fase 4").
+
+## Continuação — Proposta da SPEC de API externa
+
+> pode prosseguir
+
+Proposta `SPEC/2026-11-02-api-externa-webhooks.md` escrita (item 14 do plano), com as decisões A1 a A6 aguardando aprovação.
+
+## Continuação — SF-109
+
+> abro o website da aplicação, não desejo ver a tela de login e senha, isso viola as restrições do projeto
+
+Pergunta feita com três opções (tirar só o formulário; sem tela de login; formulário num endereço separado). Resposta: "Sem tela de login". SF-109 concluída (ver `NOTES.md`, seção SF-109).

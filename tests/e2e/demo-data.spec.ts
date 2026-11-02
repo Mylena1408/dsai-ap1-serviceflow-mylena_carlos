@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { ENTRANCE } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { DEMO_CATALOG, seedDemoData } from "../../scripts/demo-data";
 
@@ -12,7 +13,7 @@ test("demonstration data is visible to each profile", async ({ page }) => {
     await database.$disconnect();
   }
 
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle");
   await page.getByRole("button", { name: "Entrar como Solicitante" }).click();
   await expect(page).toHaveURL(/\/catalog/);
@@ -40,7 +41,7 @@ test("demonstration data is visible to each profile", async ({ page }) => {
   await page.getByRole("button", { name: "Enviar solicitação" }).click();
   await expect(page.getByRole("status")).toHaveText("Sua solicitação foi aberta.");
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
 
   await page.getByRole("button", { name: "Entrar como Atendente" }).click();
@@ -48,7 +49,7 @@ test("demonstration data is visible to each profile", async ({ page }) => {
   await expect(page.getByText(description)).toBeVisible();
   await expect(page.getByText("Fui bloqueado no sistema de compras após três tentativas.")).toBeVisible();
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
 
   await page.getByRole("button", { name: "Entrar como Administrador" }).click();

@@ -26,7 +26,7 @@ export async function saveEmailPreferencesAction(formData: FormData): Promise<ne
     path = await preferencesPathFor(actor.role);
     await updateEmailPreferences({ categories: formData.getAll("category").map(String) });
   } catch (error) {
-    if (error instanceof AuthenticationError) redirect("/login");
+    if (error instanceof AuthenticationError) redirect("/");
     if (error instanceof AuthorizationError) redirect("/");
     if (!(error instanceof ValidationError)) throw error;
     // Only a tampered form lists something outside the six categories.
@@ -45,7 +45,7 @@ export async function markAllNotificationsAction(): Promise<never> {
     path = await notificationsPathFor(actor.role);
     await markAllNotificationsRead();
   } catch (error) {
-    if (error instanceof ApplicationError) redirect("/login");
+    if (error instanceof ApplicationError) redirect("/");
     throw error;
   }
 

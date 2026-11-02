@@ -75,7 +75,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   try {
     await requireConfigurationAdministrator();
   } catch (error) {
-    if (error instanceof AuthenticationError) redirect("/login");
+    if (error instanceof AuthenticationError) redirect("/");
     if (error instanceof AuthorizationError) redirect("/");
     throw error;
   }

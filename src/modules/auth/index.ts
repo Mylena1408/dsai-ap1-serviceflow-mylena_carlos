@@ -20,5 +20,4 @@ export type { PasswordChangeAction, PasswordChangeState } from "./ui/change-pass
 export { DEMO_ACCOUNTS, DEMO_SECTOR_NAME } from "./domain/demo-accounts";
 export { signInAsDemoUser } from "./infrastructure/prisma-demo-accounts";
 export { DemoSignInButtons } from "./ui/demo-sign-in-buttons";
-export { LoginForm } from "./ui/login-form";
 export { SignOutButton } from "./ui/sign-out-button";

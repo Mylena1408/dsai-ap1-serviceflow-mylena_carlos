@@ -27,7 +27,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
     if (editor.sectorId === null) redirect("/admin?section=services");
     home = editor.actor.role === "MANAGER" ? "/approvals" : "/queue";
   } catch (error) {
-    if (error instanceof AuthenticationError) redirect("/login");
+    if (error instanceof AuthenticationError) redirect("/");
     if (error instanceof AuthorizationError) redirect("/");
     throw error;
   }

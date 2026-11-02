@@ -809,3 +809,27 @@ Solicitada pela responsável depois do diagnóstico registrado em `NOTES.md` (SF
 - [x] **CA-HOR-03** — Com o relógio da aplicação deslocado em relação ao banco (simulado no teste), o histórico continua em ordem e nenhum horário é anterior ao da etapa anterior. *Verificado em 2026-10-30: teste de integração com o relógio da aplicação 1 h adiantado e 1 h atrasado; falha no código anterior e passa no novo.*
 - [x] **CA-HOR-04** — `tests/integration/requests-transitions.test.ts` passa sem alteração de asserções, assim como as demais suítes. *Verificado em 2026-10-30: `requests-transitions` sem alteração; unitários 226/226, integração 106/106 em três execuções, E2E 3/3.*
 
+## 24. Alteração aprovada — 2026-11-02 — Entrada sem tela de login
+
+Solicitada pela responsável pelo projeto: ao abrir o site, a pessoa não deve ver uma tela de login com e-mail e senha. Entre as opções apresentadas ("tirar só o formulário", "sem tela de login" e "formulário num endereço separado"), a escolhida foi **sem tela de login**. Esta alteração **substitui** os itens 1 e 4 da seção 22.1; o restante da seção 22 continua valendo.
+
+### 24.1 Regras
+
+1. O endereço raiz (`/`) é a entrada do sistema. Sem sessão, ele mostra a **escolha de perfil**: os botões "Entrar como Administrador", "Entrar como Solicitante", "Entrar como Atendente" e "Entrar como Gestor", com as contas de demonstração da seção 22.2. Com sessão, leva à área do perfil, como antes.
+2. **Não existe tela de login.** O endereço `/login` só redireciona para `/`, para que links antigos continuem funcionando.
+3. **O formulário de e-mail e senha sai da interface.** Nenhuma tela pede e-mail ou senha para entrar.
+4. Quem acessa uma página protegida sem sessão, ou sai pelo botão "Sair", volta para `/`.
+5. A autenticação por e-mail e senha **continua no servidor** (provedor de credenciais do Auth.js), sem tela. Ela é usada pelos testes automatizados para entrar com contas criadas pela administração e mantém as verificações de segurança existentes (pessoa inativa ou anonimizada não autentica; contas de demonstração não autenticam por senha).
+
+### 24.2 Consequências registradas
+
+- Contas criadas pela administração não têm como entrar pela interface; o uso pelo navegador passa a ser só pelas contas de demonstração.
+- A página "Alterar senha" continua existindo, sem mudança, mas as contas de demonstração não a usam, porque a senha delas é descartada (seção 22.2).
+- **Testes existentes alterados por esta alteração:** os que esperavam o redirecionamento para `/login` passam a esperar `/`; os E2E que entravam pelo formulário passam a entrar pela rota do Auth.js, e os que abriam `/login` passam a abrir `/`.
+
+### 24.3 Critérios de aceitação
+
+- [x] **CA-ENT-01** — Abrir `/` sem sessão mostra os quatro botões de perfil e nenhum campo de e-mail ou senha; cada botão leva à área do perfil. *Verificado em 2026-11-02 (SF-109): unitário da página raiz (quatro botões, nenhum campo de e-mail ou senha, nenhum redirecionamento) e E2E `demo-sign-in.spec.ts` (cada botão leva à área do perfil).*
+- [x] **CA-ENT-02** — `/login` redireciona para `/`; nenhuma página da aplicação mostra campo de senha para entrar. *Verificado em 2026-11-02 (SF-109): unitário e E2E do redirecionamento; o componente do formulário foi removido do código (`LoginForm`).*
+- [x] **CA-ENT-03** — Página protegida sem sessão e o botão "Sair" levam a `/`. *Verificado em 2026-11-02 (SF-109): E2E com `/admin`, `/catalog` e `/queue` sem sessão e com "Sair" em todos os E2E; unitários da rota de notificação e das preferências.*
+- [x] **CA-ENT-04** — A autenticação por e-mail e senha no servidor continua recusando conta inativa, anonimizada ou de demonstração; lint, typecheck, build e as suítes unitária, de integração e E2E passam. *Verificado em 2026-11-02 (SF-109): testes de integração da autenticação sem alteração; E2E da anonimização recusa a pessoa pela rota do Auth.js; lint, typecheck, build, unitários 696/696, integração 314/314 + 1 pulado, E2E 18/18.*

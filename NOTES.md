@@ -1436,3 +1436,17 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Tempo:** 9h53 na fase 4 (cerca de 860 linhas por hora); `diario/tempo-do-projeto.md` atualizado (total mínimo 50h56).
 - **Publicação:** dez migrations pendentes no Neon.
 - **Suítes não executadas de novo para o relatório** (só documentação); a última execução completa foi a da SF-108, com tudo verde.
+
+## SF-109 — Entrada sem tela de login (2026-11-02)
+
+- **Pedido da responsável:** "abro o website da aplicação, não desejo ver a tela de login e senha, isso viola as restrições do projeto". A seção 22.1 (item 4) mantinha o formulário de e-mail e senha recolhido em `/login`. Apresentei três opções; a escolhida foi **sem tela de login**. Registrada como seção 24 da SPEC principal, que substitui os itens 1 e 4 da seção 22.1.
+- **Implementação:** `/` mostra a escolha de perfil sem sessão (os quatro botões de demonstração) e leva à área com sessão; `/login` só redireciona para `/`; o componente `LoginForm` e o CSS do formulário recolhido foram removidos; todos os redirecionamentos de quem está sem sessão, o `pages.signIn` do Auth.js e o "Sair" passaram a usar `/`.
+- **Decisão — senha só no servidor:** o provedor de credenciais do Auth.js continua, sem tela, porque os E2E entram com contas criadas pela administração e porque as recusas (pessoa inativa, anonimizada, conta de demonstração) continuam cobertas pela integração. Consequência registrada na SPEC (24.2): contas criadas pela administração não entram pela interface; a página "Alterar senha" ficou sem mudança.
+- **Testes existentes alterados (exigidos pela seção 24):** três unitários esperavam `/login` e passaram a esperar `/` (`home-routing`, `notification-route`, `email-preference-actions`); os E2E abrem `/` em vez de `/login` e esperam a entrada (`ENTRANCE`, em `tests/e2e/entrance.ts`) depois de "Sair"; os três E2E que preenchiam o formulário (`service-request-flow`, `request-assignment`, `audit-lgpd`) entram pela rota do Auth.js (`passwordSignIn`). No E2E da anonimização, a recusa da Paula passou de "mensagem de erro do formulário" para "nenhuma sessão criada e a entrada mostra os perfis". `playwright.config.ts` espera o servidor em `/`.
+- **Testes novos:** unitário da escolha de perfil na raiz e do redirecionamento de `/login`; E2E de `/login` e páginas protegidas sem sessão levando à entrada.
+- **Erro meu de ferramenta:** dois scripts de edição pelo shell perderam a barra invertida das expressões regulares (`/\/login/`); um falhou sem mudar nada e o outro deixou `//catalog/` num E2E, corrigido com edição direta antes de rodar os testes.
+- **Log do E2E:** `[auth][error] CredentialsSignin` aparece quando a pessoa anonimizada é recusada; é o registro esperado do Auth.js (aparecia antes com o formulário).
+- **Banco de teste:** religado nesta sessão para rodar a integração e o E2E, obrigatórios para a mudança.
+- **Proposta da API externa:** as tarefas previstas foram renumeradas para SF-110 a SF-114, porque a SF-109 passou a ser esta mudança; a proposta continua aguardando aprovação.
+- **Resultados:** lint, typecheck e build OK; unitários 696/696; integração 314/314 + 1 pulado; E2E 18/18.
+- **Publicação:** o site da Vercel só muda no próximo deploy, que depende das dez migrations pendentes no Neon (relatório da fase 4, seção 6).

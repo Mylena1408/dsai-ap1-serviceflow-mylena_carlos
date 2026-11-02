@@ -1158,3 +1158,15 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-AUD-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-02-auditoria-lgpd.md`.
+
+## Entrada sem tela de login — alteração de SPEC de 2026-11-02
+
+### SF-109 — Escolha de perfil na raiz, sem tela de login
+
+- **Estado:** Concluída em 2026-11-02. `/` mostra a escolha de perfil sem sessão; `/login` redireciona para `/`; formulário de e-mail e senha removido da interface; páginas protegidas e "Sair" levam a `/`; autenticação por senha só na rota do Auth.js. CA-ENT-01 a 04 verificados.
+- **Objetivo:** `/` mostra a escolha de perfil sem sessão; `/login` redireciona para `/`; o formulário de e-mail e senha sai da interface; páginas protegidas e "Sair" levam a `/`; a autenticação por senha continua só no servidor.
+- **Arquivos/módulos esperados:** `src/app/page.tsx`, `src/app/login/page.tsx`, `src/modules/auth` (configuração e interface), redirecionamentos das páginas, `globals.css`, testes unitários e E2E, README.
+- **Dependências:** SF-044.
+- **Critérios de conclusão:** CA-ENT-01 a CA-ENT-04.
+- **Testes relacionados:** Unitários da página raiz e dos redirecionamentos; E2E de entrada por perfil e dos fluxos que entravam pelo formulário; todas as suítes.
+- **SPEC:** Seção 24 de `SPEC/2026-09-30-catalogo-e-solicitacoes.md`.

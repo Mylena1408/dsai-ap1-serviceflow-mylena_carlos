@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { ENTRANCE, passwordSignIn } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 
@@ -13,25 +14,22 @@ const service = "Reparo de mobiliário";
 const demoAttendant = "Atendente (demonstração)";
 
 async function enterAs(page: Page, profile: "Administrador" | "Solicitante" | "Atendente") {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: `Entrar como ${profile}` }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
 async function signInWithPassword(page: Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.waitForLoadState("networkidle");
-  await page.getByText("Entrar com e-mail e senha").click();
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha").fill(password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  // There is no e-mail and password screen; the server route remains (SPEC section 24).
+  expect(await passwordSignIn(page, email, password)).toBe(true);
+  await page.goto("/");
   await expect(page).toHaveURL(/\/queue/);
 }
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 async function openRequest(page: Page, description: string): Promise<string> {

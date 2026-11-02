@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Page } from "@playwright/test";
+import { ENTRANCE } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 import { minimalPdf, syntheticText } from "../unit/modules/attachments/synthetic-files";
@@ -18,15 +19,15 @@ const text = Buffer.from(syntheticText());
 const sha256 = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 async function enterAs(page: Page, profile: "Administrador" | "Solicitante" | "Atendente") {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: `Entrar como ${profile}` }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 async function addRequirement(

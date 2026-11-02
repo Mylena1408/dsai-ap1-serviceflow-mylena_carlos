@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: NotificationRouteContext
     return redirectTo(request, area ? `${area}/${requestId}` : `/requests/${requestId}`);
   } catch (error) {
     if (error instanceof ApplicationError) {
-      return redirectTo(request, error.code === "UNAUTHENTICATED" ? "/login" : "/");
+      return redirectTo(request, "/");
     }
 
     throw error;

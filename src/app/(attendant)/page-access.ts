@@ -6,7 +6,7 @@ export async function requireAttendantPageAccess(): Promise<AuthorizationActor> 
   try {
     return assertRole(await requireCurrentActor(), "ATTENDANT");
   } catch (error) {
-    if (error instanceof AuthenticationError) redirect("/login");
+    if (error instanceof AuthenticationError) redirect("/");
     if (error instanceof AuthorizationError) redirect("/");
     throw error;
   }

@@ -37,9 +37,9 @@ describe("open notification route", () => {
     expect((await call()).headers.get("location")).toBe("/queue/notifications");
   });
 
-  it("sends anonymous users to the login and invalid ids home", async () => {
+  it("sends anonymous users and invalid ids home", async () => {
     authorization.requireCurrentActor.mockRejectedValueOnce(new AuthenticationError());
-    expect((await call()).headers.get("location")).toBe("/login");
+    expect((await call()).headers.get("location")).toBe("/");
 
     authorization.requireCurrentActor.mockResolvedValueOnce({ id: "r", role: "REQUESTER" });
     notifications.openNotification.mockRejectedValueOnce(new ValidationError([]));

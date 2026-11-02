@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { ENTRANCE, passwordSignIn } from "./entrance";
 
 const adminEmail = "e2e-admin@example.test";
 const adminPassword = "E2E-only-admin-password";
@@ -17,24 +18,15 @@ const privateDescriptionA = `${unique}-private-request-a`;
 const privateDescriptionB = `${unique}-private-request-b`;
 
 async function signIn(page: Page, email: string, password: string): Promise<void> {
-  await page.goto("/login");
-  // The e-mail and password form is secondary to the demonstration buttons (SPEC section 22).
-  await page.getByText("Entrar com e-mail e senha").click();
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha").fill(password);
-  const credentialsResponse = page.waitForResponse((response) =>
-    response.url().includes("/api/auth/callback/credentials"),
-  );
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  const response = await credentialsResponse;
-  const result = (await response.json()) as { error?: string };
-  expect(response.ok()).toBe(true);
-  expect(result.error).toBeUndefined();
+  // There is no e-mail and password screen; the server route remains (SPEC section 24).
+  expect(await passwordSignIn(page, email, password)).toBe(true);
+  await page.goto("/");
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
 async function signOut(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 async function openAdminSection(page: Page, name: string): Promise<void> {

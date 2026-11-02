@@ -6,7 +6,7 @@ export function SignOutButton() {
   return (
     <button
       className="sign-out-button"
-      onClick={() => signOut({ redirectTo: "/login" })}
+      onClick={() => signOut({ redirectTo: "/" })}
       type="button"
     >
       Sair

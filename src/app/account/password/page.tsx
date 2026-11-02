@@ -19,7 +19,7 @@ export default async function ChangePasswordPage() {
   try {
     actor = await requireCurrentActor();
   } catch (error) {
-    if (error instanceof AuthenticationError) redirect("/login");
+    if (error instanceof AuthenticationError) redirect("/");
     throw error;
   }
 

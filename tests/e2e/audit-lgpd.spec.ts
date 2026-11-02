@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { ENTRANCE, passwordSignIn } from "./entrance";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 
@@ -16,24 +17,22 @@ const cancelNote = "Paula resolveu sozinha";
 const REMOVED = "[conteúdo removido na anonimização]";
 
 async function enterAs(page: Page, profile: "Administrador" | "Atendente") {
-  await page.goto("/login");
+  await page.goto("/");
   await page.waitForLoadState("networkidle"); // buttons only work after hydration
   await page.getByRole("button", { name: `Entrar como ${profile}` }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(ENTRANCE);
 }
 
-async function submitPassword(page: Page) {
-  await page.goto("/login");
-  await page.waitForLoadState("networkidle");
-  await page.getByText("Entrar com e-mail e senha").click();
-  await page.getByLabel("E-mail").fill(person.email);
-  await page.getByLabel("Senha").fill(person.password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+/** There is no e-mail and password screen; the server route remains (SPEC 2026-09-30, section 24). */
+async function submitPassword(page: Page): Promise<boolean> {
+  const signedIn = await passwordSignIn(page, person.email, person.password);
+  await page.goto("/");
+  return signedIn;
 }
 
 async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(ENTRANCE);
 }
 
 async function goToSection(page: Page, name: string) {
@@ -87,8 +86,8 @@ test("audit of an SLA change, \"Meus dados\" and anonymization", async ({ page }
   await signOut(page);
 
   // Paula opens a request, downloads her data and cancels the request (CA-AUD-06).
-  await submitPassword(page);
-  await expect(page).not.toHaveURL(/\/login/);
+  expect(await submitPassword(page)).toBe(true);
+  await expect(page).toHaveURL(/\/catalog/);
   await page.goto("/catalog");
   await page.getByRole("link", { name: service }).click();
   await page.getByLabel("Descreva o que você precisa").fill(description);
@@ -135,10 +134,10 @@ test("audit of an SLA change, \"Meus dados\" and anonymization", async ({ page }
   await expect(audit).not.toContainText(person.email);
   await signOut(page);
 
-  // Paula can no longer sign in.
-  await submitPassword(page);
-  await expect(page.locator("p.login-error")).toHaveText("E-mail ou senha inválidos.");
-  await expect(page).toHaveURL(/\/login/);
+  // Paula can no longer sign in: no session starts and the root shows the profile choice.
+  expect(await submitPassword(page)).toBe(false);
+  await expect(page).toHaveURL(ENTRANCE);
+  await expect(page.getByRole("button", { name: "Entrar como Administrador" })).toBeVisible();
 
   // The attendant still sees the request, with the anonymized requester and the content removed.
   await enterAs(page, "Atendente");

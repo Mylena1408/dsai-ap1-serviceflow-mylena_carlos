@@ -59,6 +59,6 @@ describe("email preference action (SF-093)", () => {
     await expect(saveEmailPreferencesAction(form([]))).rejects.toThrow("REDIRECT:/");
 
     authorization.requireCurrentActor.mockRejectedValueOnce(new AuthenticationError());
-    await expect(saveEmailPreferencesAction(form([]))).rejects.toThrow("REDIRECT:/login");
+    await expect(saveEmailPreferencesAction(form([]))).rejects.toThrow(/^REDIRECT:\/$/);
   });
 });
