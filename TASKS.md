@@ -983,7 +983,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-092 — Migration e domínio das preferências e envios
 
-- **Estado:** Não iniciada.
+- **Estado:** Concluída em 2026-11-01. Migration `20261101700000_email_notifications` (enums `NotificationCategory` e `EmailDeliveryStatus`, tabelas `NotificationPreference` e `EmailDelivery`) e regras puras em `src/modules/notifications/domain/email.ts`: categoria de cada tipo de notificação, escolha do e-mail pelas categorias ligadas e situação de um envio. CA-MAIL-02 e CA-MAIL-10 verificados.
 - **Objetivo:** Migration da seção 6 (enums `NotificationCategory` e `EmailDeliveryStatus`, tabelas `NotificationPreference` e `EmailDelivery`) e regras puras: categoria de cada tipo de notificação e transições da situação de um envio.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/notifications/`, limpeza do banco de teste, testes.
 - **Dependências:** SF-091.

@@ -93,7 +93,7 @@ A administração ganha a seção "E-mails", só para o administrador, com:
 ## 7. Critérios de aceitação
 
 - [ ] **CA-MAIL-01** — Sem preferências ligadas, as notificações na aplicação, seus destinatários e textos não mudam, nenhum envio é registrado, e as suítes anteriores passam sem alteração de asserções.
-- [ ] **CA-MAIL-02** — Todo tipo de notificação pertence a exatamente uma categoria da tabela 5.1.
+- [x] **CA-MAIL-02** — Todo tipo de notificação pertence a exatamente uma categoria da tabela 5.1. *Verificado em 2026-11-01 (SF-092): a tabela de categorias é indexada por todos os tipos de notificação (um tipo novo sem categoria quebra o typecheck), e o teste unitário confere as seis categorias com os tipos da tabela 5.1, cada tipo em exatamente uma.*
 - [ ] **CA-MAIL-03** — Cada pessoa vê e altera só as próprias preferências, por categoria; tudo começa desligado; o administrador e outras pessoas não alteram as de ninguém.
 - [ ] **CA-MAIL-04** — Com a categoria ligada, cada notificação na aplicação daquela categoria gera um registro de envio, na mesma operação; reprocessar o evento não duplica; categorias desligadas não geram registro.
 - [ ] **CA-MAIL-05** — Mudar a preferência não altera envios já registrados.
@@ -101,7 +101,7 @@ A administração ganha a seção "E-mails", só para o administrador, com:
 - [ ] **CA-MAIL-07** — Sem configuração, ou com a pessoa inativa, o envio fica "não enviado" e não é tentado de novo; nenhum valor de configuração aparece em telas, registros ou logs.
 - [ ] **CA-MAIL-08** — O e-mail tem assunto e corpo da seção 5.4, com o link para a solicitação na área da pessoa e o link para as preferências, e nunca inclui descrição, comentários, notas internas, respostas, documentos ou observações.
 - [ ] **CA-MAIL-09** — Só o administrador vê a seção "E-mails", com a situação da configuração e os 50 envios mais recentes, sem conteúdo.
-- [ ] **CA-MAIL-10** — Migration aditiva; dados existentes não mudam.
+- [x] **CA-MAIL-10** — Migration aditiva; dados existentes não mudam. *Verificado em 2026-11-01 (SF-092): migration só com criações (dois enums, duas tabelas, índices e chaves); ninguém começa com preferência ou envio; uma preferência por pessoa e categoria e um envio por notificação (`email-notification-schema.test.ts`); suítes anteriores sem alteração de asserções.*
 
 ## 8. Estratégia de testes
 

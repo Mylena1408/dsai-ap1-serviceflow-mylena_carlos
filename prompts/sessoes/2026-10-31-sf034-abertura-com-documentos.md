@@ -403,3 +403,9 @@ SF-091 concluída e SPEC de permissões configuráveis encerrada (ver `NOTES.md`
 > siga para a próxima spec
 
 Proposta escrita a partir do item 10 do plano; decisões N1 a N5 aprovadas pela responsável no questionário ("Aprovar como proposta"). SPEC `SPEC/2026-11-01-notificacoes-email-preferencias.md` aprovada e tarefas SF-092 a SF-096 registradas.
+
+## Continuação — SF-092
+
+> faça a sf-092
+
+SF-092 concluída (ver `NOTES.md`, seção SF-092, inclusive o banco de dev apagado por engano e restaurado).

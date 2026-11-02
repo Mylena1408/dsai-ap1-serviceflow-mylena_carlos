@@ -36,6 +36,22 @@ enum PermissionAction {
   REVOKED
 }
 
+enum NotificationCategory {
+  STATUS
+  ASSIGNMENT
+  COMMENTS
+  SLA
+  STAGES
+  APPROVALS
+}
+
+enum EmailDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
 enum RequestStatus {
   OPEN
   IN_PROGRESS
@@ -115,6 +131,8 @@ model User {
   permissionsGranted    UserPermission[]         @relation("UserPermissionGrantor")
   permissionEvents      UserPermissionEvent[]    @relation("UserPermissionEventUser")
   permissionEventsActed UserPermissionEvent[]    @relation("UserPermissionEventActor")
+  notificationPrefs     NotificationPreference[]
+  emailDeliveries       EmailDelivery[]
 }
 
 model Service {
@@ -309,12 +327,47 @@ model RequestNotification {
   createdAt   DateTime  @db.Timestamptz
   readAt      DateTime? @db.Timestamptz
 
-  recipient User         @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
-  request   Request      @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  event     OutboxEvent? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  recipient User           @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Restrict)
+  request   Request        @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  event     OutboxEvent?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  email     EmailDelivery?
 
   @@unique([eventId, recipientId])
   @@index([recipientId, readAt, createdAt])
+}
+
+/// Email choice per user and category (SPEC 2026-11-01-notificacoes-email-preferencias, 5.1).
+/// Without a row, the category is off.
+model NotificationPreference {
+  id           String               @id @default(uuid()) @db.Uuid
+  userId       String               @db.Uuid
+  category     NotificationCategory
+  emailEnabled Boolean
+  updatedAt    DateTime             @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, category])
+}
+
+/// Email to send for one in-app notification (SPEC 2026-11-01-notificacoes-email-preferencias, 5.2).
+/// Goes away with its notification when the daily cleanup purges it.
+model EmailDelivery {
+  id             String              @id @default(uuid()) @db.Uuid
+  notificationId String              @unique @db.Uuid
+  recipientId    String              @db.Uuid
+  status         EmailDeliveryStatus @default(PENDING)
+  attempts       Int                 @default(0)
+  availableAt    DateTime            @db.Timestamptz
+  createdAt      DateTime            @db.Timestamptz
+  sentAt         DateTime?           @db.Timestamptz
+  lastErrorCode  String?
+
+  notification RequestNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  recipient    User                @relation(fields: [recipientId], references: [id], onDelete: Restrict)
+
+  @@index([status, availableAt])
+  @@index([createdAt])
 }
 
 model RequestPriorityEvent {

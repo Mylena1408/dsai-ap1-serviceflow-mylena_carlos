@@ -8,6 +8,23 @@ import { createPrismaNotificationStore } from "./infrastructure/prisma-notificat
 // In-app notifications (SPEC 2026-10-31-eventos-outbox-jobs, section 8).
 export { plannedNotifications } from "./domain/recipients";
 export type { NotificationType } from "./domain/recipients";
+// Email notifications and preferences (SPEC 2026-11-01-notificacoes-email-preferencias).
+export {
+  EMAIL_DELIVERY_STATUSES,
+  NOTIFICATION_CATEGORIES,
+  NOTIFICATION_TYPES,
+  nextDeliveryState,
+  notificationCategory,
+  typesOfCategory,
+  wantsEmail,
+} from "./domain/email";
+export type {
+  EmailDeliveryOutcome,
+  EmailDeliveryState,
+  EmailDeliveryStatus,
+  EmailSkipReason,
+  NotificationCategory,
+} from "./domain/email";
 export type { NotificationRecord } from "./application/ports";
 
 export function notificationConsumer(database: PrismaClient = prisma): EventConsumer {
