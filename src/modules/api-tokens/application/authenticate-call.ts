@@ -23,7 +23,7 @@ export interface ApiUser {
 }
 
 export type ApiCallAuthentication =
-  | { ok: true; user: ApiUser; tokenId: string; scope: ApiTokenScope }
+  | { ok: true; user: ApiUser; tokenId: string; scope: ApiTokenScope; expiresAt: Date; sectorName: string | null }
   | { ok: false; error: "invalid_token" }
   | { ok: false; error: "insufficient_scope" }
   | { ok: false; error: "rate_limited"; retryAfterSeconds: number };
@@ -74,6 +74,8 @@ export async function authenticateApiCall(
     ok: true,
     tokenId: credential.id,
     scope: credential.scope,
+    expiresAt: credential.expiresAt,
+    sectorName: owner.sectorName,
     user: { id: owner.id, name: owner.name, email: owner.email, role: owner.role, sectorId: owner.sectorId, isActive: true },
   };
 }

@@ -131,7 +131,7 @@ describe("authentication of an API call", () => {
           revokedAt: null,
           lastUsedAt: null,
           ...credential,
-          owner: { id: ana.id, name: "Ana Souza", email: "ana@exemplo.test", role: "REQUESTER", sectorId: null, isActive: true, anonymizedAt: null, ...credential.owner },
+          owner: { id: ana.id, name: "Ana Souza", email: "ana@exemplo.test", role: "REQUESTER", sectorId: null, sectorName: null, isActive: true, anonymizedAt: null, ...credential.owner },
         },
       countCall: async (id, windowStart) => {
         calls.push({ tokenId: id, windowStart });
@@ -151,6 +151,8 @@ describe("authentication of an API call", () => {
       ok: true,
       tokenId,
       scope: "READ",
+      expiresAt: new Date(now.getTime() + 60_000),
+      sectorName: null,
       user: { id: ana.id, name: "Ana Souza", email: "ana@exemplo.test", role: "REQUESTER", sectorId: null, isActive: true },
     });
     expect(calls).toEqual([{ tokenId, windowStart: new Date("2026-11-02T15:00:00.000Z") }]);

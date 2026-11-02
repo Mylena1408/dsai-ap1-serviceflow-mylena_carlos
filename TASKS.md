@@ -1210,7 +1210,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-113 — Rotas /api/v1 e OpenAPI
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-02. Módulo `public-api` (representações em JSON, formato de erros, documento OpenAPI, operações sobre os casos de uso da tela e camada HTTP com autenticação, contexto do dono do token, cabeçalhos e tradução de erros) e as rotas `GET /api/v1/me`, `GET /api/v1/services`, `GET` e `POST /api/v1/requests`, `GET /api/v1/requests/{requestId}`, `POST /api/v1/requests/{requestId}/comments` e `GET /api/v1/openapi.json`. CA-API-03 a 09 verificados; CA-API-01 parcial.
 - **Objetivo:** Rotas da seção 5.4 sobre os casos de uso existentes, formato de respostas e erros, cabeçalhos, escopos e `/api/v1/openapi.json` com o teste de correspondência.
 - **Arquivos/módulos esperados:** `src/app/api/v1/`, módulo de API, testes.
 - **Dependências:** SF-112.

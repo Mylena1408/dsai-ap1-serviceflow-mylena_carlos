@@ -99,12 +99,24 @@ export function createPrismaApiCallStore(database: PrismaClient): ApiCallStore {
           expiresAt: true,
           revokedAt: true,
           lastUsedAt: true,
-          user: { select: { id: true, name: true, email: true, role: true, sectorId: true, isActive: true, anonymizedAt: true } },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              sectorId: true,
+              sector: { select: { name: true } },
+              isActive: true,
+              anonymizedAt: true,
+            },
+          },
         },
       });
       if (!row) return null;
       const { user, ...token } = row;
-      return { ...token, owner: { ...user, role: user.role as ApiTokenOwnerRole } };
+      const { sector, ...owner } = user;
+      return { ...token, owner: { ...owner, sectorName: sector?.name ?? null, role: owner.role as ApiTokenOwnerRole } };
     },
     async countCall(tokenId, windowStart) {
       // One statement, so concurrent calls of the same token never lose a count.

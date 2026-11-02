@@ -71,6 +71,8 @@ export interface ApiTokenCredential {
     email: string;
     role: ApiTokenOwnerRole;
     sectorId: string | null;
+    /** For "GET /api/v1/me" (5.4). */
+    sectorName: string | null;
     isActive: boolean;
     anonymizedAt: Date | null;
   };
