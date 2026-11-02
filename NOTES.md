@@ -1253,3 +1253,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão da SPEC (SF-087 a SF-091):** nenhuma dependência alterada (`package.json` e `package-lock.json` sem mudança desde a SPEC); nenhum segredo; nenhuma asserção de teste existente alterada — só mocks de autorização e dublês em memória (registrados nas SF-089 e SF-090); uma migration aditiva (`20261101600000_user_permissions`).
 - **Pendente para publicar:** aplicar `20261101600000_user_permissions` no Neon junto das outras seis pendentes.
 - **Resultados:** lint, typecheck e build OK; unitários 548/548 (95 arquivos); integração 266/266 + 1 pulado (59 arquivos); E2E 14/14.
+
+## SPEC de notificações por e-mail e preferências (2026-11-01)
+
+- **SPEC `2026-11-01-notificacoes-email-preferencias.md`** (resto do item 10 do plano) aprovada com as decisões N1 a N5 conforme propostas: e-mail por categoria escolhido pela própria pessoa, tudo começando desligado; registro do envio junto da notificação; envio por API HTTP de provedor via `fetch` (sem dependência nova), configurado só por variáveis de ambiente; conteúdo mínimo com link; seção "E-mails" na administração. Tarefas SF-092 a SF-096 registradas em `TASKS.md`.
+- **Princípio:** as notificações na aplicação não mudam; sem preferência ligada, nada é registrado nem enviado (garantia 7.4). Nenhuma chave entra no repositório: sem configuração, os envios ficam "não enviado".

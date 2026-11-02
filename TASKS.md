@@ -976,3 +976,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-PER-01 a 10 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-01-permissoes-configuraveis.md`.
+
+## Notificações por e-mail e preferências — SPEC de 2026-11-01
+
+**Ordem:** SF-092 → SF-093 → SF-094 → SF-095 → SF-096.
+
+### SF-092 — Migration e domínio das preferências e envios
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Migration da seção 6 (enums `NotificationCategory` e `EmailDeliveryStatus`, tabelas `NotificationPreference` e `EmailDelivery`) e regras puras: categoria de cada tipo de notificação e transições da situação de um envio.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/notifications/`, limpeza do banco de teste, testes.
+- **Dependências:** SF-091.
+- **Critérios de conclusão:** CA-MAIL-02 e CA-MAIL-10.
+- **Testes relacionados:** Unitários das regras; integração do schema.
+- **SPEC:** `SPEC/2026-11-01-notificacoes-email-preferencias.md`.
+
+### SF-093 — Página "Preferências de notificação"
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Casos de uso para ler e alterar as próprias preferências e a página ligada às notificações de solicitante, atendente e gestor.
+- **Arquivos/módulos esperados:** `src/modules/notifications/`, `src/app/`, testes.
+- **Dependências:** SF-092.
+- **Critérios de conclusão:** CA-MAIL-03.
+- **Testes relacionados:** Unitários das ações; integração dos casos de uso.
+- **SPEC:** `SPEC/2026-11-01-notificacoes-email-preferencias.md`.
+
+### SF-094 — Registro e envio dos e-mails
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Registro do envio junto da notificação, conforme a preferência; processamento dos pendentes após a resposta e no job diário, com novas tentativas; conteúdo da seção 5.4; porta `EmailTransport` com implementação HTTP via `fetch` e configuração por variáveis de ambiente (`.env.example` só com variáveis vazias).
+- **Arquivos/módulos esperados:** `src/modules/notifications/`, `src/server/jobs`, `.env.example`, testes.
+- **Dependências:** SF-093.
+- **Critérios de conclusão:** CA-MAIL-01, 04, 05, 06, 07 e 08.
+- **Testes relacionados:** Unitários com a porta em memória; integração; `fetch` simulado.
+- **SPEC:** `SPEC/2026-11-01-notificacoes-email-preferencias.md`.
+
+### SF-095 — Seção "E-mails" na administração
+
+- **Estado:** Não iniciada.
+- **Objetivo:** Situação da configuração e os 50 envios mais recentes, sem conteúdo, só para o administrador.
+- **Arquivos/módulos esperados:** `src/modules/notifications/`, `src/app/(admin)/admin/`, testes.
+- **Dependências:** SF-094.
+- **Critérios de conclusão:** CA-MAIL-09.
+- **Testes relacionados:** Unitários; integração da autorização.
+- **SPEC:** `SPEC/2026-11-01-notificacoes-email-preferencias.md`.
+
+### SF-096 — E2E e revisão das notificações por e-mail
+
+- **Estado:** Não iniciada.
+- **Objetivo:** E2E da seção 8; revisão e documentação.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-095.
+- **Critérios de conclusão:** Todos os CA-MAIL-01 a 10 registrados.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-01-notificacoes-email-preferencias.md`.
