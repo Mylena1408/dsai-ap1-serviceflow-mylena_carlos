@@ -47,6 +47,7 @@ Todas exigem escopo `write` (`403 insufficient_scope` com token de leitura) e re
 | `POST /api/v1/requests/{id}/reopen` | Solicitante, até 7 dias depois da conclusão | `{"note"}` (obrigatório) | reabrir |
 
 - O que a pessoa não pode ler é `404`; o que ela lê mas não pode fazer é `403 forbidden`; uma ação fora do estado (iniciar algo já iniciado, cancelar algo concluído) é `409 conflict`; motivo ausente ou longo demais é `400 invalid_request`.
+- *Esclarecido em 2026-11-03 (SF-117):* a API devolve o que o caso de uso da tela decide. Iniciar e concluir por quem não é atendente do setor é `404` (regra da SPEC principal, que não revela a solicitação), mesmo para o solicitante que a lê; a lista de candidatos é `403 forbidden` para quem não é atendente; liberar ou transferir sem ser o responsável é `409 conflict`, como na tela. Ação sem corpo aceita corpo vazio; chave desconhecida no corpo é `400`.
 - Cada ação grava o mesmo histórico, eventos da outbox e notificações da tela, e o processamento de eventos roda logo após a resposta.
 - A aprovação pendente continua impedindo o início (`409`), como na tela.
 
@@ -79,13 +80,13 @@ Migration **aditiva**: `WebhookEndpoint.sectorIds` (lista de UUID, padrão vazia
 ## 7. Critérios de aceitação
 
 - [ ] **CA-ACT-01** — Sem usar as rotas novas e sem marcar setores, nada muda: suítes anteriores passam sem alteração de asserções; webhook antigo continua recebendo de todos os setores.
-- [ ] **CA-ACT-02** — Iniciar, concluir, assumir, liberar e transferir pela API seguem as regras da tela (setor, responsável, supervisão, aprovação pendente) e gravam o mesmo histórico e os mesmos eventos.
-- [ ] **CA-ACT-03** — Cancelar e reabrir pela API seguem as regras da tela (solicitante só com a aberta; atendente com motivo; reabrir em até 7 dias com motivo).
-- [ ] **CA-ACT-04** — As respostas seguem o formato da v1: `403 insufficient_scope` com token de leitura, `404` para o que não se lê, `403 forbidden` para o que não se pode fazer, `409` fora do estado, `400` sem motivo; sucesso devolve o detalhe atualizado.
-- [ ] **CA-ACT-05** — A lista de candidatos à transferência traz só atendentes ativos do setor, sem o responsável atual nem quem pede.
+- [x] **CA-ACT-02** — Iniciar, concluir, assumir, liberar e transferir pela API seguem as regras da tela (setor, responsável, supervisão, aprovação pendente) e gravam o mesmo histórico e os mesmos eventos. *Verificado em 2026-11-03 (SF-117): o Diego assume, inicia e conclui pela API com o mesmo histórico (status e atribuição), eventos na outbox e processamento logo após a resposta; transfere para uma colega do setor e, sem ser mais o responsável, não libera (`409`); a aprovação pendente impede o início (`409`) (integração).*
+- [x] **CA-ACT-03** — Cancelar e reabrir pela API seguem as regras da tela (solicitante só com a aberta; atendente com motivo; reabrir em até 7 dias com motivo). *Verificado em 2026-11-03 (SF-117): a Ana cancela a própria solicitação aberta sem motivo e não cancela de novo (`409`); o Diego só cancela com motivo (`400` sem), e o motivo entra no histórico; a Ana reabre uma solicitação concluída na hora, com motivo (`400` sem), e não reabre uma concluída há mais de 7 dias (`409`) (integração).*
+- [x] **CA-ACT-04** — As respostas seguem o formato da v1: `403 insufficient_scope` com token de leitura, `404` para o que não se lê, `403 forbidden` para o que não se pode fazer, `409` fora do estado, `400` sem motivo; sucesso devolve o detalhe atualizado. *Verificado em 2026-11-03 (SF-117): token de leitura `403 insufficient_scope`; solicitação que a pessoa não lê `404`; quem lê mas não atende recebe o que a tela decide (`404` para iniciar, conforme o esclarecimento da seção 5.1); ação repetida `409`; id inválido e chave desconhecida `400`; sucesso devolve o detalhe atualizado (integração).*
+- [x] **CA-ACT-05** — A lista de candidatos à transferência traz só atendentes ativos do setor, sem o responsável atual nem quem pede. *Verificado em 2026-11-03 (SF-117): a lista traz a colega ativa do setor, sem o próprio Diego; para a Ana, `403` (integração).*
 - [ ] **CA-ACT-06** — Webhook com setores marcados só recebe eventos de solicitações desses setores; sem setores, recebe de todos; setor inexistente é recusado; a mudança aparece na auditoria.
 - [ ] **CA-ACT-07** — O administrador reenvia uma entrega falha ou cancelada de webhook ativo, que volta a pendente com as tentativas zeradas e é enviada com o mesmo identificador e assinatura válida; entrega pendente ou entregue, ou de webhook inativo, é recusada.
-- [ ] **CA-ACT-08** — O OpenAPI descreve as rotas novas (o teste de correspondência continua passando); o README explica as ações e o filtro por setor.
+- [ ] **CA-ACT-08** — O OpenAPI descreve as rotas novas (o teste de correspondência continua passando); o README explica as ações e o filtro por setor. *Parcial em 2026-11-03 (SF-117): o OpenAPI descreve as 8 rotas novas e o teste de correspondência passa; o README fica para a SF-119.*
 - [ ] **CA-ACT-09** — Nenhuma dependência nova; uma migration aditiva. *Parcial em 2026-11-03 (SF-116): migration `20261103100000_webhook_sectors` só acrescenta a coluna (lista vazia nos webhooks existentes, que continuam recebendo de todos os setores) e uma restrição; conferência final na SF-119.*
 
 ## 8. Estratégia de testes

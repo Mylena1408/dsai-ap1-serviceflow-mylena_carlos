@@ -3,12 +3,19 @@ import type { ApiUser } from "@/modules/api-tokens";
 import { addComment, listComments } from "@/modules/comments";
 import { listPublishedServiceRequirements } from "@/modules/document-requirements";
 import {
+  assumeRequest,
+  cancelRequest,
   createRequest,
   effectiveAssigneeId,
   getAttendantRequest,
   getManagerRequest,
   getRequesterRequest,
   listManagerApprovals,
+  listTransferCandidates,
+  releaseRequest,
+  reopenRequest,
+  transferRequest,
+  transitionRequestStatus,
   listRequestAttachments,
   listRequestFieldAnswers,
   searchAttendantQueue,
@@ -210,4 +217,59 @@ export async function commentOnRequest(caller: ApiCaller, requestId: string, bod
   const input = validateInput(commentSchema, body);
   const comment = await addComment({ requestId, body: input.body, isInternal: input.internal ?? false });
   return { status: 201, body: commentRepresentation(comment), recordedEvents: true };
+}
+
+// Actions of the attendance (SPEC 2026-11-03-api-acoes-webhooks-setor, 5.1; decision W1). Each one
+// calls the use case of the screen, which checks sector, assignee, supervision and state; the
+// answer is the updated detail.
+
+export type RequestAction = "start" | "complete" | "assume" | "release" | "transfer" | "cancel" | "reopen";
+
+const emptySchema = z.object({}).strict();
+const transferSchema = z.object({ assigneeId: z.string() }).strict();
+const noteSchema = z.object({ note: z.string().optional() }).strict();
+const requiredNoteSchema = z.object({ note: z.string() }).strict();
+
+export async function runRequestAction(
+  caller: ApiCaller,
+  requestId: string,
+  action: RequestAction,
+  body: unknown,
+  now: Date,
+): Promise<ApiResult> {
+  requireRole(caller, "REQUESTER", "ATTENDANT", "MANAGER");
+
+  switch (action) {
+    case "start":
+    case "complete":
+      validateInput(emptySchema, body);
+      await transitionRequestStatus({ requestId, toStatus: action === "start" ? "IN_PROGRESS" : "COMPLETED" });
+      break;
+    case "assume":
+      validateInput(emptySchema, body);
+      await assumeRequest({ requestId });
+      break;
+    case "release":
+      validateInput(emptySchema, body);
+      await releaseRequest({ requestId });
+      break;
+    case "transfer":
+      await transferRequest({ requestId, assigneeId: validateInput(transferSchema, body).assigneeId });
+      break;
+    case "cancel":
+      await cancelRequest({ requestId, ...validateInput(noteSchema, body) });
+      break;
+    case "reopen":
+      await reopenRequest({ requestId, note: validateInput(requiredNoteSchema, body).note });
+      break;
+  }
+
+  return { status: 200, body: await loadDetail(caller, requestId, now), recordedEvents: true };
+}
+
+/** Who may receive a transfer (5.1): active attendants of the sector, as on the screen. */
+export async function transferCandidates(caller: ApiCaller, requestId: string): Promise<ApiResult> {
+  requireRole(caller, "ATTENDANT");
+  const candidates = await listTransferCandidates(requestId);
+  return { status: 200, body: { items: candidates.map(({ id, name }) => ({ id, name })) } };
 }

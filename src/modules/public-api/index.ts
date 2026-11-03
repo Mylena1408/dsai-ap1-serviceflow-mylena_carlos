@@ -1,6 +1,6 @@
 import * as endpoints from "./application/endpoints";
 import { OPENAPI_DOCUMENT } from "./domain/openapi";
-import { apiJson, handleApiCall, jsonBody } from "./infrastructure/http";
+import { apiJson, handleApiCall, jsonBody, optionalJsonBody } from "./infrastructure/http";
 
 // Public API of the /api/v1 module (SPEC 2026-11-02-api-externa-webhooks, 5.3 and 5.4). The route
 // files only point at these handlers.
@@ -45,6 +45,29 @@ export async function getRequest(request: Request, { params }: RequestRouteConte
 export async function postComment(request: Request, { params }: RequestRouteContext): Promise<Response> {
   const { requestId } = await params;
   return handleApiCall(request, async (caller) => endpoints.commentOnRequest(caller, requestId, await jsonBody(request)));
+}
+
+function action(name: endpoints.RequestAction) {
+  return async (request: Request, { params }: RequestRouteContext): Promise<Response> => {
+    const { requestId } = await params;
+    return handleApiCall(request, async (caller, now) =>
+      endpoints.runRequestAction(caller, requestId, name, await optionalJsonBody(request), now),
+    );
+  };
+}
+
+// SPEC 2026-11-03-api-acoes-webhooks-setor, 5.1 (decision W1).
+export const postStart = action("start");
+export const postComplete = action("complete");
+export const postAssume = action("assume");
+export const postRelease = action("release");
+export const postTransfer = action("transfer");
+export const postCancel = action("cancel");
+export const postReopen = action("reopen");
+
+export async function getTransferCandidates(request: Request, { params }: RequestRouteContext): Promise<Response> {
+  const { requestId } = await params;
+  return handleApiCall(request, (caller) => endpoints.transferCandidates(caller, requestId));
 }
 
 /** Public, without token (5.4). */

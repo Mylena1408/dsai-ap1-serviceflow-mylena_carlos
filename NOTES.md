@@ -1598,3 +1598,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ambiente:** o typecheck acusou um erro em `.next/dev/types/validator.ts`, arquivo gerado pelo `next dev` que ficou truncado (provavelmente o servidor do E2E foi encerrado no meio da escrita). É ignorado pelo Git e recriado pelo servidor; a pasta `.next/dev/types` foi apagada e o typecheck voltou a passar. Nenhum arquivo do projeto mudou por isso.
 - **Testes novos:** unitário `tests/unit/modules/webhooks/sectors-resend.test.ts`; caso novo em `tests/integration/api-webhook-schema.test.ts` (arquivo criado pela SPEC anterior).
 - **Resultados:** lint, typecheck e build OK; unitários 787/787; integração 347/347 + 1 pulado; E2E 19/19.
+
+## SF-117 — Rotas de ação da API (2026-11-03)
+
+- **Implementação:** `runRequestAction` chama `transitionRequestStatus`, `assumeRequest`, `releaseRequest`, `transferRequest`, `cancelRequest` e `reopenRequest` com os corpos validados (`{}`, `{assigneeId}`, `{note?}`, `{note}`, sempre `strict`) e devolve o detalhe atualizado; `transferCandidates` usa `listTransferCandidates`. Ação sem corpo aceita corpo vazio (`optionalJsonBody`). Cada ação marca `recordedEvents`, então o processamento roda logo após a resposta. Os arquivos `route.ts` só apontam para os handlers do módulo.
+- **Esclarecimento na SPEC (5.1):** a primeira versão dizia que "o que a pessoa lê mas não pode fazer é 403". A regra da tela, mantida pela API, responde **404** para iniciar ou concluir quando quem pede não é atendente do setor (SPEC principal, não revela a solicitação); liberar ou transferir sem ser o responsável é 409. A API não cria regra nova, então a SPEC foi corrigida e o teste ficou exato.
+- **OpenAPI:** 8 operações novas com o mesmo formato (`actionOperation`); o teste de correspondência entre arquivos de rota e documento passou sem mudança.
+- **Testes novos:** integração `tests/integration/public-api-actions.test.ts` (4 cenários sobre os dados fictícios, com a autorização real).
+- **Resultados:** lint, typecheck e build OK; unitários 787/787; integração 351/351 + 1 pulado; E2E 19/19.

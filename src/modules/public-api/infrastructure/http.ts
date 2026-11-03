@@ -38,6 +38,17 @@ function errorAnswer(error: unknown): Response {
   return apiError("internal_error");
 }
 
+/** Body of an action that may come without one (5.1): no body counts as `{}`. */
+export async function optionalJsonBody(request: Request): Promise<unknown> {
+  const text = await request.text();
+  if (text.trim() === "") return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new ValidationError([{ path: [], code: "invalid_format" }]);
+  }
+}
+
 /** JSON body of a POST: anything that does not parse is an invalid request. */
 export async function jsonBody(request: Request): Promise<unknown> {
   try {

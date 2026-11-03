@@ -16,6 +16,15 @@ export const API_V1_OPERATIONS: readonly ApiOperation[] = [
   { method: "post", path: "/api/v1/requests", scope: "WRITE" },
   { method: "get", path: "/api/v1/requests/{requestId}", scope: "READ" },
   { method: "post", path: "/api/v1/requests/{requestId}/comments", scope: "WRITE" },
+  // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.1 (decision W1).
+  { method: "post", path: "/api/v1/requests/{requestId}/start", scope: "WRITE" },
+  { method: "post", path: "/api/v1/requests/{requestId}/complete", scope: "WRITE" },
+  { method: "post", path: "/api/v1/requests/{requestId}/assume", scope: "WRITE" },
+  { method: "post", path: "/api/v1/requests/{requestId}/release", scope: "WRITE" },
+  { method: "post", path: "/api/v1/requests/{requestId}/transfer", scope: "WRITE" },
+  { method: "get", path: "/api/v1/requests/{requestId}/transfer-candidates", scope: "READ" },
+  { method: "post", path: "/api/v1/requests/{requestId}/cancel", scope: "WRITE" },
+  { method: "post", path: "/api/v1/requests/{requestId}/reopen", scope: "WRITE" },
   { method: "get", path: "/api/v1/openapi.json", scope: null },
 ];
 
@@ -52,6 +61,29 @@ function errors(...codes: Array<(typeof API_ERROR_CODES)[number]>) {
 }
 
 const requestIdParameter = { name: "requestId", in: "path", required: true, schema: { type: "string", format: "uuid" } };
+
+/** An action of the attendance (SPEC 2026-11-03-api-acoes-webhooks-setor, 5.1). */
+function actionOperation(summary: string, description: string, body?: object) {
+  return {
+    post: {
+      summary,
+      description: `${description} Mesmas regras da tela. Responde com o detalhe atualizado. Escopo: WRITE.`,
+      parameters: [requestIdParameter],
+      ...(body ? { requestBody: { required: true, content: json(body) } } : {}),
+      responses: {
+        "200": { description: "A solicitação atualizada", content: json(ref("RequestDetail")) },
+        ...errors("invalid_request", "insufficient_scope", "forbidden", "not_found", "conflict"),
+      },
+    },
+  };
+}
+
+const noteBody = (required: boolean) => ({
+  type: "object",
+  additionalProperties: false,
+  ...(required ? { required: ["note"] } : {}),
+  properties: { note: { type: "string", maxLength: 1000 } },
+});
 
 export const OPENAPI_DOCUMENT = {
   openapi: "3.1.0",
@@ -153,6 +185,32 @@ export const OPENAPI_DOCUMENT = {
         },
       },
     },
+    "/api/v1/requests/{requestId}/start": actionOperation("Iniciar o atendimento", "Atendente do setor; com responsável, só ele; com aprovação pendente, 409."),
+    "/api/v1/requests/{requestId}/complete": actionOperation("Concluir", "Atendente do setor; com responsável, só ele."),
+    "/api/v1/requests/{requestId}/assume": actionOperation("Assumir", "Atendente do setor, quando não há responsável efetivo."),
+    "/api/v1/requests/{requestId}/release": actionOperation("Liberar", "O responsável ou quem supervisiona a fila do setor."),
+    "/api/v1/requests/{requestId}/transfer": actionOperation(
+      "Transferir",
+      "O responsável ou quem supervisiona a fila, para um atendente ativo do setor (veja transfer-candidates).",
+      { type: "object", additionalProperties: false, required: ["assigneeId"], properties: { assigneeId: { type: "string", format: "uuid" } } },
+    ),
+    "/api/v1/requests/{requestId}/transfer-candidates": {
+      get: {
+        summary: "Para quem se pode transferir",
+        description: "Atendentes ativos do setor, sem o responsável atual nem quem pede. Escopo: READ.",
+        parameters: [requestIdParameter],
+        responses: {
+          "200": { description: "Candidatos", content: json({ type: "object", required: ["items"], properties: { items: { type: "array", items: person } } }) },
+          ...errors("invalid_request", "forbidden", "not_found"),
+        },
+      },
+    },
+    "/api/v1/requests/{requestId}/cancel": actionOperation(
+      "Cancelar",
+      "Solicitante, só com a solicitação aberta (motivo opcional); atendente do setor, com motivo obrigatório.",
+      noteBody(false),
+    ),
+    "/api/v1/requests/{requestId}/reopen": actionOperation("Reabrir", "Solicitante, até 7 dias depois da conclusão, com motivo.", noteBody(true)),
     "/api/v1/openapi.json": {
       get: {
         summary: "Este documento",

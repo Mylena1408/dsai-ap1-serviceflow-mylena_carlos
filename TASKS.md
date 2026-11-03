@@ -1254,7 +1254,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-117 — Rotas de ação da API
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Rotas `start`, `complete`, `assume`, `release`, `transfer`, `cancel`, `reopen` e `transfer-candidates` sobre os casos de uso da tela (`runRequestAction` e `transferCandidates` no módulo `public-api`), corpo opcional nas ações sem dados, OpenAPI com as 8 operações. CA-ACT-02 a 05 verificados; CA-ACT-08 parcial.
 - **Objetivo:** Rotas `start`, `complete`, `assume`, `release`, `transfer`, `cancel`, `reopen` e `transfer-candidates` sobre os casos de uso da tela, com o formato da v1 e o OpenAPI.
 - **Arquivos/módulos esperados:** `src/modules/public-api/`, `src/app/api/v1/requests/[requestId]/`, testes.
 - **Dependências:** SF-116.
