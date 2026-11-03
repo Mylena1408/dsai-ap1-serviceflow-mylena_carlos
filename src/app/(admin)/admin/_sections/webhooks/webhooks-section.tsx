@@ -1,6 +1,19 @@
-import { MAX_WEBHOOKS, WEBHOOK_ENV_NAMES, WEBHOOK_EVENT_LABELS, type WebhookDeliveryRecord, type WebhookOverview } from "@/modules/webhooks";
-import { createWebhookAction, rotateWebhookSecretAction, setWebhookActiveAction, updateWebhookAction } from "./actions";
-import { WebhookCreateForm, WebhookRotateForm } from "./webhook-forms";
+import {
+  MAX_WEBHOOKS,
+  WEBHOOK_ENV_NAMES,
+  WEBHOOK_EVENT_LABELS,
+  canResendWebhookDelivery,
+  type WebhookDeliveryRecord,
+  type WebhookOverview,
+} from "@/modules/webhooks";
+import {
+  createWebhookAction,
+  resendWebhookDeliveryAction,
+  rotateWebhookSecretAction,
+  setWebhookActiveAction,
+  updateWebhookAction,
+} from "./actions";
+import { WebhookCreateForm, WebhookRotateForm, WebhookSectorOptions } from "./webhook-forms";
 
 // "Webhooks" (SPEC 2026-11-02-api-externa-webhooks, 5.6; decision A5): registration by the
 // administrator, whether the key is configured (by its name, never its value) and the latest
@@ -25,6 +38,12 @@ const ERROR_LABELS: Record<string, string> = {
 
 function errorLabel(code: string): string {
   return ERROR_LABELS[code] ?? (code.startsWith("HTTP_") ? `resposta ${code.slice(5)}` : code);
+}
+
+/** SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2. */
+function sectorNames(sectorIds: readonly string[], sectors: WebhookOverview["sectors"]): string {
+  if (sectorIds.length === 0) return "Todos os setores";
+  return sectorIds.map((id) => sectors.find((sector) => sector.id === id)?.name ?? "(setor removido)").join(", ");
 }
 
 function eventLabel(type: string): string {
@@ -56,7 +75,7 @@ export function WebhooksSection({ overview }: { overview: WebhookOverview }) {
           : `Webhooks não configurados: nada é cadastrado nem enviado. Configure ${WEBHOOK_ENV_NAMES.join(", ")} no ambiente do servidor.`}
       </p>
 
-      <WebhookCreateForm action={createWebhookAction} disabled={disabled} events={EVENTS} />
+      <WebhookCreateForm action={createWebhookAction} disabled={disabled} events={EVENTS} sectors={overview.sectors} />
 
       {overview.webhooks.length === 0 ? (
         <p className="empty-state">Nenhum webhook cadastrado.</p>
@@ -72,6 +91,7 @@ export function WebhooksSection({ overview }: { overview: WebhookOverview }) {
                 <div className="entity-details">
                   <span>{webhook.url}</span>
                   <span>{webhook.eventTypes.map(eventLabel).join(", ")}</span>
+                  <span>{sectorNames(webhook.sectorIds, overview.sectors)}</span>
                 </div>
                 <details>
                   <summary>Editar</summary>
@@ -94,6 +114,7 @@ export function WebhooksSection({ overview }: { overview: WebhookOverview }) {
                         </label>
                       ))}
                     </fieldset>
+                    <WebhookSectorOptions checked={webhook.sectorIds} sectors={overview.sectors} />
                     <button type="submit">Salvar</button>
                   </form>
                 </details>
@@ -129,6 +150,14 @@ export function WebhooksSection({ overview }: { overview: WebhookOverview }) {
                 {delivery.attempts === 1 ? "tentativa" : "tentativas"}
                 {delivery.lastErrorCode ? ` · ${errorLabel(delivery.lastErrorCode)}` : ""}
               </p>
+              {canResendWebhookDelivery(delivery, { isActive: delivery.webhookActive }) ? (
+                <form action={resendWebhookDeliveryAction} className="entity-actions">
+                  <input name="deliveryId" type="hidden" value={delivery.id} />
+                  <button className="button-secondary" type="submit">
+                    Reenviar
+                  </button>
+                </form>
+              ) : null}
             </li>
           ))}
         </ul>

@@ -13,6 +13,10 @@ export function announcement(error?: string, notice?: string, entity?: string): 
     return "Usuários inativos não recebem permissões.";
   }
   // SPEC 2026-11-02-auditoria-lgpd, 5.5.1 and 5.5.2: conditions and explicit confirmation.
+  // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.3: only failed or cancelled deliveries of active webhooks.
+  if (error === "dependency" && entity === "webhookDeliveries") {
+    return "Só é possível reenviar entregas que falharam ou foram canceladas, de webhooks ativos.";
+  }
   // SPEC 2026-11-02-api-externa-webhooks, 5.6: limit of active webhooks.
   if (error === "dependency" && entity === "webhooks") {
     return "Já há 10 webhooks ativos. Desative um antes de reativar este.";
@@ -49,6 +53,8 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (notice === "updated") return "Alterações salvas.";
   if (notice === "status") return "Estado atualizado.";
   if (notice === "anonymized") return "Pessoa anonimizada.";
+  // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.3.
+  if (notice === "resent" && entity === "webhookDeliveries") return "Entrega reenviada. Ela sai logo em seguida.";
   // SPEC 2026-11-02-api-externa-webhooks, 5.1: revocation counts on the next call.
   if (notice === "revoked" && entity === "apiTokens") return "Token revogado. Ele deixa de funcionar na próxima chamada.";
   return null;

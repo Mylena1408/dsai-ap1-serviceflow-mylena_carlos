@@ -17,6 +17,7 @@ const recordSelect = {
   name: true,
   url: true,
   eventTypes: true,
+  sectorIds: true,
   isActive: true,
   createdAt: true,
   updatedAt: true,
@@ -45,6 +46,21 @@ function createPrismaWebhookTransaction(transaction: Prisma.TransactionClient): 
     },
     update(webhookId, changes) {
       return transaction.webhookEndpoint.update({ where: { id: webhookId }, data: changes, select: { id: true } });
+    },
+    async existingSectorIds() {
+      return (await transaction.sector.findMany({ select: { id: true } })).map(({ id }) => id);
+    },
+    findDelivery(deliveryId) {
+      return transaction.webhookDelivery.findUnique({
+        where: { id: deliveryId },
+        select: { id: true, status: true, endpoint: { select: { isActive: true } } },
+      });
+    },
+    async requeueDelivery(deliveryId, at) {
+      await transaction.webhookDelivery.update({
+        where: { id: deliveryId },
+        data: { status: "PENDING", attempts: 0, availableAt: at, lastErrorCode: null, deliveredAt: null },
+      });
     },
     async cancelPending(webhookId) {
       const result = await transaction.webhookDelivery.updateMany({
@@ -87,10 +103,13 @@ export function createPrismaWebhookReader(database: PrismaClient): WebhookReader
           lastErrorCode: true,
           createdAt: true,
           deliveredAt: true,
-          endpoint: { select: { name: true } },
+          endpoint: { select: { name: true, isActive: true } },
         },
       });
-      return rows.map(({ endpoint, ...row }) => ({ ...row, webhookName: endpoint.name }));
+      return rows.map(({ endpoint, ...row }) => ({ ...row, webhookName: endpoint.name, webhookActive: endpoint.isActive }));
+    },
+    sectors() {
+      return database.sector.findMany({ select: { id: true, name: true, isActive: true }, orderBy: [{ isActive: "desc" }, { name: "asc" }] });
     },
   };
 }
@@ -98,7 +117,13 @@ export function createPrismaWebhookReader(database: PrismaClient): WebhookReader
 export function createPrismaWebhookDeliveryStore(database: PrismaClient): WebhookDeliveryStore {
   return {
     subscribers(eventType) {
-      return database.webhookEndpoint.findMany({ where: { isActive: true, eventTypes: { has: eventType } }, select: { id: true } });
+      return database.webhookEndpoint.findMany({
+        where: { isActive: true, eventTypes: { has: eventType } },
+        select: { id: true, sectorIds: true },
+      });
+    },
+    async requestSector(requestId) {
+      return (await database.request.findUnique({ where: { id: requestId }, select: { sectorId: true } }))?.sectorId ?? null;
     },
     async register(deliveries) {
       await database.webhookDelivery.createMany({

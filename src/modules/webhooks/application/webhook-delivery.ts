@@ -1,5 +1,5 @@
 import type { ClaimedEvent, EventConsumer } from "@/modules/events";
-import { webhookBody, webhookFailureCode, webhookRetryPlan } from "../domain/delivery";
+import { webhookAcceptsSector, webhookBody, webhookFailureCode, webhookRetryPlan } from "../domain/delivery";
 import { decryptWebhookSecret, webhookSignature } from "../domain/secret";
 import type { PendingWebhookDelivery, WebhookDeliveryStore, WebhookDeliveryUpdate, WebhookTransport } from "./ports";
 
@@ -31,7 +31,12 @@ export function createWebhookConsumer(store: WebhookDeliveryStore, configured: (
     name: "webhooks",
     async handle(event: ClaimedEvent) {
       if (!configured()) return;
-      const subscribers = await store.subscribers(event.type);
+      let subscribers = await store.subscribers(event.type);
+      // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2: the sector is read only when a webhook filters.
+      if (subscribers.some(({ sectorIds }) => sectorIds.length > 0)) {
+        const sectorId = await store.requestSector(event.requestId);
+        subscribers = subscribers.filter(({ sectorIds }) => sectorId !== null && webhookAcceptsSector(sectorIds, sectorId));
+      }
       if (subscribers.length === 0) return;
 
       const body = webhookBody({ id: event.id, type: event.type, occurredAt: event.occurredAt, requestId: event.requestId, payload: event.payload });

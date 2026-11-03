@@ -42,6 +42,10 @@ export function auditValueFormatter(names: Record<string, string>) {
     if (field === "eventTypes" && Array.isArray(value)) {
       return value.map((type) => (WEBHOOK_EVENT_LABELS as Record<string, string>)[type] ?? type).join(", ");
     }
+    // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2: the sectors of a webhook by their names.
+    if (field === "sectorIds" && Array.isArray(value)) {
+      return value.length === 0 ? "Todos os setores" : value.map((id) => names[id] ?? "(removido)").join(", ");
+    }
     if (typeof value !== "string") return undefined;
     if (field === "sectorId" || field === "categoryId") return names[value] ?? "(removido)";
     if (field === "role") return ROLE_LABELS[value as keyof typeof ROLE_LABELS];

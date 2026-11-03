@@ -1606,3 +1606,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **OpenAPI:** 8 operações novas com o mesmo formato (`actionOperation`); o teste de correspondência entre arquivos de rota e documento passou sem mudança.
 - **Testes novos:** integração `tests/integration/public-api-actions.test.ts` (4 cenários sobre os dados fictícios, com a autorização real).
 - **Resultados:** lint, typecheck e build OK; unitários 787/787; integração 351/351 + 1 pulado; E2E 19/19.
+
+## SF-118 — Webhooks por setor e reenvio (2026-11-03)
+
+- **Cadastro:** `sectorIds` opcional no formulário; repetidos são removidos e setor inexistente é recusado no caminho `sectorIds` (caminho público acrescentado em `src/server/errors`). A visão geral passa a trazer a lista de setores (inclusive inativos, marcados como tal) para os checkboxes.
+- **Consumidor:** filtra os assinantes pelo setor da solicitação. O setor só é lido quando algum webhook filtra, para não acrescentar consulta a quem não usa o filtro (CA-ACT-01).
+- **Reenvio:** `resendWebhookDelivery` exige administrador, recusa entrega pendente, entregue ou de webhook inativo (`ConflictError`) e devolve a entrega à fila (pendente, 0 tentativas, sem erro). Não é auditado: não muda configuração, e a própria entrega já registra o resultado. A ação da tela agenda o processamento logo em seguida. A mensagem de recusa ganhou uma entidade própria (`webhookDeliveries`) porque a primeira versão reaproveitava a de webhooks e mostrava o aviso do limite de 10 ativos.
+- **Auditoria:** "Setores" entre os campos auditados do webhook; a tela mostra "Todos os setores" ou os nomes.
+- **Teste anterior ajustado:** os dublês de `tests/unit/modules/webhooks/use-cases.test.ts` (SPEC anterior) ganharam os métodos e campos novos das portas; nenhuma asserção mudou.
+- **Testes novos:** unitário `tests/unit/modules/webhooks/sectors-actions.test.ts`; integração `tests/integration/webhook-sectors.test.ts` (receptor HTTP local, assinatura conferida).
+- **Verificação no navegador:** não feita nesta tarefa; fica coberta pelo E2E da SF-119.
+- **Resultados:** lint, typecheck e build OK; unitários 791/791; integração 354/354 + 1 pulado; E2E 19/19.

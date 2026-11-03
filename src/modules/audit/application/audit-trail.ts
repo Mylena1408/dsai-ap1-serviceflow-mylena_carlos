@@ -41,8 +41,9 @@ function referencedIds(items: readonly AuditTrailItem[]): string[] {
   for (const item of items) {
     if (item.kind !== "change") continue;
     for (const change of item.changes) {
-      if ("personal" in change || (change.field !== "sectorId" && change.field !== "categoryId")) continue;
-      for (const value of [change.before, change.after]) {
+      if ("personal" in change || !["sectorId", "categoryId", "sectorIds"].includes(change.field)) continue;
+      // "sectorIds" of a webhook is a list (SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2).
+      for (const value of [change.before, change.after].flatMap((item) => (Array.isArray(item) ? item : [item]))) {
         if (typeof value === "string" && entityIdSchema.safeParse(value).success) ids.add(value);
       }
     }

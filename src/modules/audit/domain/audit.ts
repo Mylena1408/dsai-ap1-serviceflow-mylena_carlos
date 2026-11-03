@@ -106,6 +106,7 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   revokedAt: "Revogado em",
   url: "Endereço",
   eventTypes: "Eventos",
+  sectorIds: "Setores",
 };
 
 function normalize(value: AuditInputValue): AuditValue {
@@ -174,7 +175,7 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   SERVICE_STAGE: ["name", "position", "isActive"],
   // Never the token value, its hash or the webhook secret (SPEC 2026-11-02-api-externa-webhooks, 5.7).
   API_TOKEN: ["name", "scope", "expiresAt", "revokedAt"],
-  WEBHOOK: ["name", "url", "eventTypes", "isActive"],
+  WEBHOOK: ["name", "url", "eventTypes", "sectorIds", "isActive"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

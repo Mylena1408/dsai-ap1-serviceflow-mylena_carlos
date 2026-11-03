@@ -1264,7 +1264,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-118 — Webhooks por setor e reenvio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Setores no cadastro e na edição (nenhum marcado = todos), auditados com os nomes; o consumidor só registra entregas para webhooks que aceitam o setor da solicitação (lê o setor só quando algum webhook filtra); `resendWebhookDelivery` e botão "Reenviar" nas entregas falhas ou canceladas de webhook ativo. CA-ACT-06 e 07 verificados por unitários e integração; a verificação no navegador passa para o E2E da SF-119.
 - **Objetivo:** Setores no cadastro e na edição do webhook (auditados pelos nomes), filtro no consumidor e botão "Reenviar" nas entregas falhas ou canceladas.
 - **Arquivos/módulos esperados:** `src/modules/webhooks/`, seção "Webhooks", testes.
 - **Dependências:** SF-117.

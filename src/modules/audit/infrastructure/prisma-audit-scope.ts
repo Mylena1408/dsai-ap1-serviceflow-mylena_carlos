@@ -89,7 +89,7 @@ async function loadState(
     case "WEBHOOK": {
       const row = await transaction.webhookEndpoint.findUnique({
         where: { id },
-        select: { name: true, url: true, eventTypes: true, isActive: true },
+        select: { name: true, url: true, eventTypes: true, sectorIds: true, isActive: true },
       });
       return row && { label: row.name, state: row };
     }

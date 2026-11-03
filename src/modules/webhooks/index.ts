@@ -33,7 +33,7 @@ export {
   parseWebhookEncryptionKey,
   webhookSignature,
 } from "./domain/secret";
-export type { WebhookDeliveryRecord, WebhookRecord } from "./application/ports";
+export type { WebhookDeliveryRecord, WebhookRecord, WebhookSectorOption } from "./application/ports";
 export type { WebhookOverview, WebhookWithSecret } from "./application/webhook-admin";
 export type { WebhookRunSummary } from "./application/webhook-delivery";
 export { WEBHOOK_ENV_NAMES } from "./infrastructure/http-webhook-transport";
@@ -67,6 +67,11 @@ export async function updateWebhook(input: unknown, database: PrismaClient = pri
 
 export async function setWebhookActive(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return admin.setWebhookActive(input, deps(database));
+}
+
+/** SPEC 2026-11-03-api-acoes-webhooks-setor, 5.3. */
+export async function resendWebhookDelivery(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return admin.resendWebhookDelivery(input, deps(database));
 }
 
 export async function rotateWebhookSecret(input: unknown, database: PrismaClient = prisma): Promise<admin.WebhookWithSecret> {

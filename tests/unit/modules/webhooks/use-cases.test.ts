@@ -29,7 +29,7 @@ function memory(state: { active?: number; webhook?: Partial<WebhookRecord> | nul
   const existing: WebhookRecord | null =
     state.webhook === null
       ? null
-      : { id: webhookId, name: "Portal", url: form.url, eventTypes: ["request.opened"], isActive: true, createdAt: now, updatedAt: now, ...state.webhook };
+      : { id: webhookId, name: "Portal", url: form.url, eventTypes: ["request.opened"], sectorIds: [], isActive: true, createdAt: now, updatedAt: now, ...state.webhook };
   const transaction: WebhookTransaction = {
     async audited(meta, change) {
       audits.push(meta);
@@ -46,6 +46,10 @@ function memory(state: { active?: number; webhook?: Partial<WebhookRecord> | nul
       writes.push({ kind: "update", data });
       return { id };
     },
+    // SPEC 2026-11-03-api-acoes-webhooks-setor: ports added later, tested in sectors-actions.test.ts.
+    existingSectorIds: async () => [],
+    findDelivery: async () => null,
+    requeueDelivery: async () => undefined,
     cancelPending: async () => {
       writes.push({ kind: "cancel", data: webhookId });
       return 2;
@@ -118,7 +122,8 @@ describe("webhook deliveries (CA-API-11)", () => {
     const registered: unknown[] = [];
     const saved: Array<{ id: string; update: WebhookDeliveryUpdate }> = [];
     const delivery: WebhookDeliveryStore = {
-      subscribers: async (type) => (type === "request.opened" ? [{ id: "w1" }, { id: "w2" }] : []),
+      subscribers: async (type) => (type === "request.opened" ? [{ id: "w1", sectorIds: [] }, { id: "w2", sectorIds: [] }] : []),
+      requestSector: async () => null,
       register: async (rows) => {
         registered.push(...rows);
       },

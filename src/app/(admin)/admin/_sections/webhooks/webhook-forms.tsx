@@ -34,13 +34,41 @@ function SecretOnce({ state }: { state: WebhookSecretState }) {
   );
 }
 
+export type SectorChoice = { id: string; name: string; isActive: boolean };
+
+/** Sectors of a webhook (SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2): none checked = every sector. */
+export function WebhookSectorOptions({
+  sectors,
+  checked = [],
+  disabled = false,
+}: {
+  sectors: readonly SectorChoice[];
+  checked?: readonly string[];
+  disabled?: boolean;
+}) {
+  return (
+    <fieldset className="format-options" disabled={disabled}>
+      <legend>Setores (nenhum marcado = todos)</legend>
+      {sectors.map((sector) => (
+        <label className="checkbox-field" key={sector.id}>
+          <input defaultChecked={checked.includes(sector.id)} name="sectorIds" type="checkbox" value={sector.id} />
+          {sector.name}
+          {sector.isActive ? "" : " (inativo)"}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
 export function WebhookCreateForm({
   action,
   events,
+  sectors,
   disabled,
 }: {
   action: SecretAction;
   events: ReadonlyArray<{ type: string; label: string }>;
+  sectors: readonly SectorChoice[];
   disabled: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -71,6 +99,7 @@ export function WebhookCreateForm({
             </label>
           ))}
         </fieldset>
+        <WebhookSectorOptions disabled={disabled} sectors={sectors} />
         <button disabled={disabled || isPending} type="submit">
           {isPending ? "Criando..." : "Criar webhook"}
         </button>

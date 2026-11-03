@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createWebhook, rotateWebhookSecret, setWebhookActive, updateWebhook } from "@/modules/webhooks";
+import { createWebhook, resendWebhookDelivery, rotateWebhookSecret, setWebhookActive, updateWebhook } from "@/modules/webhooks";
+import { scheduleEventProcessing } from "@/server/jobs/schedule";
 import { ConflictError, NotFoundError, ValidationError } from "@/server/errors";
 import { activeState, field, finish, reportFailure } from "../../_shared/action-helpers";
 
@@ -20,6 +21,8 @@ function form(formData: FormData) {
     name: field(formData, "name"),
     url: field(formData, "url"),
     eventTypes: formData.getAll("eventTypes").filter((value): value is string => typeof value === "string"),
+    // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2: none checked means every sector.
+    sectorIds: formData.getAll("sectorIds").filter((value): value is string => typeof value === "string"),
   };
 }
 
@@ -30,6 +33,7 @@ function refusal(error: unknown): WebhookSecretState {
       return { status: "error", message: "Endereço não aceito: use https com um nome público, sem usuário e senha, na porta padrão, 443 ou 8443." };
     }
     if (path === "eventTypes") return { status: "error", message: "Escolha pelo menos um evento." };
+    if (path === "sectorIds") return { status: "error", message: "Um dos setores escolhidos não existe mais. Atualize a página." };
     return { status: "error", message: "Informe um nome de até 60 caracteres." };
   }
   if (error instanceof ConflictError) {
@@ -75,4 +79,15 @@ export async function setWebhookActiveAction(formData: FormData): Promise<never>
     reportFailure("webhooks", "webhooks", error);
   }
   return finish("webhooks", "status", "webhooks");
+}
+
+/** "Reenviar" (SPEC 2026-11-03-api-acoes-webhooks-setor, 5.3): sent right after the answer. */
+export async function resendWebhookDeliveryAction(formData: FormData): Promise<never> {
+  try {
+    await resendWebhookDelivery({ deliveryId: field(formData, "deliveryId") });
+  } catch (error) {
+    reportFailure("webhookDeliveries", "webhooks", error);
+  }
+  scheduleEventProcessing();
+  return finish("webhookDeliveries", "resent", "webhooks");
 }
