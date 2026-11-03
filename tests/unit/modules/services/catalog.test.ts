@@ -29,6 +29,7 @@ function service(
     defaultPriority: "NORMAL",
     slaHours: null,
     requiresApproval: false,
+    slaBusinessHours: false,
     createdAt: new Date(0),
     updatedAt: new Date(0),
     category: { id: `category-${category}`, name: category },

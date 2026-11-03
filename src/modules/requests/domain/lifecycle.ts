@@ -34,6 +34,9 @@ export interface LifecycleRequest {
   stageIndex?: number | null;
   /** Approval situation (SPEC 2026-11-01-aprovacoes); optional like the SLA state. */
   approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
+  /** SPEC 2026-11-03-pausa-sla-calendario; optional like the SLA state. */
+  slaBusinessHours?: boolean;
+  slaPausedAt?: Date | null;
 }
 
 // Section 5.6. Start and completion keep their own rule in status-transition.ts.

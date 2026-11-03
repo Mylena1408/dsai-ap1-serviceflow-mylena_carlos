@@ -1,4 +1,5 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
+import { loadBusinessCalendar } from "@/modules/calendar";
 import {
   runSerializableTransaction,
   type PersistenceErrorPolicy,
@@ -257,6 +258,9 @@ function createPrismaRequestTransaction(
   transaction: Prisma.TransactionClient,
 ): RequestTransaction {
   return {
+    loadBusinessCalendar() {
+      return loadBusinessCalendar(transaction);
+    },
     async currentTime() {
       // now() is the transaction start time: the same value for every statement in it.
       const [row] = await transaction.$queryRaw<Array<{ now: Date }>>`SELECT now() AS "now"`;
@@ -333,6 +337,7 @@ function createPrismaRequestTransaction(
           ...(update.cancelledAt ? { cancelledAt: update.cancelledAt } : {}),
           ...(update.completedLate !== undefined ? { completedLate: update.completedLate } : {}),
           ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
+          ...(update.dueSoonAt !== undefined ? { dueSoonAt: update.dueSoonAt } : {}),
           ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
           ...(update.stageNamesSnapshot !== undefined ? { stageNamesSnapshot: update.stageNamesSnapshot } : {}),
           ...(update.stageIndex !== undefined ? { stageIndex: update.stageIndex } : {}),
@@ -347,6 +352,7 @@ function createPrismaRequestTransaction(
           approvalState: update.approvalState,
           updatedAt: update.updatedAt,
           ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
+          ...(update.dueSoonAt !== undefined ? { dueSoonAt: update.dueSoonAt } : {}),
           ...(update.status ? { status: update.status, cancelledAt: update.cancelledAt } : {}),
         },
       });
@@ -397,6 +403,8 @@ function createPrismaRequestTransaction(
           stageNamesSnapshot: true,
           stageIndex: true,
           approvalState: true,
+          slaBusinessHours: true,
+          slaPausedAt: true,
           assignee: { select: lifecycleUser },
         },
       });
@@ -433,6 +441,7 @@ function createPrismaRequestTransaction(
         data: {
           priority: update.priority,
           dueAt: update.dueAt,
+          ...(update.dueSoonAt !== undefined ? { dueSoonAt: update.dueSoonAt } : {}),
           updatedAt: update.updatedAt,
           ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
         },

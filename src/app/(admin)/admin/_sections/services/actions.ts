@@ -40,6 +40,10 @@ import {
   type AdminUpdateState,
 } from "../../_shared/action-helpers";
 
+function slaClock(value: string): boolean | string {
+  return value === "business" ? true : value === "calendar" ? false : value;
+}
+
 // Only sent when the form has the fields, so a form without them keeps the current values
 // (SPEC 2026-11-01-sla-prioridades, section 5.6).
 function slaFields(formData: FormData) {
@@ -48,6 +52,8 @@ function slaFields(formData: FormData) {
     ...(formData.has("slaHours") ? { slaHours: field(formData, "slaHours") } : {}),
     // A checkbox is absent when unchecked; the marker says the form has it (SPEC de aprovações, 5.2).
     ...(formData.has("requiresApprovalField") ? { requiresApproval: formData.get("requiresApproval") === "on" } : {}),
+    // SPEC 2026-11-03-pausa-sla-calendario, 5.2: an unexpected value goes on, for the server to refuse.
+    ...(formData.has("slaClock") ? { slaBusinessHours: slaClock(field(formData, "slaClock")) } : {}),
   };
 }
 

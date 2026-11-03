@@ -43,6 +43,7 @@ async function loadState(
           defaultPriority: true,
           slaHours: true,
           requiresApproval: true,
+          slaBusinessHours: true,
           isActive: true,
         },
       });

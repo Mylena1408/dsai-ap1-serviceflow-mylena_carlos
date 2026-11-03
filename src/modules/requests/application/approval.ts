@@ -1,7 +1,9 @@
 import { requireCurrentActor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { assertCanDecideApproval, decisionNote, dueAtOnApproval } from "../domain/approval";
+import { assertCanDecideApproval, decisionNote } from "../domain/approval";
+import { slaScheduleFrom } from "../domain/sla";
+import { requestClock, scheduleColumns } from "./sla-clock";
 import { requestApprovalDecisionInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner } from "./ports";
 
@@ -37,7 +39,13 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
       approvalState: approved ? "APPROVED" : "REJECTED",
       updatedAt: decidedAt,
       ...(approved
-        ? { dueAt: dueAtOnApproval(decidedAt, request.slaHoursSnapshot ?? null, request.priority ?? "NORMAL") }
+        ? scheduleColumns(
+            // Section 5.5 (decision A3), on the request's clock (SPEC 2026-11-03-pausa-sla-calendario, 5.2.5).
+            request.slaHoursSnapshot === null || request.slaHoursSnapshot === undefined
+              ? null
+              : slaScheduleFrom(decidedAt, request.slaHoursSnapshot, request.priority ?? "NORMAL", await requestClock(transaction, request.slaBusinessHours)),
+            request.slaBusinessHours,
+          )
         : { status: "CANCELLED", cancelledAt: decidedAt }),
     });
 

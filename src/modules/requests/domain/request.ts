@@ -29,6 +29,10 @@ export interface RequestRecord {
   stageIndex: number | null;
   /** SPEC 2026-11-01-aprovacoes: null when the service did not require approval. */
   approvalState: "PENDING" | "APPROVED" | "REJECTED" | null;
+  /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 5.3; optional so older records stay valid. */
+  slaBusinessHours?: boolean;
+  dueSoonAt?: Date | null;
+  slaPausedAt?: Date | null;
 }
 
 export interface RequestStatusEventRecord {

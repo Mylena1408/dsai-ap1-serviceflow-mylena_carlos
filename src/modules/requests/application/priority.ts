@@ -2,7 +2,8 @@ import { requireStatusChangeActor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { assertCanChangePriority } from "../domain/lifecycle";
-import { dueAtAfterPriorityChange } from "../domain/sla";
+import { slaScheduleAfterPriorityChange } from "../domain/sla";
+import { requestClock, scheduleColumns } from "./sla-clock";
 import { requestPriorityInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner } from "./ports";
 
@@ -30,7 +31,19 @@ export async function changeRequestPriority(
 
     const fromPriority = request.priority ?? "NORMAL";
     const currentDueAt = request.dueAt ?? null;
-    const dueAt = dueAtAfterPriorityChange(currentDueAt, request.slaHoursSnapshot ?? null, fromPriority, priority);
+    // On the request's clock (SPEC 2026-11-03-pausa-sla-calendario, 5.2.5); a paused request keeps
+    // its pause, and the resume measures from the new due date (5.4.6).
+    const schedule =
+      currentDueAt === null
+        ? null
+        : slaScheduleAfterPriorityChange(
+            currentDueAt,
+            request.slaHoursSnapshot ?? null,
+            fromPriority,
+            priority,
+            await requestClock(transaction, request.slaBusinessHours),
+          );
+    const { dueAt, ...dueSoon } = scheduleColumns(schedule, request.slaBusinessHours);
     const occurredAt = await transaction.currentTime();
     const changed = await transaction.updatePriorityIfCurrent({
       requestId,
@@ -39,6 +52,7 @@ export async function changeRequestPriority(
       expectedPriority: fromPriority,
       priority,
       dueAt,
+      ...dueSoon,
       resetSlaAlerts: dueAt !== null && currentDueAt !== null && dueAt.getTime() > currentDueAt.getTime(),
       updatedAt: occurredAt,
     });

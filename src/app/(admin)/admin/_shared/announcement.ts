@@ -24,6 +24,16 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "validation" && entity === "webhooks") {
     return "Confira o nome, o endereço (https público, porta padrão, 443 ou 8443) e escolha pelo menos um evento.";
   }
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.1.
+  if (error === "validation" && entity === "calendar") {
+    return "Confira o expediente: marque pelo menos um dia, use HH:MM com o início antes do fim e um fuso horário válido.";
+  }
+  if (error === "validation" && entity === "holidays") {
+    return "Confira o feriado: informe uma data válida e um nome de até 80 caracteres.";
+  }
+  if (error === "dependency" && entity === "holidays") {
+    return "Já existe um feriado cadastrado nessa data.";
+  }
   if (error === "dependency" && entity === "anonymization") {
     return "Só é possível anonimizar pessoas desativadas, sem solicitações abertas ou em atendimento, e nunca a própria conta.";
   }
@@ -49,6 +59,10 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "unexpected") {
     return "Não foi possível concluir a operação. Tente novamente.";
   }
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.7.
+  if (notice === "updated" && entity === "calendar") return "Expediente salvo. Vale para os próximos cálculos de prazo.";
+  if (notice === "created" && entity === "holidays") return "Feriado cadastrado.";
+  if (notice === "deleted" && entity === "holidays") return "Feriado removido.";
   if (notice === "created") return "Registro criado.";
   if (notice === "updated") return "Alterações salvas.";
   if (notice === "status") return "Estado atualizado.";

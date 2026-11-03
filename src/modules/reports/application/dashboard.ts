@@ -184,9 +184,9 @@ export async function exportDashboardCsv(raw: RawParams, reader: DashboardReader
   return {
     fileName: reportCsvFileName(period),
     content: buildRequestsCsv(
-      rows.map(({ slaHoursSnapshot, ...row }) => ({
+      rows.map(({ slaHoursSnapshot, slaBusinessHours, dueSoonAt, slaPausedAt, ...row }) => ({
         ...row,
-        slaSituation: slaSituation({ ...row, slaHoursSnapshot }, now),
+        slaSituation: slaSituation({ ...row, slaHoursSnapshot, slaBusinessHours, dueSoonAt, slaPausedAt }, now),
       })),
     ),
   };

@@ -61,6 +61,7 @@ function service(name: string, overrides: Partial<ServiceRecord> = {}): ServiceR
     defaultPriority: "NORMAL",
     slaHours: null,
     requiresApproval: false,
+    slaBusinessHours: false,
     createdAt: testNow,
     updatedAt: testNow,
     ...overrides,

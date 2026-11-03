@@ -12,6 +12,8 @@ export const serviceInputSchema = z
     slaHours: z.union([z.string(), z.number(), z.null()]).optional(),
     // SPEC 2026-11-01-aprovacoes, 5.2; optional for the same reason.
     requiresApproval: z.boolean().optional(),
+    // SPEC 2026-11-03-pausa-sla-calendario, 5.2; optional for the same reason.
+    slaBusinessHours: z.boolean().optional(),
   })
   .strict();
 

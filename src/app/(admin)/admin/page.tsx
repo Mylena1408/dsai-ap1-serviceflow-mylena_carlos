@@ -29,6 +29,8 @@ import { ApiTokensSection } from "./_sections/api-tokens/api-tokens-section";
 import { WebhooksSection } from "./_sections/webhooks/webhooks-section";
 import { getWebhookOverview } from "@/modules/webhooks";
 import { listAllApiTokens } from "@/modules/api-tokens";
+import { getCalendarOverview } from "@/modules/calendar";
+import { CalendarSection } from "./_sections/calendar/calendar-section";
 
 type AdminPageProps = {
   searchParams: Promise<{
@@ -52,6 +54,7 @@ const adminSections = [
   { id: "sectors", label: "Setores" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
+  { id: "calendar", label: "Calendário" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
   { id: "audit", label: "Auditoria" },
@@ -111,6 +114,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const apiTokens = selectedSection === "api-tokens" ? await listAllApiTokens() : null;
   // SPEC 2026-11-02-api-externa-webhooks, 5.6: read only when the section is open.
   const webhookOverview = selectedSection === "webhooks" ? await getWebhookOverview() : null;
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.7: read only when the section is open.
+  const calendarOverview = selectedSection === "calendar" ? await getCalendarOverview() : null;
 
   return (
     <main className="page-shell">
@@ -212,6 +217,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {apiTokens ? <ApiTokensSection tokens={apiTokens} /> : null}
 
       {webhookOverview ? <WebhooksSection overview={webhookOverview} /> : null}
+
+      {calendarOverview ? <CalendarSection overview={calendarOverview} /> : null}
         </div>
       ) : null}
     </main>

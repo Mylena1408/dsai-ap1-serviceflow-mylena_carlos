@@ -21,6 +21,7 @@ import type { ActiveDocumentRequirement } from "@/modules/requests/domain/attach
 import type { DomainEvent } from "@/modules/events";
 import type { AnswerableField } from "@/modules/service-fields";
 import type { Permission } from "@/shared/permissions";
+import { DEFAULT_CALENDAR, type BusinessCalendar } from "@/shared/business-clock";
 
 export type StoredActor = TransactionActor & { name: string; email: string };
 export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
@@ -50,6 +51,8 @@ export interface InMemoryRequestStore {
   /** SPEC 2026-11-03-transferencia-entre-setores. */
   sectors: Array<{ id: string; name: string; isActive: boolean }>;
   sectorEvents: NewSectorEvent[];
+  /** SPEC 2026-11-03-pausa-sla-calendario; the default of 5.1 without holidays when absent. */
+  calendar?: BusinessCalendar;
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -235,6 +238,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     async currentTime() {
       return store.databaseTime;
     },
+    async loadBusinessCalendar() {
+      return store.calendar ?? { ...DEFAULT_CALENDAR, holidays: [] };
+    },
     async findActor(actorId) {
       const actor = store.actors.find(({ id }) => id === actorId);
       return actor
@@ -295,6 +301,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       if (update.cancelledAt) request.cancelledAt = update.cancelledAt;
       if (update.completedLate !== undefined) request.completedLate = update.completedLate;
       if (update.dueAt !== undefined) request.dueAt = update.dueAt;
+      if (update.dueSoonAt !== undefined) request.dueSoonAt = update.dueSoonAt;
       if (update.stageNamesSnapshot !== undefined) request.stageNamesSnapshot = update.stageNamesSnapshot;
       if (update.stageIndex !== undefined) request.stageIndex = update.stageIndex;
       return 1;
@@ -307,6 +314,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       request.approvalState = update.approvalState;
       request.updatedAt = update.updatedAt;
       if (update.dueAt !== undefined) request.dueAt = update.dueAt;
+      if (update.dueSoonAt !== undefined) request.dueSoonAt = update.dueSoonAt;
       if (update.status) {
         request.status = update.status;
         request.cancelledAt = update.cancelledAt ?? null;
@@ -378,6 +386,8 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
             stageNamesSnapshot: request.stageNamesSnapshot,
             stageIndex: request.stageIndex,
             approvalState: request.approvalState,
+            slaBusinessHours: request.slaBusinessHours,
+            slaPausedAt: request.slaPausedAt,
             assignee: lifecycleUser(store, request.assigneeId),
           }
         : null;
@@ -417,6 +427,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       if (!request) return 0;
       request.priority = update.priority;
       request.dueAt = update.dueAt;
+      if (update.dueSoonAt !== undefined) request.dueSoonAt = update.dueSoonAt;
       request.updatedAt = update.updatedAt;
       return 1;
     },

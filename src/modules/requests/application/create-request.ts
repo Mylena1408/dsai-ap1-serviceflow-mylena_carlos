@@ -17,7 +17,9 @@ import {
   type ActiveDocumentRequirement,
 } from "../domain/attachment-requirements";
 import type { RequestWithHistory } from "../domain/request";
-import { approvalStateOnOpening, dueAtOnOpening } from "../domain/approval";
+import { approvalStateOnOpening } from "../domain/approval";
+import { slaScheduleFrom } from "../domain/sla";
+import { requestClock, scheduleColumns } from "./sla-clock";
 import { buildRequestSnapshot } from "../domain/snapshot";
 import type {
   AttachmentStorage,
@@ -167,6 +169,13 @@ async function openRequest(
 
   const openedAt = await transaction.currentTime();
   const approvalState = approvalStateOnOpening(context.service.requiresApproval);
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.2: the service's clock is copied to the request; the
+  // calendar is read only when a due date is computed in business hours.
+  const businessHours = context.service.slaBusinessHours === true;
+  const schedule =
+    approvalState === "PENDING" || context.service.slaHours === null
+      ? null
+      : slaScheduleFrom(openedAt, context.service.slaHours, context.service.defaultPriority, await requestClock(transaction, businessHours));
   const created = await transaction.insertRequest({
     ...buildRequestSnapshot(context.actorId, context.service),
     id: requestId,
@@ -178,7 +187,8 @@ async function openRequest(
     slaHoursSnapshot: context.service.slaHours,
     // SPEC 2026-11-01-aprovacoes, 5.2 and 5.5: with approval, pending and without a due date.
     approvalState,
-    dueAt: dueAtOnOpening(openedAt, context.service.slaHours, context.service.defaultPriority, approvalState),
+    ...scheduleColumns(schedule, businessHours),
+    ...(businessHours ? { slaBusinessHours: true } : {}),
   });
 
   await transaction.insertStatusEvent({

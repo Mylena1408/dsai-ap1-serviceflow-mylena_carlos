@@ -117,6 +117,9 @@ export function createPrismaDashboardReader(database: PrismaClient): DashboardRe
           dueAt: true,
           completedLate: true,
           slaHoursSnapshot: true,
+          slaBusinessHours: true,
+          dueSoonAt: true,
+          slaPausedAt: true,
         },
       });
 
@@ -137,6 +140,9 @@ export function createPrismaDashboardReader(database: PrismaClient): DashboardRe
           dueAt: row.dueAt,
           completedLate: row.completedLate,
           slaHoursSnapshot: row.slaHoursSnapshot,
+          // SPEC 2026-11-03-pausa-sla-calendario: only when they change the situation.
+          ...(row.slaBusinessHours ? { slaBusinessHours: true as const, dueSoonAt: row.dueSoonAt } : {}),
+          ...(row.slaPausedAt ? { slaPausedAt: row.slaPausedAt } : {}),
         }),
       );
     },

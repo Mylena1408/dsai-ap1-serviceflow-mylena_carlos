@@ -9,7 +9,9 @@ import {
   type LifecycleUser,
 } from "../domain/lifecycle";
 import type { RequestStatus } from "../domain/request";
-import { dueAtFrom } from "../domain/sla";
+import { slaScheduleFrom } from "../domain/sla";
+import { requestClock, scheduleColumns } from "./sla-clock";
+import type { SlaClock } from "@/shared/business-clock";
 import { NO_STAGE } from "../domain/stages";
 import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner, StatusUpdate } from "./ports";
@@ -25,9 +27,12 @@ interface LifecycleChange {
   stamps: (
     now: Date,
     request: LifecycleRequest,
-  ) => Pick<
-    StatusUpdate,
-    "completedAt" | "cancelledAt" | "completedLate" | "dueAt" | "resetSlaAlerts" | "stageNamesSnapshot" | "stageIndex"
+    clock: () => Promise<SlaClock>,
+  ) => Promise<
+    Pick<
+      StatusUpdate,
+      "completedAt" | "cancelledAt" | "completedLate" | "dueAt" | "dueSoonAt" | "resetSlaAlerts" | "stageNamesSnapshot" | "stageIndex"
+    >
   >;
 }
 
@@ -56,7 +61,7 @@ async function changeLifecycle(
       expectedAssigneeId: request.assignee?.id ?? null,
       toStatus: change.toStatus,
       updatedAt: occurredAt,
-      ...change.stamps(occurredAt, request),
+      ...(await change.stamps(occurredAt, request, () => requestClock(transaction, request.slaBusinessHours))),
     });
 
     // Status or assignee changed after the read (section 5.8).
@@ -97,7 +102,7 @@ export async function cancelRequest(
     toStatus: "CANCELLED",
     note,
     decide: (actor, request) => assertCanCancel(actor, request, note),
-    stamps: (now) => ({ cancelledAt: now }),
+    stamps: async (now) => ({ cancelledAt: now }),
   });
 }
 
@@ -119,10 +124,16 @@ export async function reopenRequest(
     decide: (actor, request, now) => assertCanReopen(actor, request, now, note),
     // SPEC 2026-11-01, section 5.3: a new due date from the reopening, with the current
     // priority; the completion result is cleared and new alerts are allowed.
-    stamps: (now, request) => ({
+    stamps: async (now, request, clock) => ({
       completedAt: null,
       completedLate: null,
-      dueAt: dueAtFrom(now, request.slaHoursSnapshot ?? null, request.priority ?? "NORMAL"),
+      // On the request's clock (SPEC 2026-11-03-pausa-sla-calendario, 5.2.5).
+      ...scheduleColumns(
+        request.slaHoursSnapshot === null || request.slaHoursSnapshot === undefined
+          ? null
+          : slaScheduleFrom(now, request.slaHoursSnapshot, request.priority ?? "NORMAL", await clock()),
+        request.slaBusinessHours,
+      ),
       resetSlaAlerts: true,
       // SPEC 2026-11-01-fluxos-configuraveis, 5.4: no stage until the attendance starts again.
       ...NO_STAGE,

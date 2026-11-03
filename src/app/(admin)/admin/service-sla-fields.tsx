@@ -6,10 +6,12 @@ export function ServiceSlaFields({
   defaultPriority,
   slaHours,
   requiresApproval,
+  slaBusinessHours = false,
 }: {
   defaultPriority: PriorityValue;
   slaHours: number | null;
   requiresApproval: boolean;
+  slaBusinessHours?: boolean;
 }) {
   return (
     <>
@@ -35,6 +37,14 @@ export function ServiceSlaFields({
           step={1}
           type="number"
         />
+      </label>
+      {/* SPEC 2026-11-03-pausa-sla-calendario, 5.2: only matters with a base SLA. */}
+      <label>
+        Contagem do prazo
+        <select defaultValue={slaBusinessHours ? "business" : "calendar"} name="slaClock">
+          <option value="calendar">Horas corridas</option>
+          <option value="business">Horas úteis (calendário)</option>
+        </select>
       </label>
       {/* SPEC 2026-11-01-aprovacoes, 5.2: the marker tells the server the form has the checkbox. */}
       <input name="requiresApprovalField" type="hidden" value="1" />

@@ -1,3 +1,4 @@
+import type { BusinessCalendar } from "@/shared/business-clock";
 import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { DomainEvent } from "@/modules/events";
 import type { Permission } from "@/shared/permissions";
@@ -62,6 +63,8 @@ export interface ServiceForRequest {
   slaHours: number | null;
   /** SPEC 2026-11-01 (aprovações): copied to the request on opening. */
   requiresApproval: boolean;
+  /** SPEC 2026-11-03-pausa-sla-calendario, 5.2: copied to the request on opening. */
+  slaBusinessHours?: boolean;
   category: { id: string; name: string; isActive: boolean };
   sector: { id: string; name: string; isActive: boolean };
 }
@@ -92,6 +95,8 @@ export interface StatusUpdate {
   completedLate?: boolean | null;
   /** New due date, on reopening. */
   dueAt?: Date | null;
+  /** Start of "due soon", written only in business hours (SPEC 2026-11-03-pausa-sla-calendario, 6). */
+  dueSoonAt?: Date | null;
   /** Clears the alert marks so a new due date can be alerted again (section 5.5). */
   resetSlaAlerts?: boolean;
   /** When given, the stage must also be unchanged since the read (SPEC de fluxos, 5.3.5). */
@@ -108,6 +113,8 @@ export interface ApprovalUpdate {
   updatedAt: Date;
   /** Due date from the approval (5.5). */
   dueAt?: Date | null;
+  /** Start of "due soon", written only in business hours (SPEC 2026-11-03-pausa-sla-calendario, 6). */
+  dueSoonAt?: Date | null;
   /** The rejection cancels the request (5.3.4). */
   status?: "CANCELLED";
   cancelledAt?: Date;
@@ -189,6 +196,8 @@ export interface PriorityUpdate {
   expectedPriority: RequestPriority;
   priority: RequestPriority;
   dueAt: Date | null;
+  /** Start of "due soon", written only in business hours (SPEC 2026-11-03-pausa-sla-calendario, 6). */
+  dueSoonAt?: Date | null;
   resetSlaAlerts: boolean;
   updatedAt: Date;
 }
@@ -266,6 +275,8 @@ export interface RequestTransaction {
    * from this single clock (SPEC 2026-09-30, section 23).
    */
   currentTime(): Promise<Date>;
+  /** The business calendar in force (SPEC 2026-11-03-pausa-sla-calendario, 5.1 and 5.2). */
+  loadBusinessCalendar(): Promise<BusinessCalendar>;
   findActor(actorId: string): Promise<TransactionActor | null>;
   findServiceForRequest(serviceId: string): Promise<ServiceForRequest | null>;
   /** Active document requirements of the service, in display order. */
@@ -291,6 +302,9 @@ export interface RequestTransaction {
       slaHoursSnapshot: number | null;
       dueAt: Date | null;
       approvalState: ApprovalState | null;
+      /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 6. */
+      slaBusinessHours?: boolean;
+      dueSoonAt?: Date | null;
     },
   ): Promise<{ id: string }>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;

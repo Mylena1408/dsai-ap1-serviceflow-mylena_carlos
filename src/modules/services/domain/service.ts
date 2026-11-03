@@ -12,6 +12,8 @@ export interface ServiceRecord {
   slaHours: number | null;
   /** SPEC 2026-11-01 (aprovações), 5.2. */
   requiresApproval: boolean;
+  /** SPEC 2026-11-03-pausa-sla-calendario, 5.2: the SLA counts only business hours. */
+  slaBusinessHours: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +28,8 @@ export interface ServiceData {
   slaHours?: number | null;
   /** Omitted keeps the current value (create: no approval). */
   requiresApproval?: boolean;
+  /** Omitted keeps the current value (create: calendar hours). */
+  slaBusinessHours?: boolean;
 }
 
 export interface PublishedService extends ServiceRecord {

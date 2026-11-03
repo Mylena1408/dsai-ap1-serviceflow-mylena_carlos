@@ -1386,7 +1386,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-129 — Calendário, opção do serviço e horas úteis nos cálculos
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Seção "Calendário" da administração (expediente e feriados, com auditoria); "Contagem do prazo" no serviço; abertura, aprovação, mudança de prioridade e reabertura com o relógio da solicitação, gravando o "próximo do vencimento" em horas úteis; marca "(horas úteis)" junto do vencimento; exportação CSV com a situação certa em horas úteis. CA-PSL-02 a 04 verificados.
 - **Objetivo:** Tela "Calendário" da administração com feriados e auditoria; "Contagem do prazo" no serviço; horas úteis na abertura, aprovação, mudança de prioridade e reabertura, gravando o "próximo do vencimento".
 - **Arquivos/módulos esperados:** `src/modules/` (calendário, serviços, solicitações, auditoria), `src/app/(admin)/`, testes.
 - **Dependências:** SF-128.

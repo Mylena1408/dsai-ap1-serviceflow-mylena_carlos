@@ -9,7 +9,7 @@ export { SLA_SITUATION_LABELS };
 
 type SlaRequest = Pick<
   RequestWithHistory,
-  "status" | "priority" | "slaHoursSnapshot" | "dueAt" | "completedLate"
+  "status" | "priority" | "slaHoursSnapshot" | "dueAt" | "completedLate" | "slaBusinessHours" | "dueSoonAt" | "slaPausedAt"
 >;
 
 export interface SlaSummary {
@@ -18,6 +18,8 @@ export interface SlaSummary {
   situationLabel: string;
   /** Shown only while the deadline is running. */
   dueAt: Date | null;
+  /** SPEC 2026-11-03-pausa-sla-calendario, 5.7: present only when the due date counts business hours. */
+  businessHours?: true;
 }
 
 export function slaSummary(request: SlaRequest, now: Date): SlaSummary {
@@ -29,6 +31,7 @@ export function slaSummary(request: SlaRequest, now: Date): SlaSummary {
     situation,
     situationLabel: SLA_SITUATION_LABELS[situation],
     dueAt: running ? request.dueAt : null,
+    ...(request.slaBusinessHours ? { businessHours: true as const } : {}),
   };
 }
 
@@ -48,6 +51,7 @@ export function RequestSla({ request, now }: RequestSlaProps) {
         <span className="metadata">
           Vence em{" "}
           <time dateTime={summary.dueAt.toISOString()}>{summary.dueAt.toLocaleString("pt-BR")}</time>
+          {summary.businessHours ? " (horas úteis)" : null}
         </span>
       ) : null}
     </p>

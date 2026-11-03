@@ -105,6 +105,7 @@ export function ServicesSection({
                 defaultPriority: service.defaultPriority,
                 slaHours: service.slaHours,
                 requiresApproval: service.requiresApproval,
+                slaBusinessHours: service.slaBusinessHours,
               }}
               categories={categories}
               sectors={sectors}

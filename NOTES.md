@@ -1752,3 +1752,31 @@ Padrão a replicar nas SF-039 e SF-040:
   - a limpeza das tabelas (`fixtures.ts`, `prepare-e2e.ts`).
 - **Testes novos:** `tests/unit/shared/business-clock.test.ts`, `tests/unit/modules/requests/domain/sla-calendar.test.ts`, `tests/unit/modules/calendar/calendar-config.test.ts` e `tests/integration/sla-pause-calendar-schema.test.ts`.
 - **Resultados:** lint e typecheck OK; unitários 854/854; integração 378/378 + 1 pulado.
+
+## SF-129 — Calendário, opção do serviço e horas úteis nos cálculos (2026-11-03)
+
+- **Módulo `calendar`:**
+  - casos de uso `getCalendarOverview`, `updateCalendar`, `createHoliday` e `deleteHoliday`, só para o administrador, todos auditados na mesma transação;
+  - `loadBusinessCalendar(client)` lê o calendário com qualquer cliente, inclusive a transação de uma solicitação;
+  - a gravação é `upsert` da linha `id = 1`;
+  - o feriado repetido é conferido antes de gravar, e o índice único segura dois cadastros simultâneos (`P2002` vira `409`).
+- **Auditoria do calendário:**
+  - o identificador da entidade é o uuid fixo `BUSINESS_CALENDAR_AUDIT_ID` (a tabela usa `id = 1`);
+  - sem linha, o estado anterior é o padrão, então a primeira gravação registra só o que mudou;
+  - a remoção de feriado usa o caminho novo de `DELETED` do escopo de auditoria.
+- **Solicitações:**
+  - `RequestTransaction.loadBusinessCalendar()`, chamado só quando a solicitação conta em horas úteis;
+  - `application/sla-clock.ts` concentra o relógio da solicitação e as colunas a gravar. `dueSoonAt` só é enviado em horas úteis: em horas corridas o trigger calcula, e as gravações e os testes existentes ficam como estavam;
+  - abertura, aprovação, mudança de prioridade e reabertura usam `slaScheduleFrom` e `slaScheduleAfterPriorityChange`;
+  - para a reabertura poder ler o calendário, os `stamps` de `changeLifecycle` passaram a ser assíncronos.
+- **Serviço:**
+  - `slaBusinessHours` no esquema (opcional, como `requiresApproval`), no registro, na auditoria e no formulário ("Contagem do prazo": horas corridas ou horas úteis);
+  - a ação manda um valor inesperado adiante para o servidor recusar;
+  - a lista mostra "(horas úteis)" ao lado do prazo-base.
+- **Telas:**
+  - seção "Calendário" na administração: dias, início e fim em `HH:MM`, fuso e feriados, com cadastro e remoção, e mensagens próprias;
+  - a linha do prazo mostra "(horas úteis)" junto do vencimento.
+- **CSV:** a exportação leva `slaBusinessHours`, `dueSoonAt` e `slaPausedAt` só quando mudam a situação, para o "próximo do vencimento" sair certo em horas úteis. O teste de integração do leitor, que confere a linha inteira, não mudou.
+- **Testes anteriores ajustados:** só objetos de serviço completos ganharam `slaBusinessHours: false` (`service-use-cases.test.ts`, `catalog.test.ts`) e o dublê em memória ganhou o calendário e o `dueSoonAt`.
+- **Testes novos:** `tests/integration/business-hours-sla.test.ts` e `tests/unit/calendar-admin-actions.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 857/857; integração 383/383 + 1 pulado.

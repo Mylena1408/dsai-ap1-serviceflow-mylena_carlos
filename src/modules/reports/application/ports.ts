@@ -54,7 +54,13 @@ export interface PeriodTotals {
 }
 
 /** A request of the export, with what the SLA situation needs (computed at export time). */
-export type ExportRequestRow = Omit<ReportCsvRow, "slaSituation"> & { slaHoursSnapshot: number | null };
+export type ExportRequestRow = Omit<ReportCsvRow, "slaSituation"> & {
+  slaHoursSnapshot: number | null;
+  /** SPEC 2026-11-03-pausa-sla-calendario: present only in business hours or while paused. */
+  slaBusinessHours?: true;
+  dueSoonAt?: Date | null;
+  slaPausedAt?: Date;
+};
 
 export interface DashboardReader {
   findSector(sectorId: string): Promise<ReportSector | null>;

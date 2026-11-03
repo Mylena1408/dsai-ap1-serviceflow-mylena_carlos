@@ -51,3 +51,4 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 
 1. SPEC `SPEC/2026-11-03-pausa-sla-calendario.md` (funcionalidade 7), decisões H1 a H9 adotadas como recomendadas; tarefas SF-128 a SF-132.
 2. SF-128: migration, relógio de horas úteis e regras da pausa; a linha padrão do calendário saiu da migration por causa da regra do projeto (migrations não inserem dados).
+3. SF-129: seção "Calendário", opção do serviço e horas úteis nos cálculos do prazo.
