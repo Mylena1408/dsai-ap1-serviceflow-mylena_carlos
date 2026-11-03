@@ -46,6 +46,11 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
           <p>Solicitações encaminhadas à equipe que você atende.</p>
         </div>
       </header>
+      {params.notice === "sector-sent" ? (
+        <p className="feedback" role="status">
+          Solicitação encaminhada ao outro setor. Ela saiu da fila deste setor.
+        </p>
+      ) : null}
       <RequestSearchForm basePath="/queue" params={params} showAssignee showSla defaultOrder="oldest" />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">

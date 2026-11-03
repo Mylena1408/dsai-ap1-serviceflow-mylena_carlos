@@ -72,7 +72,7 @@ async function changeAssignee(
 
 // SPEC 2026-11-01-permissoes-configuraveis, 5.3.3: the permission is read only when the actor is
 // not the holder, in the same transaction, so a revocation counts at once.
-async function supervises(actor: LifecycleUser, request: LifecycleRequest, transaction: RequestTransaction) {
+export async function supervises(actor: LifecycleUser, request: LifecycleRequest, transaction: RequestTransaction) {
   const holderId = effectiveAssigneeId(request);
 
   if (holderId === null || holderId === actor.id) {

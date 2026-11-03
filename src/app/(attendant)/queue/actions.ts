@@ -8,6 +8,7 @@ import {
   changeRequestPriority,
   moveRequestStage,
   releaseRequest,
+  sendRequestToSector,
   transferRequest,
   transitionRequestStatus,
 } from "@/modules/requests";
@@ -29,6 +30,9 @@ function errorCode(error: ApplicationError, noteCode: string): string {
   }
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("priority"))) {
     return "priority";
+  }
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("sectorId"))) {
+    return "sector";
   }
   return error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN"
     ? "access"
@@ -99,6 +103,28 @@ export async function transferRequestAction(formData: FormData): Promise<never> 
     (requestId) => transferRequest({ requestId, assigneeId }),
     "transferred",
   );
+}
+
+// SPEC 2026-11-03-transferencia-entre-setores: after the move the attendant no longer reads the
+// request, so the success goes back to the queue.
+export async function sendToSectorAction(formData: FormData): Promise<never> {
+  const requestId = field(formData, "requestId");
+  const sectorId = field(formData, "sectorId");
+  const note = field(formData, "note");
+
+  try {
+    await sendRequestToSector({ requestId, sectorId, note });
+  } catch (error) {
+    if (error instanceof ApplicationError) {
+      redirect(`/queue/${encodeURIComponent(requestId)}?error=${errorCode(error, "sector-note")}`);
+    }
+
+    throw error;
+  }
+
+  scheduleEventProcessing();
+  revalidatePath("/queue");
+  redirect("/queue?notice=sector-sent");
 }
 
 // Section 5.4: the attendant cancels with a mandatory reason.

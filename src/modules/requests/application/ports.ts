@@ -6,7 +6,7 @@ import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domai
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { RequestFieldAnswer } from "../domain/field-answer";
 import type { ApprovalState } from "../domain/approval";
-import type { LifecycleRequest, LifecycleUser } from "../domain/lifecycle";
+import type { LifecycleRequest, LifecycleUser, SectorDestination } from "../domain/lifecycle";
 import type { SearchCriteria } from "../domain/search-criteria";
 import type { RequestPriority, RequestStatus, RequestWithHistory } from "../domain/request";
 import type { RequestSnapshot } from "../domain/snapshot";
@@ -24,6 +24,11 @@ export interface RequestQueryRepository {
   findForApproval(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
   /** Active attendants of a sector, by name, for the transfer form. */
   listSectorAttendants(sectorId: string): Promise<Array<{ id: string; name: string }>>;
+  /**
+   * Sectors that may receive a request of `currentSectorId` (SPEC 2026-11-03-transferencia-entre-
+   * setores, 5.2): active, different and with an active attendant, by name.
+   */
+  listSectorDestinations(currentSectorId: string): Promise<Array<{ id: string; name: string }>>;
   /**
    * One page of the reader's list (SPEC 2026-10-31-busca-filtros-paginacao). `scope` is
    * built from the session; `viewerId` resolves the "mine" assignee filter.
@@ -151,6 +156,31 @@ export interface NewAssignmentEvent {
   occurredAt: Date;
 }
 
+/**
+ * Moves the request to another sector (SPEC 2026-11-03-transferencia-entre-setores, 5.3) only while
+ * it is still open, in the sector read, with the assignee read and without a pending approval.
+ * The assignee is removed.
+ */
+export interface SectorUpdate {
+  requestId: string;
+  expectedSectorId: string;
+  expectedAssigneeId: string | null;
+  sectorId: string;
+  sectorName: string;
+  updatedAt: Date;
+}
+
+export interface NewSectorEvent {
+  requestId: string;
+  actorId: string;
+  fromSectorId: string;
+  toSectorId: string;
+  fromSectorName: string;
+  toSectorName: string;
+  note: string;
+  occurredAt: Date;
+}
+
 /** Changes the priority only while status, assignee and priority are still the ones read. */
 export interface PriorityUpdate {
   requestId: string;
@@ -271,6 +301,11 @@ export interface RequestTransaction {
   insertAssignmentEvent(event: NewAssignmentEvent): Promise<void>;
   /** Returns the number of rows changed (0 when the request changed meanwhile). */
   updatePriorityIfCurrent(update: PriorityUpdate): Promise<number>;
+  /** A sector with its count of active attendants, read in this transaction (5.2). */
+  findSectorDestination(sectorId: string): Promise<SectorDestination | null>;
+  /** Returns the number of rows changed (0 when the request changed meanwhile). */
+  updateSectorIfCurrent(update: SectorUpdate): Promise<number>;
+  insertSectorEvent(event: NewSectorEvent): Promise<void>;
   insertPriorityEvent(event: NewPriorityEvent): Promise<void>;
   /** Writes a domain event to the outbox in this same transaction (SPEC de eventos, 6.2). */
   recordEvent(event: DomainEvent): Promise<void>;

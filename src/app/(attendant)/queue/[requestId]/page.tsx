@@ -5,6 +5,7 @@ import {
   getAttendantRequest,
   listRequestAttachments,
   listRequestFieldAnswers,
+  listSectorDestinations,
   listTransferCandidates,
 } from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
@@ -20,6 +21,7 @@ import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
 import { RequestSla } from "@/app/_components/request-sla";
 import { PriorityForm } from "./priority-form";
+import { SectorTransferForm } from "./sector-transfer-form";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -51,6 +53,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "priority") return "Escolha uma prioridade diferente da atual.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
   if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
+  if (error === "sector-note") return "Informe a justificativa do encaminhamento, com até 1.000 caracteres.";
+  if (error === "sector") return "Escolha um setor ativo, diferente do atual e com atendente ativo.";
   return null;
 }
 
@@ -68,6 +72,7 @@ export default async function QueueRequestPage({
   let answers;
   let comments;
   let candidates: Array<{ id: string; name: string }> = [];
+  let destinations: Array<{ id: string; name: string }> = [];
   // SPEC 2026-11-01-permissoes-configuraveis, 5.3.3.
   const supervisor = await actorHasPermission(actor, "QUEUE_SUPERVISION");
 
@@ -79,6 +84,15 @@ export default async function QueueRequestPage({
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
       candidates = await listTransferCandidates(request.id);
+    }
+    // SPEC 2026-11-03-transferencia-entre-setores, 5.1: open, without a pending approval, and the
+    // holder, a supervisor or anyone when nobody holds it.
+    if (
+      request.status === "OPEN" &&
+      request.approvalState !== "PENDING" &&
+      (holderId === null || holderId === actor.id || supervisor)
+    ) {
+      destinations = await listSectorDestinations(request.id);
     }
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
@@ -114,13 +128,14 @@ export default async function QueueRequestPage({
         </p>
         <RequestSla request={request} now={new Date()} />
         <p>Categoria: {request.categoryNameSnapshot}</p>
-        <p>Setor de origem: {request.sectorNameSnapshot}</p>
+        <p>Setor: {request.sectorNameSnapshot}</p>
         <p>{request.serviceDescriptionSnapshot}</p>
         <h2>Descrição da solicitação</h2>
         <p className="request-description">{request.description}</p>
       </article>
       <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} supervisor={supervisor} />
       <StagePanel request={request} canAct={!heldByColleague} />
+      {destinations.length > 0 ? <SectorTransferForm requestId={request.id} destinations={destinations} /> : null}
       {(request.status === "OPEN" || request.status === "IN_PROGRESS") && !heldByColleague ? (
         <>
           <PriorityForm requestId={request.id} priority={request.priority} />

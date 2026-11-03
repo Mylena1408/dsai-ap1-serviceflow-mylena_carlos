@@ -84,7 +84,7 @@ Linha "Encaminhada do setor *Origem* para o setor *Destino*", com quem fez, a da
 
 ### 5.9 Anonimização e "Meus dados"
 
-A justificativa do encaminhamento é texto escrito pela pessoa: a anonimização a substitui por "[conteúdo removido na anonimização]" e "Meus dados" a inclui entre as justificativas que a pessoa escreveu.
+A justificativa do encaminhamento é texto escrito pela pessoa: a anonimização a substitui por "[conteúdo removido na anonimização]". Em "Meus dados", os encaminhamentos aparecem nas solicitações que a pessoa abriu (de, para, quem, quando e justificativa), como o histórico de status. *Esclarecimento de 2026-11-03 (SF-121): a primeira redação dizia "entre as justificativas que a pessoa escreveu", mas o arquivo atual não lista justificativas escritas pela equipe em solicitações de outras pessoas (só comentários); seguir o modelo existente evita uma seção nova sem pedido.*
 
 ## 6. Dados
 
@@ -98,13 +98,13 @@ Nenhuma dependência nova.
 ## 7. Critérios de aceitação
 
 - [ ] **CA-SET-01** — Sem encaminhar, nada muda: suítes anteriores passam sem alteração de asserções.
-- [ ] **CA-SET-02** — O atendente do setor (o responsável, se houver; o supervisor também) encaminha uma solicitação aberta, com justificativa, para um setor ativo com atendente ativo; ela passa ao novo setor sem responsável, com status, prioridade e prazo iguais.
-- [ ] **CA-SET-03** — São recusados: solicitação em atendimento, concluída, cancelada ou com aprovação pendente (`409`); sem justificativa (`400`); destino igual ao atual, inativo, inexistente ou sem atendente ativo (`400`); atendente do setor sem direito (`409`); quem não é do setor (`404`).
-- [ ] **CA-SET-04** — Depois do encaminhamento, o novo setor vê a solicitação na fila, com todo o histórico e as notas internas; o setor anterior recebe `404`; o solicitante vê o setor novo e a linha do histórico.
-- [ ] **CA-SET-05** — Os atendentes do novo setor e o solicitante recebem a notificação; quem encaminhou não.
+- [x] **CA-SET-02** — O atendente do setor (o responsável, se houver; o supervisor também) encaminha uma solicitação aberta, com justificativa, para um setor ativo com atendente ativo; ela passa ao novo setor sem responsável, com status, prioridade e prazo iguais. *Verificado em 2026-11-03 (SF-121): a responsável encaminha; sem responsável, qualquer atendente do setor; com responsável, o colega só com a supervisão da fila; setor e nome atualizados, responsável removido (com a linha de liberação), status, prioridade, prazo e serviço iguais; histórico com nomes e justificativa; eventos `request.assignment_changed` e `request.sector_changed` na outbox (unitários e integração).*
+- [x] **CA-SET-03** — São recusados: solicitação em atendimento, concluída, cancelada ou com aprovação pendente (`409`); sem justificativa (`400`); destino igual ao atual, inativo, inexistente ou sem atendente ativo (`400`); atendente do setor sem direito (`409`); quem não é do setor (`404`). *Verificado em 2026-11-03 (SF-121): cada recusa com o código indicado e sem gravar nada; justificativa e destino recusados nos campos `note` e `sectorId`; dois encaminhamentos simultâneos: só um acontece (unitários e integração).*
+- [x] **CA-SET-04** — Depois do encaminhamento, o novo setor vê a solicitação na fila, com todo o histórico e as notas internas; o setor anterior recebe `404`; o solicitante vê o setor novo e a linha do histórico. *Verificado em 2026-11-03 (SF-121) sobre o banco; a verificação nas telas fica para o E2E da SF-123.*
+- [x] **CA-SET-05** — Os atendentes do novo setor e o solicitante recebem a notificação; quem encaminhou não. *Verificado em 2026-11-03 (SF-121): o consumidor de notificações grava `sector.received` para os dois atendentes do novo setor e `sector.changed` para o solicitante, nada para quem encaminhou; categorias de e-mail "transferências" e "status" (unitários e integração).*
 - [ ] **CA-SET-06** — O evento `request.sector_changed` chega aos webhooks sem filtro e aos filtrados pelo setor de origem ou de destino, só com identificadores.
 - [ ] **CA-SET-07** — A API encaminha e lista destinos com as mesmas regras; o OpenAPI descreve as rotas.
-- [ ] **CA-SET-08** — A anonimização substitui a justificativa; "Meus dados" a inclui.
+- [x] **CA-SET-08** — A anonimização substitui a justificativa; "Meus dados" do solicitante inclui os encaminhamentos das solicitações dele. *Verificado em 2026-11-03 (SF-121): o arquivo traz `encaminhamentos` com origem, destino, autor e justificativa (só em solicitações que mudaram de setor); a anonimização da atendente troca a justificativa pelo texto padrão (unitários e integração).*
 - [ ] **CA-SET-09** — Nenhuma dependência nova; uma migration aditiva; README explica o encaminhamento. *Parcial em 2026-11-03 (SF-120): migration `20261103200000_request_sector_events` cria a tabela nova e recria as restrições de tipo da outbox e dos webhooks só para aceitar `request.sector_changed` (todo valor aceito antes continua aceito); conferência final na SF-123.*
 
 ## 8. Estratégia de testes

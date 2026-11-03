@@ -56,6 +56,10 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
               orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
               select: { occurredAt: true, toStatus: true, note: true, actor: { select: { name: true } } },
             },
+            sectorEvents: {
+              orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+              select: { occurredAt: true, fromSectorName: true, toSectorName: true, note: true, actor: { select: { name: true } } },
+            },
             comments: {
               where: { isInternal: false },
               orderBy: [{ createdAt: "asc" }, { id: "asc" }],
@@ -127,6 +131,13 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
             toStatus: event.toStatus,
             actorName: event.actor.name,
             note: event.note,
+          })),
+          sectorMoves: request.sectorEvents.map((move) => ({
+            occurredAt: move.occurredAt,
+            fromSectorName: move.fromSectorName,
+            toSectorName: move.toSectorName,
+            actorName: move.actor.name,
+            note: move.note,
           })),
           comments: request.comments.map((comment) => ({
             createdAt: comment.createdAt,

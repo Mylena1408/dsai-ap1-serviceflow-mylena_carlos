@@ -46,6 +46,11 @@ export interface PersonalDataSource {
     dueAt: Date | null;
     answers: Array<{ label: string; value: string }>;
     history: Array<{ occurredAt: Date; toStatus: StatusValue; actorName: string; note: string | null }>;
+    /**
+     * Moves to other sectors with their reasons (SPEC 2026-11-03-transferencia-entre-setores, 5.9).
+     * Absent for sources written before that SPEC.
+     */
+    sectorMoves?: Array<{ occurredAt: Date; fromSectorName: string; toSectorName: string; actorName: string; note: string }>;
     /** Public comments only: internal notes belong to the team. */
     comments: Array<{ createdAt: Date; authorName: string; body: string; isInternal: boolean }>;
     attachments: Array<{ requirementName: string; filename: string; createdAt: Date; removed: boolean }>;
@@ -109,6 +114,18 @@ export function buildPersonalDataExport(source: PersonalDataSource, now: Date) {
         por: event.actorName,
         justificativa: event.note,
       })),
+      // Only when there was a move, so files of requests that never moved keep their shape.
+      ...(request.sectorMoves && request.sectorMoves.length > 0
+        ? {
+            encaminhamentos: request.sectorMoves.map((move) => ({
+              quando: iso(move.occurredAt),
+              de: move.fromSectorName,
+              para: move.toSectorName,
+              por: move.actorName,
+              justificativa: move.note,
+            })),
+          }
+        : {}),
       comentarios: request.comments
         .filter((comment) => !comment.isInternal)
         .map((comment) => ({ quando: iso(comment.createdAt), autor: comment.authorName, texto: comment.body })),

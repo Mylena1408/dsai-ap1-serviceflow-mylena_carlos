@@ -25,6 +25,9 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   "approval.requested": "APPROVALS",
   "approval.approved": "APPROVALS",
   "approval.rejected": "APPROVALS",
+  // SPEC 2026-11-03-transferencia-entre-setores, 5.6.
+  "sector.received": "ASSIGNMENT",
+  "sector.changed": "STATUS",
 };
 
 export const NOTIFICATION_TYPES = Object.keys(TYPE_CATEGORY) as NotificationType[];

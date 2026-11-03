@@ -61,6 +61,11 @@ export const requestTransferInputSchema = z
   .object({ requestId: entityIdSchema, assigneeId: entityIdSchema })
   .strict();
 
+// SPEC 2026-11-03-transferencia-entre-setores, 5.1 and 5.2: the reason is checked by the domain.
+export const requestSectorTransferInputSchema = z
+  .object({ requestId: entityIdSchema, sectorId: entityIdSchema, note: z.string().optional() })
+  .strict();
+
 // Reasons are trimmed and limited by the domain (normalizeNote), with fixed messages.
 export const requestCancellationInputSchema = z
   .object({ requestId: entityIdSchema, note: z.string().optional() })

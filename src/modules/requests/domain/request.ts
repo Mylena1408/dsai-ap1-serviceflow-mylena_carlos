@@ -82,6 +82,21 @@ export interface RequestStageEventRecord {
   actor: { id: string; name: string };
 }
 
+/** Request sent to another sector (SPEC 2026-11-03-transferencia-entre-setores, 5.3 and 5.5). */
+export interface RequestSectorEventRecord {
+  id: string;
+  requestId: string;
+  actorId: string;
+  fromSectorId: string;
+  toSectorId: string;
+  /** Names at the time of the move. */
+  fromSectorName: string;
+  toSectorName: string;
+  note: string;
+  occurredAt: Date;
+  actor: { id: string; name: string };
+}
+
 /** Manager decision (SPEC 2026-11-01-aprovacoes, 5.6). */
 export interface RequestApprovalRecord {
   id: string;
@@ -103,6 +118,11 @@ export interface RequestWithHistory extends RequestRecord {
   approval: RequestApprovalRecord | null;
   /** Assume, release and transfer events (SPEC 2026-10-31, section 5.9). */
   assignmentEvents: RequestAssignmentEventRecord[];
+  /**
+   * Moves to other sectors (SPEC 2026-11-03-transferencia-entre-setores, 5.5). Always loaded from
+   * the database; optional so records built before that SPEC stay valid.
+   */
+  sectorEvents?: RequestSectorEventRecord[];
   service: {
     id: string;
     isActive: boolean;

@@ -18,6 +18,11 @@ export interface NotificationContext {
   approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
   /** Active managers of the sector, loaded only for an opening that requires approval. */
   approvalManagerIds?: readonly string[];
+  /**
+   * Active attendants of the sector that received the request, loaded only for a move to another
+   * sector (SPEC 2026-11-03-transferencia-entre-setores, 5.6).
+   */
+  receivingAttendantIds?: readonly string[];
 }
 
 export type NotifiableEvent =
@@ -29,7 +34,8 @@ export type NotifiableEvent =
   | { type: "request.sla_warning" }
   | { type: "request.sla_breached" }
   | { type: "request.stage_changed"; payload: { direction: string; actorId: string } }
-  | { type: "request.approval_decided"; payload: { decision: string; actorId: string } };
+  | { type: "request.approval_decided"; payload: { decision: string; actorId: string } }
+  | { type: "request.sector_changed"; payload: { toSectorId: string; actorId: string } };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -98,6 +104,16 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
         event.payload.decision === "APPROVED" ? "approval.approved" : "approval.rejected",
         event.payload.actorId,
       );
+
+    case "request.sector_changed": {
+      // SPEC 2026-11-03-transferencia-entre-setores, 5.6: the receiving team and the requester; the
+      // author of the move never.
+      const actorId = event.payload.actorId;
+      const team = (context.receivingAttendantIds ?? [])
+        .filter((recipientId) => recipientId !== actorId)
+        .map((recipientId): PlannedNotification => ({ recipientId, type: "sector.received" }));
+      return [...team, ...plan(context.requesterId, "sector.changed", actorId)];
+    }
 
     case "request.stage_changed":
       // SPEC 2026-11-01-fluxos-configuraveis, 5.5.3 (decision W4): the requester hears about each

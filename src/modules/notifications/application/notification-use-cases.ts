@@ -49,6 +49,10 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         ...(event.type === "request.opened" && request.approvalState === "PENDING"
           ? { approvalManagerIds: await store.sectorManagerIds(request.sectorId) }
           : {}),
+        // SPEC 2026-11-03-transferencia-entre-setores, 5.6: the team of the sector named by the event.
+        ...(event.type === "request.sector_changed" && typeof event.payload.toSectorId === "string"
+          ? { receivingAttendantIds: await store.sectorAttendantIds(event.payload.toSectorId) }
+          : {}),
       });
 
       if (planned.length === 0) {

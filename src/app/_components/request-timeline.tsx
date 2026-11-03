@@ -49,6 +49,14 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
         ? null
         : event.note,
   }));
+  // SPEC 2026-11-03-transferencia-entre-setores, 5.5: names at the time of the move.
+  const sectorEntries = (request.sectorEvents ?? []).map((event) => ({
+    id: `sector-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: `Encaminhada do setor ${event.fromSectorName} para o setor ${event.toSectorName}`,
+    actor: event.actor.name,
+    note: event.note,
+  }));
   const assignmentEntries = request.assignmentEvents.map((event) => ({
     id: `assignment-${event.id}`,
     occurredAt: event.occurredAt,
@@ -88,9 +96,9 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
       ]
     : [];
 
-  // Stable sort: on equal times, status events come first, then assignments, priorities, stages
-  // and the approval.
-  return [...statusEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries].sort(
+  // Stable sort: on equal times, status events come first, then sector moves, assignments,
+  // priorities, stages and the approval.
+  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

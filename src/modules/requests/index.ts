@@ -10,6 +10,7 @@ import * as priorityUseCase from "./application/priority";
 import * as queries from "./application/request-queries";
 import * as slaAlerts from "./application/sla-alerts";
 import * as stageUseCase from "./application/stages";
+import * as sectorTransfer from "./application/sector-transfer";
 import * as approvalUseCase from "./application/approval";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
@@ -171,6 +172,19 @@ export async function listTransferCandidates(
   database: PrismaClient = prisma,
 ): Promise<Array<{ id: string; name: string }>> {
   return queries.listTransferCandidates(requestId, createPrismaRequestQueryRepository(database));
+}
+
+/** SPEC 2026-11-03-transferencia-entre-setores, 5.3. */
+export async function sendRequestToSector(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return sectorTransfer.sendRequestToSector(input, createPrismaRequestTransactionRunner(database, assignmentErrors));
+}
+
+/** SPEC 2026-11-03-transferencia-entre-setores, 5.2. */
+export async function listSectorDestinations(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<Array<{ id: string; name: string }>> {
+  return sectorTransfer.listSectorDestinations(requestId, createPrismaRequestQueryRepository(database));
 }
 
 const lifecycleErrors = {

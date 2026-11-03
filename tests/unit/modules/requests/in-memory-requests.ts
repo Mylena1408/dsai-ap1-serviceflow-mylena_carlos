@@ -2,6 +2,7 @@ import type {
   NewApproval,
   NewAssignmentEvent,
   NewPriorityEvent,
+  NewSectorEvent,
   NewStageEvent,
   NewRequestAttachment,
   NewRequestFieldValue,
@@ -46,6 +47,9 @@ export interface InMemoryRequestStore {
   approvals: NewApproval[];
   /** Granted permissions by user id (SPEC de permissões). */
   permissions: Record<string, Permission[]>;
+  /** SPEC 2026-11-03-transferencia-entre-setores. */
+  sectors: Array<{ id: string; name: string; isActive: boolean }>;
+  sectorEvents: NewSectorEvent[];
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -70,6 +74,8 @@ export function createStore(seed: Partial<InMemoryRequestStore> = {}): InMemoryR
     stageEvents: [],
     approvals: [],
     permissions: {},
+    sectors: [],
+    sectorEvents: [],
     ...seed,
   };
 }
@@ -159,6 +165,9 @@ function withHistory(store: InMemoryRequestStore, request: RequestRecord): Reque
     stageEvents: store.stageEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event) => ({ ...event, actor: nameOf(store, event.actorId)! })),
+    sectorEvents: store.sectorEvents
+      .filter(({ requestId }) => requestId === request.id)
+      .map((event, index) => ({ ...event, id: `sector-${index + 1}`, actor: nameOf(store, event.actorId)! })),
     assignmentEvents: store.assignmentEvents
       .filter(({ requestId }) => requestId === request.id)
       .map((event, index) => ({
@@ -208,7 +217,17 @@ export function createInMemoryQueryRepository(store: InMemoryRequestStore): Requ
         .filter((actor) => actor.sectorId === sectorId && actor.role === "ATTENDANT" && actor.isActive)
         .map(({ id, name }) => ({ id, name }));
     },
+    async listSectorDestinations(currentSectorId) {
+      return store.sectors
+        .filter((sector) => sector.id !== currentSectorId && sector.isActive && activeAttendants(store, sector.id) > 0)
+        .sort((left, right) => left.name.localeCompare(right.name))
+        .map(({ id, name }) => ({ id, name }));
+    },
   };
+}
+
+function activeAttendants(store: InMemoryRequestStore, sectorId: string): number {
+  return store.actors.filter((actor) => actor.sectorId === sectorId && actor.role === "ATTENDANT" && actor.isActive).length;
 }
 
 function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransaction {
@@ -398,6 +417,29 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     },
     async insertPriorityEvent(event) {
       store.priorityEvents.push({ ...event });
+    },
+    async findSectorDestination(sectorId) {
+      const sector = store.sectors.find(({ id }) => id === sectorId);
+      return sector ? { ...sector, activeAttendants: activeAttendants(store, sector.id) } : null;
+    },
+    async updateSectorIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, sectorId, assigneeId, approvalState }) =>
+          id === update.requestId &&
+          status === "OPEN" &&
+          sectorId === update.expectedSectorId &&
+          assigneeId === update.expectedAssigneeId &&
+          approvalState !== "PENDING",
+      );
+      if (!request) return 0;
+      request.sectorId = update.sectorId;
+      request.sectorNameSnapshot = update.sectorName;
+      request.assigneeId = null;
+      request.updatedAt = update.updatedAt;
+      return 1;
+    },
+    async insertSectorEvent(event) {
+      store.sectorEvents.push({ ...event });
     },
     async getWithHistory(requestId) {
       const request = store.requests.find(({ id }) => id === requestId);

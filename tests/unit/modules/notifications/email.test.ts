@@ -16,8 +16,9 @@ describe("notification categories (SF-092)", () => {
   it("puts every notification type in exactly one category of table 5.1 (CA-MAIL-02)", () => {
     expect(NOTIFICATION_CATEGORIES).toEqual(["STATUS", "ASSIGNMENT", "COMMENTS", "SLA", "STAGES", "APPROVALS"]);
     expect(Object.fromEntries(NOTIFICATION_CATEGORIES.map((category) => [category, typesOfCategory(category)]))).toEqual({
-      STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN"],
-      ASSIGNMENT: ["assignment.received"],
+      // "sector.*" added by SPEC 2026-11-03-transferencia-entre-setores, 5.6.
+      STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "sector.changed"],
+      ASSIGNMENT: ["assignment.received", "sector.received"],
       COMMENTS: ["comment.public", "comment.internal"],
       SLA: ["sla.warning", "sla.breached"],
       STAGES: ["stage.changed"],

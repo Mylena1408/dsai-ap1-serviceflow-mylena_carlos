@@ -17,6 +17,8 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "approval.requested": "Aprovação pendente",
   "approval.approved": "Solicitação aprovada",
   "approval.rejected": "Solicitação rejeitada",
+  "sector.received": "Encaminhada ao setor",
+  "sector.changed": "Encaminhada a outro setor",
 };
 
 const STATUS_LABELS: Record<EmailDeliveryRecord["status"], string> = {

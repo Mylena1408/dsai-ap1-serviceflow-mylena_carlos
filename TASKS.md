@@ -1298,7 +1298,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-121 — Encaminhamento pela tela
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Caso de uso `sendRequestToSector` e consulta `listSectorDestinations`, formulário "Encaminhar para outro setor" na página da fila (volta para a fila com aviso), linha no histórico, notificações `sector.received` e `sector.changed`, anonimização e "Meus dados". CA-SET-02 a 05 e 08 verificados (telas no E2E da SF-123).
 - **Objetivo:** Caso de uso transacional, formulário na página da fila, histórico, notificações (`sector.received` e `sector.changed`), anonimização e "Meus dados".
 - **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/notifications/`, `src/modules/users/`, `src/modules/audit/`, `src/app/(attendant)/queue/`, testes.
 - **Dependências:** SF-120.

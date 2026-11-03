@@ -56,6 +56,8 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
         where: { actorId: userId, note: { not: null } },
         data: { note: replacement },
       });
+      // SPEC 2026-11-03-transferencia-entre-setores, 5.9: the reason of a move is mandatory.
+      await transaction.requestSectorEvent.updateMany({ where: { actorId: userId }, data: { note: replacement } });
     },
     async deleteNotificationData(userId) {
       await transaction.emailDelivery.deleteMany({ where: { recipientId: userId } });

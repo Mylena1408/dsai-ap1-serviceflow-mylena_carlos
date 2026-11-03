@@ -12,7 +12,9 @@ export type NotificationType =
   | "stage.changed"
   | "approval.requested"
   | "approval.approved"
-  | "approval.rejected";
+  | "approval.rejected"
+  | "sector.received"
+  | "sector.changed";
 
 // Text of each notification (SPEC 2026-10-31-eventos-outbox-jobs, section 8.2), shared by the
 // in-app list and the emails (SPEC 2026-11-01-notificacoes-email-preferencias, 5.4). Messages are
@@ -31,6 +33,9 @@ const MESSAGES: Record<NotificationType, (service: string, stage?: string) => st
   "approval.requested": (service) => `Aprovação pendente: ${service}`,
   "approval.approved": (service) => `Solicitação aprovada: ${service}`,
   "approval.rejected": (service) => `Solicitação rejeitada: ${service}`,
+  // SPEC 2026-11-03-transferencia-entre-setores, 5.6.
+  "sector.received": (service) => `Solicitação encaminhada ao seu setor: ${service}`,
+  "sector.changed": (service) => `Solicitação encaminhada a outro setor: ${service}`,
   // The stage name is missing once the event is purged (after 30 days).
   "stage.changed": (service, stage) =>
     stage ? `Sua solicitação passou para a etapa ${stage}: ${service}` : `Sua solicitação mudou de etapa: ${service}`,

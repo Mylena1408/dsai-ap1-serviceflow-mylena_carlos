@@ -53,6 +53,10 @@ const requestWithHistory = {
       toAssignee: { select: { id: true, name: true } },
     },
   },
+  sectorEvents: {
+    orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+    include: { actor: { select: { id: true, name: true } } },
+  },
 } satisfies Prisma.RequestInclude;
 
 const lifecycleUser = { id: true, role: true, isActive: true, sectorId: true } as const;
@@ -230,6 +234,13 @@ export function createPrismaRequestQueryRepository(
     listSectorAttendants(sectorId) {
       return database.user.findMany({
         where: { sectorId, role: "ATTENDANT", isActive: true },
+        select: { id: true, name: true },
+        orderBy: [{ name: "asc" }, { id: "asc" }],
+      });
+    },
+    listSectorDestinations(currentSectorId) {
+      return database.sector.findMany({
+        where: { id: { not: currentSectorId }, isActive: true, users: { some: { role: "ATTENDANT", isActive: true } } },
         select: { id: true, name: true },
         orderBy: [{ name: "asc" }, { id: "asc" }],
       });
@@ -422,6 +433,35 @@ function createPrismaRequestTransaction(
     },
     async insertPriorityEvent(event) {
       await transaction.requestPriorityEvent.create({ data: event });
+    },
+    async findSectorDestination(sectorId) {
+      const sector = await transaction.sector.findUnique({
+        where: { id: sectorId },
+        select: {
+          id: true,
+          name: true,
+          isActive: true,
+          _count: { select: { users: { where: { role: "ATTENDANT", isActive: true } } } },
+        },
+      });
+      return sector && { id: sector.id, name: sector.name, isActive: sector.isActive, activeAttendants: sector._count.users };
+    },
+    async updateSectorIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: {
+          id: update.requestId,
+          status: "OPEN",
+          sectorId: update.expectedSectorId,
+          assigneeId: update.expectedAssigneeId,
+          // A pending approval stays with the managers of the current sector (decision T3).
+          OR: [{ approvalState: null }, { approvalState: { not: "PENDING" } }],
+        },
+        data: { sectorId: update.sectorId, sectorNameSnapshot: update.sectorName, assigneeId: null, updatedAt: update.updatedAt },
+      });
+      return result.count;
+    },
+    async insertSectorEvent(event) {
+      await transaction.requestSectorEvent.create({ data: event });
     },
     recordEvent(event) {
       return recordOutboxEvent(transaction, event);
