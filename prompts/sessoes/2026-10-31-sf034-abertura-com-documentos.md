@@ -615,3 +615,9 @@ Push de `b88727d` a `95a5e04`.
 > pode prosseguir
 
 Migration bloqueada para o agente; aplicada pela responsável com `!`; deploy e verificação (ver `NOTES.md`, seção "Publicação da API externa e dos webhooks").
+
+## Continuação — E-mails e próximos passos
+
+> mantenha os e-mails desativado, quais os próximos passos?
+
+Decisão registrada em `NOTES.md` ("Decisão: e-mails desativados na publicação"); próximos passos apresentados.

@@ -1560,3 +1560,7 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Deploy:** `vercel deploy --prod` do commit `95a5e04`. O `npx` passou a pedir o CLI 65.10.0, que não está instalado, e o primeiro comando não rodou; usei o CLI 65.9.0 que já estava no cache do `npx`, sem baixar nada.
 - **Verificação só com leitura:** `/` 200; `/login` 307; `/api/v1/me` sem token e `/api/v1/requests` com token inválido respondem 401 `invalid_token` com `Cache-Control: no-store`, `X-Content-Type-Options: nosniff` e `WWW-Authenticate: Bearer`; `/api/v1/openapi.json` responde 200 com o documento.
 - **Pendente:** `WEBHOOK_ENCRYPTION_KEY` não está cadastrada na Vercel (conferido pelo nome das variáveis): no site, a seção "Webhooks" avisa que não está configurada e nada é enviado; tokens e API funcionam. A troca da senha do Neon continua recomendada.
+
+## Decisão: e-mails desativados na publicação (2026-11-02)
+
+- A responsável decidiu manter o envio de e-mails desativado no site publicado ("mantenha os e-mails desativado"). Nada muda no código: sem `EMAIL_API_KEY`, `EMAIL_FROM` e `APP_BASE_URL` na Vercel (conferido pelos nomes das variáveis), os envios ficam registrados como "não enviado — e-mail não configurado" e a seção "E-mails" avisa. Não criar conta no provedor nem cadastrar essas variáveis sem novo pedido.
