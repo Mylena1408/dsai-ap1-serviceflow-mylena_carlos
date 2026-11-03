@@ -44,3 +44,9 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 4. SF-125: arquivos em comentários; o E2E revelou que o campo de arquivo vazio chega como "undefined", defeito que também quebrava a abertura com documento opcional em branco (SF-034); corrigido nos dois.
 5. SF-126: documento depois da abertura.
 6. SF-127: E2E e README.
+
+## Continuação — pausa do prazo e calendário de horas úteis
+
+> pode prosseguir
+
+1. SPEC `SPEC/2026-11-03-pausa-sla-calendario.md` (funcionalidade 7), decisões H1 a H9 adotadas como recomendadas; tarefas SF-128 a SF-132.

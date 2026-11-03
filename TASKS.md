@@ -1369,3 +1369,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ANX-01 a 09.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-03-anexos-comentarios-documentos.md`.
+
+## Pausa do prazo e calendário de horas úteis — SPEC de 2026-11-03
+
+**Ordem:** SF-128 → SF-129 → SF-130 → SF-131 → SF-132.
+
+### SF-128 — Migration e domínio do calendário e da pausa
+
+- **Estado:** Pendente.
+- **Objetivo:** Migration aditiva (calendário, feriados, opção do serviço, cópia na solicitação, pausas, trigger e restrições recriados mais amplos); relógio de horas úteis; validação do calendário e dos feriados; regras de quem pausa e retoma e deslocamento do vencimento.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, `src/shared/time/` ou módulo do calendário, testes.
+- **Dependências:** SF-127.
+- **Critérios de conclusão:** Parte de dados de CA-PSL-11; regras de CA-PSL-03, 05 e 07 cobertas por unitários.
+- **Testes relacionados:** Unitários; integração do schema.
+- **SPEC:** `SPEC/2026-11-03-pausa-sla-calendario.md`.
+
+### SF-129 — Calendário, opção do serviço e horas úteis nos cálculos
+
+- **Estado:** Pendente.
+- **Objetivo:** Tela "Calendário" da administração com feriados e auditoria; "Contagem do prazo" no serviço; horas úteis na abertura, aprovação, mudança de prioridade e reabertura, gravando o "próximo do vencimento".
+- **Arquivos/módulos esperados:** `src/modules/` (calendário, serviços, solicitações, auditoria), `src/app/(admin)/`, testes.
+- **Dependências:** SF-128.
+- **Critérios de conclusão:** CA-PSL-02, 03 e 04.
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-03-pausa-sla-calendario.md`.
+
+### SF-130 — Pausa e retomada
+
+- **Estado:** Pendente.
+- **Objetivo:** Caso de uso de pausar e retomar, retomada pela resposta do solicitante e no fim do atendimento, telas, histórico, notificação `sla.paused`, alertas, filtro da fila, painel, CSV, anonimização e "Meus dados".
+- **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/comments/`, `src/modules/notifications/`, `src/modules/reports/`, `src/modules/audit/`, `src/app/`, testes.
+- **Dependências:** SF-129.
+- **Critérios de conclusão:** CA-PSL-05 a 08 (tela e notificação) e 10.
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-03-pausa-sla-calendario.md`.
+
+### SF-131 — API, OpenAPI e webhooks da pausa
+
+- **Estado:** Pendente.
+- **Objetivo:** `POST pause-sla` e `resume-sla`, campos e histórico no detalhe, filtro `sla=paused`, OpenAPI e eventos "Prazo pausado" e "Prazo retomado" nos webhooks.
+- **Arquivos/módulos esperados:** `src/modules/public-api/`, `src/app/api/v1/`, `src/modules/webhooks/`, testes.
+- **Dependências:** SF-130.
+- **Critérios de conclusão:** CA-PSL-08 (webhooks) e 09.
+- **Testes relacionados:** Unitários; integração com a API.
+- **SPEC:** `SPEC/2026-11-03-pausa-sla-calendario.md`.
+
+### SF-132 — E2E, README e revisão
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8, README e revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-131.
+- **Critérios de conclusão:** CA-PSL-01 a 11.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-03-pausa-sla-calendario.md`.

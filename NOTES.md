@@ -1716,3 +1716,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Conferido:** o armazenamento sem configuração lança `DocumentStorageError`, que a tela transforma no aviso "O envio de arquivos não está disponível agora"; comentário sem arquivo não toca no armazenamento.
 - **Resultados:** lint, typecheck e build OK; unitários 829/829; integração 371/371 + 1 pulado; E2E 22/22.
 - **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors`, `20261103200000_request_sector_events` e `20261103300000_request_comment_files`.
+
+## SPEC de pausa do prazo e calendário de horas úteis (2026-11-03)
+
+- **SPEC `2026-11-03-pausa-sla-calendario.md`** (funcionalidade 7 da lista aprovada), decisões H1 a H9 adotadas como recomendadas: um calendário da organização (dias, uma janela por dia, fuso, feriados simples e anuais); opção por serviço entre horas corridas (padrão, comportamento atual) e horas úteis, copiada na abertura; mudança do calendário não recalcula vencimentos gravados; pausa só "aguardando o solicitante", com motivo, em atendimento, pelo responsável ou supervisor, recusada se vencida; retomada manual, pela resposta do solicitante (comentário ou documento) e no fim do atendimento; o tempo pausado não conta no relógio da solicitação; notificação ao solicitante e webhooks. Tarefas SF-128 a SF-132.
+- **Ponto de projeto:** o trigger de `dueSoonAt` (SF-068) só conhece horas corridas. Em horas úteis a conta depende do calendário, então a aplicação grava o valor e o trigger o mantém; uma função de domínio única devolve vencimento e "próximo" juntos.
