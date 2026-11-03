@@ -92,3 +92,25 @@ export function webhookRetryPlan(attempts: number, now: Date): WebhookRetryPlan 
   const delay = WEBHOOK_RETRY_DELAYS_MS[attempts - 1] ?? WEBHOOK_RETRY_DELAYS_MS.at(-1)!;
   return { status: "PENDING", availableAt: new Date(now.getTime() + delay) };
 }
+
+/**
+ * SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2 (decision W2): a webhook without sectors receives
+ * every sector; with sectors, only events of requests opened in one of them.
+ */
+export function webhookAcceptsSector(webhookSectorIds: readonly string[], requestSectorId: string): boolean {
+  return webhookSectorIds.length === 0 || webhookSectorIds.includes(requestSectorId);
+}
+
+/** The sectors of the form without repetition; null when one of them does not exist. */
+export function checkWebhookSectors(selected: readonly string[], existing: readonly string[]): string[] | null {
+  const unique = [...new Set(selected)];
+  return unique.every((sectorId) => existing.includes(sectorId)) ? unique : null;
+}
+
+/**
+ * Section 5.3 (decision W3): only a delivery that ended without success (failed or cancelled), of a
+ * webhook still active, goes back to the queue.
+ */
+export function canResendWebhookDelivery(delivery: { status: string }, webhook: { isActive: boolean }): boolean {
+  return webhook.isActive && (delivery.status === "FAILED" || delivery.status === "CANCELLED");
+}

@@ -133,3 +133,15 @@ describe("API token and webhook schema (SF-111)", () => {
     await expect(prisma.webhookEndpoint.delete({ where: { id: webhook.id } })).rejects.toThrow();
   });
 });
+
+describe("webhook sectors schema (SF-116)", () => {
+  it("starts existing and new webhooks with no sector (every sector) and refuses a null item", async () => {
+    await expect(webhookRow()).resolves.toMatchObject({ sectorIds: [] });
+    const sector = await prisma.sector.create({ data: { name: "Central" } });
+    await expect(webhookRow({ sectorIds: [sector.id] })).resolves.toMatchObject({ sectorIds: [sector.id] });
+    await expect(
+      prisma.$executeRawUnsafe(`UPDATE "WebhookEndpoint" SET "sectorIds" = ARRAY[NULL]::uuid[]`),
+    ).rejects.toThrow();
+    await expect(prisma.$executeRawUnsafe(`UPDATE "WebhookEndpoint" SET "sectorIds" = NULL`)).rejects.toThrow();
+  });
+});

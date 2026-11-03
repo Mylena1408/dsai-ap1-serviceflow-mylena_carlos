@@ -1244,7 +1244,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-116 — Migration e regras do filtro por setor e do reenvio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Migration `20261103100000_webhook_sectors` (`WebhookEndpoint.sectorIds`, lista vazia por padrão, nunca nula nem com item nulo) e regras `webhookAcceptsSector`, `checkWebhookSectors` e `canResendWebhookDelivery`. CA-ACT-09 parcial; regras de CA-ACT-06 e 07 cobertas por unitários.
 - **Objetivo:** Migration aditiva com `WebhookEndpoint.sectorIds`; regras puras: quais webhooks recebem um evento de um setor e quando uma entrega pode ser reenviada.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/webhooks/domain/`, testes.
 - **Dependências:** SF-115.

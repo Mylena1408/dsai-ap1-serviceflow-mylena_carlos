@@ -15,10 +15,13 @@ export {
   WEBHOOK_EVENT_LABELS,
   WEBHOOK_RETRY_DELAYS_MS,
   WEBHOOK_TIMEOUT_MS,
+  canResendWebhookDelivery,
   checkWebhookEvents,
+  checkWebhookSectors,
   normalizeWebhookName,
   webhookBody,
   webhookFailureCode,
+  webhookAcceptsSector,
   webhookRetryPlan,
 } from "./domain/delivery";
 export type { WebhookAttemptResult, WebhookEvent, WebhookRetryPlan } from "./domain/delivery";

@@ -605,6 +605,8 @@ model WebhookEndpoint {
   name            String
   url             String
   eventTypes      String[]
+  /// SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2: empty means every sector.
+  sectorIds       String[] @default([]) @db.Uuid
   isActive        Boolean  @default(true)
   encryptedSecret String
   createdAt       DateTime @default(now()) @db.Timestamptz

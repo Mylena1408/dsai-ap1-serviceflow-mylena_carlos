@@ -1590,3 +1590,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ordem adotada (informada à responsável):** 3 e 4 juntas → 5 → 6 → 7 → 8 → 2 → 1. Motivos: o plano manda deixar múltiplas organizações por último (muda todas as tabelas e consultas, e faria refazer as outras); o MCP de documentos depende da SF-030 (armazenamento real ainda sem credenciais).
 - **Como as SPECs são aprovadas daqui em diante:** cada SPEC registra que a funcionalidade foi aprovada em 2026-11-03 e adota as decisões recomendadas, listadas na seção de decisões; a responsável pode rever qualquer uma.
 - **SPEC `2026-11-03-api-acoes-webhooks-setor.md`** (funcionalidades 3 e 4): rotas `POST` por ação (`start`, `complete`, `assume`, `release`, `transfer`, `cancel`, `reopen`) e `GET transfer-candidates`, sobre os casos de uso da tela; filtro opcional de setores no webhook (vazio = todos); reenvio de entrega falha ou cancelada. Tarefas SF-116 a SF-119.
+
+## SF-116 — Migration e regras do filtro por setor e do reenvio (2026-11-03)
+
+- **Migration `20261103100000_webhook_sectors`:** gerada comparando os arquivos de schema (sem banco sombra). Só acrescenta `sectorIds UUID[]` com padrão vazio e a restrição "nunca nula, sem item nulo". Webhooks existentes ficam com a lista vazia, que significa todos os setores. Aplicada nos bancos de teste e de desenvolvimento; o Neon ainda não a tem.
+- **Regras (`src/modules/webhooks/domain/delivery.ts`):** `webhookAcceptsSector` (vazio = todos), `checkWebhookSectors` (sem repetição, recusa setor inexistente) e `canResendWebhookDelivery` (só falha ou cancelada, de webhook ativo).
+- **Ambiente:** o typecheck acusou um erro em `.next/dev/types/validator.ts`, arquivo gerado pelo `next dev` que ficou truncado (provavelmente o servidor do E2E foi encerrado no meio da escrita). É ignorado pelo Git e recriado pelo servidor; a pasta `.next/dev/types` foi apagada e o typecheck voltou a passar. Nenhum arquivo do projeto mudou por isso.
+- **Testes novos:** unitário `tests/unit/modules/webhooks/sectors-resend.test.ts`; caso novo em `tests/integration/api-webhook-schema.test.ts` (arquivo criado pela SPEC anterior).
+- **Resultados:** lint, typecheck e build OK; unitários 787/787; integração 347/347 + 1 pulado; E2E 19/19.

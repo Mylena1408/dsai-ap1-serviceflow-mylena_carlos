@@ -86,7 +86,7 @@ Migration **aditiva**: `WebhookEndpoint.sectorIds` (lista de UUID, padrão vazia
 - [ ] **CA-ACT-06** — Webhook com setores marcados só recebe eventos de solicitações desses setores; sem setores, recebe de todos; setor inexistente é recusado; a mudança aparece na auditoria.
 - [ ] **CA-ACT-07** — O administrador reenvia uma entrega falha ou cancelada de webhook ativo, que volta a pendente com as tentativas zeradas e é enviada com o mesmo identificador e assinatura válida; entrega pendente ou entregue, ou de webhook inativo, é recusada.
 - [ ] **CA-ACT-08** — O OpenAPI descreve as rotas novas (o teste de correspondência continua passando); o README explica as ações e o filtro por setor.
-- [ ] **CA-ACT-09** — Nenhuma dependência nova; uma migration aditiva.
+- [ ] **CA-ACT-09** — Nenhuma dependência nova; uma migration aditiva. *Parcial em 2026-11-03 (SF-116): migration `20261103100000_webhook_sectors` só acrescenta a coluna (lista vazia nos webhooks existentes, que continuam recebendo de todos os setores) e uma restrição; conferência final na SF-119.*
 
 ## 8. Estratégia de testes
 
