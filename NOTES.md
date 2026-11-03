@@ -1804,3 +1804,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Webhooks:** nada mudou no módulo: os rótulos vieram na SF-128, e eventos que não são de mudança de setor já vão aos webhooks do setor atual.
 - **Teste novo:** `tests/integration/public-api-sla-pause.test.ts`.
 - **Resultados:** lint e build OK; unitários 865/865; integração 390/390 + 1 pulado.
+
+## SF-132 — E2E e revisão do calendário e da pausa (2026-11-03)
+
+- **E2E `tests/e2e/sla-pause-calendar.spec.ts`:** o administrador marca os sete dias, de 00:00 a 24:00 (assim o teste não depende da hora em que roda), cadastra um feriado e cria um serviço de 8 h em horas úteis (a lista mostra "(horas úteis)"); a Ana abre e vê "(horas úteis)" no vencimento; o Diego assume, inicia e pausa com motivo; a fila filtrada por "Pausado" mostra a solicitação; a Ana vê "Prazo pausado" e o motivo, comenta, e o prazo volta a "Dentro do prazo"; o Diego vê a pausa, o motivo e "Prazo retomado pela resposta do solicitante" no histórico.
+- **README:** calendário e pausa em "Fluxos disponíveis" e as rotas `pause-sla` e `resume-sla` na API.
+- **Revisão:** nenhuma dependência nova; uma migration; nenhum segredo; SPEC concluída, com dois esclarecimentos registrados (linha do calendário sem `INSERT`; liberar não muda o status).
+- **Resultados:** lint, typecheck e build OK; unitários 865/865; integração 390/390 + 1 pulado; E2E 23/23.
+- **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors`, `20261103200000_request_sector_events`, `20261103300000_request_comment_files` e `20261103400000_sla_pause_calendar`.

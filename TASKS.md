@@ -1416,7 +1416,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-132 — E2E, README e revisão
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. E2E `tests/e2e/sla-pause-calendar.spec.ts` (calendário e feriado na administração, serviço em horas úteis, pausa com motivo, aviso e resposta do solicitante, retomada no histórico, filtro "Pausado"), README e revisão da SPEC. CA-PSL-01 a 11 verificados; SPEC concluída.
 - **Objetivo:** E2E da seção 8, README e revisão da SPEC.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-131.
