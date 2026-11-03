@@ -23,6 +23,7 @@ export const WEBHOOK_EVENT_LABELS: Record<DomainEventType, string> = {
   "request.sla_breached": "Prazo vencido",
   "request.stage_changed": "Mudança de etapa",
   "request.approval_decided": "Decisão de aprovação",
+  "request.sector_changed": "Mudança de setor",
 };
 
 export function normalizeWebhookName(raw: string): string | null {

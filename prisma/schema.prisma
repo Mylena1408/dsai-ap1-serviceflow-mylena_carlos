@@ -127,9 +127,11 @@ model Sector {
   createdAt DateTime @default(now()) @db.Timestamptz
   updatedAt DateTime @updatedAt @db.Timestamptz
 
-  users    User[]
-  services Service[]
-  requests Request[]
+  users            User[]
+  services         Service[]
+  requests         Request[]
+  requestsSentAway RequestSectorEvent[] @relation("RequestSectorEventFrom")
+  requestsReceived RequestSectorEvent[] @relation("RequestSectorEventTo")
 }
 
 model Category {
@@ -167,6 +169,7 @@ model User {
   notifications         RequestNotification[]    @relation("NotificationRecipient")
   priorityEvents        RequestPriorityEvent[]   @relation("RequestPriorityEventActor")
   stageEvents           RequestStageEvent[]      @relation("RequestStageEventActor")
+  sectorEvents          RequestSectorEvent[]     @relation("RequestSectorEventActor")
   approvalsDecided      RequestApproval[]        @relation("RequestApprovalDecider")
   permissions           UserPermission[]         @relation("UserPermissionHolder")
   permissionsGranted    UserPermission[]         @relation("UserPermissionGrantor")
@@ -242,6 +245,7 @@ model Request {
   priorityEvents   RequestPriorityEvent[]
   fieldValues      RequestFieldValue[]
   stageEvents      RequestStageEvent[]
+  sectorEvents     RequestSectorEvent[]
   approval         RequestApproval?
   comments         RequestComment[]
   outboxEvents     OutboxEvent[]
@@ -496,6 +500,27 @@ model RequestStageEvent {
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor   User    @relation("RequestStageEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId])
+}
+
+/// A request sent to another sector (SPEC 2026-11-03-transferencia-entre-setores, 5.3 and 6). The
+/// names are the ones at the time; the note is mandatory and checked in SQL.
+model RequestSectorEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  requestId      String   @db.Uuid
+  actorId        String   @db.Uuid
+  fromSectorId   String   @db.Uuid
+  toSectorId     String   @db.Uuid
+  fromSectorName String
+  toSectorName   String
+  note           String
+  occurredAt     DateTime @db.Timestamptz
+
+  request    Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  actor      User    @relation("RequestSectorEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+  fromSector Sector  @relation("RequestSectorEventFrom", fields: [fromSectorId], references: [id], onDelete: Restrict)
+  toSector   Sector  @relation("RequestSectorEventTo", fields: [toSectorId], references: [id], onDelete: Restrict)
 
   @@index([requestId])
 }

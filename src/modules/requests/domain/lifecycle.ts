@@ -140,6 +140,58 @@ export function assertCanTransfer(
 }
 
 /**
+ * SPEC 2026-11-03-transferencia-entre-setores, 5.1 (decisions T1 and T3): an attendant of the
+ * current sector sends an open request without a pending approval to another sector. With an
+ * effective assignee only that attendant does, or a supervisor of the queue; without one, any
+ * attendant of the sector.
+ */
+export function assertCanSendToSector(actor: LifecycleUser, request: LifecycleRequest, supervisor = false): void {
+  requireSectorAttendant(actor, request);
+
+  if (request.status !== "OPEN" || request.approvalState === "PENDING") {
+    throw new ConflictError();
+  }
+
+  const holderId = effectiveAssigneeId(request);
+
+  if (holderId !== null && holderId !== actor.id && !supervisor) {
+    throw new ConflictError();
+  }
+}
+
+/** Section 5.1 item 4: the reason is mandatory, 1 to 1,000 characters once trimmed. */
+export function sectorTransferNote(raw: string | null | undefined): string {
+  const note = normalizeNote(raw);
+  requireNote(note);
+  return note!;
+}
+
+/** A sector that may receive a request (section 5.2), as read in the transaction. */
+export interface SectorDestination {
+  id: string;
+  name: string;
+  isActive: boolean;
+  activeAttendants: number;
+}
+
+/**
+ * Section 5.2 (decision T4): an active sector, other than the current one, with at least one
+ * active attendant. Anything else is refused on the "sectorId" field.
+ */
+export function isSectorDestination(request: Pick<LifecycleRequest, "sectorId">, sector: SectorDestination | null): sector is SectorDestination {
+  return sector !== null && sector.isActive && sector.id !== request.sectorId && sector.activeAttendants > 0;
+}
+
+export function assertSectorDestination(
+  request: Pick<LifecycleRequest, "sectorId">,
+  sector: SectorDestination | null,
+): asserts sector is SectorDestination {
+  if (!isSectorDestination(request, sector)) {
+    throw new ValidationError([{ path: ["sectorId"], code: "invalid_value" }]);
+  }
+}
+
+/**
  * Section 5.3 (decision D2): with an effective assignee only that attendant starts or
  * completes; without one, any attendant of the sector does, as before.
  */

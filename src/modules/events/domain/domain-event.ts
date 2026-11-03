@@ -52,6 +52,14 @@ export type DomainEvent =
       payload: { decision: "APPROVED" | "REJECTED"; actorId: string };
     }
   | {
+      // Request sent to another sector (SPEC 2026-11-03-transferencia-entre-setores, 5.3.5); the
+      // note stays in the history row.
+      type: "request.sector_changed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { fromSectorId: string; toSectorId: string; actorId: string };
+    }
+  | {
       // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
       // writes them, and the consumer reloads the request to find the recipients.
       type: "request.sla_warning" | "request.sla_breached";
@@ -72,6 +80,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.sla_breached",
   "request.stage_changed",
   "request.approval_decided",
+  "request.sector_changed",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -84,6 +93,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.sla_breached": [],
   "request.stage_changed": ["stageEventId", "direction", "actorId"],
   "request.approval_decided": ["decision", "actorId"],
+  "request.sector_changed": ["fromSectorId", "toSectorId", "actorId"],
 };
 
 /**

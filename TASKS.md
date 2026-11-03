@@ -1288,7 +1288,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-120 — Migration e regras do encaminhamento
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Migration `20261103200000_request_sector_events` (tabela `RequestSectorEvent` com justificativa de 1 a 1.000 caracteres e origem diferente do destino; `request.sector_changed` aceito na outbox e nos webhooks); regras `assertCanSendToSector`, `sectorTransferNote` e `assertSectorDestination`; evento `request.sector_changed` com o rótulo "Mudança de setor" nos webhooks. Regras de CA-SET-02 e 03 cobertas por unitários; CA-SET-09 parcial.
 - **Objetivo:** Tabela `RequestSectorEvent`, tipo `request.sector_changed` aceito na outbox e nos webhooks; regras puras de quem encaminha (5.1) e dos destinos (5.2).
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, `src/modules/events/domain/`, testes.
 - **Dependências:** SF-119.

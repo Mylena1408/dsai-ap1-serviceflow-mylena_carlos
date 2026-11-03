@@ -105,7 +105,7 @@ Nenhuma dependência nova.
 - [ ] **CA-SET-06** — O evento `request.sector_changed` chega aos webhooks sem filtro e aos filtrados pelo setor de origem ou de destino, só com identificadores.
 - [ ] **CA-SET-07** — A API encaminha e lista destinos com as mesmas regras; o OpenAPI descreve as rotas.
 - [ ] **CA-SET-08** — A anonimização substitui a justificativa; "Meus dados" a inclui.
-- [ ] **CA-SET-09** — Nenhuma dependência nova; uma migration aditiva; README explica o encaminhamento.
+- [ ] **CA-SET-09** — Nenhuma dependência nova; uma migration aditiva; README explica o encaminhamento. *Parcial em 2026-11-03 (SF-120): migration `20261103200000_request_sector_events` cria a tabela nova e recria as restrições de tipo da outbox e dos webhooks só para aceitar `request.sector_changed` (todo valor aceito antes continua aceito); conferência final na SF-123.*
 
 ## 8. Estratégia de testes
 
