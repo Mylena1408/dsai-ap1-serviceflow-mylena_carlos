@@ -1230,7 +1230,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-115 — E2E e revisão da API e dos webhooks
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-02. E2E `tests/e2e/api-webhooks.spec.ts` com a seção 8 inteira (receptor HTTP do próprio teste com assinatura conferida); README com as seções "API externa", "Webhooks" e "Webhooks de saída" (exemplos de chamada e verificação da assinatura, conferida contra a assinatura real); CA-API-01 e 13 verificados; SPEC concluída (CA-API-01 a 13).
 - **Objetivo:** E2E da seção 8; README com a criação de token, exemplos de chamada e a verificação da assinatura; revisão da SPEC.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-114.

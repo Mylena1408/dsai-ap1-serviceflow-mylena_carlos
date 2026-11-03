@@ -142,6 +142,65 @@ APP_BASE_URL=https://<endereço público do ServiceFlow>
 - O remetente precisa usar um domínio verificado na conta do provedor.
 - Na Vercel, cadastre `EMAIL_API_KEY` como variável **Secret**. Nunca versione a chave.
 
+### Webhooks
+
+Os segredos de assinatura dos webhooks ficam cifrados com uma chave que existe só no ambiente do servidor (`SPEC/2026-11-02-api-externa-webhooks.md`, seção 5.6):
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+```env
+WEBHOOK_ENCRYPTION_KEY=<32 bytes em base64>
+```
+
+- Sem a chave, a seção "Webhooks" avisa que não está configurada e nada é cadastrado nem enviado.
+- Trocar a chave deixa os segredos já guardados ilegíveis: gere um novo segredo em cada webhook.
+- Na Vercel, cadastre a chave como **Secret**. `WEBHOOK_ALLOW_LOCAL=true` só serve aos testes (aceita receptores em `localhost`) e é ignorada em produção.
+
+## API externa
+
+Outros sistemas usam a API `/api/v1` com um **token pessoal** (`SPEC/2026-11-02-api-externa-webhooks.md`). Cada chamada age com o perfil, o setor e as permissões de quem criou o token, com as mesmas regras da tela.
+
+1. Entre como solicitante, atendente ou gestor e abra **Acesso à API** no menu.
+2. Escolha nome, escopo ("Somente leitura" ou "Leitura e escrita") e validade (30, 90 ou 365 dias) e clique em **Criar token**. O valor (`sf_...`) aparece **uma única vez**: guarde-o como uma senha. O banco guarda só o hash.
+3. Chame a API com o cabeçalho `Authorization`:
+
+```bash
+curl -H "Authorization: Bearer sf_..." https://<endereço>/api/v1/me
+curl -H "Authorization: Bearer sf_..." "https://<endereço>/api/v1/requests?status=OPEN"
+curl -X POST -H "Authorization: Bearer sf_..." -H "Content-Type: application/json" \
+  -d '{"serviceId":"<id do serviço>","description":"Cadeira quebrada na sala 3"}' \
+  https://<endereço>/api/v1/requests
+```
+
+- Rotas: `GET /api/v1/me`, `GET /api/v1/services` (solicitante), `GET /api/v1/requests`, `POST /api/v1/requests` (solicitante, sem anexos), `GET /api/v1/requests/{id}`, `POST /api/v1/requests/{id}/comments`. A descrição completa, com formatos e erros, está em `GET /api/v1/openapi.json` (público).
+- Erros sempre no formato `{"error": {"code", "message"}}`: `401 invalid_token`, `403 forbidden` ou `insufficient_scope`, `404 not_found` (também para o que a pessoa não pode ler), `422 documents_required` (serviço com documento obrigatório) e `429 rate_limited` com `Retry-After`. Limite de 60 chamadas por minuto por token; até 10 tokens ativos por pessoa.
+- A pessoa revoga os próprios tokens na mesma página; o administrador vê e revoga todos em **Administração → Acesso à API**. A revogação vale na chamada seguinte.
+
+### Webhooks de saída
+
+Em **Administração → Webhooks**, o administrador cadastra um endereço `https` público e os eventos (solicitação aberta, mudança de status, de responsável, de prioridade ou de etapa, comentário, prazos e decisão de aprovação). O **segredo** (`whsec_...`) aparece uma única vez; "Gerar novo segredo" troca o segredo na hora.
+
+Cada evento chega como `POST` com corpo JSON `{"id", "type", "occurredAt", "requestId", "data"}`, só com identificadores e códigos (nunca descrições, comentários, nomes ou e-mails), e com os cabeçalhos `ServiceFlow-Event`, `ServiceFlow-Delivery` (igual em todas as tentativas) e `ServiceFlow-Signature: t=<segundos>,v1=<hex>`. Para conferir a assinatura no sistema que recebe:
+
+```js
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+// rawBody: o corpo exatamente como chegou, antes de qualquer JSON.parse.
+function isFromServiceFlow(signatureHeader, rawBody, secret, maxAgeSeconds = 300) {
+  const match = /^t=(\d+),v1=([0-9a-f]{64})$/.exec(signatureHeader ?? "");
+  if (!match) return false;
+  const [, timestamp, received] = match;
+  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > maxAgeSeconds) return false; // evita reenvio antigo
+  const expected = createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(received));
+}
+```
+
+- Responda com qualquer status 2xx. Outras respostas, redirecionamentos (não seguidos), falta de resposta em 10 s ou endereço que resolve para rede interna contam como falha; há novas tentativas depois de 1 min, 5 min, 30 min, 2 h e 12 h, e a entrega desiste na sexta falha. Como a mesma entrega pode chegar mais de uma vez, use `ServiceFlow-Delivery` para ignorar repetições.
+- A seção mostra as 50 entregas mais recentes, sem o corpo. Desativar um webhook cancela as entregas pendentes dele.
+
 ## Fluxos disponíveis
 
 - Administradores autenticados configuram usuários, setores, categorias e serviços em `/admin`.
@@ -162,6 +221,7 @@ APP_BASE_URL=https://<endereço público do ServiceFlow>
 - Notificações por e-mail (`SPEC/2026-11-01-notificacoes-email-preferencias.md`): solicitante, atendente e gestor escolhem em "Preferências de e-mail" (link na página de notificações) quais categorias também querem receber por e-mail — mudanças de status, transferências, comentários e notas internas, prazos, etapas e aprovações. Tudo começa desligado e as notificações dentro do sistema continuam sempre ativas. Cada notificação de uma categoria ligada gera um envio, processado depois da ação e pelo job diário, com novas tentativas em caso de falha. O e-mail traz só o aviso, o serviço, um código curto e o link para a solicitação, nunca a descrição, comentários ou documentos. Na seção "E-mails" da administração, o administrador vê se o envio está configurado e os 50 envios mais recentes, sem o conteúdo.
 - Painel e relatórios (`SPEC/2026-11-02-painel-relatorios.md`): o administrador abre a seção "Painel" da administração (toda a organização ou um setor) e o gestor abre "Painel do setor" (só o próprio setor). O painel mostra a situação atual (abertas, aguardando aprovação, em atendimento, próximas do vencimento e vencidas) e, no período escolhido (últimos 7, 30 ou 90 dias ou um intervalo de até 366 dias, contados no horário de Brasília), as solicitações abertas, concluídas e canceladas, o tempo médio e a mediana até a conclusão, o percentual concluído no prazo e a distribuição por categoria, setor e status, em barras. "Exportar CSV" (`/api/reports/requests.csv`) baixa as solicitações abertas no período, com colunas mínimas (sem descrição, comentários nem dados do solicitante), até 10.000 linhas, separadas por `;` e prontas para planilhas. O painel não tem links para solicitações: as regras de leitura de cada uma não mudam. Os números são calculados a cada visita, sem tabela nova.
 - Auditoria e dados pessoais (`SPEC/2026-11-02-auditoria-lgpd.md`): cada criação, alteração, reordenação, desativação e reativação de usuários, setores, categorias, serviços, documentos exigidos, campos e etapas fica registrada na mesma transação, com quem fez, o perfil e os campos alterados (nome e e-mail de pessoas só como "alterado"; senhas nunca). A seção "Auditoria" da administração, só para o administrador, lista esses registros junto com as concessões e revogações de permissões, 50 por página, com filtros por período, tipo e pessoa. O job diário aplica os prazos de guarda: eventos processados 30 dias, notificações lidas 90, não lidas 365, envios de e-mail 180 e auditoria 5 anos; solicitações e histórico não têm prazo automático. Em "Meus dados" (`/account/data`, link no menu de todos os perfis), cada pessoa baixa um JSON com os próprios dados, sem senha nem notas internas de outras pessoas, e o download entra na auditoria. O administrador pode **anonimizar** uma pessoa desativada que não tenha solicitação aberta ou em atendimento: com confirmação explícita e de forma irreversível, nome e e-mail viram "Pessoa anonimizada <código>", a conta deixa de entrar, os textos que ela escreveu viram "[conteúdo removido na anonimização]", os anexos que enviou são apagados do armazenamento ("Arquivo removido na anonimização") e saem as preferências, notificações, envios de e-mail e permissões. As solicitações, o histórico e os números do painel continuam. Esta organização dos dados não substitui a orientação jurídica da organização.
+- API externa e webhooks (`SPEC/2026-11-02-api-externa-webhooks.md`): tokens pessoais de solicitante, atendente e gestor, com escopo e validade, usados pela API `/api/v1` com as mesmas regras da tela; webhooks cadastrados pelo administrador, com entregas assinadas e novas tentativas. Tokens e mudanças de webhook entram na auditoria sem valor nem segredo; "Meus dados" lista os tokens; anonimizar revoga os tokens; o job diário apaga entregas encerradas há mais de 30 dias e tokens encerrados há mais de 365. Detalhes nas seções "API externa" e "Webhooks" acima.
 - A rota inicial encaminha a sessão autenticada à interface do perfil obtido do servidor; o cliente não escolhe papel.
 - A abertura valida no servidor a disponibilidade atual do serviço, categoria e setor e grava snapshots e evento inicial junto da solicitação. Transições persistem status e evento de histórico atomicamente.
 - Administradores configuram, por serviço, até 5 documentos exigidos (PDF, DOCX ou TXT; obrigatórios ou opcionais). O solicitante anexa um arquivo por documento ao abrir a solicitação (até 2 MiB cada, 4 MiB no total); o servidor confere o conteúdo real de cada arquivo.

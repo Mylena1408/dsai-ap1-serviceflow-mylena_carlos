@@ -597,3 +597,9 @@ SF-113 concluída (ver `NOTES.md`, seção SF-113).
 > pode começar a SF-114
 
 SF-114 concluída (ver `NOTES.md`, seção SF-114).
+
+## Continuação — SF-115
+
+> pode começar a SF-115
+
+SF-115 concluída (ver `NOTES.md`, seção SF-115).
