@@ -1308,7 +1308,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-122 — API, OpenAPI e webhooks
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Rotas `POST transfer-sector` (responde `{id, sectorId}`) e `GET sector-candidates`, OpenAPI, `history.sectors` no detalhe da API, filtro dos webhooks por origem ou destino no evento de mudança de setor. CA-SET-06 e 07 verificados.
 - **Objetivo:** `POST transfer-sector` e `GET sector-candidates`, OpenAPI, evento "Mudança de setor" nos webhooks com filtro por origem ou destino.
 - **Arquivos/módulos esperados:** `src/modules/public-api/`, `src/app/api/v1/`, `src/modules/webhooks/`, testes.
 - **Dependências:** SF-121.

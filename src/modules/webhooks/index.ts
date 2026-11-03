@@ -21,6 +21,7 @@ export {
   normalizeWebhookName,
   webhookBody,
   webhookFailureCode,
+  eventSectorIds,
   webhookAcceptsSector,
   webhookRetryPlan,
 } from "./domain/delivery";

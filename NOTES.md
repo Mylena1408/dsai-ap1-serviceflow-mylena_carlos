@@ -1654,3 +1654,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes anteriores ajustados:** o dublê `tests/unit/modules/requests/in-memory-requests.ts` ganhou setores, eventos de setor e os métodos novos das portas; `tests/unit/modules/notifications/email.test.ts` enumera a tabela 5.1 da SPEC de e-mail inteira e ganhou os dois tipos novos, com comentário (é o teste que obriga todo tipo novo a ter categoria).
 - **Testes novos:** unitários `tests/unit/modules/requests/application/sector-transfer.test.ts` e `tests/unit/request-sector-display.test.ts`; integração `tests/integration/request-sector-transfer.test.ts` (inclui dois encaminhamentos simultâneos: só um acontece).
 - **Resultados:** lint, typecheck e build OK; unitários 811/811; integração 361/361 + 1 pulado; E2E 20/20.
+
+## SF-122 — API, OpenAPI e webhooks do encaminhamento (2026-11-03)
+
+- **Esclarecimento na SPEC (5.8.2):** a primeira redação mandava devolver o detalhe atualizado, como nas outras ações. Só que quem encaminha deixa de ler a solicitação na mesma transação, e montar o detalhe depois responderia `404` a um encaminhamento feito. A rota responde `200 {"id", "sectorId"}`.
+- **Perfis:** como nas ações da SF-117, a rota aceita solicitante, atendente e gestor e deixa o caso de uso decidir (`404` fora do setor, `409` para a colega sem direito); `sector-candidates` só atendente (`403` para os outros perfis), como `transfer-candidates`.
+- **Histórico na API:** o detalhe ganhou `history.sectors` (origem, destino, autor, justificativa, data), para o novo setor ler pela API o mesmo histórico da tela (SPEC 5.4). Nenhum teste anterior comparava o objeto `history` inteiro.
+- **Webhooks:** `eventSectorIds` diz a quais setores o evento pertence: o de mudança de setor pertence à origem e ao destino (decisão T6) e nem lê o setor atual; os outros eventos seguem com o setor atual.
+- **Erro meu no teste, corrigido:** a primeira versão do teste de integração simulava a sessão (`@/server/auth`) para abrir a solicitação e cadastrar webhooks; isso substitui também o contexto do token da API, e as rotas responderam `500`. O teste passou a criar a solicitação e os webhooks direto no banco, sem simular a sessão.
+- **Testes novos:** unitário `tests/unit/modules/webhooks/sector-move.test.ts`; integração `tests/integration/public-api-sector-transfer.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 813/813; integração 363/363 + 1 pulado. O E2E não foi rodado nesta tarefa (nenhuma tela mudou); roda inteiro na SF-123.

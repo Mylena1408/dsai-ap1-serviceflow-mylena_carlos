@@ -124,6 +124,14 @@ export function requestDetailRepresentation(
         actor: { id: event.actor.id, name: event.actor.name },
         occurredAt: iso(event.occurredAt),
       })),
+      // SPEC 2026-11-03-transferencia-entre-setores, 5.4 and 5.5: the same moves the screen shows.
+      sectors: (request.sectorEvents ?? []).map((event) => ({
+        from: { id: event.fromSectorId, name: event.fromSectorName },
+        to: { id: event.toSectorId, name: event.toSectorName },
+        actor: { id: event.actor.id, name: event.actor.name },
+        note: event.note,
+        occurredAt: iso(event.occurredAt),
+      })),
       stages: request.stageEvents.map((event) => ({
         from: event.fromStage,
         to: event.toStage,

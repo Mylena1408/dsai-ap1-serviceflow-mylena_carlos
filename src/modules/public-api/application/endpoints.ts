@@ -11,7 +11,9 @@ import {
   getManagerRequest,
   getRequesterRequest,
   listManagerApprovals,
+  listSectorDestinations,
   listTransferCandidates,
+  sendRequestToSector,
   releaseRequest,
   reopenRequest,
   transferRequest,
@@ -265,6 +267,24 @@ export async function runRequestAction(
   }
 
   return { status: 200, body: await loadDetail(caller, requestId, now), recordedEvents: true };
+}
+
+// SPEC 2026-11-03-transferencia-entre-setores, 5.8. The caller stops reading the request once it
+// leaves the sector, so the answer confirms the move instead of returning the detail.
+const sectorTransferSchema = z.object({ sectorId: z.string(), note: z.string().optional() }).strict();
+
+export async function sendToSector(caller: ApiCaller, requestId: string, body: unknown): Promise<ApiResult> {
+  requireRole(caller, "REQUESTER", "ATTENDANT", "MANAGER");
+  const { sectorId, note } = validateInput(sectorTransferSchema, body);
+  await sendRequestToSector({ requestId, sectorId, note });
+  return { status: 200, body: { id: requestId, sectorId }, recordedEvents: true };
+}
+
+/** Sectors that may receive the request (5.2), for attendants of its sector, as on the screen. */
+export async function sectorCandidates(caller: ApiCaller, requestId: string): Promise<ApiResult> {
+  requireRole(caller, "ATTENDANT");
+  const sectors = await listSectorDestinations(requestId);
+  return { status: 200, body: { items: sectors.map(({ id, name }) => ({ id, name })) } };
 }
 
 /** Who may receive a transfer (5.1): active attendants of the sector, as on the screen. */

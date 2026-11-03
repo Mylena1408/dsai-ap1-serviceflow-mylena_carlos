@@ -1,5 +1,5 @@
 import type { ClaimedEvent, EventConsumer } from "@/modules/events";
-import { webhookAcceptsSector, webhookBody, webhookFailureCode, webhookRetryPlan } from "../domain/delivery";
+import { eventSectorIds, webhookAcceptsSector, webhookBody, webhookFailureCode, webhookRetryPlan } from "../domain/delivery";
 import { decryptWebhookSecret, webhookSignature } from "../domain/secret";
 import type { PendingWebhookDelivery, WebhookDeliveryStore, WebhookDeliveryUpdate, WebhookTransport } from "./ports";
 
@@ -33,9 +33,14 @@ export function createWebhookConsumer(store: WebhookDeliveryStore, configured: (
       if (!configured()) return;
       let subscribers = await store.subscribers(event.type);
       // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2: the sector is read only when a webhook filters.
+      // A move to another sector belongs to both sectors (SPEC de transferência entre setores, 5.7).
       if (subscribers.some(({ sectorIds }) => sectorIds.length > 0)) {
-        const sectorId = await store.requestSector(event.requestId);
-        subscribers = subscribers.filter(({ sectorIds }) => sectorId !== null && webhookAcceptsSector(sectorIds, sectorId));
+        const eventSectors =
+          eventSectorIds(event.type, event.payload) ??
+          [await store.requestSector(event.requestId)].filter((sectorId): sectorId is string => sectorId !== null);
+        subscribers = subscribers.filter(({ sectorIds }) =>
+          eventSectors.some((sectorId) => webhookAcceptsSector(sectorIds, sectorId)),
+        );
       }
       if (subscribers.length === 0) return;
 

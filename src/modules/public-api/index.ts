@@ -70,6 +70,17 @@ export async function getTransferCandidates(request: Request, { params }: Reques
   return handleApiCall(request, (caller) => endpoints.transferCandidates(caller, requestId));
 }
 
+// SPEC 2026-11-03-transferencia-entre-setores, 5.8.
+export async function postTransferSector(request: Request, { params }: RequestRouteContext): Promise<Response> {
+  const { requestId } = await params;
+  return handleApiCall(request, async (caller) => endpoints.sendToSector(caller, requestId, await jsonBody(request)));
+}
+
+export async function getSectorCandidates(request: Request, { params }: RequestRouteContext): Promise<Response> {
+  const { requestId } = await params;
+  return handleApiCall(request, (caller) => endpoints.sectorCandidates(caller, requestId));
+}
+
 /** Public, without token (5.4). */
 export function getOpenApiDocument(): Response {
   return apiJson(OPENAPI_DOCUMENT);

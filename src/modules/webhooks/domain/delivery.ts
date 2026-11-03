@@ -102,6 +102,16 @@ export function webhookAcceptsSector(webhookSectorIds: readonly string[], reques
   return webhookSectorIds.length === 0 || webhookSectorIds.includes(requestSectorId);
 }
 
+/**
+ * Sectors an event belongs to for the filter (SPEC 2026-11-03-transferencia-entre-setores, 5.7,
+ * decision T6): a move belongs to its origin and its destination; null for every other event,
+ * which belongs to the request's current sector.
+ */
+export function eventSectorIds(type: string, payload: Record<string, unknown>): string[] | null {
+  if (type !== "request.sector_changed") return null;
+  return [payload.fromSectorId, payload.toSectorId].filter((value): value is string => typeof value === "string");
+}
+
 /** The sectors of the form without repetition; null when one of them does not exist. */
 export function checkWebhookSectors(selected: readonly string[], existing: readonly string[]): string[] | null {
   const unique = [...new Set(selected)];

@@ -25,6 +25,9 @@ export const API_V1_OPERATIONS: readonly ApiOperation[] = [
   { method: "get", path: "/api/v1/requests/{requestId}/transfer-candidates", scope: "READ" },
   { method: "post", path: "/api/v1/requests/{requestId}/cancel", scope: "WRITE" },
   { method: "post", path: "/api/v1/requests/{requestId}/reopen", scope: "WRITE" },
+  // SPEC 2026-11-03-transferencia-entre-setores, 5.8.
+  { method: "post", path: "/api/v1/requests/{requestId}/transfer-sector", scope: "WRITE" },
+  { method: "get", path: "/api/v1/requests/{requestId}/sector-candidates", scope: "READ" },
   { method: "get", path: "/api/v1/openapi.json", scope: null },
 ];
 
@@ -211,6 +214,45 @@ export const OPENAPI_DOCUMENT = {
       noteBody(false),
     ),
     "/api/v1/requests/{requestId}/reopen": actionOperation("Reabrir", "Solicitante, até 7 dias depois da conclusão, com motivo.", noteBody(true)),
+    "/api/v1/requests/{requestId}/transfer-sector": {
+      post: {
+        summary: "Encaminhar para outro setor",
+        description:
+          "Atendente do setor (o responsável, se houver, ou quem supervisiona a fila), com a solicitação aberta e sem aprovação pendente, para um setor de sector-candidates, com justificativa. O responsável sai; prazo e prioridade ficam. Quem encaminha deixa de ver a solicitação, então a resposta só confirma o encaminhamento. Escopo: WRITE.",
+        parameters: [requestIdParameter],
+        requestBody: {
+          required: true,
+          content: json({
+            type: "object",
+            additionalProperties: false,
+            required: ["sectorId", "note"],
+            properties: { sectorId: { type: "string", format: "uuid" }, note: { type: "string", minLength: 1, maxLength: 1000 } },
+          }),
+        },
+        responses: {
+          "200": {
+            description: "Encaminhada",
+            content: json({
+              type: "object",
+              required: ["id", "sectorId"],
+              properties: { id: { type: "string", format: "uuid" }, sectorId: { type: "string", format: "uuid" } },
+            }),
+          },
+          ...errors("invalid_request", "insufficient_scope", "forbidden", "not_found", "conflict"),
+        },
+      },
+    },
+    "/api/v1/requests/{requestId}/sector-candidates": {
+      get: {
+        summary: "Para quais setores se pode encaminhar",
+        description: "Setores ativos, diferentes do atual e com pelo menos um atendente ativo, por nome. Escopo: READ.",
+        parameters: [requestIdParameter],
+        responses: {
+          "200": { description: "Setores", content: json({ type: "object", required: ["items"], properties: { items: { type: "array", items: person } } }) },
+          ...errors("invalid_request", "forbidden", "not_found"),
+        },
+      },
+    },
     "/api/v1/openapi.json": {
       get: {
         summary: "Este documento",
@@ -326,7 +368,7 @@ export const OPENAPI_DOCUMENT = {
                 },
               },
               comments: { type: "array", items: ref("Comment") },
-              history: { type: "object", description: "status, assignment, priority, stages e approval" },
+              history: { type: "object", description: "status, assignment, sectors (encaminhamentos), priority, stages e approval" },
             },
           },
         ],
