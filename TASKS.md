@@ -1450,7 +1450,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-135 — Abertura com seleção múltipla e condições
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Caixas de seleção com rascunho preservado; condicionais que aparecem e somem conforme o controlador (desativados quando escondidos; com aviso antes da hidratação); só campos do solicitante na abertura e no catálogo; lista na ação e na API; condição no catálogo da API e no OpenAPI. CA-CND-04 e 05 verificados.
 - **Objetivo:** Caixas de seleção, mostrar e esconder condicionais no formulário, descarte de valores escondidos no servidor, lista na API de abertura.
 - **Arquivos/módulos esperados:** `src/app/(requester)/`, `src/modules/requests/`, `src/modules/public-api/`, testes.
 - **Dependências:** SF-134.

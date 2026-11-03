@@ -18,8 +18,9 @@ export const requestCreationInputSchema = z
     attachments: z.array(attachmentUploadSchema).optional(),
     // Answers to the service's custom fields, by field id (SPEC 2026-11-01-campos-personalizados,
     // 5.3). Ids are checked against the active fields on the server; the bounds only stop abuse.
+    // A multiple choice sends a list (SPEC 2026-11-03-campos-condicionais-atendimento, 5.1).
     fieldValues: z
-      .record(z.string().max(64), z.string().max(20_000))
+      .record(z.string().max(64), z.union([z.string().max(20_000), z.array(z.string().max(200)).max(20)]))
       .refine((values) => Object.keys(values).length <= 50, { message: "Too many field values." })
       .optional(),
   })

@@ -190,7 +190,8 @@ const openingSchema = z
   .object({
     serviceId: z.string(),
     description: z.string(),
-    fieldValues: z.record(z.string(), z.string()).optional(),
+    // A multiple choice takes a list (SPEC 2026-11-03-campos-condicionais-atendimento, 5.8.1).
+    fieldValues: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
   })
   .strict();
 

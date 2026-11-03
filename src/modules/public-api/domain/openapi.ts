@@ -143,7 +143,7 @@ export const OPENAPI_DOCUMENT = {
         summary: "Abrir uma solicitação",
         description:
           "Só solicitantes, sem anexos: serviço com documento obrigatório responde 422 documents_required. " +
-          "fieldValues traz as respostas dos campos pelo id do campo. Escopo: WRITE.",
+          "fieldValues traz as respostas dos campos pelo id do campo; a seleção múltipla aceita uma lista de opções, e o valor de um campo cuja condição não foi atendida é descartado. Escopo: WRITE.",
         requestBody: {
           required: true,
           content: json({
@@ -153,7 +153,10 @@ export const OPENAPI_DOCUMENT = {
             properties: {
               serviceId: { type: "string", format: "uuid" },
               description: { type: "string", maxLength: 10000 },
-              fieldValues: { type: "object", additionalProperties: { type: "string" } },
+              fieldValues: {
+                type: "object",
+                additionalProperties: { oneOf: [{ type: "string" }, { type: "array", items: { type: "string" } }] },
+              },
             },
           }),
         },
@@ -332,6 +335,10 @@ export const OPENAPI_DOCUMENT = {
                 options: { type: "array", items: { type: "string" } },
                 minValue: nullable("integer"),
                 maxValue: nullable("integer"),
+                condition: nullable("object", {
+                  description: "Mostrar só quando o campo fieldId for (ou, na seleção múltipla, contiver) value; true/false para sim ou não.",
+                  properties: { fieldId: { type: "string", format: "uuid" }, value: { type: "string" } },
+                }),
               },
             },
           },

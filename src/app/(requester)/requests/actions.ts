@@ -41,12 +41,15 @@ async function attachments(formData: FormData) {
 }
 
 // Only sent when the form has custom fields, so services without them open as before.
-function customFieldValues(formData: FormData): { fieldValues?: Record<string, string> } {
-  const values: Record<string, string> = {};
+function customFieldValues(formData: FormData): { fieldValues?: Record<string, string | string[]> } {
+  const values: Record<string, string | string[]> = {};
 
   for (const [name, value] of formData.entries()) {
     if (name.startsWith(CUSTOM_FIELD_PREFIX) && typeof value === "string") {
-      values[name.slice(CUSTOM_FIELD_PREFIX.length)] = value;
+      const id = name.slice(CUSTOM_FIELD_PREFIX.length);
+      const previous = values[id];
+      // The boxes of a multiple choice share the name (SPEC 2026-11-03-campos-condicionais-atendimento, 5.1).
+      values[id] = previous === undefined ? value : [...(Array.isArray(previous) ? previous : [previous]), value];
     }
   }
 

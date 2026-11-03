@@ -1862,3 +1862,19 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** o campo personalizado registra também `audience`, `conditionFieldId` e `conditionValue`.
 - **Testes novos:** `tests/integration/conditional-fields-config.test.ts` e `tests/unit/conditional-field-actions.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 878/878; integração 397/397 + 1 pulado; E2E de campos e permissões 2/2.
+
+## SF-135 — Abertura com seleção múltipla e condições (2026-11-03)
+
+- **Formulário (`request-form.tsx`):**
+  - o estado `current` acompanha os valores a cada mudança, e `conditionShown` aplica a mesma regra do servidor;
+  - o campo escondido fica com `hidden`, e seu controle com `disabled`, então o navegador não o envia nem o exige;
+  - antes da hidratação (`useSyncExternalStore`, falso no servidor), todos aparecem com "Preencha só se …", que é também o comportamento sem JavaScript (5.2.6).
+- **Defeito pego pelo E2E anterior:** a primeira versão envolvia cada campo num `fieldset` desativável, e o E2E dos campos personalizados (que procura `.custom-field > label`) falhou. O teste antigo estava certo: a estrutura mudou sem necessidade. Troquei o `fieldset` por `disabled` direto nos controles, e o teste passou sem alteração.
+- **Envio:**
+  - a ação e o esquema aceitam lista quando várias caixas têm o mesmo nome;
+  - a abertura e o catálogo (tela e API) mostram só os campos do solicitante (`listPublishedServiceFields` filtra pelo público);
+  - resposta para um campo do atendimento é recusada como formulário desatualizado.
+- **API:** `fieldValues` aceita lista; cada campo do catálogo tem `condition` (`null` sem condição); OpenAPI atualizado.
+- **Teste de integração da API em arquivo próprio:** com `@/server/auth` simulado, a API respondeu `500`, problema já visto na SF-122, porque o simulado substitui o contexto do token. Por isso `public-api-conditional-fields.test.ts` não simula a sessão e cria os campos direto no banco.
+- **Testes novos:** `tests/integration/conditional-fields-opening.test.ts`, `tests/integration/public-api-conditional-fields.test.ts` e `tests/unit/conditional-fields-form.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 880/880; integração 401/401 + 1 pulado; E2E de campos personalizados e de anexos 2/2.

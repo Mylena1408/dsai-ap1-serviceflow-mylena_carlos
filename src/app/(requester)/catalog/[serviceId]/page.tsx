@@ -102,7 +102,7 @@ export default async function ServicePage({
         <RequestForm
           action={createRequestAction}
           fieldErrors={fieldErrors}
-          fields={fields.map(({ id, label, helpText, type, isRequired, options, minValue, maxValue }) => ({
+          fields={fields.map(({ id, label, helpText, type, isRequired, options, minValue, maxValue, conditionFieldId, conditionValue }) => ({
             id,
             label,
             helpText,
@@ -111,6 +111,8 @@ export default async function ServicePage({
             options,
             minValue,
             maxValue,
+            conditionFieldId,
+            conditionValue,
           }))}
           maxFileBytes={MAX_ATTACHMENT_BYTES}
           maxTotalBytes={MAX_ATTACHMENTS_TOTAL_BYTES}

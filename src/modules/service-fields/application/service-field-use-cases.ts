@@ -47,7 +47,8 @@ export async function listPublishedServiceFields(
   await requirePublishedCatalogReader();
   const id = validateInput(entityIdSchema, serviceId);
 
-  return repository.listActiveForService(id);
+  // Attendance fields are not in the requester's form (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4.2).
+  return (await repository.listActiveForService(id)).filter((field) => field.audience === "REQUESTER");
 }
 
 export async function createServiceField(
