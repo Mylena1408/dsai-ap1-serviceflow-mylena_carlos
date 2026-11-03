@@ -56,3 +56,4 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 > pode prosseguir
 
 4. SF-130: pausa e retomada do prazo; esclarecimento na SPEC sobre liberar (não muda o status).
+5. SF-131: API, OpenAPI e webhooks da pausa.

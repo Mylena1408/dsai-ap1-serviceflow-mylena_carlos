@@ -101,6 +101,9 @@ export function requestDetailRepresentation(
 ) {
   return {
     ...requestSummaryRepresentation(request, context),
+    // SPEC 2026-11-03-pausa-sla-calendario, 5.8.3.
+    slaBusinessHours: request.slaBusinessHours ?? false,
+    slaPausedAt: iso(request.slaPausedAt),
     fieldAnswers: extra.answers.map((answer) => ({ label: answer.label, type: answer.type, value: answer.value })),
     // Name, format and size only: the API has no download (section 4).
     attachments: extra.attachments.map((attachment) => ({
@@ -139,6 +142,15 @@ export function requestDetailRepresentation(
         actor: { id: event.actor.id, name: event.actor.name },
         note: event.note,
         occurredAt: iso(event.occurredAt),
+      })),
+      // SPEC 2026-11-03-pausa-sla-calendario, 5.8.3: the same pauses the screen shows.
+      pauses: (request.slaPauses ?? []).map((pause) => ({
+        reason: pause.reason,
+        pausedBy: { id: pause.pausedBy.id, name: pause.pausedBy.name },
+        pausedAt: iso(pause.pausedAt),
+        resumedAt: iso(pause.resumedAt),
+        resumedBy: pause.resumedBy && { id: pause.resumedBy.id, name: pause.resumedBy.name },
+        resumeCause: pause.resumeCause,
       })),
       stages: request.stageEvents.map((event) => ({
         from: event.fromStage,

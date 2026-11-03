@@ -28,6 +28,9 @@ export const API_V1_OPERATIONS: readonly ApiOperation[] = [
   // SPEC 2026-11-03-transferencia-entre-setores, 5.8.
   { method: "post", path: "/api/v1/requests/{requestId}/transfer-sector", scope: "WRITE" },
   { method: "get", path: "/api/v1/requests/{requestId}/sector-candidates", scope: "READ" },
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.8.
+  { method: "post", path: "/api/v1/requests/{requestId}/pause-sla", scope: "WRITE" },
+  { method: "post", path: "/api/v1/requests/{requestId}/resume-sla", scope: "WRITE" },
   { method: "get", path: "/api/v1/openapi.json", scope: null },
 ];
 
@@ -131,7 +134,7 @@ export const OPENAPI_DOCUMENT = {
           { name: "from", in: "query", schema: { type: "string", format: "date" } },
           { name: "to", in: "query", schema: { type: "string", format: "date" } },
           { name: "order", in: "query", schema: { type: "string", enum: ["newest", "oldest", "due"] } },
-          { name: "sla", in: "query", description: "Só atendentes", schema: { type: "string", enum: ["on_time", "due_soon", "overdue", "none"] } },
+          { name: "sla", in: "query", description: "Só atendentes", schema: { type: "string", enum: ["on_time", "due_soon", "overdue", "none", "paused"] } },
           { name: "filter", in: "query", schema: { type: "string", enum: ["pending", "all", "sector"] } },
         ],
         responses: { "200": { description: "Uma página", content: json(ref("RequestPage")) }, ...errors("invalid_request", "forbidden") },
@@ -214,6 +217,16 @@ export const OPENAPI_DOCUMENT = {
       noteBody(false),
     ),
     "/api/v1/requests/{requestId}/reopen": actionOperation("Reabrir", "Solicitante, até 7 dias depois da conclusão, com motivo.", noteBody(true)),
+    "/api/v1/requests/{requestId}/pause-sla": actionOperation(
+      "Pausar o prazo",
+      "Responsável (ou quem supervisiona a fila; sem responsável, atendente do setor), com a solicitação em atendimento, com prazo, sem pausa e sem estar vencida. O motivo é mostrado ao solicitante.",
+      { type: "object", additionalProperties: false, required: ["reason"], properties: { reason: { type: "string", minLength: 1, maxLength: 500 } } },
+    ),
+    "/api/v1/requests/{requestId}/resume-sla": actionOperation(
+      "Retomar o prazo",
+      "Quem pode pausar, com a solicitação pausada. O tempo pausado não conta no prazo.",
+      { type: "object", additionalProperties: false, properties: {} },
+    ),
     "/api/v1/requests/{requestId}/transfer-sector": {
       post: {
         summary: "Encaminhar para outro setor",
@@ -342,7 +355,7 @@ export const OPENAPI_DOCUMENT = {
           completedAt: nullable("string", { format: "date-time" }),
           cancelledAt: nullable("string", { format: "date-time" }),
           dueAt: nullable("string", { format: "date-time" }),
-          slaSituation: { type: "string", enum: ["none", "on_time", "due_soon", "overdue", "completed_on_time", "completed_late"] },
+          slaSituation: { type: "string", enum: ["none", "on_time", "due_soon", "overdue", "completed_on_time", "completed_late", "paused"] },
           completedLate: nullable("boolean"),
         },
       },
@@ -352,6 +365,8 @@ export const OPENAPI_DOCUMENT = {
           {
             type: "object",
             properties: {
+              slaBusinessHours: { type: "boolean", description: "O prazo conta só horas úteis do calendário." },
+              slaPausedAt: nullable("string", { format: "date-time" }),
               fieldAnswers: { type: "array", items: { type: "object", properties: { label: { type: "string" }, type: { type: "string" }, value: { type: "string" } } } },
               attachments: {
                 type: "array",
@@ -368,7 +383,7 @@ export const OPENAPI_DOCUMENT = {
                 },
               },
               comments: { type: "array", items: ref("Comment") },
-              history: { type: "object", description: "status, assignment, sectors (encaminhamentos), priority, stages e approval" },
+              history: { type: "object", description: "status, assignment, sectors (encaminhamentos), priority, pauses (pausas do prazo), stages e approval" },
             },
           },
         ],

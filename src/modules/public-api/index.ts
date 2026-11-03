@@ -64,6 +64,9 @@ export const postRelease = action("release");
 export const postTransfer = action("transfer");
 export const postCancel = action("cancel");
 export const postReopen = action("reopen");
+// SPEC 2026-11-03-pausa-sla-calendario, 5.8.
+export const postPauseSla = action("pause-sla");
+export const postResumeSla = action("resume-sla");
 
 export async function getTransferCandidates(request: Request, { params }: RequestRouteContext): Promise<Response> {
   const { requestId } = await params;

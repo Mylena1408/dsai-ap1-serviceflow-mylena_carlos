@@ -1406,7 +1406,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-131 — API, OpenAPI e webhooks da pausa
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Ações `pause-sla` e `resume-sla` (mesmo caminho das outras ações), `slaBusinessHours`, `slaPausedAt` e `history.pauses` no detalhe, `paused` na situação e no filtro, OpenAPI, e entregas de webhook dos dois eventos (sem mudança no módulo de webhooks: o filtro usa o setor atual). CA-PSL-06, 08 e 09 verificados.
 - **Objetivo:** `POST pause-sla` e `resume-sla`, campos e histórico no detalhe, filtro `sla=paused`, OpenAPI e eventos "Prazo pausado" e "Prazo retomado" nos webhooks.
 - **Arquivos/módulos esperados:** `src/modules/public-api/`, `src/app/api/v1/`, `src/modules/webhooks/`, testes.
 - **Dependências:** SF-130.

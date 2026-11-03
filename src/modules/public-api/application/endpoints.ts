@@ -13,6 +13,8 @@ import {
   listManagerApprovals,
   listSectorDestinations,
   listTransferCandidates,
+  pauseRequestSla,
+  resumeRequestSla,
   sendRequestToSector,
   releaseRequest,
   reopenRequest,
@@ -225,12 +227,23 @@ export async function commentOnRequest(caller: ApiCaller, requestId: string, bod
 // calls the use case of the screen, which checks sector, assignee, supervision and state; the
 // answer is the updated detail.
 
-export type RequestAction = "start" | "complete" | "assume" | "release" | "transfer" | "cancel" | "reopen";
+export type RequestAction =
+  | "start"
+  | "complete"
+  | "assume"
+  | "release"
+  | "transfer"
+  | "cancel"
+  | "reopen"
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.8.
+  | "pause-sla"
+  | "resume-sla";
 
 const emptySchema = z.object({}).strict();
 const transferSchema = z.object({ assigneeId: z.string() }).strict();
 const noteSchema = z.object({ note: z.string().optional() }).strict();
 const requiredNoteSchema = z.object({ note: z.string() }).strict();
+const reasonSchema = z.object({ reason: z.string() }).strict();
 
 export async function runRequestAction(
   caller: ApiCaller,
@@ -263,6 +276,13 @@ export async function runRequestAction(
       break;
     case "reopen":
       await reopenRequest({ requestId, note: validateInput(requiredNoteSchema, body).note });
+      break;
+    case "pause-sla":
+      await pauseRequestSla({ requestId, reason: validateInput(reasonSchema, body).reason });
+      break;
+    case "resume-sla":
+      validateInput(emptySchema, body);
+      await resumeRequestSla({ requestId });
       break;
   }
 

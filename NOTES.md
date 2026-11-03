@@ -1795,3 +1795,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes anteriores ajustados, como nas SPECs anteriores:** tabela 5.1 de `email.test.ts` (tipo novo) e as contagens completas do painel em `dashboard-view.test.ts`, `dashboard.test.ts` e `dashboard-reader.test.ts` (campo `paused`), com comentário; o dublê em memória ganhou as operações da pausa.
 - **Testes novos:** `tests/unit/modules/requests/application/sla-pause.test.ts` e `tests/integration/sla-pause.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 865/865; integração 387/387 + 1 pulado; E2E 22/22.
+
+## SF-131 — API, OpenAPI e webhooks da pausa (2026-11-03)
+
+- **Rotas:** `POST /api/v1/requests/{id}/pause-sla` (corpo `{reason}`, estrito) e `resume-sla` (corpo `{}`), no mesmo despachante das ações da SPEC de ações pela API; respondem com o detalhe atualizado.
+- **Detalhe:** `slaBusinessHours`, `slaPausedAt` e `history.pauses` ficam só no detalhe (o resumo das listas não mudou, para não alterar respostas verificadas por testes anteriores); `slaSituation` aceita `paused`.
+- **OpenAPI:** duas rotas, `paused` na situação e no filtro `sla`, campos novos no `RequestDetail`.
+- **Webhooks:** nada mudou no módulo: os rótulos vieram na SF-128, e eventos que não são de mudança de setor já vão aos webhooks do setor atual.
+- **Teste novo:** `tests/integration/public-api-sla-pause.test.ts`.
+- **Resultados:** lint e build OK; unitários 865/865; integração 390/390 + 1 pulado.
