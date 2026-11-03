@@ -1325,3 +1325,47 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-SET-01 a 09.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-03-transferencia-entre-setores.md`.
+
+## Anexos em comentários e documentos depois da abertura — SPEC de 2026-11-03
+
+**Ordem:** SF-124 → SF-125 → SF-126 → SF-127.
+
+### SF-124 — Migration e regras dos anexos
+
+- **Estado:** Pendente.
+- **Objetivo:** Tabela `RequestCommentFile`, `request.document_added` aceito na outbox e nos webhooks; regras puras dos limites por comentário e por solicitação e do documento depois da abertura.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/attachments/`, `src/modules/comments/domain/`, `src/modules/requests/domain/`, testes.
+- **Dependências:** SF-123.
+- **Critérios de conclusão:** Parte de dados de CA-ANX-09; regras de CA-ANX-03 e 06 cobertas por unitários.
+- **Testes relacionados:** Unitários; integração do schema.
+- **SPEC:** `SPEC/2026-11-03-anexos-comentarios-documentos.md`.
+
+### SF-125 — Arquivos em comentários
+
+- **Estado:** Pendente.
+- **Objetivo:** Envio com o comentário (com compensação), lista e download com a visibilidade do comentário, anonimização e "Meus dados"; metadados no detalhe da API.
+- **Arquivos/módulos esperados:** `src/modules/comments/`, `src/app/_components/request-conversation.tsx`, rota de download, `src/modules/users/`, `src/modules/audit/`, testes.
+- **Dependências:** SF-124.
+- **Critérios de conclusão:** CA-ANX-02 a 04, 07 (comentários) e 08.
+- **Testes relacionados:** Unitários; integração com armazenamento em memória.
+- **SPEC:** `SPEC/2026-11-03-anexos-comentarios-documentos.md`.
+
+### SF-126 — Documento depois da abertura
+
+- **Estado:** Pendente.
+- **Objetivo:** Formulário do solicitante para documentos que faltam, histórico, evento `request.document_added`, notificação `document.added` e rótulo de webhook.
+- **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/notifications/`, `src/modules/webhooks/`, `src/app/(requester)/requests/`, testes.
+- **Dependências:** SF-125.
+- **Critérios de conclusão:** CA-ANX-05, 06 e 07 (documentos).
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-03-anexos-comentarios-documentos.md`.
+
+### SF-127 — E2E, README e revisão
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8, README e revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-126.
+- **Critérios de conclusão:** CA-ANX-01 a 09.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-03-anexos-comentarios-documentos.md`.

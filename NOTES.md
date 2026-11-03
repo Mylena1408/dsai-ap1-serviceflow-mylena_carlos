@@ -1673,3 +1673,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CA-SET-01:** os testes anteriores que enumeram todos os tipos de evento e as categorias de e-mail tiveram a lista estendida (padrão das SPECs anteriores); os demais arquivos anteriores só ganharam linhas.
 - **Resultados:** lint, typecheck e build OK; unitários 813/813; integração 363/363 + 1 pulado; E2E 21/21.
 - **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors` e `20261103200000_request_sector_events`.
+
+## SPEC de anexos em comentários e documentos depois da abertura (2026-11-03)
+
+- **Pedido:** "pode prosseguir", depois da medição do cloc; funcionalidade 6 da lista aprovada.
+- **SPEC `2026-11-03-anexos-comentarios-documentos.md`:** até 3 arquivos por comentário (PDF, DOCX, TXT, 2 MiB cada, 4 MiB somados, 30 por solicitação), com a visibilidade do comentário; o solicitante envia depois da abertura um documento ainda não enviado, com histórico, evento `request.document_added`, notificação ao responsável e webhook. Decisões X1 a X7 adotadas como recomendadas. Tarefas SF-124 a SF-127.
+- **Dependência registrada:** o armazenamento de produção ainda depende da SF-030; o desenvolvimento e os testes usam o armazenamento de teste, como na SF-034. A limpeza de órfãos só apaga pastas de solicitações que não existem, então arquivos de comentário guardados na pasta da solicitação não são afetados por ela.
