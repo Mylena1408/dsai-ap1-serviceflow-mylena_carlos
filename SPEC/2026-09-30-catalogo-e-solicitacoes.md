@@ -316,9 +316,9 @@ A gravação do evento e a atualização de status pertencem à mesma transaçã
 - [ ] Somente `OPEN → IN_PROGRESS` e `IN_PROGRESS → COMPLETED` são aceitas; transições inválidas, repetidas, concorrentes ou após conclusão não alteram o registro nem criam evento.
 - [ ] Cada transição válida grava exatamente um evento imutável com ator, estados e horário UTC; concluir também define `completed_at`.
 - [ ] Usuário inativo não autentica nem executa operações; desativação não apaga solicitações ou eventos e a aplicação preserva ao menos um administrador ativo.
-- [ ] Um usuário autenticado de cada perfil (`ADMIN`, `REQUESTER` e `ATTENDANT`) consegue alterar somente a própria senha, informando a senha atual, uma nova senha com no mínimo 12 caracteres e sua confirmação idêntica.
-- [ ] Senha atual incorreta, nova senha abaixo do mínimo ou confirmação divergente não altera a credencial persistida; a operação identifica a conta apenas pela sessão server-side e não aceita `userId` enviado pelo cliente.
-- [ ] Após alteração válida, somente o hash Argon2id da nova senha é persistido, a senha em texto puro não é registrada nem exibida, a sessão permanece autenticada e a nova senha permite autenticação subsequente.
+- [x] Um usuário autenticado de cada perfil (`ADMIN`, `REQUESTER` e `ATTENDANT`) consegue alterar somente a própria senha, informando a senha atual, uma nova senha com no mínimo 12 caracteres e sua confirmação idêntica.
+- [x] Senha atual incorreta, nova senha abaixo do mínimo ou confirmação divergente não altera a credencial persistida; a operação identifica a conta apenas pela sessão server-side e não aceita `userId` enviado pelo cliente.
+- [x] Após alteração válida, somente o hash Argon2id da nova senha é persistido, a senha em texto puro não é registrada nem exibida, a sessão permanece autenticada e a nova senha permite autenticação subsequente.
 - [ ] Os critérios de aceitação de documentos exigidos por serviço (CA-DOC-01 a CA-DOC-22, seção 21.12) são atendidos.
 - [ ] A suíte automatizada cobre as regras de negócio, autorização, persistência e o percurso web completo definido nesta SPEC.
 
@@ -857,7 +857,7 @@ Solicitada pela responsável pelo projeto: "tire as contas sem senha, a página 
 ### 25.2 Carregamento no primeiro clique
 
 - Ao clicar num botão de perfil, se o banco ainda não tiver os dados fictícios, eles são carregados antes da entrada, numa transação; os cliques seguintes não carregam nada de novo e **não desfazem** mudanças feitas na administração (por exemplo, um serviço desativado continua desativado).
-- O marcador de "já carregado" é a existência de uma solicitação fictícia de Ana, Bruno ou Carla **com aprovação**. *Corrigido em 2026-11-02 (defeito encontrado no site publicado): o marcador anterior, "qualquer solicitação de Ana, Bruno ou Carla", reconhecia os dados do seed de 2026-10-30 (sem aprovações) como já carregados, e o primeiro clique não carregava o conjunto atual nem desativava as contas genéricas. As solicitações antigas continuam no banco.*
+- O marcador de "já carregado" é a existência de uma solicitação fictícia de Ana, Bruno ou Carla **com aprovação**. *Corrigido em 2026-11-02 (defeito encontrado no site publicado): o marcador anterior, "qualquer solicitação de Ana, Bruno ou Carla", reconhecia os dados do seed de 2026-10-30 (sem aprovações) como já carregados, e o primeiro clique não carregava o conjunto atual nem desativava as contas genéricas. As solicitações antigas continuam no banco.* *Verificado em 2026-11-02 (SF-029): `tests/integration/change-own-password.test.ts` passou no PostgreSQL de teste (7 casos).* *Verificado em 2026-11-02 (SF-029): `tests/integration/change-own-password.test.ts` passou no PostgreSQL de teste (7 casos).* *Verificado em 2026-11-02 (SF-029): `tests/integration/change-own-password.test.ts` passou no PostgreSQL de teste (7 casos).*
 - Falha no carregamento não impede a entrada: o erro é registrado no log do servidor só pelo código, e a pessoa entra com o que existir.
 - `npm run seed:demo` continua existindo e carrega os mesmos dados (inclusive restaurando itens de demonstração desativados, como antes).
 

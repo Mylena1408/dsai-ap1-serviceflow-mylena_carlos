@@ -298,7 +298,7 @@
 
 ### SF-029 — Implementar autogerenciamento da própria senha
 
-- **Estado:** Implementada e testada manualmente com sucesso em 2026-10-06; validação automatizada de integração bloqueada pelo ambiente (falha de `prisma generate` com `EPERM` e indisponibilidade de conexão ao `TEST_DATABASE_URL`). Não marcar concluída até executar com sucesso a suite PostgreSQL de teste.
+- **Estado:** Concluída em 2026-11-02. Implementada em 2026-10-06; a validação de integração, bloqueada pelo ambiente naquela data, foi executada no PostgreSQL de teste: `tests/integration/change-own-password.test.ts` com 7 casos (os três perfis trocam a própria senha e continuam autenticados, só o hash Argon2id fica gravado e a nova senha autentica; senha atual incorreta, nova senha curta e confirmação divergente não mudam o hash; `userId` forjado é recusado sem mudar nenhuma conta). A suíte de integração completa também passa (346 + 1 pulado). Desde a seção 24 da SPEC principal não há tela de login; a página "Alterar senha" continua como representação didática (seção 25.1).
 - **Objetivo:** Permitir que qualquer usuário ativo e autenticado altere somente a própria senha, conforme a alteração aprovada em 2026-10-06 na seção 20 da SPEC principal.
 - **Arquivos/módulos esperados:** `src/modules/auth/`, `src/shared/validation/`, `src/app/account/password/`, navegação autenticada, `tests/unit/` e `tests/integration/`.
 - **Dependências:** SF-008 e SF-010.

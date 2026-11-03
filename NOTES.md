@@ -1564,3 +1564,8 @@ Padrão a replicar nas SF-039 e SF-040:
 ## Decisão: e-mails desativados na publicação (2026-11-02)
 
 - A responsável decidiu manter o envio de e-mails desativado no site publicado ("mantenha os e-mails desativado"). Nada muda no código: sem `EMAIL_API_KEY`, `EMAIL_FROM` e `APP_BASE_URL` na Vercel (conferido pelos nomes das variáveis), os envios ficam registrados como "não enviado — e-mail não configurado" e a seção "E-mails" avisa. Não criar conta no provedor nem cadastrar essas variáveis sem novo pedido.
+
+## SF-029 — Validação de integração registrada (2026-11-02)
+
+- A pendência era só o registro: a suíte PostgreSQL da troca de senha não pôde rodar em 2026-10-06 (`EPERM` no `prisma generate` e banco de teste indisponível). Hoje `tests/integration/change-own-password.test.ts` passou com 7 casos, cobrindo todos os critérios da tarefa; a suíte de integração inteira já vinha passando em todas as tarefas recentes (346 + 1 pulado). Os três critérios da seção 15 da SPEC principal sobre a troca de senha foram marcados.
+- Nenhum código mudou.
