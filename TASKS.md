@@ -1440,7 +1440,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-134 — Configuração dos campos na administração
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Editor com "Quem preenche" e "Mostrar só quando" (lista dos controladores possíveis com os valores), resumo do público e da condição, mensagens fixas para condição inválida e conflito, auditoria do público e da condição. CA-CND-02 e 03 verificados.
 - **Objetivo:** Tipo "Seleção múltipla", "Quem preenche" e "Mostrar só quando" no editor de campos; regras de 5.2 e 5.3 nos casos de uso; lista com público e condição; auditoria.
 - **Arquivos/módulos esperados:** `src/modules/service-fields/`, `src/app/(admin)/admin/`, testes.
 - **Dependências:** SF-133.

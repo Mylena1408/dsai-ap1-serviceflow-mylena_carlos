@@ -1847,3 +1847,18 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Teste anterior alterado:** `service-field-schemas.test.ts` usava `MULTI_SELECT` como exemplo de tipo desconhecido. A SPEC o tornou válido, e o exemplo passou a ser `FILE`, com comentário.
 - **Testes novos:** `tests/unit/modules/service-fields/conditional-fields.test.ts` e `tests/integration/conditional-fields-schema.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 876/876; integração 394/394 + 1 pulado.
+
+## SF-134 — Configuração dos campos condicionais (2026-11-03)
+
+- **Formulário:**
+  - "Mostrar só quando" é uma lista única com cada controlador possível e cada valor (`<id>::<valor>`). Assim não depende de JavaScript, e o servidor confere tudo de novo;
+  - "Quem preenche" escolhe o público;
+  - os dois só são enviados quando o formulário os tem, como o SLA e a aprovação no serviço, e os testes antigos das ações não mudaram.
+- **Mensagens:**
+  - condição inválida tem mensagem própria;
+  - na edição, o conflito avisa também da condição que seria quebrada;
+  - na criação, o conflito continua com a mensagem antiga, porque lá só pode ser limite ou rótulo repetido (condição inválida na criação é erro de validação);
+  - desativar ou reativar com conflito usa a mensagem da seção, ampliada.
+- **Auditoria:** o campo personalizado registra também `audience`, `conditionFieldId` e `conditionValue`.
+- **Testes novos:** `tests/integration/conditional-fields-config.test.ts` e `tests/unit/conditional-field-actions.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 878/878; integração 397/397 + 1 pulado; E2E de campos e permissões 2/2.

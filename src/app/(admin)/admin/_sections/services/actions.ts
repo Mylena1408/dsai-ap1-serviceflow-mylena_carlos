@@ -36,6 +36,7 @@ import {
   reportFailure,
   selectedSection,
   serviceFieldFields,
+  serviceFieldFailure,
   updateFailure,
   type AdminUpdateState,
 } from "../../_shared/action-helpers";
@@ -166,7 +167,7 @@ export async function createServiceFieldAction(
   try {
     await createServiceField(field(formData, "serviceId"), serviceFieldFields(formData));
   } catch (error) {
-    return createFailure(error);
+    return serviceFieldFailure(error, "create") ?? createFailure(error);
   }
   return finishCreate();
 }
@@ -178,7 +179,7 @@ export async function updateServiceFieldAction(
   try {
     await updateServiceField(field(formData, "id"), serviceFieldFields(formData));
   } catch (error) {
-    return updateFailure(error);
+    return serviceFieldFailure(error) ?? updateFailure(error);
   }
   return finishUpdate();
 }

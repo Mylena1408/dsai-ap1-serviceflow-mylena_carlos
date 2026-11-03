@@ -2,7 +2,7 @@
 // module: only the files under _sections/*/actions.ts expose actions.
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ApplicationError } from "@/server/errors";
+import { ApplicationError, ValidationError } from "@/server/errors";
 import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
@@ -54,7 +54,40 @@ export function serviceFieldFields(formData: FormData) {
       .filter((option) => option !== ""),
     minValue: limit("minValue"),
     maxValue: limit("maxValue"),
+    // SPEC 2026-11-03-campos-condicionais-atendimento, 5.7: sent only when the form has them, so a
+    // form without them keeps the current values. "condition" is "<field id>::<value>" or empty.
+    ...(formData.has("audience") ? { audience: field(formData, "audience") } : {}),
+    ...(formData.has("condition") ? fieldCondition(field(formData, "condition")) : {}),
   };
+}
+
+function fieldCondition(raw: string): { conditionFieldId: string | null; conditionValue: string | null } {
+  const separator = raw.indexOf("::");
+  return separator < 0
+    ? { conditionFieldId: raw === "" ? null : raw, conditionValue: null }
+    : { conditionFieldId: raw.slice(0, separator), conditionValue: raw.slice(separator + 2) };
+}
+
+/**
+ * Refusals of the custom field form (SPEC 2026-11-03-campos-condicionais-atendimento, 5.3 and 5.7):
+ * a broken condition and a conflict get their own fixed messages.
+ */
+export function serviceFieldFailure(error: unknown, kind: "create" | "update" = "update"): AdminUpdateState | null {
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path[0] === "conditionFieldId" || path[0] === "conditionValue")) {
+    return {
+      status: "error",
+      message: "Escolha uma condição válida: um campo de escolha ativo, do mesmo público e sem condição própria, e uma das suas opções.",
+    };
+  }
+  // On creation a conflict is only the limit or a repeated label, with the message it already had.
+  if (kind === "update" && error instanceof ApplicationError && error.code === "CONFLICT") {
+    return {
+      status: "error",
+      message:
+        "Não foi possível salvar: o serviço já tem o limite de campos ativos, outro campo ativo usa o mesmo rótulo, ou a mudança quebraria a condição de outro campo.",
+    };
+  }
+  return null;
 }
 
 export function activeState(formData: FormData): boolean {

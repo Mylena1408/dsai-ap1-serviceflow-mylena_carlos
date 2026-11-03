@@ -3,7 +3,7 @@
 export function announcement(error?: string, notice?: string, entity?: string): string | null {
   // Reactivating a custom field fails on the limit or on a repeated label (SPEC 2026-11-01-campos-personalizados, 5.1).
   if (error === "dependency" && entity === "serviceFields") {
-    return "Não foi possível concluir: o serviço já tem o limite de campos ativos ou outro campo ativo usa o mesmo rótulo.";
+    return "Não foi possível concluir: o serviço já tem o limite de campos ativos, outro campo ativo usa o mesmo rótulo, ou a mudança quebraria a condição de outro campo (SPEC de campos condicionais, 5.3).";
   }
   // SPEC 2026-11-01-permissoes-configuraveis, 5.2: profile not eligible or inactive user.
   if (error === "validation" && entity === "permissions") {

@@ -152,6 +152,9 @@ export function ServicesSection({
                     minValue: serviceField.minValue,
                     maxValue: serviceField.maxValue,
                     isActive: serviceField.isActive,
+                    audience: serviceField.audience,
+                    conditionFieldId: serviceField.conditionFieldId,
+                    conditionValue: serviceField.conditionValue,
                   }))}
                 maxActive={MAX_ACTIVE_SERVICE_FIELDS}
                 moveAction={moveServiceFieldAction}

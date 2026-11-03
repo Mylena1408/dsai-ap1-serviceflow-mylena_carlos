@@ -69,6 +69,9 @@ async function loadState(
           maxValue: true,
           position: true,
           isActive: true,
+          audience: true,
+          conditionFieldId: true,
+          conditionValue: true,
         },
       });
       return row && { label: row.label, state: row };

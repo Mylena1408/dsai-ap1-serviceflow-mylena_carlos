@@ -28,7 +28,37 @@ export type AdminServiceField = {
   minValue: number | null;
   maxValue: number | null;
   isActive: boolean;
+  /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.4. */
+  audience?: "REQUESTER" | "ATTENDANT";
+  conditionFieldId?: string | null;
+  conditionValue?: string | null;
 };
+
+const AUDIENCE_LABELS = { REQUESTER: "Solicitante, na abertura", ATTENDANT: "Atendimento" } as const;
+
+/** Text of a condition value: "Sim"/"Não" for yes or no, the option otherwise. */
+function conditionValueLabel(controller: AdminServiceField, value: string): string {
+  return controller.type === "YES_NO" ? (value === "true" ? "Sim" : "Não") : value;
+}
+
+/** Fields that may control a condition (5.2.2): active, with choices, without their own condition. */
+function controllersFor(fields: readonly AdminServiceField[], field?: AdminServiceField): AdminServiceField[] {
+  return fields.filter(
+    (item) =>
+      item.isActive &&
+      item.id !== field?.id &&
+      !item.conditionFieldId &&
+      (item.type === "SELECT" || item.type === "YES_NO" || item.type === "MULTI_SELECT"),
+  );
+}
+
+function conditionText(field: AdminServiceField, fields: readonly AdminServiceField[]): string | null {
+  if (!field.conditionFieldId || field.conditionValue === null || field.conditionValue === undefined) return null;
+  const controller = fields.find((item) => item.id === field.conditionFieldId);
+  if (!controller) return null;
+  const operator = controller.type === "MULTI_SELECT" ? "contém" : "=";
+  return `Mostrar só quando ${controller.label} ${operator} ${conditionValueLabel(controller, field.conditionValue)}`;
+}
 
 type ServiceFieldsEditorProps = {
   serviceId: string;
@@ -59,7 +89,9 @@ function fieldSummary(field: AdminServiceField): string | null {
 }
 
 // The type is chosen only on creation (section 5.1); editing keeps it in a hidden input.
-function FieldInputs({ field }: { field?: AdminServiceField }) {
+function FieldInputs({ field, fields = [] }: { field?: AdminServiceField; fields?: readonly AdminServiceField[] }) {
+  const controllers = controllersFor(fields, field);
+  const currentCondition = field?.conditionFieldId ? `${field.conditionFieldId}::${field.conditionValue ?? ""}` : "";
   const [type, setType] = useState<FieldType>(field?.type ?? "SHORT_TEXT");
   const typeSelect = useRef<HTMLSelectElement>(null);
 
@@ -106,6 +138,28 @@ function FieldInputs({ field }: { field?: AdminServiceField }) {
           <option value="false">Opcional</option>
         </select>
       </label>
+      {/* SPEC 2026-11-03-campos-condicionais-atendimento, 5.7. */}
+      <label>
+        Quem preenche
+        <select defaultValue={field?.audience ?? "REQUESTER"} name="audience">
+          <option value="REQUESTER">{AUDIENCE_LABELS.REQUESTER}</option>
+          <option value="ATTENDANT">{AUDIENCE_LABELS.ATTENDANT}</option>
+        </select>
+      </label>
+      <label className="wide-field">
+        Mostrar só quando
+        <select defaultValue={currentCondition} name="condition">
+          <option value="">Sempre mostrar</option>
+          {controllers.flatMap((controller) =>
+            (controller.type === "YES_NO" ? ["true", "false"] : controller.options).map((value) => (
+              <option key={`${controller.id}::${value}`} value={`${controller.id}::${value}`}>
+                {controller.label} {controller.type === "MULTI_SELECT" ? "contém" : "="} {conditionValueLabel(controller, value)}
+                {controller.audience === "ATTENDANT" ? " (atendimento)" : ""}
+              </option>
+            )),
+          )}
+        </select>
+      </label>
       <label className="wide-field">
         Texto de ajuda (opcional)
         <input defaultValue={field?.helpText ?? ""} maxLength={200} name="helpText" />
@@ -134,10 +188,12 @@ function FieldInputs({ field }: { field?: AdminServiceField }) {
 
 function FieldEditForm({
   field,
+  fields,
   action,
   onDone,
 }: {
   field: AdminServiceField;
+  fields: readonly AdminServiceField[];
   action: FormAction;
   onDone: (saved: boolean) => void;
 }) {
@@ -153,7 +209,7 @@ function FieldEditForm({
     <form action={formAction} className="entity-editor-form">
       <input name="id" type="hidden" value={field.id} />
       <div className="editor-fields">
-        <FieldInputs field={field} />
+        <FieldInputs field={field} fields={fields} />
       </div>
       {state.status === "error" && state.message ? (
         <p className="feedback feedback-error editor-feedback" role="alert">
@@ -184,6 +240,7 @@ function HiddenTarget({ id }: { id: string }) {
 
 function ActiveField({
   field,
+  fields,
   isFirst,
   isLast,
   updateAction,
@@ -191,6 +248,7 @@ function ActiveField({
   deactivateAction,
 }: {
   field: AdminServiceField;
+  fields: readonly AdminServiceField[];
   isFirst: boolean;
   isLast: boolean;
   updateAction: FormAction;
@@ -207,6 +265,7 @@ function ActiveField({
         <FieldEditForm
           action={updateAction}
           field={field}
+          fields={fields}
           onDone={(saved) => {
             setEditing(false);
             if (saved) router.refresh();
@@ -224,7 +283,9 @@ function ActiveField({
       </div>
       <div className="entity-details">
         <span>Tipo: {FIELD_TYPE_LABELS[field.type]}</span>
+        <span>Quem preenche: {AUDIENCE_LABELS[field.audience ?? "REQUESTER"]}</span>
         {summary ? <span>{summary}</span> : null}
+        {conditionText(field, fields) ? <span>{conditionText(field, fields)}</span> : null}
         {field.helpText ? <span>Ajuda: {field.helpText}</span> : null}
       </div>
       <div className="entity-actions requirement-actions">
@@ -281,6 +342,7 @@ export function ServiceFieldsEditor({
             <ActiveField
               deactivateAction={deactivateAction}
               field={field}
+              fields={fields}
               isFirst={index === 0}
               isLast={index === active.length - 1}
               key={field.id}
@@ -293,7 +355,7 @@ export function ServiceFieldsEditor({
       {active.length < maxActive ? (
         <AdminCreateForm action={createAction} submitLabel="Adicionar campo">
           <input name="serviceId" type="hidden" value={serviceId} />
-          <FieldInputs />
+          <FieldInputs fields={fields} />
         </AdminCreateForm>
       ) : (
         <p className="section-description">Limite de {maxActive} campos ativos atingido.</p>
