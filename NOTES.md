@@ -1569,3 +1569,11 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - A pendência era só o registro: a suíte PostgreSQL da troca de senha não pôde rodar em 2026-10-06 (`EPERM` no `prisma generate` e banco de teste indisponível). Hoje `tests/integration/change-own-password.test.ts` passou com 7 casos, cobrindo todos os critérios da tarefa; a suíte de integração inteira já vinha passando em todas as tarefas recentes (346 + 1 pulado). Os três critérios da seção 15 da SPEC principal sobre a troca de senha foram marcados.
 - Nenhum código mudou.
+
+## SF-028 — Política de backup e teste de restauração (2026-11-02)
+
+- **Decisão da responsável:** opção "Semanal + antes de deploy" entre três propostas (diária; só o histórico do Neon). Registrada em `SPEC/2026-11-02-backup-recuperacao.md`: `pg_dump` completo semanal e antes de cada migration ou deploy; 4 semanais e as de deploy por 30 dias; cifradas e fora do repositório; RPO de 7 dias; RTO de até 2 horas; teste a cada 3 meses. Motivo de não depender do Neon: no plano gratuito o histórico cobre cerca de 6 horas (documentação consultada; ela se contradiz sobre a restauração instantânea nesse plano).
+- **Ferramentas:** não havia `pg_dump` na máquina (o pacote do banco local não traz as ferramentas de cliente e a pasta de 2026-10 não existia mais). Com a autorização da responsável, baixei de novo o zip oficial do PostgreSQL 17.11 da EnterpriseDB por HTTPS, numa pasta nova fora do projeto; o SHA-256 (`80379B2C...F82F`) é igual ao registrado em 2026-10, então é o mesmo arquivo. Extraído em `%LOCALAPPDATA%\serviceflow-pg17`.
+- **Teste de restauração:** cópia do banco local de desenvolvimento (dados fictícios) restaurada num banco novo; 28 tabelas com as mesmas linhas, mesma estrutura (118 restrições, 73 índices, 50 funções, 1 trigger), migrations em dia; cópia e banco de teste apagados. O banco de produção não foi copiado: exige a conexão de produção, que fica com a responsável.
+- **Segurança:** `*.dump` no `.gitignore`; README aponta para a política.
+- **SF-028:** fica aberta só pela dependência da SF-026 (meta de linhas). SF-029 concluída antes, no mesmo pedido.

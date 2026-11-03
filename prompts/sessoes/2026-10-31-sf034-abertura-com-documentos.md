@@ -621,3 +621,9 @@ Migration bloqueada para o agente; aplicada pela responsável com `!`; deploy e 
 > mantenha os e-mails desativado, quais os próximos passos?
 
 Decisão registrada em `NOTES.md` ("Decisão: e-mails desativados na publicação"); próximos passos apresentados.
+
+## Continuação — Pendências
+
+> pode começar pelas pendências
+
+SF-029 registrada como concluída. Para a SF-028, perguntas sobre a política e sobre baixar as ferramentas do PostgreSQL; respostas: "Semanal + antes de deploy (Recomendado)" e "Pode baixar (Recomendado)". Ver `NOTES.md`, seção "SF-028 — Política de backup e teste de restauração".

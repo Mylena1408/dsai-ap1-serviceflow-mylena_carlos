@@ -288,7 +288,7 @@
 
 ### SF-028 — Fazer revisão final da entrega
 
-- **Estado:** Revisão executada em 2026-10-05, mas não concluída: SF-026 permanece incompleta (dependência desta tarefa). A medição oficial foi reproduzida em 2026-10-06 e totalizou 8.903 linhas; continua pendente a política operacional de backup/recuperação e seu teste de restauração.
+- **Estado:** Revisão executada em 2026-10-05, mas não concluída: SF-026 permanece incompleta (dependência desta tarefa). A medição oficial foi reproduzida em 2026-10-06 e totalizou 8.903 linhas. **Atualização 2026-11-02:** a política de backup e recuperação foi aprovada (`SPEC/2026-11-02-backup-recuperacao.md`) e o teste de restauração isolado foi executado com sucesso; a SF-029 foi concluída. A única dependência que mantém esta tarefa aberta é a SF-026 (meta de 100.000 linhas; 35.682 linhas `added` em 2026-11-02).
 - **Objetivo:** Confirmar escopo, qualidade, segurança básica, documentação, testes e estado do repositório antes da conclusão.
 - **Arquivos/módulos esperados:** Nenhum arquivo de funcionalidade por padrão; relatório de revisão/diário se exigido pelo processo.
 - **Dependências:** SF-024 a SF-027.

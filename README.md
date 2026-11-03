@@ -126,7 +126,7 @@ Os domínios administrativos server-side ficam em `src/modules/sectors/`, `src/m
 
 ### Backup e recuperação
 
-A política operacional de backup e recuperação do PostgreSQL ainda precisa ser definida para o ambiente de execução. Defina e valide essa política, incluindo um teste de restauração isolado, antes de usar o sistema com dados reais. Consulte também a dependência registrada na seção 18 da SPEC principal; este README não presume frequência, retenção nem objetivos de recuperação.
+A política está em `SPEC/2026-11-02-backup-recuperacao.md`: cópia lógica completa (`pg_dump`) **toda semana e antes de cada migration ou deploy**, guardando as 4 últimas semanais e as de deploy por 30 dias, cifradas e fora do repositório (contêm dados pessoais); perda máxima aceita de 7 dias e recuperação em até 2 horas; teste de restauração a cada 3 meses num banco isolado. O histórico nativo do Neon no plano gratuito cobre só cerca de 6 horas e não substitui as cópias. Os comandos de cópia e restauração estão na seção 4 da SPEC. Arquivos `*.dump` são ignorados pelo Git.
 
 ### Notificações por e-mail
 

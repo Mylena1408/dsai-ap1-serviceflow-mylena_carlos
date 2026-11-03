@@ -382,7 +382,7 @@ A estratégia de testes específica dos requisitos documentais e anexos (unitár
 - Ambiente local e de teste com PostgreSQL e configuração de conexão externa ao repositório.
 - Estratégia segura de bootstrap do primeiro administrador, sem credenciais versionadas.
 - Esquema e migrações para entidades, índices, restrições únicas e chaves estrangeiras desta SPEC.
-- Política de backup e recuperação do banco definida para o ambiente de execução antes de uso com dados reais; não altera o escopo funcional.
+- Política de backup e recuperação do banco definida para o ambiente de execução antes de uso com dados reais; não altera o escopo funcional. *Definida em 2026-11-02: `SPEC/2026-11-02-backup-recuperacao.md`, com teste de restauração executado.*
 - Ambiente de testes automatizados e execução dos testes relacionados antes de considerar a entrega concluída.
 
 ## 19. Pontos que deverão ser tratados em SPECs futuras
