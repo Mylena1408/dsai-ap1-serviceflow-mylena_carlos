@@ -20,6 +20,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "sector.received": "Encaminhada ao setor",
   "sector.changed": "Encaminhada a outro setor",
   "document.added": "Novo documento",
+  "sla.paused": "Aguardando resposta",
 };
 
 const STATUS_LABELS: Record<EmailDeliveryRecord["status"], string> = {

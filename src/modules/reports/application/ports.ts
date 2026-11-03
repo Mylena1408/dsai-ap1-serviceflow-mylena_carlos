@@ -30,6 +30,8 @@ export interface CurrentCounts {
   inProgress: number;
   dueSoon: number;
   overdue: number;
+  /** SPEC 2026-11-03-pausa-sla-calendario, 5.7: paused ones count here, not as due soon or overdue. */
+  paused: number;
 }
 
 export interface StatusGroup {

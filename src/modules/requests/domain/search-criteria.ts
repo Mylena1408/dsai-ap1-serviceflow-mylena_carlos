@@ -18,7 +18,8 @@ const AUDIENCE_ORDERS: Record<SearchAudience, readonly SearchOrder[]> = {
   requester: ["newest", "oldest"],
   attendant: ORDERS,
 };
-const SLA_FILTERS = ["on_time", "due_soon", "overdue", "none"] as const;
+// "paused" added by SPEC 2026-11-03-pausa-sla-calendario, 5.7.
+const SLA_FILTERS = ["on_time", "due_soon", "overdue", "none", "paused"] as const;
 
 export type SearchAudience = "requester" | "attendant";
 export type AssigneeFilter = (typeof ASSIGNEE_FILTERS)[number];

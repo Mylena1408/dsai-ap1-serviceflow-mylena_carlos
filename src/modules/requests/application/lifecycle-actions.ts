@@ -11,6 +11,7 @@ import {
 import type { RequestStatus } from "../domain/request";
 import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
+import { closePause, resumeColumns } from "./sla-pause";
 import type { SlaClock } from "@/shared/business-clock";
 import { NO_STAGE } from "../domain/stages";
 import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
@@ -53,6 +54,8 @@ async function changeLifecycle(
 
     const occurredAt = await transaction.currentTime();
     change.decide(actor, request, occurredAt);
+    // SPEC 2026-11-03-pausa-sla-calendario, 5.4.3: cancelling ends a running pause.
+    const ending = await resumeColumns(transaction, request, occurredAt);
 
     const changed = await transaction.updateStatusIfCurrent({
       requestId,
@@ -62,6 +65,7 @@ async function changeLifecycle(
       toStatus: change.toStatus,
       updatedAt: occurredAt,
       ...(await change.stamps(occurredAt, request, () => requestClock(transaction, request.slaBusinessHours))),
+      ...(ending ? { slaPausedAt: null, expectedSlaPausedAt: request.slaPausedAt ?? null } : {}),
     });
 
     // Status or assignee changed after the read (section 5.8).
@@ -84,6 +88,10 @@ async function changeLifecycle(
       occurredAt,
       payload: { fromStatus: request.status, toStatus: change.toStatus, actorId: actor.id },
     });
+
+    if (ending) {
+      await closePause(transaction, requestId, occurredAt, actor.id, "ATTENDANCE_ENDED");
+    }
   });
 }
 

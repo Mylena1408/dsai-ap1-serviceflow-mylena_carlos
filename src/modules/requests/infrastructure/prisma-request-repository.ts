@@ -58,6 +58,11 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.5.
+  slaPauses: {
+    orderBy: [{ pausedAt: "asc" }, { id: "asc" }],
+    include: { pausedBy: { select: { id: true, name: true } }, resumedBy: { select: { id: true, name: true } } },
+  },
   // Only what the history needs (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.5).
   attachments: {
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
@@ -86,12 +91,15 @@ const ACTIVE_STATUSES: RequestStatus[] = ["OPEN", "IN_PROGRESS"];
  */
 function slaWhere(filter: SlaFilter, now: Date): Prisma.RequestWhereInput {
   switch (filter) {
+    // A paused request is only "paused" (SPEC 2026-11-03-pausa-sla-calendario, 5.3.4).
     case "on_time":
-      return { status: { in: ACTIVE_STATUSES }, dueSoonAt: { gt: now } };
+      return { status: { in: ACTIVE_STATUSES }, slaPausedAt: null, dueSoonAt: { gt: now } };
     case "due_soon":
-      return { status: { in: ACTIVE_STATUSES }, dueSoonAt: { lte: now }, dueAt: { gte: now } };
+      return { status: { in: ACTIVE_STATUSES }, slaPausedAt: null, dueSoonAt: { lte: now }, dueAt: { gte: now } };
     case "overdue":
-      return { status: { in: ACTIVE_STATUSES }, dueAt: { lt: now } };
+      return { status: { in: ACTIVE_STATUSES }, slaPausedAt: null, dueAt: { lt: now } };
+    case "paused":
+      return { slaPausedAt: { not: null } };
     case "none":
       return { OR: [{ dueAt: null }, { status: "CANCELLED" }] };
   }
@@ -254,7 +262,7 @@ export function createPrismaRequestQueryRepository(
   };
 }
 
-function createPrismaRequestTransaction(
+export function createPrismaRequestTransaction(
   transaction: Prisma.TransactionClient,
 ): RequestTransaction {
   return {
@@ -329,6 +337,7 @@ function createPrismaRequestTransaction(
             ? { assigneeId: update.expectedAssigneeId }
             : {}),
           ...(update.expectedStageIndex !== undefined ? { stageIndex: update.expectedStageIndex } : {}),
+          ...(update.expectedSlaPausedAt !== undefined ? { slaPausedAt: update.expectedSlaPausedAt } : {}),
         },
         data: {
           status: update.toStatus,
@@ -338,6 +347,7 @@ function createPrismaRequestTransaction(
           ...(update.completedLate !== undefined ? { completedLate: update.completedLate } : {}),
           ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
           ...(update.dueSoonAt !== undefined ? { dueSoonAt: update.dueSoonAt } : {}),
+          ...(update.slaPausedAt !== undefined ? { slaPausedAt: update.slaPausedAt } : {}),
           ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
           ...(update.stageNamesSnapshot !== undefined ? { stageNamesSnapshot: update.stageNamesSnapshot } : {}),
           ...(update.stageIndex !== undefined ? { stageIndex: update.stageIndex } : {}),
@@ -450,6 +460,37 @@ function createPrismaRequestTransaction(
     },
     async insertPriorityEvent(event) {
       await transaction.requestPriorityEvent.create({ data: event });
+    },
+    async updateSlaPauseIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: {
+          id: update.requestId,
+          status: "IN_PROGRESS",
+          assigneeId: update.expectedAssigneeId,
+          slaPausedAt: update.expectedSlaPausedAt,
+        },
+        data: {
+          slaPausedAt: update.slaPausedAt,
+          updatedAt: update.updatedAt,
+          ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
+          ...(update.dueSoonAt !== undefined ? { dueSoonAt: update.dueSoonAt } : {}),
+        },
+      });
+      return result.count;
+    },
+    async insertSlaPause(pause) {
+      const { id } = await transaction.requestSlaPause.create({ data: pause, select: { id: true } });
+      return id;
+    },
+    async closeOpenSlaPause({ requestId, ...closing }) {
+      const open = await transaction.requestSlaPause.findFirst({ where: { requestId, resumedAt: null }, select: { id: true } });
+
+      if (!open) {
+        return null;
+      }
+
+      await transaction.requestSlaPause.update({ where: { id: open.id }, data: closing });
+      return open.id;
     },
     async findSectorDestination(sectorId) {
       const sector = await transaction.sector.findUnique({

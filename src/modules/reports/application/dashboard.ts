@@ -65,7 +65,7 @@ interface ResolvedScope {
   sectorError: SectorFilterError | null;
 }
 
-const NO_CURRENT: CurrentCounts = { open: 0, awaitingApproval: 0, inProgress: 0, dueSoon: 0, overdue: 0 };
+const NO_CURRENT: CurrentCounts = { open: 0, awaitingApproval: 0, inProgress: 0, dueSoon: 0, overdue: 0, paused: 0 };
 const NO_TOTALS: PeriodTotals = {
   opened: 0,
   completed: 0,

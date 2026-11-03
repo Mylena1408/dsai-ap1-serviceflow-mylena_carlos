@@ -26,7 +26,8 @@ const dashboard: Dashboard = {
   withoutSector: false,
   period: lastDaysPeriod(30, now),
   errors: { period: null, sector: null },
-  current: { open: 4, awaitingApproval: 1, inProgress: 2, dueSoon: 1, overdue: 3 },
+  // "paused" added by SPEC 2026-11-03-pausa-sla-calendario, 5.7.
+  current: { open: 4, awaitingApproval: 1, inProgress: 2, dueSoon: 1, overdue: 3, paused: 0 },
   totals: {
     opened: 6,
     completed: 3,

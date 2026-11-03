@@ -12,6 +12,14 @@ import {
 } from "@/shared/requests";
 import { zonedDayOf } from "@/shared/time";
 
+export type SlaPauseResumeCause = "MANUAL" | "REQUESTER_REPLY" | "ATTENDANCE_ENDED";
+
+const RESUME_CAUSE_LABELS: Record<SlaPauseResumeCause, string> = {
+  MANUAL: "pela equipe",
+  REQUESTER_REPLY: "pela resposta do solicitante",
+  ATTENDANCE_ENDED: "com o fim do atendimento",
+};
+
 // "Meus dados" (SPEC 2026-11-02-auditoria-lgpd, 5.4, decision D3): the person's own data in a
 // readable JSON. Built field by field from what the reader loads, so a password hash or another
 // person's internal note cannot reach the file even if the source carried it by mistake.
@@ -51,6 +59,8 @@ export interface PersonalDataSource {
      * Absent for sources written before that SPEC.
      */
     sectorMoves?: Array<{ occurredAt: Date; fromSectorName: string; toSectorName: string; actorName: string; note: string }>;
+    /** SPEC 2026-11-03-pausa-sla-calendario, 5.9.3. */
+    slaPauses?: Array<{ pausedAt: Date; reason: string; pausedByName: string; resumedAt: Date | null; resumeCause: SlaPauseResumeCause | null }>;
     /** Public comments only: internal notes belong to the team. */
     /** `files`: names of the files of the comment (SPEC 2026-11-03-anexos-comentarios-documentos, 5.4). */
     comments: Array<{ createdAt: Date; authorName: string; body: string; isInternal: boolean; files?: string[] }>;
@@ -124,6 +134,18 @@ export function buildPersonalDataExport(source: PersonalDataSource, now: Date) {
               para: move.toSectorName,
               por: move.actorName,
               justificativa: move.note,
+            })),
+          }
+        : {}),
+      // Only when there was a pause, like the moves (SPEC 2026-11-03-pausa-sla-calendario, 5.9.3).
+      ...(request.slaPauses && request.slaPauses.length > 0
+        ? {
+            pausas: request.slaPauses.map((pause) => ({
+              pausadaEm: iso(pause.pausedAt),
+              por: pause.pausedByName,
+              motivo: pause.reason,
+              retomadaEm: iso(pause.resumedAt),
+              retomada: pause.resumeCause ? RESUME_CAUSE_LABELS[pause.resumeCause] : null,
             })),
           }
         : {}),

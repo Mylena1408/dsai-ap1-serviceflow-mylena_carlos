@@ -95,6 +95,17 @@ export default async function RequestPage({
           <RequestApprovalLabel request={request} />
         </p>
         <RequestSla request={request} now={new Date()} />
+        {/* SPEC 2026-11-03-pausa-sla-calendario, 5.3.4: the reason and how the SLA resumes. */}
+        {request.slaPausedAt ? (
+          <p className="feedback" role="note">
+            O atendimento aguarda sua resposta
+            {(() => {
+              const reason = request.slaPauses?.find((pause) => pause.resumedAt === null)?.reason;
+              return reason ? `: ${reason}` : ".";
+            })()}{" "}
+            Ao responder com um comentário, o prazo volta a contar.
+          </p>
+        ) : null}
         <p>Categoria: {request.categoryNameSnapshot}</p>
         <p>Setor responsável: {request.sectorNameSnapshot}</p>
         <p>

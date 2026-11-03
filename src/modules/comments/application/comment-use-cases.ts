@@ -109,6 +109,10 @@ async function saveComment(
     payload: { commentId: comment.id, authorId: comment.author.id, isInternal: comment.isInternal },
   });
 
+  if (!draft.isInternal) {
+    await transaction.resumeSlaOnRequesterReply?.(draft.requestId, reader.id);
+  }
+
   return {
     ...comment,
     files: files.map(({ id, originalFilename, detectedFormat, sizeBytes }) => ({ id, originalFilename, detectedFormat, sizeBytes, removed: false })),

@@ -22,7 +22,8 @@ const infra: ReportSector = { id: "11111111-1111-4111-8111-111111111111", name: 
 const people: ReportSector = { id: "22222222-2222-4222-8222-222222222222", name: "Pessoas", isActive: true };
 const closed: ReportSector = { id: "33333333-3333-4333-8333-333333333333", name: "Arquivo", isActive: false };
 
-const current: CurrentCounts = { open: 4, awaitingApproval: 1, inProgress: 2, dueSoon: 1, overdue: 1 };
+// "paused" added by SPEC 2026-11-03-pausa-sla-calendario, 5.7.
+const current: CurrentCounts = { open: 4, awaitingApproval: 1, inProgress: 2, dueSoon: 1, overdue: 1, paused: 0 };
 const totals: PeriodTotals = {
   opened: 6,
   completed: 3,

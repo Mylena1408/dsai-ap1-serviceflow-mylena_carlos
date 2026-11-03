@@ -67,6 +67,33 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     actor: event.actor.name,
     note: event.note,
   }));
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.5: the pause with its reason, and the resume with its cause.
+  const pauseEntries = (request.slaPauses ?? []).flatMap((pause) => [
+    {
+      id: `pause-${pause.id}`,
+      occurredAt: pause.pausedAt,
+      title: "Prazo pausado: aguardando o solicitante",
+      actor: pause.pausedBy.name,
+      note: pause.reason,
+      noteLabel: "Motivo",
+    },
+    ...(pause.resumedAt
+      ? [
+          {
+            id: `resume-${pause.id}`,
+            occurredAt: pause.resumedAt,
+            title:
+              pause.resumeCause === "REQUESTER_REPLY"
+                ? "Prazo retomado pela resposta do solicitante"
+                : pause.resumeCause === "ATTENDANCE_ENDED"
+                  ? "Prazo retomado com o fim do atendimento"
+                  : `Prazo retomado por ${pause.resumedBy?.name ?? ""}`.trim(),
+            actor: pause.resumedBy?.name ?? "",
+            note: null,
+          },
+        ]
+      : []),
+  ]);
   const assignmentEntries = request.assignmentEvents.map((event) => ({
     id: `assignment-${event.id}`,
     occurredAt: event.occurredAt,
@@ -108,7 +135,7 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
 
   // Stable sort: on equal times, status events come first, then sector moves, assignments,
   // priorities, stages and the approval.
-  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries].sort(
+  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

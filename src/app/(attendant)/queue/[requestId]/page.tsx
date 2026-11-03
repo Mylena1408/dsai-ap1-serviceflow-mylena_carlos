@@ -22,6 +22,7 @@ import { CancelRequestForm } from "./cancel-request-form";
 import { RequestSla } from "@/app/_components/request-sla";
 import { PriorityForm } from "./priority-form";
 import { SectorTransferForm } from "./sector-transfer-form";
+import { SlaPausePanel } from "./sla-pause-panel";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -50,6 +51,9 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "commented") return "Comentário enviado.";
   if (notice === "priority") return "Prioridade alterada.";
   if (notice === "stage") return "Etapa alterada.";
+  if (notice === "paused") return "Prazo pausado. O solicitante foi avisado.";
+  if (notice === "resumed") return "Prazo retomado.";
+  if (error === "pause-reason") return "Informe o motivo da pausa, com até 500 caracteres.";
   if (error === "stage-note") return "Informe a justificativa do retorno, com até 1.000 caracteres.";
   if (error === "priority") return "Escolha uma prioridade diferente da atual.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
@@ -137,6 +141,11 @@ export default async function QueueRequestPage({
       </article>
       <AssignmentPanel request={request} actorId={actor.id} candidates={candidates} supervisor={supervisor} />
       <StagePanel request={request} canAct={!heldByColleague} />
+      {/* SPEC 2026-11-03-pausa-sla-calendario, 5.3 and 5.7: in progress, with an SLA, for the holder,
+          a supervisor or anyone when nobody holds it. The server checks everything again. */}
+      {request.status === "IN_PROGRESS" && request.slaHoursSnapshot !== null && (!heldByColleague || supervisor) ? (
+        <SlaPausePanel request={request} now={new Date()} />
+      ) : null}
       {destinations.length > 0 ? <SectorTransferForm requestId={request.id} destinations={destinations} /> : null}
       {(request.status === "OPEN" || request.status === "IN_PROGRESS") && !heldByColleague ? (
         <>

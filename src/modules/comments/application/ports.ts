@@ -81,6 +81,11 @@ export interface CommentTransaction extends CommentScopeReader {
   insertFiles(files: NewCommentFile[]): Promise<void>;
   /** Writes a domain event to the outbox in this same transaction. */
   recordEvent(event: DomainEvent): Promise<void>;
+  /**
+   * SPEC 2026-11-03-pausa-sla-calendario, 5.4.2: a public comment of the requester resumes a paused
+   * SLA in this same transaction. Optional so doubles without SLA stay valid.
+   */
+  resumeSlaOnRequesterReply?(requestId: string, authorId: string): Promise<void>;
 }
 
 export interface CommentTransactionRunner {

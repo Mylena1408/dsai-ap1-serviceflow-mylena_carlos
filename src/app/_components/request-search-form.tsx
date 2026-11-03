@@ -69,6 +69,7 @@ export function RequestSearchForm({ basePath, params, showAssignee, showSla = fa
             <option value="due_soon">Próximo do vencimento</option>
             <option value="overdue">Vencido</option>
             <option value="none">Sem prazo</option>
+            <option value="paused">Pausado</option>
           </select>
         </div>
       ) : null}

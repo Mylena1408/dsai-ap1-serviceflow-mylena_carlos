@@ -1780,3 +1780,18 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes anteriores ajustados:** só objetos de serviço completos ganharam `slaBusinessHours: false` (`service-use-cases.test.ts`, `catalog.test.ts`) e o dublê em memória ganhou o calendário e o `dueSoonAt`.
 - **Testes novos:** `tests/integration/business-hours-sla.test.ts` e `tests/unit/calendar-admin-actions.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 857/857; integração 383/383 + 1 pulado.
+
+## SF-130 — Pausa e retomada do prazo (2026-11-03)
+
+- **Esclarecimento da SPEC (5.4.3):** liberar a solicitação não muda o status (continua em atendimento, sem responsável), ao contrário do que a primeira redação supunha. Liberar não encerra a pausa; sem responsável efetivo, qualquer atendente ativo do setor pausa ou retoma, como no encaminhamento. A regra `requireHolder` de `sla-pause.ts` mudou para isso.
+- **Casos de uso (`requests/application/sla-pause.ts`):** pausa com `updateSlaPauseIfCurrent` condicionada ao status, ao responsável e à pausa lidos (`null`), linha em `RequestSlaPause` e evento só com identificadores; retomada manual e pela resposta do solicitante com o mesmo caminho (`resumeColumns` calcula o novo vencimento no relógio da solicitação, `closePause` fecha a linha e grava `request.sla_resumed`).
+- **Fim do atendimento:** a conclusão (`transition-request-status.ts`) e o cancelamento (`lifecycle-actions.ts`) encerram a pausa na mesma gravação do status, com `expectedSlaPausedAt`; a conclusão compara com o vencimento já deslocado, então o tempo pausado não atrasa.
+- **Retomada automática:** documento depois da abertura chama `resumeOnRequesterReply` na mesma transação; nos comentários, a porta ganhou `resumeSlaOnRequesterReply` (opcional), que a infraestrutura Prisma implementa com a função exportada por `requests` sobre a mesma transação. Nota interna não retoma.
+- **Leitura:** o detalhe carrega `slaPauses` (com quem pausou e quem retomou); a situação já sai "Prazo pausado" pela regra da SF-128.
+- **Filtros, alertas e painel:** "dentro", "próximo" e "vencido" deixam as pausadas de fora e há o filtro "Pausado"; o job de alertas ignora as pausadas (na busca e na gravação condicional); o painel ganhou "Prazo pausado" e as pausadas saíram de "próximas" e "vencidas".
+- **Telas:** painel "Pausar prazo (aguardando o solicitante)" e "Retomar prazo" no detalhe da fila (só em atendimento, com prazo, sem estar vencida para pausar); aviso ao solicitante com o motivo e como o prazo volta a contar; linhas do histórico.
+- **Notificação:** `sla.paused` ("Aguardando sua resposta: serviço"), categoria "status"; rótulo na seção de e-mails.
+- **Anonimização e "Meus dados":** o motivo é substituído; o arquivo traz `pausas` só quando houve pausa.
+- **Testes anteriores ajustados, como nas SPECs anteriores:** tabela 5.1 de `email.test.ts` (tipo novo) e as contagens completas do painel em `dashboard-view.test.ts`, `dashboard.test.ts` e `dashboard-reader.test.ts` (campo `paused`), com comentário; o dublê em memória ganhou as operações da pausa.
+- **Testes novos:** `tests/unit/modules/requests/application/sla-pause.test.ts` e `tests/integration/sla-pause.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 865/865; integração 387/387 + 1 pulado; E2E 22/22.

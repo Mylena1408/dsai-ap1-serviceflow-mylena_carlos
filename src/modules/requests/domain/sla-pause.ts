@@ -28,7 +28,8 @@ export function pauseReason(raw: string | null | undefined): string {
 }
 
 /**
- * Section 5.3 item 3: the effective assignee, or a queue supervisor of the sector. Someone who is
+ * Section 5.3 item 3: the effective assignee (any attendant of the sector when nobody holds it),
+ * or a queue supervisor of the sector. Someone who is
  * not an attendant of the current sector does not see the request (404); a colleague without
  * the right gets 409, as when starting or releasing a colleague's request.
  */
@@ -39,7 +40,8 @@ function requireHolder(actor: LifecycleUser, request: LifecycleRequest, supervis
 
   const holderId = effectiveAssigneeId(request);
 
-  if (holderId !== actor.id && !supervisor) {
+  // Without an effective assignee (released), any attendant of the sector acts (5.4.3, SF-130).
+  if (holderId !== null && holderId !== actor.id && !supervisor) {
     throw new ConflictError();
   }
 }

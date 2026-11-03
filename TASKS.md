@@ -1396,7 +1396,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-130 — Pausa e retomada
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Casos de uso `pauseRequestSla`, `resumeRequestSla` e `resumeOnRequesterReply`; retomada pelo comentário público e pelo documento do solicitante; fim da pausa na conclusão e no cancelamento; painel "Pausar prazo" e "Retomar prazo" na fila e aviso ao solicitante; histórico; notificação `sla.paused`; alertas, filtro "Pausado", painel e CSV; anonimização e "Meus dados". Esclarecimento na SPEC (5.4.3: liberar não muda o status). CA-PSL-05, 07 e 10 verificados; CA-PSL-06 e 08 parciais (API e webhooks na SF-131).
 - **Objetivo:** Caso de uso de pausar e retomar, retomada pela resposta do solicitante e no fim do atendimento, telas, histórico, notificação `sla.paused`, alertas, filtro da fila, painel, CSV, anonimização e "Meus dados".
 - **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/comments/`, `src/modules/notifications/`, `src/modules/reports/`, `src/modules/audit/`, `src/app/`, testes.
 - **Dependências:** SF-129.

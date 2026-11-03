@@ -181,6 +181,7 @@ export function DashboardView({ dashboard, action, hidden = {} }: DashboardViewP
           <Indicator label="Em atendimento" value={String(current.inProgress)} />
           <Indicator label="Próximas do vencimento" value={String(current.dueSoon)} />
           <Indicator label="Vencidas" value={String(current.overdue)} />
+          <Indicator label="Prazo pausado" value={String(current.paused)} />
         </dl>
       </section>
 

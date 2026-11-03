@@ -1,3 +1,4 @@
+import type { SlaResumeCause } from "../domain/sla-pause";
 import type { BusinessCalendar } from "@/shared/business-clock";
 import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { DomainEvent } from "@/modules/events";
@@ -99,6 +100,12 @@ export interface StatusUpdate {
   dueSoonAt?: Date | null;
   /** Clears the alert marks so a new due date can be alerted again (section 5.5). */
   resetSlaAlerts?: boolean;
+  /**
+   * SPEC 2026-11-03-pausa-sla-calendario, 5.4.3: the end of the attendance ends a running pause.
+   * When given, the pause start must also be unchanged since the read.
+   */
+  expectedSlaPausedAt?: Date | null;
+  slaPausedAt?: null;
   /** When given, the stage must also be unchanged since the read (SPEC de fluxos, 5.3.5). */
   expectedStageIndex?: number | null;
   /** Flow copy set on start and cleared on reopening (SPEC de fluxos, 5.2 and 5.4). */
@@ -186,6 +193,35 @@ export interface NewSectorEvent {
   toSectorName: string;
   note: string;
   occurredAt: Date;
+}
+
+/**
+ * Starts or ends a pause (SPEC 2026-11-03-pausa-sla-calendario, 5.3 and 5.4) only while the request
+ * is in progress with the assignee and the pause start read.
+ */
+export interface SlaPauseUpdate {
+  requestId: string;
+  expectedAssigneeId: string | null;
+  expectedSlaPausedAt: Date | null;
+  slaPausedAt: Date | null;
+  /** New schedule on resume. */
+  dueAt?: Date | null;
+  dueSoonAt?: Date | null;
+  updatedAt: Date;
+}
+
+export interface NewSlaPause {
+  requestId: string;
+  pausedById: string;
+  reason: string;
+  pausedAt: Date;
+}
+
+export interface SlaPauseClosing {
+  requestId: string;
+  resumedAt: Date;
+  resumedById: string;
+  resumeCause: SlaResumeCause;
 }
 
 /** Changes the priority only while status, assignee and priority are still the ones read. */
@@ -330,6 +366,12 @@ export interface RequestTransaction {
   updateSectorIfCurrent(update: SectorUpdate): Promise<number>;
   insertSectorEvent(event: NewSectorEvent): Promise<void>;
   insertPriorityEvent(event: NewPriorityEvent): Promise<void>;
+  /** Returns the number of rows changed (0 when the request changed meanwhile). */
+  updateSlaPauseIfCurrent(update: SlaPauseUpdate): Promise<number>;
+  /** Returns the id of the pause row. */
+  insertSlaPause(pause: NewSlaPause): Promise<string>;
+  /** Closes the open pause of the request; returns its id, or null when none was open. */
+  closeOpenSlaPause(closing: SlaPauseClosing): Promise<string | null>;
   /** Writes a domain event to the outbox in this same transaction (SPEC de eventos, 6.2). */
   recordEvent(event: DomainEvent): Promise<void>;
   getWithHistory(requestId: string): Promise<RequestWithHistory>;

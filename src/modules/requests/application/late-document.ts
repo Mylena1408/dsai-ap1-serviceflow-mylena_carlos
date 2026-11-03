@@ -7,6 +7,7 @@ import { entityIdSchema } from "@/shared/validation";
 import { assertCanAddLateDocument, type ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import { lateDocumentInputSchema } from "./request-schemas";
 import type { AttachmentQueryRepository, AttachmentStorage, RequestTransaction, RequestTransactionRunner } from "./ports";
+import { resumeOnRequesterReply } from "./sla-pause";
 
 // Document sent after the opening (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3). The rules
 // run before anything is stored and again in the transaction that writes the row; the object is
@@ -79,6 +80,8 @@ export async function addLateDocument(
         occurredAt,
         payload: { attachmentId: id, actorId: actor.id },
       });
+      // SPEC 2026-11-03-pausa-sla-calendario, 5.4.2: the requester's reply resumes a paused SLA.
+      await resumeOnRequesterReply(transaction, requestId, actor.id);
     });
   } catch (error) {
     await storage.remove(storageKey).catch(() => undefined);

@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/storage";
 import * as assignment from "./application/assignment";
@@ -12,6 +12,7 @@ import * as slaAlerts from "./application/sla-alerts";
 import * as stageUseCase from "./application/stages";
 import * as sectorTransfer from "./application/sector-transfer";
 import * as lateDocument from "./application/late-document";
+import * as slaPause from "./application/sla-pause";
 import type { ActiveDocumentRequirement } from "./domain/attachment-requirements";
 import * as approvalUseCase from "./application/approval";
 import * as transitionUseCase from "./application/transition-request-status";
@@ -27,6 +28,7 @@ import * as orphanCleanup from "./application/orphan-cleanup";
 import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import {
   createPrismaRequestQueryRepository,
+  createPrismaRequestTransaction,
   createPrismaRequestTransactionRunner,
 } from "./infrastructure/prisma-request-repository";
 
@@ -269,4 +271,22 @@ export async function changeRequestPriority(input: unknown, database: PrismaClie
     input,
     createPrismaRequestTransactionRunner(database, lifecycleErrors),
   );
+}
+
+// SLA pause "aguardando o solicitante" (SPEC 2026-11-03-pausa-sla-calendario, 5.3 and 5.4).
+export async function pauseRequestSla(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return slaPause.pauseRequestSla(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
+export async function resumeRequestSla(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return slaPause.resumeRequestSla(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
+/** For the comments module: resumes a paused SLA inside its own transaction (5.4.2). */
+export async function resumeSlaOnRequesterReply(
+  transaction: Prisma.TransactionClient,
+  requestId: string,
+  authorId: string,
+): Promise<void> {
+  await slaPause.resumeOnRequesterReply(createPrismaRequestTransaction(transaction), requestId, authorId);
 }

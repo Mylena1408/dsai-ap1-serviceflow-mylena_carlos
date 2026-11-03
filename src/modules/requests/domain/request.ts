@@ -101,6 +101,20 @@ export interface RequestSectorEventRecord {
   actor: { id: string; name: string };
 }
 
+/** An SLA pause and its resume (SPEC 2026-11-03-pausa-sla-calendario, 5.5). */
+export interface RequestSlaPauseRecord {
+  id: string;
+  requestId: string;
+  pausedById: string;
+  reason: string;
+  pausedAt: Date;
+  resumedAt: Date | null;
+  resumedById: string | null;
+  resumeCause: "MANUAL" | "REQUESTER_REPLY" | "ATTENDANCE_ENDED" | null;
+  pausedBy: { id: string; name: string };
+  resumedBy: { id: string; name: string } | null;
+}
+
 /** Manager decision (SPEC 2026-11-01-aprovacoes, 5.6). */
 export interface RequestApprovalRecord {
   id: string;
@@ -132,6 +146,8 @@ export interface RequestWithHistory extends RequestRecord {
    * history lines (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.5). Optional like sectorEvents.
    */
   attachments?: Array<{ id: string; requirementNameSnapshot: string; createdAt: Date; uploadedBy: { id: string; name: string } }>;
+  /** SLA pauses (SPEC 2026-11-03-pausa-sla-calendario, 5.5). Optional like sectorEvents. */
+  slaPauses?: RequestSlaPauseRecord[];
   service: {
     id: string;
     isActive: boolean;

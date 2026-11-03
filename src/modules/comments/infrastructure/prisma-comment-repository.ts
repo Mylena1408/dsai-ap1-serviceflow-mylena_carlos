@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { recordOutboxEvent } from "@/modules/events";
+import { resumeSlaOnRequesterReply } from "@/modules/requests";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import type {
   CommentRecord,
@@ -111,6 +112,9 @@ export function createPrismaCommentTransactionRunner(database: PrismaClient): Co
             },
             async insertFiles(files) {
               await transaction.requestCommentFile.createMany({ data: files });
+            },
+            resumeSlaOnRequesterReply(requestId, authorId) {
+              return resumeSlaOnRequesterReply(transaction, requestId, authorId);
             },
           }),
         { translate: ["P2003", "P2034"], fallbackMessage: "Comment creation failed." },

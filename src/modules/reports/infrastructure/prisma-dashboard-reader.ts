@@ -41,16 +41,19 @@ export function createPrismaDashboardReader(database: PrismaClient): DashboardRe
     async currentCounts(scope, now) {
       const where = scopeWhere(scope);
       // Same rules as `slaSituation` and the queue filter: at the due date itself, still "due soon".
-      const [open, awaitingApproval, inProgress, dueSoon, overdue] = await Promise.all([
+      // SPEC 2026-11-03-pausa-sla-calendario, 5.7: a paused request is neither due soon nor overdue.
+      const running = { status: { in: ACTIVE_STATUSES }, slaPausedAt: null };
+      const [open, awaitingApproval, inProgress, dueSoon, overdue, paused] = await Promise.all([
         database.request.count({ where: { ...where, status: "OPEN" } }),
         database.request.count({ where: { ...where, status: "OPEN", approvalState: "PENDING" } }),
         database.request.count({ where: { ...where, status: "IN_PROGRESS" } }),
         database.request.count({
-          where: { ...where, status: { in: ACTIVE_STATUSES }, dueSoonAt: { lte: now }, dueAt: { gte: now } },
+          where: { ...where, ...running, dueSoonAt: { lte: now }, dueAt: { gte: now } },
         }),
-        database.request.count({ where: { ...where, status: { in: ACTIVE_STATUSES }, dueAt: { lt: now } } }),
+        database.request.count({ where: { ...where, ...running, dueAt: { lt: now } } }),
+        database.request.count({ where: { ...where, slaPausedAt: { not: null } } }),
       ]);
-      return { open, awaitingApproval, inProgress, dueSoon, overdue };
+      return { open, awaitingApproval, inProgress, dueSoon, overdue, paused };
     },
 
     async periodTotals(scope, range) {

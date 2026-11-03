@@ -140,6 +140,8 @@ describe("Prisma dashboard reader (SF-098)", () => {
       inProgress: 1,
       dueSoon: 1,
       overdue: 1,
+      // Added by SPEC 2026-11-03-pausa-sla-calendario, 5.7.
+      paused: 0,
     });
     await expect(reader.currentCounts({ sectorId: sectorA.id }, now)).resolves.toMatchObject({ open: 2, inProgress: 1 });
     await expect(reader.currentCounts({ sectorId: sectorB.id }, now)).resolves.toEqual({
@@ -148,6 +150,7 @@ describe("Prisma dashboard reader (SF-098)", () => {
       inProgress: 0,
       dueSoon: 0,
       overdue: 0,
+      paused: 0,
     });
   });
 

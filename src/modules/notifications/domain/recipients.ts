@@ -36,7 +36,8 @@ export type NotifiableEvent =
   | { type: "request.stage_changed"; payload: { direction: string; actorId: string } }
   | { type: "request.approval_decided"; payload: { decision: string; actorId: string } }
   | { type: "request.sector_changed"; payload: { toSectorId: string; actorId: string } }
-  | { type: "request.document_added"; payload: { actorId: string } };
+  | { type: "request.document_added"; payload: { actorId: string } }
+  | { type: "request.sla_paused"; payload: { actorId: string } };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -120,6 +121,11 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       // SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6 (decision X7): the effective assignee,
       // like a public comment of the requester; without one, nobody.
       return plan(context.effectiveAssigneeId, "document.added", event.payload.actorId);
+
+    case "request.sla_paused":
+      // SPEC 2026-11-03-pausa-sla-calendario, 5.6: the requester is asked to reply; the resume
+      // notifies nobody (the requester's reply already notifies the assignee).
+      return plan(context.requesterId, "sla.paused", event.payload.actorId);
 
     case "request.stage_changed":
       // SPEC 2026-11-01-fluxos-configuraveis, 5.5.3 (decision W4): the requester hears about each

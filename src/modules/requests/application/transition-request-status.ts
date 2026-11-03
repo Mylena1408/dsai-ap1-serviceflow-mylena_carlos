@@ -9,6 +9,7 @@ import { assertCanCompleteAtStage, stageCopyOnStart } from "../domain/stages";
 import { assertCanStartWithApproval } from "../domain/approval";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
+import { closePause, resumeColumns } from "./sla-pause";
 
 export async function transitionRequestStatus(
   input: unknown,
@@ -60,6 +61,9 @@ export async function transitionRequestStatus(
         ? stageCopyOnStart(await transaction.listActiveStageNames(currentRequest.serviceId))
         : null;
     const occurredAt = await transaction.currentTime();
+    // SPEC 2026-11-03-pausa-sla-calendario, 5.4.3: completing ends a running pause first, so the
+    // paused time does not make the completion late.
+    const ending = parsed.toStatus === "COMPLETED" ? await resumeColumns(transaction, currentRequest, occurredAt) : null;
     const changed = await transaction.updateStatusIfCurrent({
       requestId: parsed.requestId,
       sectorId: currentActor.sectorId,
@@ -70,11 +74,12 @@ export async function transitionRequestStatus(
       ...(parsed.toStatus === "COMPLETED"
         ? {
             completedAt: occurredAt,
-            completedLate: completedLateAt(currentRequest.dueAt ?? null, occurredAt),
+            completedLate: completedLateAt(ending ? ending.dueAt : (currentRequest.dueAt ?? null), occurredAt),
             ...(stageState.stageIndex !== null ? { expectedStageIndex: stageState.stageIndex } : {}),
           }
         : {}),
       ...(stageCopy && stageCopy.stageIndex !== null ? stageCopy : {}),
+      ...(ending ? { ...ending, expectedSlaPausedAt: currentRequest.slaPausedAt ?? null } : {}),
     });
 
     if (changed !== 1) {
@@ -94,6 +99,10 @@ export async function transitionRequestStatus(
       occurredAt,
       payload: { fromStatus: currentRequest.status, toStatus: parsed.toStatus, actorId: currentActor.id },
     });
+
+    if (ending) {
+      await closePause(transaction, parsed.requestId, occurredAt, currentActor.id, "ATTENDANCE_ENDED");
+    }
 
     if (stageCopy && stageCopy.stageIndex !== null) {
       const stageEventId = await transaction.insertStageEvent({

@@ -30,6 +30,8 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   "sector.changed": "STATUS",
   // SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6.
   "document.added": "COMMENTS",
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.6.
+  "sla.paused": "STATUS",
 };
 
 export const NOTIFICATION_TYPES = Object.keys(TYPE_CATEGORY) as NotificationType[];

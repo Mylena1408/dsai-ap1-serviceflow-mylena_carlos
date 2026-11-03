@@ -13,6 +13,8 @@ export function createPrismaSlaAlertStore(database: PrismaClient): SlaAlertStore
           status: { in: ACTIVE_STATUSES },
           // dueSoonAt is kept by a database trigger (migration 20261101200000).
           dueSoonAt: { lte: now },
+          // SPEC 2026-11-03-pausa-sla-calendario, 5.3.4: no alert while paused.
+          slaPausedAt: null,
           OR: [{ slaWarningNotifiedAt: null }, { slaBreachNotifiedAt: null, dueAt: { lt: now } }],
         },
         select: {
@@ -38,6 +40,7 @@ export function createPrismaSlaAlertStore(database: PrismaClient): SlaAlertStore
             dueAt: candidate.dueAt,
             slaWarningNotifiedAt: candidate.slaWarningNotifiedAt,
             slaBreachNotifiedAt: null,
+            slaPausedAt: null,
           },
           // A breach also closes the warning, so a late "due soon" is never sent.
           data:

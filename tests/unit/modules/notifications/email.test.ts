@@ -16,8 +16,9 @@ describe("notification categories (SF-092)", () => {
   it("puts every notification type in exactly one category of table 5.1 (CA-MAIL-02)", () => {
     expect(NOTIFICATION_CATEGORIES).toEqual(["STATUS", "ASSIGNMENT", "COMMENTS", "SLA", "STAGES", "APPROVALS"]);
     expect(Object.fromEntries(NOTIFICATION_CATEGORIES.map((category) => [category, typesOfCategory(category)]))).toEqual({
-      // "sector.*" added by SPEC 2026-11-03-transferencia-entre-setores, 5.6.
-      STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "sector.changed"],
+      // "sector.*" added by SPEC 2026-11-03-transferencia-entre-setores, 5.6; "sla.paused" by
+      // SPEC 2026-11-03-pausa-sla-calendario, 5.6.
+      STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "sector.changed", "sla.paused"],
       ASSIGNMENT: ["assignment.received", "sector.received"],
       // "document.added" added by SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6.
       COMMENTS: ["comment.public", "comment.internal", "document.added"],

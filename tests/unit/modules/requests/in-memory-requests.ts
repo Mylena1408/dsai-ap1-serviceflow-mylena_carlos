@@ -3,6 +3,8 @@ import type {
   NewAssignmentEvent,
   NewPriorityEvent,
   NewSectorEvent,
+  NewSlaPause,
+  SlaPauseClosing,
   NewStageEvent,
   NewRequestAttachment,
   NewRequestFieldValue,
@@ -53,6 +55,7 @@ export interface InMemoryRequestStore {
   sectorEvents: NewSectorEvent[];
   /** SPEC 2026-11-03-pausa-sla-calendario; the default of 5.1 without holidays when absent. */
   calendar?: BusinessCalendar;
+  slaPauses?: Array<NewSlaPause & { id: string } & Partial<Omit<SlaPauseClosing, "requestId">>>;
 }
 
 export const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -295,6 +298,8 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       );
       if (!request) return 0;
       if (update.expectedStageIndex !== undefined && request.stageIndex !== update.expectedStageIndex) return 0;
+      if (update.expectedSlaPausedAt !== undefined && (request.slaPausedAt ?? null)?.getTime() !== update.expectedSlaPausedAt?.getTime()) return 0;
+      if (update.slaPausedAt !== undefined) request.slaPausedAt = update.slaPausedAt;
       request.status = update.toStatus;
       request.updatedAt = update.updatedAt;
       if (update.completedAt !== undefined) request.completedAt = update.completedAt;
@@ -430,6 +435,29 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       if (update.dueSoonAt !== undefined) request.dueSoonAt = update.dueSoonAt;
       request.updatedAt = update.updatedAt;
       return 1;
+    },
+    async updateSlaPauseIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, assigneeId }) => id === update.requestId && status === "IN_PROGRESS" && assigneeId === update.expectedAssigneeId,
+      );
+      if (!request || (request.slaPausedAt ?? null)?.getTime() !== update.expectedSlaPausedAt?.getTime()) return 0;
+      request.slaPausedAt = update.slaPausedAt;
+      request.updatedAt = update.updatedAt;
+      if (update.dueAt !== undefined) request.dueAt = update.dueAt;
+      if (update.dueSoonAt !== undefined) request.dueSoonAt = update.dueSoonAt;
+      return 1;
+    },
+    async insertSlaPause(pause) {
+      store.slaPauses ??= [];
+      const id = `pause-${store.slaPauses.length + 1}`;
+      store.slaPauses.push({ ...pause, id });
+      return id;
+    },
+    async closeOpenSlaPause({ requestId, ...closing }) {
+      const open = (store.slaPauses ?? []).find((pause) => pause.requestId === requestId && !pause.resumedAt);
+      if (!open) return null;
+      Object.assign(open, closing);
+      return open.id;
     },
     async insertPriorityEvent(event) {
       store.priorityEvents.push({ ...event });

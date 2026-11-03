@@ -7,7 +7,9 @@ import {
   cancelRequest,
   changeRequestPriority,
   moveRequestStage,
+  pauseRequestSla,
   releaseRequest,
+  resumeRequestSla,
   sendRequestToSector,
   transferRequest,
   transitionRequestStatus,
@@ -36,6 +38,10 @@ function errorCode(error: ApplicationError, noteCode: string): string {
   }
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("sectorId"))) {
     return "sector";
+  }
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.3.1.
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("reason"))) {
+    return "pause-reason";
   }
   return error.code === "UNAUTHENTICATED" || error.code === "FORBIDDEN"
     ? "access"
@@ -128,6 +134,16 @@ export async function sendToSectorAction(formData: FormData): Promise<never> {
   scheduleEventProcessing();
   revalidatePath("/queue");
   redirect("/queue?notice=sector-sent");
+}
+
+// SPEC 2026-11-03-pausa-sla-calendario, 5.3 and 5.4.1: pause with a reason, resume by hand.
+export async function pauseSlaAction(formData: FormData): Promise<never> {
+  const reason = field(formData, "reason");
+  return runOnRequest(formData, (requestId) => pauseRequestSla({ requestId, reason }), "paused");
+}
+
+export async function resumeSlaAction(formData: FormData): Promise<never> {
+  return runOnRequest(formData, (requestId) => resumeRequestSla({ requestId }), "resumed");
 }
 
 // Section 5.4: the attendant cancels with a mandatory reason.
