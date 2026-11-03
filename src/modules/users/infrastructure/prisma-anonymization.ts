@@ -90,8 +90,18 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
         where: { uploadedById: userId, removedAt: null },
         data: { removedAt, originalFilename: filename },
       });
+      // SPEC 2026-11-03-anexos-comentarios-documentos, 5.4: the files of the person's comments too.
+      const commentFiles = await transaction.requestCommentFile.findMany({
+        where: { uploadedById: userId, removedAt: null },
+        select: { storageKey: true },
+        orderBy: { id: "asc" },
+      });
+      await transaction.requestCommentFile.updateMany({
+        where: { uploadedById: userId, removedAt: null },
+        data: { removedAt, originalFilename: filename },
+      });
 
-      return attachments.map(({ storageKey }) => storageKey);
+      return [...attachments, ...commentFiles].map(({ storageKey }) => storageKey);
     },
     async relabelAuditEntries(userId, label) {
       await transaction.auditEntry.updateMany({ where: { entityType: "USER", entityId: userId }, data: { entityLabel: label } });

@@ -15,6 +15,7 @@ import {
 import { addComment } from "@/modules/comments";
 import { scheduleEventProcessing } from "@/server/jobs/schedule";
 import { ApplicationError, ValidationError } from "@/server/errors";
+import { commentFileErrorCode, commentFiles } from "@/app/_components/comment-form-data";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -22,6 +23,8 @@ function field(formData: FormData, name: string): string {
 }
 
 function errorCode(error: ApplicationError, noteCode: string): string {
+  const fileCode = commentFileErrorCode(error);
+  if (fileCode) return fileCode;
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("note"))) {
     return noteCode;
   }
@@ -137,7 +140,13 @@ export async function cancelRequestAction(formData: FormData): Promise<never> {
 export async function addCommentAction(formData: FormData): Promise<never> {
   const body = field(formData, "body");
   const isInternal = formData.get("isInternal") === "on";
-  return runOnRequest(formData, (requestId) => addComment({ requestId, body, isInternal }), "commented");
+  // SPEC 2026-11-03-anexos-comentarios-documentos, 5.1: files only when the form has them.
+  const files = await commentFiles(formData);
+  return runOnRequest(
+    formData,
+    (requestId) => addComment({ requestId, body, isInternal, ...(files.length > 0 ? { files } : {}) }),
+    "commented",
+  );
 }
 
 // SPEC 2026-11-01-sla-prioridades, section 5.1 (decision P1).

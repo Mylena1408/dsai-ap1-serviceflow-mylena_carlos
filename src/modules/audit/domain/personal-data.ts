@@ -52,11 +52,12 @@ export interface PersonalDataSource {
      */
     sectorMoves?: Array<{ occurredAt: Date; fromSectorName: string; toSectorName: string; actorName: string; note: string }>;
     /** Public comments only: internal notes belong to the team. */
-    comments: Array<{ createdAt: Date; authorName: string; body: string; isInternal: boolean }>;
+    /** `files`: names of the files of the comment (SPEC 2026-11-03-anexos-comentarios-documentos, 5.4). */
+    comments: Array<{ createdAt: Date; authorName: string; body: string; isInternal: boolean; files?: string[] }>;
     attachments: Array<{ requirementName: string; filename: string; createdAt: Date; removed: boolean }>;
   }>;
   /** Comments and notes the person wrote in requests opened by others. */
-  writtenElsewhere: Array<{ requestId: string; serviceName: string; createdAt: Date; body: string; isInternal: boolean }>;
+  writtenElsewhere: Array<{ requestId: string; serviceName: string; createdAt: Date; body: string; isInternal: boolean; files?: string[] }>;
   /** Most recent first. */
   notifications: Array<{ createdAt: Date; readAt: Date | null; type: NotificationType; serviceName: string }>;
   permissions: Array<{ permission: Permission; grantedAt: Date }>;
@@ -128,7 +129,13 @@ export function buildPersonalDataExport(source: PersonalDataSource, now: Date) {
         : {}),
       comentarios: request.comments
         .filter((comment) => !comment.isInternal)
-        .map((comment) => ({ quando: iso(comment.createdAt), autor: comment.authorName, texto: comment.body })),
+        .map((comment) => ({
+          quando: iso(comment.createdAt),
+          autor: comment.authorName,
+          texto: comment.body,
+          // Only when the comment has files, so the other entries keep their shape.
+          ...(comment.files && comment.files.length > 0 ? { arquivos: comment.files } : {}),
+        })),
       anexos: request.attachments.map((attachment) => ({
         documento: attachment.requirementName,
         arquivo: attachment.removed ? "Arquivo removido na anonimização" : attachment.filename,
@@ -141,6 +148,7 @@ export function buildPersonalDataExport(source: PersonalDataSource, now: Date) {
       quando: iso(comment.createdAt),
       notaInterna: comment.isInternal,
       texto: comment.body,
+      ...(comment.files && comment.files.length > 0 ? { arquivos: comment.files } : {}),
     })),
     notificacoesRecentes: source.notifications.map((notification) => ({
       quando: iso(notification.createdAt),

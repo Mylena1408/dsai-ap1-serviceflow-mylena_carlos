@@ -63,6 +63,11 @@ function runner(store: Store): CommentTransactionRunner {
           return databaseTime;
         },
         async recordEvent() {},
+        // SPEC 2026-11-03-anexos-comentarios-documentos: these tests send no files.
+        async countFiles() {
+          return 0;
+        },
+        async insertFiles() {},
         async insertComment(comment: NewComment) {
           const author = readers[comment.authorId];
           const record = {
@@ -95,6 +100,9 @@ function repository(store: Store): CommentRepository {
         }
       }
       return counts;
+    },
+    async findFile() {
+      return null;
     },
   };
 }

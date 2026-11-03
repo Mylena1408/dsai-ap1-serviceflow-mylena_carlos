@@ -63,7 +63,13 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
             comments: {
               where: { isInternal: false },
               orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-              select: { createdAt: true, body: true, isInternal: true, author: { select: { name: true } } },
+              select: {
+                createdAt: true,
+                body: true,
+                isInternal: true,
+                author: { select: { name: true } },
+                files: { orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: { originalFilename: true } },
+              },
             },
             attachments: {
               orderBy: [{ createdAt: "asc" }, { id: "asc" }],
@@ -80,6 +86,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
             body: true,
             isInternal: true,
             request: { select: { serviceNameSnapshot: true } },
+            files: { orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: { originalFilename: true } },
           },
         }),
         database.requestNotification.findMany({
@@ -144,6 +151,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
             authorName: comment.author.name,
             body: comment.body,
             isInternal: comment.isInternal,
+            files: comment.files.map(({ originalFilename }) => originalFilename),
           })),
           attachments: request.attachments.map((attachment) => ({
             requirementName: attachment.requirementNameSnapshot,
@@ -158,6 +166,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
           createdAt: comment.createdAt,
           body: comment.body,
           isInternal: comment.isInternal,
+          files: comment.files.map(({ originalFilename }) => originalFilename),
         })),
         notifications: notifications.map((notification) => ({
           createdAt: notification.createdAt,

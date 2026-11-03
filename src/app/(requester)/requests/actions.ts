@@ -8,6 +8,7 @@ import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests"
 import { FieldAnswersError } from "@/modules/service-fields";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
+import { commentFileErrorCode, commentFiles, isEmptyFileInput } from "@/app/_components/comment-form-data";
 
 // File inputs are named "attachment:<requirementId>" (SPEC 21.4 item 2).
 const ATTACHMENT_FIELD_PREFIX = "attachment:";
@@ -20,13 +21,14 @@ function field(formData: FormData, name: string): string {
 }
 
 // Only the requirement link, the name and the bytes leave the form; every stored field is
-// derived on the server. An input left empty arrives as a nameless empty file and is skipped.
+// derived on the server. An input left empty is skipped (isEmptyFileInput: Next.js delivers it as
+// an empty file named "undefined"; fixed in SF-125, the check by an empty name never matched).
 async function attachments(formData: FormData) {
   const uploads = [];
 
   for (const [name, value] of formData.entries()) {
     if (!name.startsWith(ATTACHMENT_FIELD_PREFIX) || typeof value === "string") continue;
-    if (value.name === "" && value.size === 0) continue;
+    if (isEmptyFileInput(value)) continue;
 
     uploads.push({
       requirementId: name.slice(ATTACHMENT_FIELD_PREFIX.length),
@@ -99,6 +101,8 @@ export async function createRequestAction(formData: FormData): Promise<never> {
 
 // Lifecycle actions on the requester's own request (SPEC 2026-10-31, sections 5.4 and 5.5).
 function lifecycleErrorCode(error: ApplicationError): string {
+  const fileCode = commentFileErrorCode(error);
+  if (fileCode) return fileCode;
   if (error instanceof ValidationError) {
     if (error.issues.some(({ path }) => path.includes("body"))) return "body";
     return error.issues.some(({ path }) => path.includes("note")) ? "note" : "validation";
@@ -143,7 +147,9 @@ export async function reopenOwnRequestAction(formData: FormData): Promise<never>
 // Comments (SPEC 2026-10-31-comentarios): the requester never marks internal notes.
 export async function addOwnCommentAction(formData: FormData): Promise<never> {
   const body = field(formData, "body");
+  // SPEC 2026-11-03-anexos-comentarios-documentos, 5.1: files only when the form has them.
+  const files = await commentFiles(formData);
   return runOnOwnRequest(formData, async (requestId) => {
-    await addComment({ requestId, body });
+    await addComment({ requestId, body, ...(files.length > 0 ? { files } : {}) });
   }, "commented");
 }

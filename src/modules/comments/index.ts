@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
+import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/storage";
 import * as useCases from "./application/comment-use-cases";
 import type { CommentRecord } from "./application/ports";
 import {
@@ -8,10 +9,24 @@ import {
 } from "./infrastructure/prisma-comment-repository";
 
 export { MAX_COMMENT_LENGTH } from "./domain/comment-policy";
-export type { CommentRecord } from "./application/ports";
+export type { CommentFileSummary, CommentRecord } from "./application/ports";
+export type { CommentFileDownload } from "./application/comment-use-cases";
 
-export async function addComment(input: unknown, database: PrismaClient = prisma): Promise<CommentRecord> {
-  return useCases.addComment(input, createPrismaCommentTransactionRunner(database));
+export async function addComment(
+  input: unknown,
+  database: PrismaClient = prisma,
+  storage: DocumentStorage = getApplicationDocumentStorage(),
+): Promise<CommentRecord> {
+  return useCases.addComment(input, createPrismaCommentTransactionRunner(database), storage);
+}
+
+/** SPEC 2026-11-03-anexos-comentarios-documentos, 5.2. */
+export async function getCommentFileDownload(
+  input: unknown,
+  database: PrismaClient = prisma,
+  storage: Pick<DocumentStorage, "get"> = getApplicationDocumentStorage(),
+): Promise<useCases.CommentFileDownload> {
+  return useCases.getCommentFileDownload(input, createPrismaCommentRepository(database), storage);
 }
 
 export async function listComments(

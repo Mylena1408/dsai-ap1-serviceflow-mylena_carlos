@@ -10,6 +10,11 @@ import type {
 
 const commentWithAuthor = {
   author: { select: { id: true, name: true, role: true } },
+  // SPEC 2026-11-03-anexos-comentarios-documentos, 5.1.
+  files: {
+    select: { id: true, originalFilename: true, detectedFormat: true, sizeBytes: true, removedAt: true },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  },
 } satisfies Prisma.RequestCommentInclude;
 
 const toDomain = (
@@ -21,6 +26,7 @@ const toDomain = (
   isInternal: row.isInternal,
   createdAt: row.createdAt,
   author: row.author,
+  files: row.files.map(({ removedAt, ...file }) => ({ ...file, removed: removedAt !== null })),
 });
 
 // The request scope is read here, like requests reads document requirements, so the module
@@ -62,6 +68,21 @@ export function createPrismaCommentRepository(database: PrismaClient): CommentRe
       });
       return new Map(groups.map((group) => [group.requestId, group._count._all]));
     },
+    async findFile(requestId, commentId, fileId) {
+      const row = await database.requestCommentFile.findFirst({
+        where: { id: fileId, commentId, requestId },
+        select: { storageKey: true, originalFilename: true, contentType: true, removedAt: true, comment: { select: { isInternal: true } } },
+      });
+      return (
+        row && {
+          storageKey: row.storageKey,
+          originalFilename: row.originalFilename,
+          contentType: row.contentType,
+          isInternal: row.comment.isInternal,
+          removed: row.removedAt !== null,
+        }
+      );
+    },
   };
 }
 
@@ -84,6 +105,12 @@ export function createPrismaCommentTransactionRunner(database: PrismaClient): Co
               return toDomain(
                 await transaction.requestComment.create({ data: comment, include: commentWithAuthor }),
               );
+            },
+            countFiles(requestId) {
+              return transaction.requestCommentFile.count({ where: { requestId } });
+            },
+            async insertFiles(files) {
+              await transaction.requestCommentFile.createMany({ data: files });
             },
           }),
         { translate: ["P2003", "P2034"], fallbackMessage: "Comment creation failed." },

@@ -390,6 +390,20 @@ export const OPENAPI_DOCUMENT = {
           body: { type: "string" },
           internal: { type: "boolean" },
           createdAt: dateTime,
+          files: {
+            type: "array",
+            description: "Arquivos do comentário: só metadados; o download é feito pela tela.",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", format: "uuid" },
+                fileName: nullable("string"),
+                format: { type: "string", enum: ["PDF", "DOCX", "TXT"] },
+                sizeBytes: { type: "integer" },
+                removed: { type: "boolean" },
+              },
+            },
+          },
         },
       },
     },

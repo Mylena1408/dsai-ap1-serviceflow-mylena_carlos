@@ -1,4 +1,5 @@
 import { MAX_COMMENT_LENGTH, type CommentRecord } from "@/modules/comments";
+import { COMMENT_FILES_FIELD } from "./comment-form-data";
 
 type RequestConversationProps = {
   requestId: string;
@@ -9,6 +10,10 @@ type RequestConversationProps = {
   allowInternal: boolean;
   action: (formData: FormData) => Promise<never>;
 };
+
+function fileSize(bytes: number): string {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const roleLabels = {
   REQUESTER: "solicitante",
@@ -38,6 +43,25 @@ export function RequestConversation({
             <li key={comment.id} className={comment.isInternal ? "is-internal" : undefined}>
               {comment.isInternal ? <p className="comment-badge">Nota interna (só atendentes)</p> : null}
               <p className="comment-body">{comment.body}</p>
+              {comment.files && comment.files.length > 0 ? (
+                // SPEC 2026-11-03-anexos-comentarios-documentos, 5.2: same visibility as the comment.
+                <ul className="comment-files" aria-label="Arquivos do comentário">
+                  {comment.files.map((file) => (
+                    <li key={file.id}>
+                      {file.removed ? (
+                        <span>Arquivo removido na anonimização</span>
+                      ) : (
+                        <a href={`/api/requests/${requestId}/comments/${comment.id}/files/${file.id}`}>
+                          {file.originalFilename}
+                        </a>
+                      )}{" "}
+                      <span className="metadata">
+                        ({file.detectedFormat}, {fileSize(file.sizeBytes)})
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               <p className="metadata">
                 {comment.author.name} ({roleLabels[comment.author.role]}) ·{" "}
                 <time dateTime={comment.createdAt.toISOString()}>
@@ -53,6 +77,9 @@ export function RequestConversation({
           <input type="hidden" name="requestId" value={requestId} />
           <label htmlFor="comment-body">Novo comentário</label>
           <textarea id="comment-body" name="body" required maxLength={MAX_COMMENT_LENGTH} rows={3} />
+          <label htmlFor="comment-files">Arquivos (opcional)</label>
+          <input id="comment-files" name={COMMENT_FILES_FIELD} type="file" multiple accept=".pdf,.docx,.txt" />
+          <p className="metadata">Até 3 arquivos PDF, DOCX ou TXT, de até 2 MiB cada e 4 MiB somados.</p>
           {allowInternal ? (
             <label className="checkbox-label">
               <input type="checkbox" name="isInternal" />

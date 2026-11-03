@@ -26,6 +26,7 @@ import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
+import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 
 type QueueRequestPageProps = {
   params: Promise<{ requestId: string }>;
@@ -52,6 +53,7 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "stage-note") return "Informe a justificativa do retorno, com até 1.000 caracteres.";
   if (error === "priority") return "Escolha uma prioridade diferente da atual.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
+  if (error && COMMENT_FILE_MESSAGES[error]) return COMMENT_FILE_MESSAGES[error];
   if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
   if (error === "sector-note") return "Informe a justificativa do encaminhamento, com até 1.000 caracteres.";
   if (error === "sector") return "Escolha um setor ativo, diferente do atual e com atendente ativo.";

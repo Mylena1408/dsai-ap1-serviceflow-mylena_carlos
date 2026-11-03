@@ -1342,7 +1342,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-125 — Arquivos em comentários
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Arquivos no formulário de comentário (solicitante e fila), lista e download (`/api/requests/{id}/comments/{commentId}/files/{fileId}`), compensação, anonimização, "Meus dados" e metadados no detalhe da API. Corrigido também o defeito do campo de arquivo vazio, que afetava a abertura com documento opcional em branco (SF-034). CA-ANX-02 a 04 e 08 verificados; CA-ANX-07 na parte de comentários (unitário).
 - **Objetivo:** Envio com o comentário (com compensação), lista e download com a visibilidade do comentário, anonimização e "Meus dados"; metadados no detalhe da API.
 - **Arquivos/módulos esperados:** `src/modules/comments/`, `src/app/_components/request-conversation.tsx`, rota de download, `src/modules/users/`, `src/modules/audit/`, testes.
 - **Dependências:** SF-124.

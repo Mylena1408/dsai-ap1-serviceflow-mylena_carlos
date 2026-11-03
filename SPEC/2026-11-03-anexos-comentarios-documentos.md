@@ -76,13 +76,13 @@ Nenhuma dependência nova.
 ## 7. Critérios de aceitação
 
 - [ ] **CA-ANX-01** — Sem anexar, nada muda: suítes anteriores passam; comentários sem arquivo e documentos de abertura funcionam como antes.
-- [ ] **CA-ANX-02** — Solicitante e atendente anexam até 3 arquivos válidos a um comentário; os arquivos aparecem no comentário e são baixados com o mesmo conteúdo.
-- [ ] **CA-ANX-03** — São recusados, sem gravar comentário nem arquivo: mais de 3 arquivos, arquivo acima de 2 MiB, soma acima de 4 MiB, formato não detectado (mesmo com extensão aceita), mais de 30 arquivos na solicitação, solicitação cancelada.
-- [ ] **CA-ANX-04** — Arquivo de nota interna não aparece nem é baixado pelo solicitante (`404`); quem não lê a solicitação recebe `404`.
+- [x] **CA-ANX-02** — Solicitante e atendente anexam até 3 arquivos válidos a um comentário; os arquivos aparecem no comentário e são baixados com o mesmo conteúdo. *Verificado em 2026-11-03 (SF-125): metadados derivados no servidor, chave na pasta da solicitação, lista no comentário e download com o mesmo conteúdo (unitários e integração); o envio pela tela fica para o E2E da SF-127.*
+- [x] **CA-ANX-03** — São recusados, sem gravar comentário nem arquivo: mais de 3 arquivos, arquivo acima de 2 MiB, soma acima de 4 MiB, formato não detectado (mesmo com extensão aceita), mais de 30 arquivos na solicitação, solicitação cancelada. *Verificado em 2026-11-03 (SF-124 e SF-125): cada recusa sem objeto no armazenamento nem linha no banco; o 31º arquivo da solicitação é recusado (unitários e integração).*
+- [x] **CA-ANX-04** — Arquivo de nota interna não aparece nem é baixado pelo solicitante (`404`); quem não lê a solicitação recebe `404`. *Verificado em 2026-11-03 (SF-125): o solicitante não recebe a nota nem baixa o arquivo; arquivo pedido com o comentário errado, atendente de outro setor e identificador inválido dão "não encontrado" (unitários e integração).*
 - [ ] **CA-ANX-05** — O solicitante envia depois da abertura um documento ainda não enviado; ele aparece na lista de documentos e no histórico; o responsável é notificado; o webhook "Documento enviado" recebe o evento.
 - [ ] **CA-ANX-06** — São recusados: documento de requisito já atendido, inativo ou de outro serviço; formato não aceito pelo requisito; soma acima de 4 MiB; solicitação concluída ou cancelada; quem não é o solicitante dono.
 - [ ] **CA-ANX-07** — Falha do armazenamento ou do banco não deixa linha sem objeto nem objeto sem linha.
-- [ ] **CA-ANX-08** — A anonimização remove os arquivos de comentários da pessoa; "Meus dados" lista os nomes.
+- [x] **CA-ANX-08** — A anonimização remove os arquivos de comentários da pessoa; "Meus dados" lista os nomes. *Verificado em 2026-11-03 (SF-125): "Meus dados" traz `arquivos` no comentário; a anonimização apaga o objeto, troca o nome por "Arquivo removido na anonimização" e o download passa a `404` (integração).*
 - [ ] **CA-ANX-09** — Nenhuma dependência nova; uma migration aditiva; README explica os anexos. *Parcial em 2026-11-03 (SF-124): migration `20261103300000_request_comment_files` cria a tabela e um índice único em `RequestComment(id, requestId)` (alvo da chave composta) e recria as restrições de tipo só para aceitar `request.document_added`; conferência final na SF-127.*
 
 ## 8. Estratégia de testes

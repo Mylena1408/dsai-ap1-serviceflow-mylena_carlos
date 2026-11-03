@@ -79,6 +79,14 @@ export function commentRepresentation(comment: CommentRecord) {
     body: comment.body,
     internal: comment.isInternal,
     createdAt: iso(comment.createdAt),
+    // SPEC 2026-11-03-anexos-comentarios-documentos, decision X6: metadata only, no download.
+    files: (comment.files ?? []).map((file) => ({
+      id: file.id,
+      fileName: file.removed ? null : file.originalFilename,
+      format: file.detectedFormat,
+      sizeBytes: file.sizeBytes,
+      removed: file.removed,
+    })),
   };
 }
 

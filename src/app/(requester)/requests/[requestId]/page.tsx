@@ -18,6 +18,7 @@ import { RequestTimeline } from "@/app/_components/request-timeline";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
+import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 import { addOwnCommentAction } from "../actions";
 
 type RequestPageProps = {
@@ -33,6 +34,7 @@ function feedback(notice?: string, error?: string): string | null {
   if (notice === "reopened") return "Sua solicitação foi reaberta.";
   if (notice === "commented") return "Comentário enviado.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
+  if (error && COMMENT_FILE_MESSAGES[error]) return COMMENT_FILE_MESSAGES[error];
   if (error === "note") return "Informe o motivo com até 1.000 caracteres (obrigatório para reabrir).";
   if (error === "state") {
     return "Não é possível fazer isso agora: a solicitação mudou de estado ou o prazo de reabertura terminou. Atualize a página.";
