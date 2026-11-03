@@ -1,5 +1,5 @@
-import type { DetectedDocumentFormat } from "@/modules/attachments";
-import { ValidationError } from "@/server/errors";
+import { MAX_ATTACHMENTS_PER_REQUEST, MAX_ATTACHMENTS_TOTAL_BYTES, type DetectedDocumentFormat } from "@/modules/attachments";
+import { ConflictError, NotFoundError, ValidationError } from "@/server/errors";
 
 export interface ActiveDocumentRequirement {
   id: string;
@@ -57,4 +57,42 @@ export function assertFormatStillAccepted(
   if (!requirement.acceptedFormats.includes(detectedFormat)) {
     throw new ValidationError([{ path: ["attachments"], code: "invalid_format" }]);
   }
+}
+
+/** State read for a document sent after the opening (SPEC 2026-11-03-anexos-comentarios-documentos). */
+export interface LateDocumentContext {
+  actor: { id: string; role: string; isActive: boolean };
+  request: { requesterId: string; status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" };
+  /** The active requirement of the request's service with that id, or null. */
+  requirement: ActiveDocumentRequirement | null;
+  /** Documents already in the request: requirement and size. */
+  documents: ReadonlyArray<{ requirementId: string; sizeBytes: number }>;
+  size: number;
+}
+
+/**
+ * Section 5.3 (decisions X4 and X5): only the requester who owns the request, while it is open or
+ * in progress, sends a document for an active requirement of the service that has none yet,
+ * within the per-request limits of section 21 (5 documents, 4 MiB together).
+ */
+export function assertCanAddLateDocument({ actor, request, requirement, documents, size }: LateDocumentContext): ActiveDocumentRequirement {
+  if (!actor.isActive || actor.role !== "REQUESTER" || actor.id !== request.requesterId) {
+    throw new NotFoundError();
+  }
+
+  if (request.status !== "OPEN" && request.status !== "IN_PROGRESS") {
+    throw new ConflictError();
+  }
+
+  if (!requirement || documents.some(({ requirementId }) => requirementId === requirement.id)) {
+    throw requirementError("invalid_value");
+  }
+
+  const total = documents.reduce((sum, document) => sum + document.sizeBytes, 0) + size;
+
+  if (documents.length + 1 > MAX_ATTACHMENTS_PER_REQUEST || total > MAX_ATTACHMENTS_TOTAL_BYTES) {
+    throw new ValidationError([{ path: ["attachments"], code: "too_big" }]);
+  }
+
+  return requirement;
 }

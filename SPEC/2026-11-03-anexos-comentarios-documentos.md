@@ -83,7 +83,7 @@ Nenhuma dependência nova.
 - [ ] **CA-ANX-06** — São recusados: documento de requisito já atendido, inativo ou de outro serviço; formato não aceito pelo requisito; soma acima de 4 MiB; solicitação concluída ou cancelada; quem não é o solicitante dono.
 - [ ] **CA-ANX-07** — Falha do armazenamento ou do banco não deixa linha sem objeto nem objeto sem linha.
 - [ ] **CA-ANX-08** — A anonimização remove os arquivos de comentários da pessoa; "Meus dados" lista os nomes.
-- [ ] **CA-ANX-09** — Nenhuma dependência nova; uma migration aditiva; README explica os anexos.
+- [ ] **CA-ANX-09** — Nenhuma dependência nova; uma migration aditiva; README explica os anexos. *Parcial em 2026-11-03 (SF-124): migration `20261103300000_request_comment_files` cria a tabela e um índice único em `RequestComment(id, requestId)` (alvo da chave composta) e recria as restrições de tipo só para aceitar `request.document_added`; conferência final na SF-127.*
 
 ## 8. Estratégia de testes
 

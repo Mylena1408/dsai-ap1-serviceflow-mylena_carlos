@@ -24,6 +24,7 @@ export const WEBHOOK_EVENT_LABELS: Record<DomainEventType, string> = {
   "request.stage_changed": "Mudança de etapa",
   "request.approval_decided": "Decisão de aprovação",
   "request.sector_changed": "Mudança de setor",
+  "request.document_added": "Documento enviado",
 };
 
 export function normalizeWebhookName(raw: string): string | null {

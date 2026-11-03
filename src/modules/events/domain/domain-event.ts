@@ -60,6 +60,13 @@ export type DomainEvent =
       payload: { fromSectorId: string; toSectorId: string; actorId: string };
     }
   | {
+      // Document sent after the opening (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6).
+      type: "request.document_added";
+      requestId: string;
+      occurredAt: Date;
+      payload: { attachmentId: string; actorId: string };
+    }
+  | {
       // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
       // writes them, and the consumer reloads the request to find the recipients.
       type: "request.sla_warning" | "request.sla_breached";
@@ -81,6 +88,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.stage_changed",
   "request.approval_decided",
   "request.sector_changed",
+  "request.document_added",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -94,6 +102,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.stage_changed": ["stageEventId", "direction", "actorId"],
   "request.approval_decided": ["decision", "actorId"],
   "request.sector_changed": ["fromSectorId", "toSectorId", "actorId"],
+  "request.document_added": ["attachmentId", "actorId"],
 };
 
 /**

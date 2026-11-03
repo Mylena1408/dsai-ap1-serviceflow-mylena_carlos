@@ -33,6 +33,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.approval_decided",
       // Added by SPEC 2026-11-03 (transferência entre setores).
       "request.sector_changed",
+      // Added by SPEC 2026-11-03 (anexos em comentários e documentos).
+      "request.document_added",
     ]);
     expect(
       outboxPayload({

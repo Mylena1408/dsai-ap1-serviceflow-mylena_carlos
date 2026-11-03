@@ -1332,7 +1332,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-124 — Migration e regras dos anexos
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Migration `20261103300000_request_comment_files` (tabela `RequestCommentFile` com as regras de linha dos documentos e chave composta para o comentário da mesma solicitação; `request.document_added` aceito na outbox e nos webhooks); regras `assertCommentFileLimits`, `inspectCommentFile` e `assertCanAddLateDocument`; evento `request.document_added` com o rótulo "Documento enviado". Regras de CA-ANX-03 e 06 cobertas por unitários; CA-ANX-09 parcial.
 - **Objetivo:** Tabela `RequestCommentFile`, `request.document_added` aceito na outbox e nos webhooks; regras puras dos limites por comentário e por solicitação e do documento depois da abertura.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/attachments/`, `src/modules/comments/domain/`, `src/modules/requests/domain/`, testes.
 - **Dependências:** SF-123.

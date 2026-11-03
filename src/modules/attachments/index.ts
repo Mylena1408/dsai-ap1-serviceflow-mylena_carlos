@@ -16,6 +16,13 @@ export {
 } from "./domain/attachment-policy";
 export type { AttachmentUpload, InspectedAttachment } from "./domain/attachment-policy";
 export {
+  COMMENT_FILE_FORMATS,
+  MAX_COMMENT_FILES_PER_REQUEST,
+  MAX_FILES_PER_COMMENT,
+  assertCommentFileLimits,
+  inspectCommentFile,
+} from "./domain/comment-files";
+export {
   DOCX_MAX_CONTENT_TYPES_BYTES,
   DOCX_MAX_ZIP_ENTRIES,
   detectDocumentFormat,

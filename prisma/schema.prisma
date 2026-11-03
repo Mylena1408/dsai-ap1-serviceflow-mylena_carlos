@@ -170,6 +170,7 @@ model User {
   priorityEvents        RequestPriorityEvent[]   @relation("RequestPriorityEventActor")
   stageEvents           RequestStageEvent[]      @relation("RequestStageEventActor")
   sectorEvents          RequestSectorEvent[]     @relation("RequestSectorEventActor")
+  commentFiles          RequestCommentFile[]     @relation("RequestCommentFileUploader")
   approvalsDecided      RequestApproval[]        @relation("RequestApprovalDecider")
   permissions           UserPermission[]         @relation("UserPermissionHolder")
   permissionsGranted    UserPermission[]         @relation("UserPermissionGrantor")
@@ -246,6 +247,7 @@ model Request {
   fieldValues      RequestFieldValue[]
   stageEvents      RequestStageEvent[]
   sectorEvents     RequestSectorEvent[]
+  commentFiles     RequestCommentFile[]
   approval         RequestApproval?
   comments         RequestComment[]
   outboxEvents     OutboxEvent[]
@@ -343,10 +345,39 @@ model RequestComment {
   isInternal Boolean  @default(false)
   createdAt  DateTime @default(now()) @db.Timestamptz
 
-  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  author  User    @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  request Request              @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  author  User                 @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  files   RequestCommentFile[]
 
+  /// Target of the composite key of RequestCommentFile: a file belongs to the comment's request.
+  @@unique([id, requestId])
   @@index([requestId, createdAt])
+}
+
+/// File attached to a comment (SPEC 2026-11-03-anexos-comentarios-documentos, 5.1 and 6). Immutable
+/// metadata; the content lives in private object storage. Row CHECKs are created in SQL.
+model RequestCommentFile {
+  id               String         @id @default(uuid()) @db.Uuid
+  requestId        String         @db.Uuid
+  commentId        String         @db.Uuid
+  originalFilename String
+  detectedFormat   DocumentFormat
+  contentType      String
+  sizeBytes        Int
+  sha256           String         @db.Char(64)
+  storageKey       String         @unique
+  uploadedById     String         @db.Uuid
+  createdAt        DateTime       @db.Timestamptz
+  /// SPEC 2026-11-02-auditoria-lgpd, 5.5: the file was removed by an anonymization.
+  removedAt        DateTime?      @db.Timestamptz
+
+  request    Request        @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  comment    RequestComment @relation(fields: [commentId, requestId], references: [id, requestId], onDelete: Restrict)
+  uploadedBy User           @relation("RequestCommentFileUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@index([commentId])
+  @@index([requestId])
+  @@index([uploadedById])
 }
 
 model OutboxEvent {
