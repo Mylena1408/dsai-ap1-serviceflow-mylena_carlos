@@ -1237,3 +1237,47 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Todos os CA-API-01 a 13 registrados.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-02-api-externa-webhooks.md`.
+
+## Ações de atendimento pela API e webhooks por setor — SPEC de 2026-11-03
+
+**Ordem:** SF-116 → SF-117 → SF-118 → SF-119.
+
+### SF-116 — Migration e regras do filtro por setor e do reenvio
+
+- **Estado:** Pendente.
+- **Objetivo:** Migration aditiva com `WebhookEndpoint.sectorIds`; regras puras: quais webhooks recebem um evento de um setor e quando uma entrega pode ser reenviada.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/webhooks/domain/`, testes.
+- **Dependências:** SF-115.
+- **Critérios de conclusão:** Regras de CA-ACT-06 e 07; CA-ACT-09 (migration aditiva).
+- **Testes relacionados:** Unitários; integração do schema.
+- **SPEC:** `SPEC/2026-11-03-api-acoes-webhooks-setor.md`.
+
+### SF-117 — Rotas de ação da API
+
+- **Estado:** Pendente.
+- **Objetivo:** Rotas `start`, `complete`, `assume`, `release`, `transfer`, `cancel`, `reopen` e `transfer-candidates` sobre os casos de uso da tela, com o formato da v1 e o OpenAPI.
+- **Arquivos/módulos esperados:** `src/modules/public-api/`, `src/app/api/v1/requests/[requestId]/`, testes.
+- **Dependências:** SF-116.
+- **Critérios de conclusão:** CA-ACT-02 a 05 e a parte de OpenAPI de CA-ACT-08.
+- **Testes relacionados:** Unitários; integração com cada perfil.
+- **SPEC:** `SPEC/2026-11-03-api-acoes-webhooks-setor.md`.
+
+### SF-118 — Webhooks por setor e reenvio
+
+- **Estado:** Pendente.
+- **Objetivo:** Setores no cadastro e na edição do webhook (auditados pelos nomes), filtro no consumidor e botão "Reenviar" nas entregas falhas ou canceladas.
+- **Arquivos/módulos esperados:** `src/modules/webhooks/`, seção "Webhooks", testes.
+- **Dependências:** SF-117.
+- **Critérios de conclusão:** CA-ACT-06 e 07.
+- **Testes relacionados:** Unitários; integração com receptor HTTP local; verificação no navegador.
+- **SPEC:** `SPEC/2026-11-03-api-acoes-webhooks-setor.md`.
+
+### SF-119 — E2E e revisão das ações e dos webhooks por setor
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8, README e revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-118.
+- **Critérios de conclusão:** CA-ACT-01 a 09.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-03-api-acoes-webhooks-setor.md`.
