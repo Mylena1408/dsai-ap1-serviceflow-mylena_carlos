@@ -13,6 +13,13 @@ export function announcement(error?: string, notice?: string, entity?: string): 
     return "Usuários inativos não recebem permissões.";
   }
   // SPEC 2026-11-02-auditoria-lgpd, 5.5.1 and 5.5.2: conditions and explicit confirmation.
+  // SPEC 2026-11-02-api-externa-webhooks, 5.6: limit of active webhooks.
+  if (error === "dependency" && entity === "webhooks") {
+    return "Já há 10 webhooks ativos. Desative um antes de reativar este.";
+  }
+  if (error === "validation" && entity === "webhooks") {
+    return "Confira o nome, o endereço (https público, porta padrão, 443 ou 8443) e escolha pelo menos um evento.";
+  }
   if (error === "dependency" && entity === "anonymization") {
     return "Só é possível anonimizar pessoas desativadas, sem solicitações abertas ou em atendimento, e nunca a própria conta.";
   }

@@ -55,6 +55,19 @@ export interface PersonalDataSource {
   /** Most recent first. */
   notifications: Array<{ createdAt: Date; readAt: Date | null; type: NotificationType; serviceName: string }>;
   permissions: Array<{ permission: Permission; grantedAt: Date }>;
+  /**
+   * API tokens (SPEC 2026-11-02-api-externa-webhooks, 5.7): name, scope text, last four characters
+   * and dates, never the value or the hash. Absent for sources written before that SPEC.
+   */
+  apiTokens?: Array<{
+    name: string;
+    scope: string;
+    lastFour: string;
+    createdAt: Date;
+    expiresAt: Date;
+    lastUsedAt: Date | null;
+    revokedAt: Date | null;
+  }>;
 }
 
 const iso = (value: Date | null) => (value ? value.toISOString() : null);
@@ -118,6 +131,15 @@ export function buildPersonalDataExport(source: PersonalDataSource, now: Date) {
       lida: notification.readAt !== null,
     })),
     permissoesRecebidas: source.permissions.map((grant) => ({ permissao: PERMISSION_LABELS[grant.permission], concedidaEm: iso(grant.grantedAt) })),
+    tokensDeAcessoAPI: (source.apiTokens ?? []).map((token) => ({
+      nome: token.name,
+      escopo: token.scope,
+      terminaEm: token.lastFour,
+      criadoEm: iso(token.createdAt),
+      validoAte: iso(token.expiresAt),
+      ultimoUso: iso(token.lastUsedAt),
+      revogadoEm: iso(token.revokedAt),
+    })),
   };
 }
 

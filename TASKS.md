@@ -1220,7 +1220,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-114 — Webhooks
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-02. Casos de uso do administrador (criar, alterar, desativar e reativar, gerar novo segredo) com auditoria; consumidor da outbox que registra as entregas; envio com assinatura, verificação de endereço, sem redirecionamento, tempo-limite e novas tentativas, logo após a resposta e no job diário; seção "Webhooks"; retenção de entregas, janelas e tokens; tokens em "Meus dados"; anonimização revoga os tokens. CA-API-10, 11 e 12 verificados.
 - **Objetivo:** Cadastro, alteração, desativação e troca de segredo pelo administrador; consumidor da outbox que registra as entregas; envio com assinatura, verificação de endereço, sem redirecionamento, tempo-limite e novas tentativas, logo após a resposta e no job diário; seção "Webhooks"; retenção, "Meus dados" e anonimização.
 - **Arquivos/módulos esperados:** Módulo de webhooks, `src/server/jobs`, seção da administração, módulos de auditoria e usuários, testes.
 - **Dependências:** SF-113.

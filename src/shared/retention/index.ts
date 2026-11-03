@@ -14,6 +14,12 @@ export const RETENTION_PERIODS = {
   unreadNotifications: { days: 365 },
   emailDeliveries: { days: 180 },
   auditEntries: { years: 5 },
+  /** SPEC 2026-11-02-api-externa-webhooks, 5.7: finished webhook deliveries. */
+  webhookDeliveries: { days: 30 },
+  /** Windows of the call limit (same SPEC, 5.5). */
+  apiRateWindows: { days: 1 },
+  /** Tokens revoked or expired (same SPEC, 5.7). */
+  endedApiTokens: { days: 365 },
 } as const satisfies Record<string, RetentionPeriod>;
 
 export type RetainedData = keyof typeof RETENTION_PERIODS;

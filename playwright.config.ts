@@ -28,6 +28,9 @@ export default defineConfig({
       NODE_ENV: "development",
       DATABASE_URL: testDatabaseUrl,
       AUTH_SECRET: randomBytes(32).toString("base64"),
+      // Webhooks (SPEC 2026-11-02-api-externa-webhooks, 5.6): a key made for this run and local receivers.
+      WEBHOOK_ENCRYPTION_KEY: randomBytes(32).toString("base64"),
+      WEBHOOK_ALLOW_LOCAL: "true",
       // Documents go to an in-process memory store; no real bucket is used (SPEC 21.15.7).
       TEST_DOCUMENT_STORAGE: "memory",
     },

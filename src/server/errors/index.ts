@@ -65,6 +65,9 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "fields",
   "period",
   "sector",
+  // SPEC 2026-11-02-api-externa-webhooks, 5.6: fields of the webhook form.
+  "url",
+  "eventTypes",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

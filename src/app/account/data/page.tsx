@@ -41,8 +41,8 @@ export default async function PersonalDataPage() {
           <p>
             Baixe um arquivo com os dados pessoais que o ServiceFlow guarda sobre você: seu perfil, os e-mails que
             você escolheu receber, as solicitações que abriu (com descrição, respostas, histórico e comentários
-            públicos), os comentários que escreveu, os nomes dos anexos enviados, as notificações recentes e as
-            permissões recebidas.
+            públicos), os comentários que escreveu, os nomes dos anexos enviados, as notificações recentes, as
+            permissões recebidas e os tokens de acesso à API (sem o valor do token).
           </p>
           <p className="metadata">
             O arquivo não traz sua senha nem notas internas escritas por outras pessoas. Cada download fica registrado.

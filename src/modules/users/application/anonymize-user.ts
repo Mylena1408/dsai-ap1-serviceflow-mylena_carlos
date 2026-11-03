@@ -68,6 +68,7 @@ export async function anonymizeUser(
       await transaction.replaceWrittenContent(userId, ANONYMIZED_CONTENT, TEXT_FIELD_TYPES);
       await transaction.deleteNotificationData(userId);
       await transaction.revokePermissions(userId, actor.id, now);
+      await transaction.revokeApiTokens(userId, actor.id, now);
       await transaction.relabelAuditEntries(userId, identity.name);
       const storageKeys = await transaction.markAttachmentsRemoved(userId, REMOVED_ATTACHMENT_NAME, now);
 

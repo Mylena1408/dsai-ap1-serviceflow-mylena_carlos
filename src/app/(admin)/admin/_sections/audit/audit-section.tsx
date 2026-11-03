@@ -10,6 +10,7 @@ import {
   type AuditValue,
 } from "@/modules/audit";
 import { API_TOKEN_SCOPE_LABELS } from "@/modules/api-tokens";
+import { WEBHOOK_EVENT_LABELS } from "@/modules/webhooks";
 import { FIELD_TYPE_LABELS, ROLE_LABELS } from "@/shared/admin-labels";
 import { PRIORITY_LABELS } from "@/shared/requests";
 import { PERIOD_ERRORS } from "@/app/_components/dashboard-view";
@@ -37,6 +38,10 @@ export function auditFilterMessages(errors: AuditTrail["errors"]): string[] {
 /** Values people can read: sector and category names, profiles, priorities, field types, token scopes and dates. */
 export function auditValueFormatter(names: Record<string, string>) {
   return (field: string, value: AuditValue): string | undefined => {
+    // SPEC 2026-11-02-api-externa-webhooks, 5.7: the events of a webhook by their names.
+    if (field === "eventTypes" && Array.isArray(value)) {
+      return value.map((type) => (WEBHOOK_EVENT_LABELS as Record<string, string>)[type] ?? type).join(", ");
+    }
     if (typeof value !== "string") return undefined;
     if (field === "sectorId" || field === "categoryId") return names[value] ?? "(removido)";
     if (field === "role") return ROLE_LABELS[value as keyof typeof ROLE_LABELS];

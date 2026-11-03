@@ -3,6 +3,7 @@ import { prisma } from "@/server/db";
 import * as authentication from "./application/authenticate-call";
 import * as tokens from "./application/token-use-cases";
 import type { AdminApiTokenRecord, ApiTokenRecord } from "./application/ports";
+import * as persistence from "./infrastructure/prisma-api-tokens";
 import {
   createPrismaApiCallStore,
   createPrismaApiTokenReader,
@@ -71,4 +72,14 @@ export async function authenticateApiRequest(
     createPrismaApiCallStore(database),
     now,
   );
+}
+
+/** Retention (5.7): call windows of more than one day. */
+export async function purgeApiRateWindows(before: Date, database: PrismaClient = prisma): Promise<number> {
+  return persistence.purgeApiRateWindows(database, before);
+}
+
+/** Retention (5.7): tokens revoked or expired more than 365 days ago. */
+export async function purgeEndedApiTokens(before: Date, database: PrismaClient = prisma): Promise<number> {
+  return persistence.purgeEndedApiTokens(database, before);
 }

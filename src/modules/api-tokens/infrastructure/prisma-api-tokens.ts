@@ -132,3 +132,16 @@ export function createPrismaApiCallStore(database: PrismaClient): ApiCallStore {
     },
   };
 }
+
+/** Call windows that started before `before` (retention, SPEC 2026-11-02-api-externa-webhooks, 5.7). */
+export async function purgeApiRateWindows(database: PrismaClient, before: Date): Promise<number> {
+  return (await database.apiRateWindow.deleteMany({ where: { windowStart: { lt: before } } })).count;
+}
+
+/** Tokens revoked or expired before `before` (5.7); their call windows go with them. */
+export async function purgeEndedApiTokens(database: PrismaClient, before: Date): Promise<number> {
+  const result = await database.apiToken.deleteMany({
+    where: { OR: [{ revokedAt: { lt: before } }, { expiresAt: { lt: before } }] },
+  });
+  return result.count;
+}

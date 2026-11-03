@@ -13,7 +13,17 @@ describe("retention periods (CA-AUD-05)", () => {
       unreadNotifications: { days: 365 },
       emailDeliveries: { days: 180 },
       auditEntries: { years: 5 },
+      // SPEC 2026-11-02-api-externa-webhooks, 5.5 and 5.7 (SF-114).
+      webhookDeliveries: { days: 30 },
+      apiRateWindows: { days: 1 },
+      endedApiTokens: { days: 365 },
     });
+  });
+
+  it("counts the deadlines of the API and the webhooks (SF-114)", () => {
+    expect(retentionCutoff("webhookDeliveries", now)).toEqual(new Date("2026-10-03T15:00:00.000Z"));
+    expect(retentionCutoff("apiRateWindows", now)).toEqual(new Date("2026-11-01T15:00:00.000Z"));
+    expect(retentionCutoff("endedApiTokens", now)).toEqual(new Date("2025-11-02T15:00:00.000Z"));
   });
 
   it("counts days back from now, to the millisecond", () => {

@@ -1,3 +1,4 @@
+import { API_TOKEN_SCOPE_LABELS } from "@/modules/api-tokens";
 import type { NotificationType } from "@/shared/notifications";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { PersonalDataReader } from "../application/ports";
@@ -28,7 +29,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
         return null;
       }
 
-      const [preferences, requests, writtenElsewhere, notifications, permissions] = await Promise.all([
+      const [preferences, requests, writtenElsewhere, notifications, permissions, apiTokens] = await Promise.all([
         database.notificationPreference.findMany({
           where: { userId, emailEnabled: true },
           select: { category: true },
@@ -87,6 +88,12 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
           where: { userId },
           orderBy: { grantedAt: "asc" },
           select: { permission: true, grantedAt: true },
+        }),
+        // Never the value or the hash (SPEC 2026-11-02-api-externa-webhooks, 5.7).
+        database.apiToken.findMany({
+          where: { userId },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          select: { name: true, scope: true, lastFour: true, createdAt: true, expiresAt: true, lastUsedAt: true, revokedAt: true },
         }),
       ]);
 
@@ -148,6 +155,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
           serviceName: notification.request.serviceNameSnapshot,
         })),
         permissions,
+        apiTokens: apiTokens.map((token) => ({ ...token, scope: API_TOKEN_SCOPE_LABELS[token.scope] })),
       };
     },
 

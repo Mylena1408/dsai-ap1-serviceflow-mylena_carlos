@@ -135,6 +135,8 @@ function transaction(store: Store): AnonymizationTransaction {
       for (const permission of store.permissions) store.permissionEvents.push({ permission, action: "REVOKED", actorId });
       store.permissions = [];
     },
+    // SPEC 2026-11-02-api-externa-webhooks, 5.7: checked in tests/integration/webhooks.test.ts.
+    async revokeApiTokens() {},
     async markAttachmentsRemoved(_id, filename, removedAt) {
       const keys = store.attachments.filter((item) => item.removedAt === null).map((item) => item.storageKey);
       for (const item of store.attachments) Object.assign(item, { filename, removedAt });

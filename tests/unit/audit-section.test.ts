@@ -10,6 +10,7 @@ vi.mock("@/modules/audit", async () => {
 });
 vi.mock("@/modules/permissions", async () => import("@/shared/permissions"));
 vi.mock("@/modules/api-tokens", async () => import("@/modules/api-tokens/domain/token"));
+vi.mock("@/modules/webhooks", async () => import("@/modules/webhooks/domain/delivery"));
 vi.mock("@/modules/reports", async () => {
   const { barPercentage } = await import("@/modules/reports/domain/metrics");
   return { barPercentage };

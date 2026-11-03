@@ -74,6 +74,9 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
         data: grants.map(({ permission }) => ({ userId, permission, action: "REVOKED" as const, actorId, occurredAt })),
       });
     },
+    async revokeApiTokens(userId, actorId, revokedAt) {
+      await transaction.apiToken.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt, revokedById: actorId } });
+    },
     async markAttachmentsRemoved(userId, filename, removedAt) {
       const attachments = await transaction.requestAttachment.findMany({
         where: { uploadedById: userId, removedAt: null },

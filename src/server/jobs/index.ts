@@ -1,3 +1,4 @@
+import { purgeApiRateWindows, purgeEndedApiTokens } from "@/modules/api-tokens";
 import { purgeAuditEntries } from "@/modules/audit";
 import { purgeProcessedEvents, runOutbox, type EventConsumer, type OutboxRunSummary } from "@/modules/events";
 import {
@@ -14,13 +15,20 @@ import {
   type OrphanCleanupSummary,
   type SlaAlertSummary,
 } from "@/modules/requests";
+import {
+  purgeWebhookDeliveries,
+  runWebhookDeliveries,
+  webhookConsumer,
+  type WebhookRunSummary,
+} from "@/modules/webhooks";
 import { isDocumentStorageConfigured } from "@/server/storage";
 import { retentionCutoff } from "@/shared/retention";
 
 // Composition of the event consumers and the daily job (SPEC 2026-10-31-eventos-outbox-
 // jobs, sections 4 and 7). Consumers are registered here so modules never import each other.
 
-const consumers: EventConsumer[] = [notificationConsumer()];
+// SPEC 2026-11-02-api-externa-webhooks, 5.6: the webhook consumer records the deliveries.
+const consumers: EventConsumer[] = [notificationConsumer(), webhookConsumer()];
 
 export function eventConsumers(): readonly EventConsumer[] {
   return consumers;
@@ -36,6 +44,11 @@ export async function processEmailsNow(): Promise<EmailRunSummary> {
   return runEmailDeliveries();
 }
 
+/** Sends the webhook deliveries the events just recorded (SPEC 2026-11-02-api-externa-webhooks, 5.6). */
+export async function processWebhooksNow(): Promise<WebhookRunSummary> {
+  return runWebhookDeliveries();
+}
+
 export type DailyStep<T> = { status: "ok"; result: T } | { status: "skipped" } | { status: "error"; code: string };
 
 export interface DailyJobSummary {
@@ -48,6 +61,11 @@ export interface DailyJobSummary {
   purgedUnreadNotifications: DailyStep<number>;
   purgedEmailDeliveries: DailyStep<number>;
   purgedAuditEntries: DailyStep<number>;
+  /** SPEC 2026-11-02-api-externa-webhooks, 5.5 to 5.7. */
+  webhooks: DailyStep<WebhookRunSummary>;
+  purgedWebhookDeliveries: DailyStep<number>;
+  purgedApiRateWindows: DailyStep<number>;
+  purgedApiTokens: DailyStep<number>;
   orphanObjects: DailyStep<OrphanCleanupSummary>;
 }
 
@@ -85,6 +103,7 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   const events = await step(() => runOutbox(consumers, { maxBatches: 20 }));
   // After the events, so the emails they record go out in the same run.
   const emails = await step(() => runEmailDeliveries({ maxBatches: 20 }));
+  const webhooks = await step(() => runWebhookDeliveries({ maxBatches: 20 }));
   // Retention: the deadlines of `RETENTION_PERIODS` (SPEC 2026-11-02-auditoria-lgpd, 5.3).
   const purgedEvents = await step(() => purgeProcessedEvents(retentionCutoff("processedEvents", now)));
   const purgedNotifications = await step(() => purgeReadNotifications(retentionCutoff("readNotifications", now)));
@@ -93,6 +112,9 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   );
   const purgedEmailDeliveries = await step(() => purgeEmailDeliveries(retentionCutoff("emailDeliveries", now)));
   const purgedAuditEntries = await step(() => purgeAuditEntries(retentionCutoff("auditEntries", now)));
+  const purgedWebhookDeliveries = await step(() => purgeWebhookDeliveries(retentionCutoff("webhookDeliveries", now)));
+  const purgedApiRateWindows = await step(() => purgeApiRateWindows(retentionCutoff("apiRateWindows", now)));
+  const purgedApiTokens = await step(() => purgeEndedApiTokens(retentionCutoff("endedApiTokens", now)));
   const orphanObjects = await orphanStep(now);
 
   return {
@@ -104,6 +126,10 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
     purgedUnreadNotifications,
     purgedEmailDeliveries,
     purgedAuditEntries,
+    webhooks,
+    purgedWebhookDeliveries,
+    purgedApiRateWindows,
+    purgedApiTokens,
     orphanObjects,
   };
 }

@@ -73,6 +73,8 @@ export interface AnonymizationTransaction extends AuditScope {
   deleteNotificationData(userId: string): Promise<void>;
   /** Revokes every permission of the person, writing each revocation in the permission history. */
   revokePermissions(userId: string, actorId: string, occurredAt: Date): Promise<void>;
+  /** Revokes every API token of the person (SPEC 2026-11-02-api-externa-webhooks, 5.7). */
+  revokeApiTokens(userId: string, actorId: string, revokedAt: Date): Promise<void>;
   /** Marks the attachments sent by the person as removed and returns their storage keys. */
   markAttachmentsRemoved(userId: string, filename: string, removedAt: Date): Promise<string[]>;
   /** Earlier audit entries about the person show the new name, never the old one (SPEC, 9). */
