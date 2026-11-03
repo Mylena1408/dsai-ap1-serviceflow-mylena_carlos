@@ -127,6 +127,8 @@ describe("texts (section 5.2)", () => {
       EXPORTED: true,
       REVOKED: true,
       SECRET_ROTATED: true,
+      // Added by SPEC 2026-11-03 (pausa do prazo e calendário).
+      DELETED: true,
     };
     const entities: Record<AuditEntityType, true> = {
       USER: true,
@@ -138,6 +140,9 @@ describe("texts (section 5.2)", () => {
       SERVICE_STAGE: true,
       API_TOKEN: true,
       WEBHOOK: true,
+      // Added by SPEC 2026-11-03 (pausa do prazo e calendário).
+      BUSINESS_CALENDAR: true,
+      HOLIDAY: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

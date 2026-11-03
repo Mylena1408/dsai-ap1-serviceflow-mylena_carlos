@@ -1721,3 +1721,34 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - **SPEC `2026-11-03-pausa-sla-calendario.md`** (funcionalidade 7 da lista aprovada), decisões H1 a H9 adotadas como recomendadas: um calendário da organização (dias, uma janela por dia, fuso, feriados simples e anuais); opção por serviço entre horas corridas (padrão, comportamento atual) e horas úteis, copiada na abertura; mudança do calendário não recalcula vencimentos gravados; pausa só "aguardando o solicitante", com motivo, em atendimento, pelo responsável ou supervisor, recusada se vencida; retomada manual, pela resposta do solicitante (comentário ou documento) e no fim do atendimento; o tempo pausado não conta no relógio da solicitação; notificação ao solicitante e webhooks. Tarefas SF-128 a SF-132.
 - **Ponto de projeto:** o trigger de `dueSoonAt` (SF-068) só conhece horas corridas. Em horas úteis a conta depende do calendário, então a aplicação grava o valor e o trigger o mantém; uma função de domínio única devolve vencimento e "próximo" juntos.
+
+## SF-128 — Migration e domínio do calendário e da pausa (2026-11-03)
+
+- **Migration `20261103400000_sla_pause_calendar`:**
+  - tabelas `RequestSlaPause` (motivo de 1 a 500 sem espaços nas pontas; retomada com as três colunas juntas e não anterior à pausa; índice único parcial de uma pausa aberta por solicitação), `BusinessCalendar` (linha única `id = 1`, dias ISO 1 a 7, janela dentro do dia, fuso não vazio) e `BusinessHoliday` (data única, nome de 1 a 80);
+  - colunas `Service.slaBusinessHours`, `Request.slaBusinessHours` e `Request.slaPausedAt` (`CHECK`: só em atendimento, com prazo);
+  - enums `SlaResumeCause`, ação de auditoria `DELETED` e entidades `BUSINESS_CALENDAR` e `HOLIDAY`;
+  - função `request_due_soon_at` recriada: em horas corridas calcula como antes; em horas úteis mantém o valor gravado pela aplicação; o trigger passou a disparar também na troca de `slaBusinessHours`;
+  - `CHECK` de tipos da outbox e dos webhooks recriados com `request.sla_paused` e `request.sla_resumed`.
+- **Sem linha inicial do calendário:** a primeira versão inseria a linha padrão, e o teste `tests/unit/prisma/migrations.test.ts` (regra do projeto: migrations não inserem dados) recusou. A linha saiu da migration: sem linha, vale o padrão da regra 5.1, e a primeira gravação cria a linha. Esclarecimento registrado na seção 6 da SPEC. Como a versão com a linha já estava aplicada nos bancos locais (teste e desenvolvimento), apaguei a linha e atualizei o checksum em `_prisma_migrations` nos dois; nada foi publicado.
+- **Relógio (`src/shared/business-clock`):**
+  - `addClockTime` e `clockTimeBetween` para horas corridas e úteis, sem dependência nova;
+  - o horário de cada dia vem de `zonedInstantOf` (novo em `src/shared/time`, com o mesmo método de duas passadas de `startOfZonedDay`);
+  - o cálculo anda dia a dia, com limite de 20 anos (`NoBusinessTimeError`);
+  - para não reconstruir um `Intl.DateTimeFormat` a cada dia, `src/shared/time` passou a guardar um formatador por fuso, sem mudar resultados;
+  - **voltando no tempo**, o resultado é o instante mais cedo com o mesmo tempo útil à frente (por exemplo, duas horas antes de segunda 10:00, com expediente a partir das 08:00, é sexta 18:00). Assim, o "próximo do vencimento" começa no fim do último expediente, e não na abertura seguinte.
+- **Agenda do prazo (`requests/domain/sla.ts`):**
+  - `slaScheduleFrom`, `slaScheduleAfterPriorityChange` e `slaScheduleAfterResume` devolvem vencimento e "próximo" juntos;
+  - em horas corridas dão os mesmos valores das funções antigas e do trigger, o que os testes conferem;
+  - `slaSituation` ganhou `paused` e, em horas úteis, usa o `dueSoonAt` gravado. Os campos novos são opcionais em `SlaState`, então quem não os passa continua em horas corridas.
+- **Regras da pausa (`requests/domain/sla-pause.ts`):**
+  - `assertCanPauseSla`: responsável efetivo ou supervisor; em atendimento, com prazo, sem pausa e sem vencer, sendo que exatamente no vencimento ainda pode;
+  - `assertCanResumeSla` e `pauseReason` (1 a 500 caracteres no caminho `reason`).
+- **Calendário (módulo novo `src/modules/calendar`):** `parseCalendarInput` (dias, `HH:MM` com `24:00` como fim do dia, fuso conferido pelo `Intl`) e `parseHolidayInput`. Caminhos de validação novos em `src/server/errors` (`weekdays`, `startTime`, `endTime`, `timeZone`, `day`, `reason`).
+- **Eventos e auditoria:** tipos `request.sla_paused` e `request.sla_resumed`, com chaves só de identificadores; rótulos de webhook "Prazo pausado" e "Prazo retomado"; auditoria com "Removeu", "Calendário" e "Feriado". O estado do calendário fica com horários em `HH:MM` e dias por nome, e a remoção de um registro grava os campos indo para vazio, porque antes não havia remoção auditada.
+- **Testes anteriores ajustados, como nas SPECs anteriores:**
+  - listas que enumeram todos os valores (`domain-event.test.ts` e `audit.test.ts`);
+  - o objeto Prisma completo de `tests/unit/authorization/index.test.ts` ganhou as duas colunas novas;
+  - a limpeza das tabelas (`fixtures.ts`, `prepare-e2e.ts`).
+- **Testes novos:** `tests/unit/shared/business-clock.test.ts`, `tests/unit/modules/requests/domain/sla-calendar.test.ts`, `tests/unit/modules/calendar/calendar-config.test.ts` e `tests/integration/sla-pause-calendar-schema.test.ts`.
+- **Resultados:** lint e typecheck OK; unitários 854/854; integração 378/378 + 1 pulado.

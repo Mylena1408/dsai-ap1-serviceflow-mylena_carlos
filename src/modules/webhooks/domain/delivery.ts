@@ -25,6 +25,8 @@ export const WEBHOOK_EVENT_LABELS: Record<DomainEventType, string> = {
   "request.approval_decided": "Decisão de aprovação",
   "request.sector_changed": "Mudança de setor",
   "request.document_added": "Documento enviado",
+  "request.sla_paused": "Prazo pausado",
+  "request.sla_resumed": "Prazo retomado",
 };
 
 export function normalizeWebhookName(raw: string): string | null {

@@ -4,7 +4,14 @@
 export type StatusValue = "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 export type PriorityValue = "LOW" | "NORMAL" | "HIGH" | "URGENT";
 export type ApprovalStateValue = "PENDING" | "APPROVED" | "REJECTED";
-export type SlaSituationValue = "none" | "on_time" | "due_soon" | "overdue" | "completed_on_time" | "completed_late";
+export type SlaSituationValue =
+  | "none"
+  | "on_time"
+  | "due_soon"
+  | "overdue"
+  | "completed_on_time"
+  | "completed_late"
+  | "paused";
 
 export const REQUEST_STATUS_LABELS: Record<StatusValue, string> = {
   OPEN: "Aberta",
@@ -36,6 +43,8 @@ export const SLA_SITUATION_LABELS: Record<SlaSituationValue, string> = {
   overdue: "Vencido",
   completed_on_time: "Concluída no prazo",
   completed_late: "Concluída com atraso",
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.3.
+  paused: "Prazo pausado",
 };
 
 /** The first block of the identifier, as people quote a request in a conversation. */

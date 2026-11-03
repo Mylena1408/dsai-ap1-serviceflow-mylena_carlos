@@ -67,6 +67,20 @@ export type DomainEvent =
       payload: { attachmentId: string; actorId: string };
     }
   | {
+      // SLA pause and resume (SPEC 2026-11-03-pausa-sla-calendario, 5.8.1); the reason stays in
+      // the pause row. A resume caused by the end of the attendance has the actor who ended it.
+      type: "request.sla_paused";
+      requestId: string;
+      occurredAt: Date;
+      payload: { pauseId: string; actorId: string };
+    }
+  | {
+      type: "request.sla_resumed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { pauseId: string; actorId: string; cause: "manual" | "requester_reply" | "attendance_ended" };
+    }
+  | {
       // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
       // writes them, and the consumer reloads the request to find the recipients.
       type: "request.sla_warning" | "request.sla_breached";
@@ -89,6 +103,8 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.approval_decided",
   "request.sector_changed",
   "request.document_added",
+  "request.sla_paused",
+  "request.sla_resumed",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -103,6 +119,8 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.approval_decided": ["decision", "actorId"],
   "request.sector_changed": ["fromSectorId", "toSectorId", "actorId"],
   "request.document_added": ["attachmentId", "actorId"],
+  "request.sla_paused": ["pauseId", "actorId"],
+  "request.sla_resumed": ["pauseId", "actorId", "cause"],
 };
 
 /**

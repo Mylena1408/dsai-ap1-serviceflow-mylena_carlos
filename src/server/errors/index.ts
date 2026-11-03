@@ -70,6 +70,13 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "eventTypes",
   // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.2.
   "sectorIds",
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.1 and 5.3.
+  "weekdays",
+  "startTime",
+  "endTime",
+  "timeZone",
+  "day",
+  "reason",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

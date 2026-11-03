@@ -1,3 +1,4 @@
+import { addClockTime, CALENDAR_CLOCK, clockTimeBetween, type SlaClock } from "@/shared/business-clock";
 import type { RequestPriority, RequestStatus } from "./request";
 
 // SLA and priorities (SPEC 2026-11-01-sla-prioridades, sections 5.1 to 5.4). Calendar hours
@@ -22,7 +23,8 @@ export type SlaSituation =
   | "due_soon"
   | "overdue"
   | "completed_on_time"
-  | "completed_late";
+  | "completed_late"
+  | "paused";
 
 /** Effective SLA in whole minutes, rounded up (section 5.2). */
 export function effectiveSlaMinutes(slaHours: number, priority: RequestPriority): number {
@@ -45,6 +47,14 @@ export interface SlaState {
   slaHoursSnapshot: number | null;
   dueAt: Date | null;
   completedLate: boolean | null;
+  /**
+   * SPEC 2026-11-03-pausa-sla-calendario. Optional, so callers that never read them keep the
+   * calendar-hours behavior: a running pause makes the situation "paused" (5.3), and in business
+   * hours the stored start of "due soon" decides it, because it depends on the calendar (5.2).
+   */
+  slaPausedAt?: Date | null;
+  slaBusinessHours?: boolean;
+  dueSoonAt?: Date | null;
 }
 
 /**
@@ -60,10 +70,18 @@ export function slaSituation(request: SlaState, now: Date): SlaSituation {
     return request.completedLate ? "completed_late" : "completed_on_time";
   }
 
+  if (request.slaPausedAt) {
+    return "paused";
+  }
+
   const remaining = request.dueAt.getTime() - now.getTime();
 
   if (remaining < 0) {
     return "overdue";
+  }
+
+  if (request.slaBusinessHours && request.dueSoonAt) {
+    return now.getTime() >= request.dueSoonAt.getTime() ? "due_soon" : "on_time";
   }
 
   const warningWindow = effectiveSlaMinutes(request.slaHoursSnapshot, request.priority) * MINUTE_MS * SLA_WARNING_FRACTION;
@@ -116,4 +134,68 @@ export function dueAtAfterPriorityChange(
 
   const periodStart = new Date(dueAt.getTime() - effectiveSlaMinutes(slaHours, fromPriority) * MINUTE_MS);
   return dueAtFrom(periodStart, slaHours, toPriority);
+}
+
+// Clock-aware schedule (SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 5.4). The due date and the
+// start of "due soon" always come together: in calendar hours the database trigger computes the
+// same "due soon"; in business hours the application writes it.
+
+export interface SlaSchedule {
+  dueAt: Date;
+  dueSoonAt: Date;
+}
+
+function warningMs(slaHours: number, priority: RequestPriority): number {
+  return effectiveSlaMinutes(slaHours, priority) * MINUTE_MS * SLA_WARNING_FRACTION;
+}
+
+function scheduleEndingAt(dueAt: Date, slaHours: number, priority: RequestPriority, clock: SlaClock): SlaSchedule {
+  return { dueAt, dueSoonAt: addClockTime(dueAt, -warningMs(slaHours, priority), clock) };
+}
+
+/** Schedule counted from `start` (opening, approval or reopening) on the request's clock. */
+export function slaScheduleFrom(
+  start: Date,
+  slaHours: number | null,
+  priority: RequestPriority,
+  clock: SlaClock = CALENDAR_CLOCK,
+): SlaSchedule | null {
+  if (slaHours === null) {
+    return null;
+  }
+
+  const dueAt = addClockTime(start, effectiveSlaMinutes(slaHours, priority) * MINUTE_MS, clock);
+  return scheduleEndingAt(dueAt, slaHours, priority, clock);
+}
+
+/** The SLA SPEC's 5.3 (interpretation of SF-067) on the request's clock. */
+export function slaScheduleAfterPriorityChange(
+  dueAt: Date | null,
+  slaHours: number | null,
+  fromPriority: RequestPriority,
+  toPriority: RequestPriority,
+  clock: SlaClock = CALENDAR_CLOCK,
+): SlaSchedule | null {
+  if (dueAt === null || slaHours === null) {
+    return null;
+  }
+
+  const periodStart = addClockTime(dueAt, -effectiveSlaMinutes(slaHours, fromPriority) * MINUTE_MS, clock);
+  return slaScheduleFrom(periodStart, slaHours, toPriority, clock);
+}
+
+/**
+ * Section 5.4 item 4: the clock time that was left when the pause started is left again from the
+ * resume. In calendar hours the due date moves by the length of the pause.
+ */
+export function slaScheduleAfterResume(
+  dueAt: Date,
+  pausedAt: Date,
+  resumedAt: Date,
+  slaHours: number,
+  priority: RequestPriority,
+  clock: SlaClock = CALENDAR_CLOCK,
+): SlaSchedule {
+  const left = clockTimeBetween(pausedAt, dueAt, clock);
+  return scheduleEndingAt(addClockTime(resumedAt, left, clock), slaHours, priority, clock);
 }

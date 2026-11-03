@@ -20,17 +20,46 @@ export function calendarDayError(day: string): "invalid_format" | "invalid_value
     : "invalid_value";
 }
 
+// One formatter per time zone: building them is the slow part, and the business-hours clock
+// (SPEC 2026-11-03-pausa-sla-calendario, 5.2) asks for many offsets in a row.
+const FORMATTERS = new Map<string, Intl.DateTimeFormat>();
+
+function formatterFor(timeZone: string): Intl.DateTimeFormat {
+  let formatter = FORMATTERS.get(timeZone);
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    FORMATTERS.set(timeZone, formatter);
+  }
+
+  return formatter;
+}
+
+/** Whether the text is an IANA time zone this runtime knows. */
+export function isKnownTimeZone(timeZone: string): boolean {
+  if (timeZone.trim() === "" || timeZone !== timeZone.trim()) {
+    return false;
+  }
+
+  try {
+    formatterFor(timeZone);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function zonedParts(instant: number, timeZone: string) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(new Date(instant));
+  const parts = formatterFor(timeZone).formatToParts(new Date(instant));
   const value = (type: string) => Number(parts.find((part) => part.type === type)?.value);
   return {
     year: value("year"),
@@ -60,6 +89,23 @@ export function startOfZonedDay(day: string, timeZone: string = SAO_PAULO_TIME_Z
   let instant = utcMidnight - timeZoneOffsetMs(utcMidnight, timeZone);
   instant = utcMidnight - timeZoneOffsetMs(instant, timeZone);
   return new Date(instant);
+}
+
+/** The instant of a minute of a valid calendar day in the time zone (1440 is the next midnight). */
+export function zonedInstantOf(day: string, minuteOfDay: number, timeZone: string = SAO_PAULO_TIME_ZONE): Date {
+  const [year, month, date] = day.split("-").map(Number);
+  const wall = Date.UTC(year, month - 1, date) + minuteOfDay * 60_000;
+  // Two passes absorb a daylight-saving change between the guess and the result.
+  let instant = wall - timeZoneOffsetMs(wall, timeZone);
+  instant = wall - timeZoneOffsetMs(instant, timeZone);
+  return new Date(instant);
+}
+
+/** ISO weekday (1 = Monday to 7 = Sunday) of a valid calendar day. */
+export function isoWeekdayOf(day: string): number {
+  const [year, month, date] = day.split("-").map(Number);
+  const weekday = new Date(Date.UTC(year, month - 1, date)).getUTCDay();
+  return weekday === 0 ? 7 : weekday;
 }
 
 /** Calendar day (YYYY-MM-DD) of an instant in the time zone. */

@@ -56,6 +56,8 @@ function persistedRequest(requesterId: string, sectorId: string) {
     slaWarningNotifiedAt: null,
     slaBreachNotifiedAt: null,
     completedLate: null,
+    slaBusinessHours: false,
+    slaPausedAt: null,
   };
 }
 

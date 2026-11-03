@@ -136,7 +136,7 @@ Migration aditiva:
 
 - **`BusinessCalendar`**, linha única (`id = 1`):
   - campos `weekdays` (dias ISO, 1 = segunda a 7 = domingo, de 1 a 7 valores entre 1 e 7), `startMinute` e `endMinute` (0 ≤ início < fim ≤ 1440), `timeZone` (texto não vazio), `updatedAt`, `updatedById` (opcional);
-  - a migration cria a linha com o padrão da regra 5.1.
+  - sem linha, vale o padrão da regra 5.1; a primeira gravação cria a linha. *Esclarecimento de 2026-11-03 (SF-128): a primeira redação dizia que a migration criaria a linha, mas o projeto proíbe migrations que inserem dados (`tests/unit/prisma/migrations.test.ts`); o efeito para quem usa é o mesmo.*
 - **`BusinessHoliday`:** `id`, `day` (data, única), `name` (1 a 80, sem espaços nas pontas), `yearly`, `createdAt`, `createdById`.
 - **Colunas novas:**
   - `Service.slaBusinessHours` (padrão falso);
@@ -168,7 +168,7 @@ Nenhuma dependência nova: as contas de fuso usam `Intl`, como os filtros por da
 - [ ] **CA-PSL-08** — O histórico mostra pausa e retomada com a causa; o solicitante recebe "Aguardando sua resposta"; os webhooks recebem os dois eventos só com identificadores.
 - [ ] **CA-PSL-09** — A API pausa e retoma com as mesmas regras e mostra a situação, a pausa e o histórico; o OpenAPI descreve as rotas.
 - [ ] **CA-PSL-10** — A anonimização substitui o motivo; "Meus dados" inclui as pausas das solicitações da pessoa.
-- [ ] **CA-PSL-11** — Nenhuma dependência nova; uma migration aditiva (com as restrições e o trigger recriados mais amplos); README explica o calendário e a pausa.
+- [ ] **CA-PSL-11** — Nenhuma dependência nova; uma migration aditiva (com as restrições e o trigger recriados mais amplos); README explica o calendário e a pausa. *Parcial em 2026-11-03 (SF-128): migration `20261103400000_sla_pause_calendar` só acrescenta tabelas, colunas e valores de enum; recria mais amplos a função do trigger de `dueSoonAt` (mantém o valor da aplicação em horas úteis) e as restrições de tipo da outbox e dos webhooks (todo valor aceito antes continua aceito); não insere linhas (`integration/sla-pause-calendar-schema.test.ts`).*
 
 ## 8. Estratégia de testes
 

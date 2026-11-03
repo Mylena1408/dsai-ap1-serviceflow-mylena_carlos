@@ -1376,7 +1376,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-128 — Migration e domínio do calendário e da pausa
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Migration `20261103400000_sla_pause_calendar`; relógio de horas úteis em `src/shared/business-clock`; agenda do prazo com o relógio (`slaScheduleFrom`, `slaScheduleAfterPriorityChange`, `slaScheduleAfterResume`) e situação "paused" em `requests/domain/sla.ts`; regras de pausa em `requests/domain/sla-pause.ts`; validação do calendário e dos feriados no módulo novo `calendar`; tipos de evento, rótulos de webhook e valores de auditoria novos. Regras de CA-PSL-03, 05 e 07 cobertas por unitários; CA-PSL-11 parcial.
 - **Objetivo:** Migration aditiva (calendário, feriados, opção do serviço, cópia na solicitação, pausas, trigger e restrições recriados mais amplos); relógio de horas úteis; validação do calendário e dos feriados; regras de quem pausa e retoma e deslocamento do vencimento.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, `src/shared/time/` ou módulo do calendário, testes.
 - **Dependências:** SF-127.

@@ -12,6 +12,8 @@ export const AUDIT_ACTIONS = [
   // SPEC 2026-11-02-api-externa-webhooks, 5.7: token revocation and a new webhook secret.
   "REVOKED",
   "SECRET_ROTATED",
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.9: a holiday is removed, not deactivated.
+  "DELETED",
 ] as const;
 
 export const AUDIT_ENTITY_TYPES = [
@@ -24,6 +26,9 @@ export const AUDIT_ENTITY_TYPES = [
   "SERVICE_STAGE",
   "API_TOKEN",
   "WEBHOOK",
+  // SPEC 2026-11-03-pausa-sla-calendario, 5.9.
+  "BUSINESS_CALENDAR",
+  "HOLIDAY",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -51,6 +56,8 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   SERVICE_STAGE: [],
   API_TOKEN: [],
   WEBHOOK: [],
+  BUSINESS_CALENDAR: [],
+  HOLIDAY: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -66,6 +73,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   EXPORTED: "Baixou os próprios dados",
   REVOKED: "Revogou",
   SECRET_ROTATED: "Gerou novo segredo",
+  DELETED: "Removeu",
 };
 
 export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
@@ -78,6 +86,8 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   SERVICE_STAGE: "Etapa",
   API_TOKEN: "Token de API",
   WEBHOOK: "Webhook",
+  BUSINESS_CALENDAR: "Calendário",
+  HOLIDAY: "Feriado",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -107,6 +117,12 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   url: "Endereço",
   eventTypes: "Eventos",
   sectorIds: "Setores",
+  weekdays: "Dias de expediente",
+  startTime: "Início do expediente",
+  endTime: "Fim do expediente",
+  timeZone: "Fuso horário",
+  day: "Data",
+  yearly: "Repete todo ano",
 };
 
 function normalize(value: AuditInputValue): AuditValue {
@@ -176,6 +192,9 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   // Never the token value, its hash or the webhook secret (SPEC 2026-11-02-api-externa-webhooks, 5.7).
   API_TOKEN: ["name", "scope", "expiresAt", "revokedAt"],
   WEBHOOK: ["name", "url", "eventTypes", "sectorIds", "isActive"],
+  // The window is recorded as "HH:MM" and the weekdays by name, as the screen shows them.
+  BUSINESS_CALENDAR: ["weekdays", "startTime", "endTime", "timeZone"],
+  HOLIDAY: ["day", "name", "yearly"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

@@ -35,6 +35,9 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.sector_changed",
       // Added by SPEC 2026-11-03 (anexos em comentários e documentos).
       "request.document_added",
+      // Added by SPEC 2026-11-03 (pausa do prazo e calendário).
+      "request.sla_paused",
+      "request.sla_resumed",
     ]);
     expect(
       outboxPayload({

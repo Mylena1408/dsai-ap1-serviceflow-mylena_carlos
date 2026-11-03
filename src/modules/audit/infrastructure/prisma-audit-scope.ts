@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { BUSINESS_CALENDAR_AUDIT_ID, DEFAULT_CALENDAR, timeOfMinute, WEEKDAY_LABELS } from "@/shared/business-clock";
 import type { AuditScope } from "../application/ports";
 import { planAuditEntry, type AuditEntityType } from "../domain/audit";
 
@@ -93,6 +94,28 @@ async function loadState(
       });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-03-pausa-sla-calendario, 5.9: the window as "HH:MM" and the weekdays by name.
+    case "BUSINESS_CALENDAR": {
+      if (id !== BUSINESS_CALENDAR_AUDIT_ID) {
+        return null;
+      }
+
+      // Without a row the default applies (seção 6), so the first save records only what changed.
+      const row = (await transaction.businessCalendar.findUnique({ where: { id: 1 } })) ?? DEFAULT_CALENDAR;
+      return {
+        label: "Calendário",
+        state: {
+          weekdays: row.weekdays.map((day) => WEEKDAY_LABELS[day] ?? String(day)),
+          startTime: timeOfMinute(row.startMinute),
+          endTime: timeOfMinute(row.endMinute),
+          timeZone: row.timeZone,
+        },
+      };
+    }
+    case "HOLIDAY": {
+      const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
+      return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };
+    }
   }
 }
 
@@ -101,7 +124,9 @@ export function createPrismaAuditScope(transaction: Prisma.TransactionClient): A
     async audited(meta, change) {
       const before = meta.entityId ? await loadState(transaction, meta.entityType, meta.entityId) : null;
       const result = await change();
-      const after = await loadState(transaction, meta.entityType, result.id);
+      const loaded = await loadState(transaction, meta.entityType, result.id);
+      // A removal (SPEC 2026-11-03-pausa-sla-calendario, 5.9) leaves no row: every field goes to empty.
+      const after = loaded ?? (meta.action === "DELETED" && before ? { label: before.label, state: {} } : null);
 
       if (after) {
         const entry = planAuditEntry({ ...meta, entityId: result.id, entityLabel: after.label }, before?.state ?? null, after.state);
