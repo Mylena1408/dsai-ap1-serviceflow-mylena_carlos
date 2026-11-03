@@ -1552,3 +1552,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão da SPEC (SF-111 a SF-115):** nenhuma dependência alterada; uma migration aditiva; nenhum segredo no repositório (`.env.example` só com variáveis comentadas e vazias; a chave do E2E é gerada a cada execução); testes anteriores só com acréscimos (CA-API-01). Mudanças em código existente: `getCurrentUser` lê primeiro o contexto da chamada da API; `url` e `eventTypes` na lista de caminhos públicos dos erros; consumidor e passos novos no job diário; três prazos novos na tabela de retenção; anonimização e "Meus dados" cobrindo os tokens.
 - **Resultados:** lint, typecheck e build OK; unitários 784/784; integração 346/346 + 1 pulado; E2E 19/19.
 - **Para publicar:** aplicar no Neon `20261102300000_api_tokens_and_webhooks` e cadastrar `WEBHOOK_ENCRYPTION_KEY` na Vercel (Secret).
+
+## Publicação da API externa e dos webhooks (2026-11-02)
+
+- A pedido da responsável ("faça o deploy na vercel").
+- **Migration no Neon:** aplicar `20261102300000_api_tokens_and_webhooks` pelo agente foi bloqueado pela permissão automática (deploy em produção). A responsável rodou o comando com `!`; a primeira tentativa falhou porque a URL sem aspas foi cortada no `&`; a segunda, com aspas e pela conexão do pooler, aplicou a migration. Antes, conferi só com leitura (`prisma migrate status`) que ela ainda não estava aplicada e não publiquei.
+- **Deploy:** `vercel deploy --prod` do commit `95a5e04`. O `npx` passou a pedir o CLI 65.10.0, que não está instalado, e o primeiro comando não rodou; usei o CLI 65.9.0 que já estava no cache do `npx`, sem baixar nada.
+- **Verificação só com leitura:** `/` 200; `/login` 307; `/api/v1/me` sem token e `/api/v1/requests` com token inválido respondem 401 `invalid_token` com `Cache-Control: no-store`, `X-Content-Type-Options: nosniff` e `WWW-Authenticate: Bearer`; `/api/v1/openapi.json` responde 200 com o documento.
+- **Pendente:** `WEBHOOK_ENCRYPTION_KEY` não está cadastrada na Vercel (conferido pelo nome das variáveis): no site, a seção "Webhooks" avisa que não está configurada e nada é enviado; tokens e API funcionam. A troca da senha do Neon continua recomendada.

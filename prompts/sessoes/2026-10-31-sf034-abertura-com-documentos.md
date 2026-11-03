@@ -603,3 +603,15 @@ SF-114 concluída (ver `NOTES.md`, seção SF-114).
 > pode começar a SF-115
 
 SF-115 concluída (ver `NOTES.md`, seção SF-115).
+
+## Continuação — Push e publicação da API
+
+> faça o push para o GitHub
+
+Push de `b88727d` a `95a5e04`.
+
+> faça o deploy na vercel
+
+> pode prosseguir
+
+Migration bloqueada para o agente; aplicada pela responsável com `!`; deploy e verificação (ver `NOTES.md`, seção "Publicação da API externa e dos webhooks").
