@@ -1274,7 +1274,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-119 — E2E e revisão das ações e dos webhooks por setor
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. E2E `tests/e2e/api-actions-webhook-sectors.spec.ts` (atendimento pela API com o histórico na tela, webhook de um setor e reenvio pela tela), README e revisão da SPEC. CA-ACT-01 a 09 verificados; SPEC concluída.
 - **Objetivo:** E2E da seção 8, README e revisão da SPEC.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-118.

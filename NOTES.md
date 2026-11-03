@@ -1617,3 +1617,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes novos:** unitário `tests/unit/modules/webhooks/sectors-actions.test.ts`; integração `tests/integration/webhook-sectors.test.ts` (receptor HTTP local, assinatura conferida).
 - **Verificação no navegador:** não feita nesta tarefa; fica coberta pelo E2E da SF-119.
 - **Resultados:** lint, typecheck e build OK; unitários 791/791; integração 354/354 + 1 pulado; E2E 19/19.
+
+## SF-119 — E2E e revisão das ações e dos webhooks por setor (2026-11-03)
+
+- **E2E `tests/e2e/api-actions-webhook-sectors.spec.ts`:** o administrador cadastra pela tela um webhook só do setor da demonstração; o solicitante abre pela API uma solicitação nesse setor e outra num segundo setor criado pelo teste; o Diego, com token próprio, assume, inicia e conclui pela API, e a página da fila mostra o mesmo histórico de um atendimento feito na tela; o receptor recebe só os eventos do setor marcado. Depois o receptor passa a responder 500, o administrador desativa e reativa o webhook (a entrega pendente vira cancelada) e clica em "Reenviar": a entrega chega com o mesmo `ServiceFlow-Delivery` e o mesmo corpo.
+- **Por que entrega cancelada, e não falha:** chegar a "falhou" exige 6 tentativas espalhadas por horas. A regra aceita as duas, e a falha está coberta pela integração.
+- **Falha encontrada e corrigida:** na primeira execução da suíte inteira, o E2E da SF-115 (`api-webhooks.spec.ts`) quebrou: ele clica no único botão "Revogar" da página de tokens, e o teste novo, que roda antes, deixava dois tokens ativos das mesmas pessoas fictícias. O teste antigo não foi alterado; o novo passou a revogar os próprios tokens no `afterAll`, gravando a dona do token como quem revogou (a restrição do banco exige os dois campos juntos, e é o que a página faz).
+- **README:** ações da API com exemplos, filtro de setores e "Reenviar".
+- **CA-ACT-01 e 09:** sem mudança em `package.json` nem no lock desde o registro da SPEC; uma migration; os testes anteriores alterados só ganharam casos ou dublês, sem asserção mudada.
+- **Resultados:** lint, typecheck e build OK; unitários 791/791; integração 354/354 + 1 pulado; E2E 20/20.
+- **Pendente para publicar:** aplicar a migration `20261103100000_webhook_sectors` no Neon antes do deploy (a responsável roda o comando).
