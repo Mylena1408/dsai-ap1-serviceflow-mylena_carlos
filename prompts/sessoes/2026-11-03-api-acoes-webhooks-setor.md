@@ -31,3 +31,16 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 3. SF-121: caso de uso, formulário na fila, histórico, notificações, anonimização e "Meus dados" (esclarecimento na SPEC, 5.9).
 4. SF-122: rotas da API, OpenAPI e webhooks da origem e do destino (esclarecimento na SPEC, 5.8.2).
 5. SF-123: E2E e README; a primeira abordagem do E2E (mover o Diego de setor) foi descartada porque a entrada de demonstração restaura o setor.
+
+## Continuação — anexos em comentários e documentos depois da abertura
+
+> quantas linhas de codigo temos ao todo passando pelo cloc --diff
+
+> pode prosseguir
+
+1. Medição do cloc (37.835 linhas `added`).
+2. SPEC `SPEC/2026-11-03-anexos-comentarios-documentos.md` (funcionalidade 6), decisões X1 a X7; tarefas SF-124 a SF-127.
+3. SF-124: migration e regras; uma barra invertida perdida no heredoc do shell foi pega pelo teste de schema e corrigida antes de publicar.
+4. SF-125: arquivos em comentários; o E2E revelou que o campo de arquivo vazio chega como "undefined", defeito que também quebrava a abertura com documento opcional em branco (SF-034); corrigido nos dois.
+5. SF-126: documento depois da abertura.
+6. SF-127: E2E e README.

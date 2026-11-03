@@ -1362,7 +1362,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-127 — E2E, README e revisão
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. E2E `tests/e2e/comment-files-late-documents.spec.ts` (abertura com o opcional em branco, documento enviado depois, comentário com PDF baixado pelo atendente, nota interna com arquivo escondida do solicitante, formato recusado), README e revisão da SPEC. CA-ANX-01 a 09 verificados; SPEC concluída.
 - **Objetivo:** E2E da seção 8, README e revisão da SPEC.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-126.

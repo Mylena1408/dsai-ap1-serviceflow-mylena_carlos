@@ -1708,3 +1708,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes anteriores ajustados:** dublês `in-memory-requests.ts` e `attachment-queries.test.ts` (métodos novos das portas); tabela de categorias em `email.test.ts`.
 - **Testes novos:** unitário `tests/unit/modules/requests/application/late-document.test.ts`; integração `tests/integration/late-document.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 829/829; integração 371/371 + 1 pulado; E2E 21/21.
+
+## SF-127 — E2E e revisão dos anexos (2026-11-03)
+
+- **E2E `tests/e2e/comment-files-late-documents.spec.ts`:** a Ana abre "Atualização cadastral" só com o comprovante (certidão opcional em branco, o caso corrigido na SF-125); o Diego assume; a Ana envia a certidão depois (a seção some, o documento aparece na lista e no histórico) e comenta com um PDF; o Diego é notificado do documento, vê a linha no histórico, baixa o PDF com o mesmo hash e os cabeçalhos certos e escreve uma nota interna com um TXT; a Ana não vê a nota e o link direto do arquivo responde `404`; um "PDF" com conteúdo de texto é recusado com a mensagem fixa e o comentário não é gravado.
+- **README:** anexos em comentários e documento depois da abertura em "Fluxos disponíveis", com a dependência da SF-030 em produção.
+- **Conferido:** o armazenamento sem configuração lança `DocumentStorageError`, que a tela transforma no aviso "O envio de arquivos não está disponível agora"; comentário sem arquivo não toca no armazenamento.
+- **Resultados:** lint, typecheck e build OK; unitários 829/829; integração 371/371 + 1 pulado; E2E 22/22.
+- **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors`, `20261103200000_request_sector_events` e `20261103300000_request_comment_files`.

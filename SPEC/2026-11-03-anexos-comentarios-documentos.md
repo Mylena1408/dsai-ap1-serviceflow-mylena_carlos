@@ -1,7 +1,7 @@
 # SPEC — Anexos em comentários e documentos depois da abertura
 
 **Data:** 2026-11-03
-**Status:** Aprovada em 2026-11-03: a responsável aprovou a funcionalidade 6 ("anexos em comentários e documentos depois da abertura") da lista de pendências; as decisões X1 a X7 da seção 11 foram adotadas como recomendadas, e podem ser revistas por ela.
+**Status:** Aprovada em 2026-11-03: a responsável aprovou a funcionalidade 6 ("anexos em comentários e documentos depois da abertura") da lista de pendências; as decisões X1 a X7 da seção 11 foram adotadas como recomendadas, e podem ser revistas por ela. **Concluída em 2026-11-03** (SF-124 a SF-127; CA-ANX-01 a 09 verificados; o armazenamento de produção continua dependendo da SF-030).
 **Projeto:** ServiceFlow
 **Referências:** `SPEC/2026-09-30-catalogo-e-solicitacoes.md` (seção 21: documentos exigidos, limites, detecção de formato, armazenamento privado e download), `SPEC/2026-10-31-comentarios.md` (comentários e notas internas; anexos ficaram fora de escopo), `SPEC/2026-10-31-eventos-outbox-jobs.md` (eventos e notificações), `SPEC/2026-11-02-auditoria-lgpd.md` (anonimização e "Meus dados"), `SPEC/2026-11-02-api-externa-webhooks.md` (webhooks)
 
@@ -75,7 +75,7 @@ Nenhuma dependência nova.
 
 ## 7. Critérios de aceitação
 
-- [ ] **CA-ANX-01** — Sem anexar, nada muda: suítes anteriores passam; comentários sem arquivo e documentos de abertura funcionam como antes.
+- [x] **CA-ANX-01** — Sem anexar, nada muda: suítes anteriores passam; comentários sem arquivo e documentos de abertura funcionam como antes. *Verificado em 2026-11-03 (SF-127): todas as suítes anteriores passam; os testes anteriores alterados só ganharam linhas (dublês e limpeza de tabelas), exceto as listas que enumeram todos os tipos de evento e as categorias de e-mail, estendidas como nas SPECs anteriores. Comentário sem arquivo não toca no armazenamento. Achado da SF-125: a abertura com documento opcional em branco já falhava antes desta SPEC (campo vazio chega como "undefined"); foi corrigida e passou a ter E2E.*
 - [x] **CA-ANX-02** — Solicitante e atendente anexam até 3 arquivos válidos a um comentário; os arquivos aparecem no comentário e são baixados com o mesmo conteúdo. *Verificado em 2026-11-03 (SF-125): metadados derivados no servidor, chave na pasta da solicitação, lista no comentário e download com o mesmo conteúdo (unitários e integração); o envio pela tela fica para o E2E da SF-127.*
 - [x] **CA-ANX-03** — São recusados, sem gravar comentário nem arquivo: mais de 3 arquivos, arquivo acima de 2 MiB, soma acima de 4 MiB, formato não detectado (mesmo com extensão aceita), mais de 30 arquivos na solicitação, solicitação cancelada. *Verificado em 2026-11-03 (SF-124 e SF-125): cada recusa sem objeto no armazenamento nem linha no banco; o 31º arquivo da solicitação é recusado (unitários e integração).*
 - [x] **CA-ANX-04** — Arquivo de nota interna não aparece nem é baixado pelo solicitante (`404`); quem não lê a solicitação recebe `404`. *Verificado em 2026-11-03 (SF-125): o solicitante não recebe a nota nem baixa o arquivo; arquivo pedido com o comentário errado, atendente de outro setor e identificador inválido dão "não encontrado" (unitários e integração).*
@@ -83,7 +83,7 @@ Nenhuma dependência nova.
 - [x] **CA-ANX-06** — São recusados: documento de requisito já atendido, inativo ou de outro serviço; formato não aceito pelo requisito; soma acima de 4 MiB; solicitação concluída ou cancelada; quem não é o solicitante dono. *Verificado em 2026-11-03 (SF-124 e SF-126): cada recusa sem objeto nem linha; o atendente recebe `404` e a lista do que falta fica vazia para ele e para solicitação concluída (unitários e integração).*
 - [x] **CA-ANX-07** — Falha do armazenamento ou do banco não deixa linha sem objeto nem objeto sem linha. *Verificado em 2026-11-03 (SF-125 e SF-126): com a transação falhando depois do envio ao armazenamento, o objeto do comentário e o do documento são removidos; recusas acontecem antes de gravar qualquer objeto (unitários).*
 - [x] **CA-ANX-08** — A anonimização remove os arquivos de comentários da pessoa; "Meus dados" lista os nomes. *Verificado em 2026-11-03 (SF-125): "Meus dados" traz `arquivos` no comentário; a anonimização apaga o objeto, troca o nome por "Arquivo removido na anonimização" e o download passa a `404` (integração).*
-- [ ] **CA-ANX-09** — Nenhuma dependência nova; uma migration aditiva; README explica os anexos. *Parcial em 2026-11-03 (SF-124): migration `20261103300000_request_comment_files` cria a tabela e um índice único em `RequestComment(id, requestId)` (alvo da chave composta) e recria as restrições de tipo só para aceitar `request.document_added`; conferência final na SF-127.*
+- [x] **CA-ANX-09** — Nenhuma dependência nova; uma migration aditiva; README explica os anexos. *Parcial em 2026-11-03 (SF-124): migration `20261103300000_request_comment_files` cria a tabela e um índice único em `RequestComment(id, requestId)` (alvo da chave composta) e recria as restrições de tipo só para aceitar `request.document_added`; conferido na SF-127: `package.json` e o lock não mudaram desde o registro da SPEC; nenhuma outra migration; o README explica os anexos e a dependência da SF-030.*
 
 ## 8. Estratégia de testes
 
