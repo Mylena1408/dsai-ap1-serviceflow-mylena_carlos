@@ -1281,3 +1281,47 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ACT-01 a 09.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-03-api-acoes-webhooks-setor.md`.
+
+## Transferência entre setores — SPEC de 2026-11-03
+
+**Ordem:** SF-120 → SF-121 → SF-122 → SF-123.
+
+### SF-120 — Migration e regras do encaminhamento
+
+- **Estado:** Pendente.
+- **Objetivo:** Tabela `RequestSectorEvent`, tipo `request.sector_changed` aceito na outbox e nos webhooks; regras puras de quem encaminha (5.1) e dos destinos (5.2).
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/domain/`, `src/modules/events/domain/`, testes.
+- **Dependências:** SF-119.
+- **Critérios de conclusão:** Parte de dados de CA-SET-09; regras de CA-SET-02 e 03 cobertas por unitários.
+- **Testes relacionados:** Unitários; integração do schema.
+- **SPEC:** `SPEC/2026-11-03-transferencia-entre-setores.md`.
+
+### SF-121 — Encaminhamento pela tela
+
+- **Estado:** Pendente.
+- **Objetivo:** Caso de uso transacional, formulário na página da fila, histórico, notificações (`sector.received` e `sector.changed`), anonimização e "Meus dados".
+- **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/notifications/`, `src/modules/users/`, `src/modules/audit/`, `src/app/(attendant)/queue/`, testes.
+- **Dependências:** SF-120.
+- **Critérios de conclusão:** CA-SET-02 a 05 e 08.
+- **Testes relacionados:** Unitários; integração com perfis e concorrência.
+- **SPEC:** `SPEC/2026-11-03-transferencia-entre-setores.md`.
+
+### SF-122 — API, OpenAPI e webhooks
+
+- **Estado:** Pendente.
+- **Objetivo:** `POST transfer-sector` e `GET sector-candidates`, OpenAPI, evento "Mudança de setor" nos webhooks com filtro por origem ou destino.
+- **Arquivos/módulos esperados:** `src/modules/public-api/`, `src/app/api/v1/`, `src/modules/webhooks/`, testes.
+- **Dependências:** SF-121.
+- **Critérios de conclusão:** CA-SET-06 e 07.
+- **Testes relacionados:** Unitários; integração com a API e receptor HTTP local.
+- **SPEC:** `SPEC/2026-11-03-transferencia-entre-setores.md`.
+
+### SF-123 — E2E, README e revisão
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8, README e revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-122.
+- **Critérios de conclusão:** CA-SET-01 a 09.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-03-transferencia-entre-setores.md`.

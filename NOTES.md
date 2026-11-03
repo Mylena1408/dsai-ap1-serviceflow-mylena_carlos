@@ -1627,3 +1627,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CA-ACT-01 e 09:** sem mudança em `package.json` nem no lock desde o registro da SPEC; uma migration; os testes anteriores alterados só ganharam casos ou dublês, sem asserção mudada.
 - **Resultados:** lint, typecheck e build OK; unitários 791/791; integração 354/354 + 1 pulado; E2E 20/20.
 - **Pendente para publicar:** aplicar a migration `20261103100000_webhook_sectors` no Neon antes do deploy (a responsável roda o comando).
+
+## SPEC de transferência entre setores (2026-11-03)
+
+- **Pedido:** "pode prosseguir", depois da conclusão da SPEC de ações pela API e webhooks por setor; funcionalidade 5 da lista aprovada.
+- **SPEC `2026-11-03-transferencia-entre-setores.md`:** encaminhar uma solicitação **aberta** para outro setor ativo com atendente ativo, com justificativa; o responsável sai, o prazo e a prioridade ficam; novo setor vê tudo, inclusive notas internas; histórico, notificações, webhooks (origem ou destino), API, anonimização e "Meus dados". Decisões T1 a T7 adotadas como recomendadas. Tarefas SF-120 a SF-123.
+- **Ajuste feito antes do registro:** a primeira redação dizia `403` para o atendente do setor sem direito; o código atual responde `409` nesse caso (iniciar ou liberar a solicitação de um colega), e a SPEC passou a seguir essa regra.
+- **Demonstração (T7):** o conjunto fictício tem um setor só, então a demonstração do encaminhamento exige que o administrador crie um segundo setor e um atendente; a alternativa de acrescentar dados fictícios ficou registrada.
