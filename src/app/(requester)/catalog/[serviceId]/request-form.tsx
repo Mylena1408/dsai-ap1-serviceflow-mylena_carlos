@@ -213,7 +213,8 @@ export function CustomFields({ fields, fieldErrors, values, current, legend = "I
         const describedBy = [helpId, errorId].filter(Boolean).join(" ") || undefined;
 
         return (
-          <div className="custom-field" hidden={hidden} key={field.id}>
+          // The page's CSS sets "display" on .custom-field, which wins over the "hidden" attribute.
+          <div className="custom-field" hidden={hidden} key={field.id} style={hidden ? { display: "none" } : undefined}>
             <label htmlFor={field.type === "MULTI_SELECT" ? undefined : `field-${field.id}`} id={`field-${field.id}-label`}>
               {field.label} {field.isRequired ? "(obrigatório)" : "(opcional)"}
             </label>

@@ -72,3 +72,4 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 > ao terminar me avise o que foi construido,aonde se encontra no escopo, quantas linhas de codigo produzidos hoje e a produção total de linhas de codigo com o cloc --diff
 
 > retorno de todas as respostas em português (brasil)
+6. SF-137: E2E, README e revisão; SPEC concluída. Medição do cloc pedida ao final.

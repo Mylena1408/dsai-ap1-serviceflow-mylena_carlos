@@ -1896,3 +1896,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Anonimização:** textos curtos e longos gravados pela pessoa nos campos do atendimento.
 - **Testes novos:** `tests/integration/attendance-fields.test.ts` e `tests/unit/attendance-fields-timeline.test.ts`; o dublê em memória ganhou as operações novas.
 - **Resultados:** lint, typecheck e build OK; unitários 881/881; integração 404/404 + 1 pulado; E2E 23/23.
+
+## SF-137 — E2E e revisão dos campos condicionais (2026-11-03)
+
+- **E2E `tests/e2e/conditional-attendance-fields.spec.ts`:** o administrador cria pela tela os quatro campos (lista, seleção múltipla, condicional "Tipo = Notebook" e obrigatório do atendimento); a Ana vê o condicional escondido, aparecendo só com "Notebook", marca duas opções e abre; o Diego tenta concluir e recebe a mensagem fixa, preenche o campo do atendimento, vê a linha no histórico sem o valor e conclui; a Ana não vê nada do atendimento.
+- **Defeito pego pelo E2E novo:** o atributo `hidden` não escondia o campo, porque o CSS da página define `display: grid` em `.custom-field`, e o estilo da página vence o do navegador para `hidden`. O campo escondido recebe agora `display: none` explícito. O teste unitário da regra não pegaria isso, porque é visual.
+- **README:** os três recursos em "Fluxos disponíveis".
+- **Revisão:** nenhuma dependência nova; duas migrations; nenhum segredo; SPEC concluída.
+- **Resultados:** lint, typecheck e build OK; unitários 881/881; integração 404/404 + 1 pulado; E2E 24/24.
+- **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors`, `20261103200000_request_sector_events`, `20261103300000_request_comment_files`, `20261103400000_sla_pause_calendar`, `20261103500000_field_type_multi_select` e `20261103500100_conditional_attendant_fields`.
+- **Teste anterior com navegação ajustada:** `tests/e2e/demo-data.spec.ts` procurava na primeira página da fila uma solicitação que ele mesmo abre. A fila mostra as mais antigas primeiro, 20 por página, e com o E2E novo a fila do setor passou a ter 21; a solicitação foi para a página 2 e o teste falhou duas vezes seguidas na suíte completa (sozinho passava). As asserções são as mesmas; só a busca da solicitação nova passou a usar `/queue?q=…`. A dependência do tamanho da fila era do teste, não do sistema.

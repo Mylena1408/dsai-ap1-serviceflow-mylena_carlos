@@ -54,8 +54,11 @@ test("demonstration data is visible to each profile", async ({ page }) => {
 
   await page.getByRole("button", { name: "Entrar como Atendente" }).click();
   await expect(page).toHaveURL(/\/queue/);
-  await expect(page.getByText(description)).toBeVisible();
   await expect(page.getByText("Fui bloqueado no sistema de compras após três tentativas.")).toBeVisible();
+  // The queue lists the oldest first, 20 per page; requests left by other E2E files can push the new
+  // one to page 2, so it is looked up by its text (SF-137).
+  await page.goto(`/queue?q=${encodeURIComponent(description)}`);
+  await expect(page.getByText(description)).toBeVisible();
   // Section 25.3: Diego is the assignee of Ana's declaration and sees his internal note.
   await page.goto(`/queue/${declaration.id}`);
   await expect(page.getByText("Conferir a data de admissão no sistema de RH antes de emitir.")).toBeVisible();

@@ -1470,7 +1470,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-137 — E2E, README e revisão
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. E2E `tests/e2e/conditional-attendance-fields.spec.ts` (campos criados pela tela, condicional que aparece com "Notebook", seleção múltipla, conclusão recusada sem o campo do atendimento, gravação, histórico sem o valor, conclusão, solicitante sem ver nada do atendimento), README e revisão da SPEC. CA-CND-01 a 10 verificados; SPEC concluída.
 - **Objetivo:** E2E da seção 8, README e revisão da SPEC.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-136.
