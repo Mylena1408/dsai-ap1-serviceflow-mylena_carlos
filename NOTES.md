@@ -1698,3 +1698,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes anteriores ajustados:** os dublês de `tests/unit/modules/comments/comment-use-cases.test.ts` ganharam os métodos novos das portas, sem mudar asserções.
 - **Testes novos:** unitários `tests/unit/modules/comments/comment-files.test.ts` e `tests/unit/comment-form-data.test.ts`; integração `tests/integration/comment-files.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 824/824; integração 369/369 + 1 pulado; E2E 21/21.
+
+## SF-126 — Documento depois da abertura (2026-11-03)
+
+- **Caso de uso (`src/modules/requests/application/late-document.ts`):** confere as regras numa transação de leitura, inspeciona o arquivo pelo formato aceito do requisito, grava o objeto e, na transação de escrita, confere de novo (dono, estado, requisito ainda sem documento, limites) antes de gravar a linha e o evento; se essa transação falhar, o objeto é removido. A unicidade `(solicitação, requisito)` do banco segura dois envios simultâneos (`P2002` vira `409`).
+- **Histórico sem tabela nova:** o detalhe passou a carregar os documentos só com o necessário (nome do requisito, data, quem enviou); viram linha do histórico os enviados depois da abertura (data maior que a da solicitação). Os documentos de abertura têm a mesma data da solicitação e não aparecem como linha.
+- **Notificação:** `document.added` ao responsável efetivo (decisão X7), na categoria de e-mail "comentários e notas internas"; `email.test.ts` (tabela 5.1) ganhou o tipo, com comentário.
+- **Tela:** "Enviar documento que falta" aparece para o solicitante dono só quando há requisito ativo sem documento e a solicitação está aberta ou em atendimento; o campo vazio usa o mesmo `isEmptyFileInput` da SF-125.
+- **Testes anteriores ajustados:** dublês `in-memory-requests.ts` e `attachment-queries.test.ts` (métodos novos das portas); tabela de categorias em `email.test.ts`.
+- **Testes novos:** unitário `tests/unit/modules/requests/application/late-document.test.ts`; integração `tests/integration/late-document.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 829/829; integração 371/371 + 1 pulado; E2E 21/21.

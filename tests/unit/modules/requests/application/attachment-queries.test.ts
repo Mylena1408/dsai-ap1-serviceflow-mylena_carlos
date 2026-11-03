@@ -67,6 +67,10 @@ function repository(): AttachmentQueryRepository {
     async findInRequest(id, attachment_id) {
       return id === requestId && attachment_id === attachmentId ? attachment : null;
     },
+    // SPEC 2026-11-03-anexos-comentarios-documentos: not used by these tests.
+    async findMissingRequirements() {
+      return null;
+    },
   };
 }
 

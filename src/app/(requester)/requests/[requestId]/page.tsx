@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import {
   effectiveAssigneeId,
   getRequesterRequest,
+  listMissingDocuments,
   listRequestAttachments,
   listRequestFieldAnswers,
 } from "@/modules/requests";
+import { LateDocumentForm } from "./late-document-form";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { RequestStageLabel, RequestStageSteps } from "@/app/_components/request-stage";
@@ -33,6 +35,11 @@ function feedback(notice?: string, error?: string): string | null {
   if (notice === "cancelled") return "Sua solicitação foi cancelada.";
   if (notice === "reopened") return "Sua solicitação foi reaberta.";
   if (notice === "commented") return "Comentário enviado.";
+  if (notice === "document") return "Documento enviado.";
+  if (error === "late-document") {
+    return "O documento não foi aceito: escolha um documento que ainda falta e envie um arquivo no formato aceito, de até 2 MiB (até 4 MiB somando todos os documentos da solicitação).";
+  }
+  if (error === "documents-unavailable") return "O envio de documentos não está disponível agora. Tente mais tarde.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
   if (error && COMMENT_FILE_MESSAGES[error]) return COMMENT_FILE_MESSAGES[error];
   if (error === "note") return "Informe o motivo com até 1.000 caracteres (obrigatório para reabrir).";
@@ -54,12 +61,14 @@ export default async function RequestPage({
   let attachments;
   let answers;
   let comments;
+  let missingDocuments;
 
   try {
     request = await getRequesterRequest(requestId);
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
+    missingDocuments = await listMissingDocuments(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
     throw error;
@@ -101,6 +110,7 @@ export default async function RequestPage({
       </article>
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
+      {missingDocuments.length > 0 ? <LateDocumentForm requestId={request.id} requirements={missingDocuments} /> : null}
       <LifecyclePanel request={request} now={new Date()} />
       <RequestConversation
         requestId={request.id}

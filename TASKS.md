@@ -1352,7 +1352,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-126 — Documento depois da abertura
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. `addLateDocument` e `listMissingDocuments`, formulário "Enviar documento que falta" na página do solicitante, linha no histórico, evento `request.document_added`, notificação `document.added` ao responsável e webhook "Documento enviado". CA-ANX-05 a 07 verificados (tela no E2E da SF-127).
 - **Objetivo:** Formulário do solicitante para documentos que faltam, histórico, evento `request.document_added`, notificação `document.added` e rótulo de webhook.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/notifications/`, `src/modules/webhooks/`, `src/app/(requester)/requests/`, testes.
 - **Dependências:** SF-125.

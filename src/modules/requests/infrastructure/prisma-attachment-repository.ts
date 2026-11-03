@@ -54,6 +54,25 @@ export function createPrismaAttachmentQueryRepository(
       });
       return rows.map(toSummary);
     },
+    async findMissingRequirements(requestId) {
+      const row = await database.request.findUnique({
+        where: { id: requestId },
+        select: {
+          requesterId: true,
+          status: true,
+          service: {
+            select: {
+              documentRequirements: {
+                where: { isActive: true, attachments: { none: { requestId } } },
+                orderBy: [{ position: "asc" }, { id: "asc" }],
+                select: { id: true, name: true, isRequired: true, acceptedFormats: true },
+              },
+            },
+          },
+        },
+      });
+      return row && { requesterId: row.requesterId, status: row.status, requirements: row.service.documentRequirements };
+    },
     async findInRequest(requestId, attachmentId) {
       const row = await database.requestAttachment.findFirst({
         // A file removed by an anonymization is never served (SPEC 2026-11-02-auditoria-lgpd, 5.5.3).

@@ -61,6 +61,15 @@ export const requestTransferInputSchema = z
   .object({ requestId: entityIdSchema, assigneeId: entityIdSchema })
   .strict();
 
+// SPEC 2026-11-03-anexos-comentarios-documentos, 5.3: one file for one requirement.
+export const lateDocumentInputSchema = z
+  .object({
+    requestId: entityIdSchema,
+    requirementId: entityIdSchema,
+    file: z.object({ name: z.string(), bytes: z.instanceof(Uint8Array) }).strict(),
+  })
+  .strict();
+
 // SPEC 2026-11-03-transferencia-entre-setores, 5.1 and 5.2: the reason is checked by the domain.
 export const requestSectorTransferInputSchema = z
   .object({ requestId: entityIdSchema, sectorId: entityIdSchema, note: z.string().optional() })

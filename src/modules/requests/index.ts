@@ -11,6 +11,8 @@ import * as queries from "./application/request-queries";
 import * as slaAlerts from "./application/sla-alerts";
 import * as stageUseCase from "./application/stages";
 import * as sectorTransfer from "./application/sector-transfer";
+import * as lateDocument from "./application/late-document";
+import type { ActiveDocumentRequirement } from "./domain/attachment-requirements";
 import * as approvalUseCase from "./application/approval";
 import * as transitionUseCase from "./application/transition-request-status";
 import type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
@@ -172,6 +174,26 @@ export async function listTransferCandidates(
   database: PrismaClient = prisma,
 ): Promise<Array<{ id: string; name: string }>> {
   return queries.listTransferCandidates(requestId, createPrismaRequestQueryRepository(database));
+}
+
+/** SPEC 2026-11-03-anexos-comentarios-documentos, 5.3. */
+export async function addLateDocument(
+  input: unknown,
+  database: PrismaClient = prisma,
+  storage: DocumentStorage = getApplicationDocumentStorage(),
+): Promise<void> {
+  return lateDocument.addLateDocument(
+    input,
+    createPrismaRequestTransactionRunner(database, { translate: ["P2002", "P2003", "P2034"], fallbackMessage: "Document upload failed." }),
+    storage,
+  );
+}
+
+export async function listMissingDocuments(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<ActiveDocumentRequirement[]> {
+  return lateDocument.listMissingDocuments(requestId, createPrismaAttachmentQueryRepository(database));
 }
 
 /** SPEC 2026-11-03-transferencia-entre-setores, 5.3. */

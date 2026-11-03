@@ -248,6 +248,13 @@ export interface AttachmentQueryRepository {
     requestId: string,
   ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean } | null>;
   listForRequest(requestId: string): Promise<RequestAttachmentSummary[]>;
+  /**
+   * Active requirements of the request's service without a document in it, with the owner and the
+   * status (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3); null when the request does not exist.
+   */
+  findMissingRequirements(
+    requestId: string,
+  ): Promise<{ requesterId: string; status: RequestStatus; requirements: ActiveDocumentRequirement[] } | null>;
   /** Filters by both identifiers, so an attachment of another request is not found. */
   findInRequest(requestId: string, attachmentId: string): Promise<StoredRequestAttachment | null>;
 }
@@ -287,6 +294,8 @@ export interface RequestTransaction {
     },
   ): Promise<{ id: string }>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;
+  /** Documents already in the request (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.3). */
+  listRequestDocuments(requestId: string): Promise<Array<{ requirementId: string; sizeBytes: number }>>;
   insertFieldValues(values: NewRequestFieldValue[]): Promise<void>;
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;

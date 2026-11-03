@@ -49,6 +49,16 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
         ? null
         : event.note,
   }));
+  // SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.5: documents sent after the opening.
+  const documentEntries = (request.attachments ?? [])
+    .filter((document) => document.createdAt.getTime() > request.createdAt.getTime())
+    .map((document) => ({
+      id: `document-${document.id}`,
+      occurredAt: document.createdAt,
+      title: `Documento enviado: ${document.requirementNameSnapshot}`,
+      actor: document.uploadedBy.name,
+      note: null,
+    }));
   // SPEC 2026-11-03-transferencia-entre-setores, 5.5: names at the time of the move.
   const sectorEntries = (request.sectorEvents ?? []).map((event) => ({
     id: `sector-${event.id}`,
@@ -98,7 +108,7 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
 
   // Stable sort: on equal times, status events come first, then sector moves, assignments,
   // priorities, stages and the approval.
-  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries].sort(
+  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

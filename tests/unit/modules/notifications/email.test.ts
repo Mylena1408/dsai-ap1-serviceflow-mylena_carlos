@@ -19,7 +19,8 @@ describe("notification categories (SF-092)", () => {
       // "sector.*" added by SPEC 2026-11-03-transferencia-entre-setores, 5.6.
       STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "sector.changed"],
       ASSIGNMENT: ["assignment.received", "sector.received"],
-      COMMENTS: ["comment.public", "comment.internal"],
+      // "document.added" added by SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6.
+      COMMENTS: ["comment.public", "comment.internal", "document.added"],
       SLA: ["sla.warning", "sla.breached"],
       STAGES: ["stage.changed"],
       APPROVALS: ["approval.requested", "approval.approved", "approval.rejected"],

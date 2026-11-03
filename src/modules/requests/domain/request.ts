@@ -123,6 +123,11 @@ export interface RequestWithHistory extends RequestRecord {
    * the database; optional so records built before that SPEC stay valid.
    */
   sectorEvents?: RequestSectorEventRecord[];
+  /**
+   * Documents of the request, only what the history needs: the ones sent after the opening become
+   * history lines (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.5). Optional like sectorEvents.
+   */
+  attachments?: Array<{ id: string; requirementNameSnapshot: string; createdAt: Date; uploadedBy: { id: string; name: string } }>;
   service: {
     id: string;
     isActive: boolean;

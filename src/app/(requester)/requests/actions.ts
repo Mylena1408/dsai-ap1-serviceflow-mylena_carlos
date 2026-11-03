@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { addComment } from "@/modules/comments";
 import { scheduleEventProcessing } from "@/server/jobs/schedule";
-import { cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
+import { addLateDocument, cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
 import { FieldAnswersError } from "@/modules/service-fields";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
@@ -142,6 +142,36 @@ export async function cancelOwnRequestAction(formData: FormData): Promise<never>
 
 export async function reopenOwnRequestAction(formData: FormData): Promise<never> {
   return runOnOwnRequest(formData, (requestId, note) => reopenRequest({ requestId, note }), "reopened");
+}
+
+// SPEC 2026-11-03-anexos-comentarios-documentos, 5.3: a document the request still misses.
+export async function addLateDocumentAction(formData: FormData): Promise<never> {
+  const requestId = field(formData, "requestId");
+  const value = formData.get("file");
+  const file =
+    value && typeof value !== "string" && !isEmptyFileInput(value)
+      ? { name: value.name, bytes: new Uint8Array(await value.arrayBuffer()) }
+      : { name: "", bytes: new Uint8Array() };
+
+  try {
+    await addLateDocument({ requestId, requirementId: field(formData, "requirementId"), file });
+  } catch (error) {
+    if (error instanceof ApplicationError) {
+      const code =
+        error instanceof DocumentStorageError
+          ? "documents-unavailable"
+          : error instanceof ValidationError
+            ? "late-document"
+            : lifecycleErrorCode(error);
+      redirect(`/requests/${encodeURIComponent(requestId)}?error=${code}`);
+    }
+
+    throw error;
+  }
+
+  scheduleEventProcessing();
+  revalidatePath(`/requests/${requestId}`);
+  redirect(`/requests/${requestId}?notice=document`);
 }
 
 // Comments (SPEC 2026-10-31-comentarios): the requester never marks internal notes.

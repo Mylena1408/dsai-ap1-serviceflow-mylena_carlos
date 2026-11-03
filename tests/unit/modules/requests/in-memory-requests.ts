@@ -344,6 +344,11 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     async insertAttachments(attachments) {
       store.attachments.push(...attachments);
     },
+    async listRequestDocuments(requestId) {
+      return store.attachments
+        .filter((attachment) => attachment.requestId === requestId)
+        .map(({ requirementId, sizeBytes }) => ({ requirementId, sizeBytes }));
+    },
     async insertFieldValues(values) {
       store.fieldValues.push(...values);
     },

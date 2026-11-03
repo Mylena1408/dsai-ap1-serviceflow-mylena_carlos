@@ -28,6 +28,8 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   // SPEC 2026-11-03-transferencia-entre-setores, 5.6.
   "sector.received": "ASSIGNMENT",
   "sector.changed": "STATUS",
+  // SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6.
+  "document.added": "COMMENTS",
 };
 
 export const NOTIFICATION_TYPES = Object.keys(TYPE_CATEGORY) as NotificationType[];

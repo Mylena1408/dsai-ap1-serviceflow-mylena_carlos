@@ -57,6 +57,11 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
+  // Only what the history needs (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.5).
+  attachments: {
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    select: { id: true, requirementNameSnapshot: true, createdAt: true, uploadedBy: { select: { id: true, name: true } } },
+  },
 } satisfies Prisma.RequestInclude;
 
 const lifecycleUser = { id: true, role: true, isActive: true, sectorId: true } as const;
@@ -303,6 +308,9 @@ function createPrismaRequestTransaction(
     },
     async insertAttachments(attachments) {
       await transaction.requestAttachment.createMany({ data: attachments });
+    },
+    listRequestDocuments(requestId) {
+      return transaction.requestAttachment.findMany({ where: { requestId }, select: { requirementId: true, sizeBytes: true } });
     },
     async insertFieldValues(values) {
       await transaction.requestFieldValue.createMany({ data: values });
