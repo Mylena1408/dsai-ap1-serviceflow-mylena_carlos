@@ -1577,3 +1577,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Teste de restauração:** cópia do banco local de desenvolvimento (dados fictícios) restaurada num banco novo; 28 tabelas com as mesmas linhas, mesma estrutura (118 restrições, 73 índices, 50 funções, 1 trigger), migrations em dia; cópia e banco de teste apagados. O banco de produção não foi copiado: exige a conexão de produção, que fica com a responsável.
 - **Segurança:** `*.dump` no `.gitignore`; README aponta para a política.
 - **SF-028:** fica aberta só pela dependência da SF-026 (meta de linhas). SF-029 concluída antes, no mesmo pedido.
+
+## Senha do Neon mantida e primeira cópia de produção (2026-11-03)
+
+- **Decisão da responsável:** manter a senha atual do Neon ("é para fins didáticos"). Não recomendar mais a troca; o banco só tem dados fictícios.
+- **Primeira cópia semanal:** feita e verificada (detalhes na seção 7 de `SPEC/2026-11-02-backup-recuperacao.md`). Achados: o Neon roda PostgreSQL **18.6**, e o `pg_dump` 17 se recusa a copiá-lo; baixei os binários oficiais do 18.6 (tamanho igual ao anunciado; SHA-256 registrado na SPEC, a EnterpriseDB não publica checksum). Na verificação, um erro meu: restaurar só o schema `public` deixou de fora a extensão `citext`; corrigido criando a extensão antes. A política foi corrigida (dizia PostgreSQL 17 para o Neon) e ganhou a observação sobre `citext` e sobre o EFS.
+- **Onde está:** `C:\Users\Mylena Reis\serviceflow-backups\serviceflow-2026-11-03.dump`, cifrado pelo EFS do Windows. Falta a cópia fora da máquina.

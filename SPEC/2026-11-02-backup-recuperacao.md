@@ -36,7 +36,7 @@ Regras de segurança:
 
 ## 4. Procedimentos
 
-Ferramentas: `pg_dump`, `pg_restore` e `psql` do PostgreSQL 17 (a mesma versão principal do Neon e dos bancos locais).
+Ferramentas: `pg_dump`, `pg_restore` e `psql` do **PostgreSQL 18**, a mesma versão principal do Neon (18.6 em 2026-11-03). O `pg_dump` se recusa a copiar um servidor de versão mais nova que a dele. *Corrigido em 2026-11-03: a primeira versão desta SPEC dizia PostgreSQL 17 para o Neon; os bancos locais é que são 17.*
 
 **Cópia (semanal ou antes de deploy):**
 
@@ -44,7 +44,9 @@ Ferramentas: `pg_dump`, `pg_restore` e `psql` do PostgreSQL 17 (a mesma versão 
 pg_dump --format=custom --no-owner --file="serviceflow-AAAA-MM-DD.dump" "<URL direta do Neon>"
 ```
 
-Depois, cifrar o arquivo (por exemplo, `7z a -p -mhe=on serviceflow-AAAA-MM-DD.7z serviceflow-AAAA-MM-DD.dump`), guardar fora da máquina e apagar o `.dump` sem cifra.
+Depois, cifrar o arquivo (por exemplo, `7z a -p -mhe=on serviceflow-AAAA-MM-DD.7z serviceflow-AAAA-MM-DD.dump`, ou guardar numa pasta cifrada pelo EFS do Windows com `cipher /e`), guardar uma cópia fora da máquina e apagar o `.dump` sem cifra. O EFS vincula o arquivo à conta do Windows: copiá-lo para um pendrive FAT ou para a nuvem pode tirar a cifra, então a cópia externa precisa de cifra própria.
+
+Se o banco restaurado não tiver as extensões do original, criar antes `CREATE EXTENSION IF NOT EXISTS citext` (as tabelas usam o tipo `citext`); restaurar com `--schema=public` deixa a extensão de fora.
 
 **Restauração (em caso de perda):**
 
@@ -68,4 +70,12 @@ Depois, cifrar o arquivo (por exemplo, `7z a -p -mhe=on serviceflow-AAAA-MM-DD.7
 - **Ferramentas:** binários oficiais do PostgreSQL 17.11 (zip da EnterpriseDB, extraído fora do projeto; SHA-256 igual ao registrado no `NOTES.md` em 2026-10).
 - **Passos:** `pg_dump` em formato custom (103 KB) → banco novo `serviceflow_restore_drill` → `pg_restore --exit-on-error`. Cópia e restauração em 3 segundos.
 - **Resultado:** as 28 tabelas com a mesma contagem de linhas na origem e no destino (por exemplo, 7 usuários, 12 solicitações, 23 eventos de status, 21 migrations); estrutura igual (118 restrições, 73 índices, 50 funções e 1 trigger); `prisma migrate status` no banco restaurado: "Database schema is up to date". O banco de teste e a cópia foram apagados em seguida.
-- **Primeiro teste na produção:** fica para a primeira cópia semanal do Neon feita pela responsável, seguindo a seção 4.
+- **Primeiro teste na produção:** ver seção 7.
+
+## 7. Primeira cópia de produção (2026-11-03)
+
+- A pedido da responsável, feita pelo agente com a conexão direta do Neon (passada só na linha de comando).
+- A primeira tentativa com o `pg_dump` 17 parou: o Neon roda PostgreSQL 18.6. Foram baixados os binários oficiais do PostgreSQL 18.6 (zip da EnterpriseDB, revisão 18.6-3, 344.414.106 bytes, igual ao tamanho anunciado; SHA-256 `59F8CE701C63C2ED623C665A5E51B3EF6F2E37CCF837B68FFEED0742D0AE6ABD`), extraídos fora do projeto.
+- Cópia `serviceflow-2026-11-03.dump` (124 KB) em `C:\Users\Mylena Reis\serviceflow-backups\`, pasta e arquivo cifrados pelo EFS do Windows.
+- Verificação: restaurada num banco local isolado (criando antes a extensão `citext`), com as 28 tabelas e a mesma contagem de linhas da produção (por exemplo, 10 pessoas, 26 solicitações, 21 migrations) e `prisma migrate status` em dia; o banco de verificação foi apagado.
+- Falta, pela política, guardar uma cópia fora da máquina, com cifra própria.

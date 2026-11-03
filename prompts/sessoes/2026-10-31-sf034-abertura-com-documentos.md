@@ -627,3 +627,9 @@ Decisão registrada em `NOTES.md` ("Decisão: e-mails desativados na publicaçã
 > pode começar pelas pendências
 
 SF-029 registrada como concluída. Para a SF-028, perguntas sobre a política e sobre baixar as ferramentas do PostgreSQL; respostas: "Semanal + antes de deploy (Recomendado)" e "Pode baixar (Recomendado)". Ver `NOTES.md`, seção "SF-028 — Política de backup e teste de restauração".
+
+## Continuação — Cópia de produção e SF-030
+
+> não desejo trocar a senha do NEON, deixe como esta pois é para fins didaticos. ; faça a primeira copia semanal do banco de produção, faça 0 sf-030 configurar o armazenamento do Supabase, ao final repasse pra mim as funcionalidades pendentes
+
+Decisão sobre a senha registrada; primeira cópia de produção feita e verificada (ver `NOTES.md`, "Senha do Neon mantida e primeira cópia de produção").
