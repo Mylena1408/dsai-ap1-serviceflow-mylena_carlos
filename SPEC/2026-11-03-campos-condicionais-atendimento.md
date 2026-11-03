@@ -136,7 +136,7 @@ Campos e respostas existentes ficam com público "Solicitante" e sem condição.
 - [ ] **CA-CND-07** — A conclusão é recusada enquanto falta um obrigatório do atendimento com condição atendida; preenchido, conclui.
 - [ ] **CA-CND-08** — O solicitante não vê respostas do atendimento (tela, API, "Meus dados"); a equipe vê; a API aceita lista na seleção múltipla e mostra `audience`; o OpenAPI descreve.
 - [ ] **CA-CND-09** — A anonimização substitui os textos do atendimento gravados pela pessoa.
-- [ ] **CA-CND-10** — Nenhuma dependência nova; duas migrations aditivas (com a restrição de opções recriada mais ampla); README explica.
+- [ ] **CA-CND-10** — Nenhuma dependência nova; duas migrations aditivas (com a restrição de opções recriada mais ampla); README explica. *Parcial em 2026-11-03 (SF-133): migrations `20261103500000_field_type_multi_select` (só o valor do enum) e `20261103500100_conditional_attendant_fields` (colunas, tabela do histórico, chave composta do controlador no mesmo serviço e `ServiceField_options_check` recriada para aceitar a seleção múltipla); nada é inserido (`integration/conditional-fields-schema.test.ts`).*
 
 ## 8. Estratégia de testes
 

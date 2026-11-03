@@ -53,7 +53,9 @@ describe("serviceFieldInputSchema (SF-071)", () => {
       expect(parse({ type }).success).toBe(true);
     }
     expect(parse({ type: "SELECT", options: ["Sim", "Talvez"] }).success).toBe(true);
-    expect(issuePaths({ type: "MULTI_SELECT" })).toEqual(["type"]);
+    // "MULTI_SELECT" was the unknown type here until SPEC 2026-11-03-campos-condicionais-atendimento
+    // made it valid (5.1); an unknown type is still refused on "type".
+    expect(issuePaths({ type: "FILE" })).toEqual(["type"]);
   });
 
   it("requires 2 to 20 distinct options of up to 80 characters on list fields", () => {

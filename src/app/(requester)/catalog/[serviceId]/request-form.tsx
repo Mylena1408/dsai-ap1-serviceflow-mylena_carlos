@@ -22,7 +22,7 @@ export interface OpeningField {
   id: string;
   label: string;
   helpText: string | null;
-  type: "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO";
+  type: "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO" | "MULTI_SELECT";
   isRequired: boolean;
   options: string[];
   minValue: number | null;
@@ -41,7 +41,7 @@ interface RequestFormProps {
 
 interface Draft {
   version: number;
-  values: Record<string, string>;
+  values: Record<string, string | string[]>;
 }
 
 const SHORT_TEXT_LIMIT = 200;
@@ -82,15 +82,31 @@ export function fieldErrorMessage(field: OpeningField, code: FieldErrorCode): st
 
 function FieldInput({ field, value, invalid, describedBy }: {
   field: OpeningField;
-  value: string | undefined;
+  value: string | string[] | undefined;
   invalid: boolean;
   describedBy: string | undefined;
 }) {
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.1: one box per option, all with the same name.
+  if (field.type === "MULTI_SELECT") {
+    const checked = Array.isArray(value) ? value : value ? [value] : [];
+    return (
+      <span className="format-options" id={`field-${field.id}`} role="group" aria-describedby={describedBy} aria-labelledby={`field-${field.id}-label`} data-invalid={invalid || undefined}>
+        {field.options.map((option) => (
+          <label className="checkbox-field" key={option}>
+            <input defaultChecked={checked.includes(option)} name={`field.${field.id}`} type="checkbox" value={option} />
+            {option}
+          </label>
+        ))}
+      </span>
+    );
+  }
+
+  const single = Array.isArray(value) ? value[0] : value;
   const common = {
     id: `field-${field.id}`,
     name: `field.${field.id}`,
     required: field.isRequired,
-    defaultValue: value,
+    defaultValue: single,
     "aria-invalid": invalid || undefined,
     "aria-describedby": describedBy,
   };
@@ -115,7 +131,7 @@ function FieldInput({ field, value, invalid, describedBy }: {
       return <input {...common} max={LAST_DATE} min={FIRST_DATE} type="date" />;
     case "SELECT":
       return (
-        <select {...common} defaultValue={value ?? ""}>
+        <select {...common} defaultValue={single ?? ""}>
           <option value="">Selecione</option>
           {field.options.map((option) => (
             <option key={option} value={option}>{option}</option>
@@ -124,7 +140,7 @@ function FieldInput({ field, value, invalid, describedBy }: {
       );
     case "YES_NO":
       return (
-        <select {...common} defaultValue={value ?? ""}>
+        <select {...common} defaultValue={single ?? ""}>
           <option value="">Selecione</option>
           <option value="true">Sim</option>
           <option value="false">Não</option>
@@ -136,7 +152,7 @@ function FieldInput({ field, value, invalid, describedBy }: {
 function CustomFields({ fields, fieldErrors, values }: {
   fields: OpeningField[];
   fieldErrors: Record<string, FieldErrorCode>;
-  values: Record<string, string>;
+  values: Record<string, string | string[]>;
 }) {
   return (
     <fieldset className="custom-fields">
@@ -149,7 +165,7 @@ function CustomFields({ fields, fieldErrors, values }: {
 
         return (
           <div className="custom-field" key={field.id}>
-            <label htmlFor={`field-${field.id}`}>
+            <label htmlFor={field.type === "MULTI_SELECT" ? undefined : `field-${field.id}`} id={`field-${field.id}-label`}>
               {field.label} {field.isRequired ? "(obrigatório)" : "(opcional)"}
             </label>
             <FieldInput
@@ -181,10 +197,12 @@ export function RequestForm({
   // The draft is saved before sending; a new key remounts the form with it as default values,
   // so they survive both React's form reset and the redirect back with the errors.
   async function submit(formData: FormData) {
-    const values: Record<string, string> = {};
+    const values: Record<string, string | string[]> = {};
     for (const [name, value] of formData.entries()) {
       if (typeof value === "string" && (name === "description" || name.startsWith("field."))) {
-        values[name] = value;
+        // Several boxes of a multiple choice share the name (5.1).
+        const previous = values[name];
+        values[name] = previous === undefined ? value : [...(Array.isArray(previous) ? previous : [previous]), value];
       }
     }
     setDraft((current) => ({ version: current.version + 1, values }));
@@ -201,7 +219,7 @@ export function RequestForm({
         required
         maxLength={10_000}
         rows={6}
-        defaultValue={draft.values.description}
+        defaultValue={draft.values.description as string | undefined}
       />
       <p>Máximo de 10.000 caracteres.</p>
       {fields.length > 0 ? (

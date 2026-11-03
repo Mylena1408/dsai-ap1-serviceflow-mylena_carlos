@@ -11,11 +11,19 @@ export interface ServiceFieldRepository {
   listActiveForService(serviceId: string): Promise<ServiceFieldRecord[]>;
 }
 
+/**
+ * A field of the service as the configuration rules read it. The condition columns are optional
+ * so doubles written before SPEC 2026-11-03-campos-condicionais-atendimento stay valid.
+ */
+export type ServiceFieldSummary = PositionedItem & { label: string; isActive: boolean } & Partial<
+    Pick<ServiceFieldRecord, "type" | "options" | "audience" | "conditionFieldId" | "conditionValue">
+  >;
+
 /** Operations available inside a custom field transaction. */
 export interface ServiceFieldTransaction extends AuditScope {
   /** Sector of the service, or null when it does not exist (SPEC de permissões, 5.3.1). */
   findServiceSector(serviceId: string): Promise<string | null>;
-  listForService(serviceId: string): Promise<Array<PositionedItem & { label: string; isActive: boolean }>>;
+  listForService(serviceId: string): Promise<ServiceFieldSummary[]>;
   find(fieldId: string): Promise<ServiceFieldRecord | null>;
   create(data: ServiceFieldDefinition & { serviceId: string; position: number }): Promise<ServiceFieldRecord>;
   update(

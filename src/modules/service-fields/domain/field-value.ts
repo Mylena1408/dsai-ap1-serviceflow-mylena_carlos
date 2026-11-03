@@ -21,7 +21,12 @@ export type FieldValueResult =
 export type AnswerableField = Pick<
   ServiceFieldRecord,
   "id" | "label" | "type" | "isRequired" | "options" | "minValue" | "maxValue" | "position"
->;
+> &
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.2; optional so callers without conditions stay valid.
+  Partial<Pick<ServiceFieldRecord, "conditionFieldId" | "conditionValue">>;
+
+/** A submitted value: one text, or several for a multiple choice (5.1). */
+export type SubmittedFieldValue = string | readonly string[];
 
 export interface FieldAnswer {
   fieldId: string;
@@ -100,8 +105,50 @@ function dateValue(text: string): FieldValueResult {
   return valid(text);
 }
 
+/**
+ * Multiple choice (SPEC 2026-11-03-campos-condicionais-atendimento, 5.1): one or more current
+ * options without repetition, stored as a JSON list in the configured order.
+ */
+function multipleChoiceValue(field: AnswerableField, raw: SubmittedFieldValue | null | undefined): FieldValueResult {
+  const chosen = (typeof raw === "string" ? [raw] : [...(raw ?? [])]).map((value) => value.trim()).filter((value) => value !== "");
+
+  if (chosen.length === 0) {
+    return field.isRequired ? invalid("required") : valid(null);
+  }
+
+  if (new Set(chosen).size !== chosen.length || chosen.some((value) => !field.options.includes(value))) {
+    return invalid("invalid_option");
+  }
+
+  return valid(JSON.stringify(field.options.filter((option) => chosen.includes(option))));
+}
+
+/** The options of a stored multiple-choice answer; empty when it is not a JSON list of texts. */
+export function multipleChoiceOptions(value: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every((item) => typeof item === "string") ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 // Validates one submitted answer. A blank optional field gives `value: null` (no answer is stored).
-export function normalizeFieldValue(field: AnswerableField, raw: string | null | undefined): FieldValueResult {
+export function normalizeFieldValue(field: AnswerableField, submitted: SubmittedFieldValue | null | undefined): FieldValueResult {
+  if (field.type === "MULTI_SELECT") {
+    return multipleChoiceValue(field, submitted);
+  }
+
+  // Only a multiple choice takes several values (5.1).
+  let raw: string | null | undefined;
+  if (typeof submitted === "string" || submitted === null || submitted === undefined) {
+    raw = submitted;
+  } else if (submitted.length > 1) {
+    return invalid("invalid_option");
+  } else {
+    raw = submitted[0];
+  }
+
   // Browsers send textarea line breaks as CRLF; they count as one character.
   const text = (raw ?? "").replace(/\r\n?/g, "\n").trim();
 
@@ -128,15 +175,39 @@ export function normalizeFieldValue(field: AnswerableField, raw: string | null |
   }
 }
 
+/**
+ * Section 5.2.4: met when the controller's answer equals the value (list, yes or no) or contains it
+ * (multiple choice). A field without condition is always shown; without an answer, not met.
+ */
+export function conditionMet(
+  field: AnswerableField,
+  controllerAnswer: { type: ServiceFieldRecord["type"]; value: string } | undefined,
+): boolean {
+  if (!field.conditionFieldId || field.conditionValue === null || field.conditionValue === undefined) {
+    return true;
+  }
+
+  if (!controllerAnswer) {
+    return false;
+  }
+
+  return controllerAnswer.type === "MULTI_SELECT"
+    ? multipleChoiceOptions(controllerAnswer.value).includes(field.conditionValue)
+    : controllerAnswer.value === field.conditionValue;
+}
+
 function compareFields(left: AnswerableField, right: AnswerableField): number {
   return left.position - right.position || (left.id < right.id ? -1 : left.id > right.id ? 1 : 0);
 }
 
 // Builds the answers of an opening from the service's active fields, as loaded from the database
 // when the form is submitted (5.3.2). `submitted` maps field id to the raw value sent by the form.
+// A field whose condition is not met is not required, and a value sent for it is discarded
+// (SPEC 2026-11-03-campos-condicionais-atendimento, 5.2.5). Controllers have no condition, so
+// they are decided first.
 export function collectFieldAnswers(
   activeFields: readonly AnswerableField[],
-  submitted: ReadonlyMap<string, string>,
+  submitted: ReadonlyMap<string, SubmittedFieldValue>,
 ): FieldAnswersResult {
   const activeIds = new Set(activeFields.map((field) => field.id));
 
@@ -144,11 +215,29 @@ export function collectFieldAnswers(
     return { ok: false, reason: "stale_form" };
   }
 
+  const ordered = [...activeFields].sort(compareFields);
+  const results = new Map<string, FieldValueResult>();
+
+  for (const field of ordered.filter((item) => !item.conditionFieldId)) {
+    results.set(field.id, normalizeFieldValue(field, submitted.get(field.id)));
+  }
+
+  for (const field of ordered.filter((item) => item.conditionFieldId)) {
+    const controller = ordered.find((item) => item.id === field.conditionFieldId);
+    const controllerResult = controller ? results.get(controller.id) : undefined;
+    const controllerAnswer =
+      controller && controllerResult?.ok && controllerResult.value !== null
+        ? { type: controller.type, value: controllerResult.value }
+        : undefined;
+
+    results.set(field.id, conditionMet(field, controllerAnswer) ? normalizeFieldValue(field, submitted.get(field.id)) : valid(null));
+  }
+
   const answers: FieldAnswer[] = [];
   const errors: FieldAnswerError[] = [];
 
-  [...activeFields].sort(compareFields).forEach((field, position) => {
-    const result = normalizeFieldValue(field, submitted.get(field.id));
+  ordered.forEach((field, position) => {
+    const result = results.get(field.id)!;
 
     if (!result.ok) {
       errors.push({ fieldId: field.id, code: result.code });
@@ -164,6 +253,21 @@ export function collectFieldAnswers(
   });
 
   return errors.length > 0 ? { ok: false, reason: "invalid", errors } : { ok: true, answers };
+}
+
+/**
+ * Section 5.5.4: labels of the required active fields, with the condition met, still without an
+ * answer. The completion is refused while the list is not empty.
+ */
+export function missingRequiredFields(
+  activeFields: readonly AnswerableField[],
+  answers: ReadonlyMap<string, { type: ServiceFieldRecord["type"]; value: string }>,
+): string[] {
+  return [...activeFields]
+    .sort(compareFields)
+    .filter((field) => field.isRequired && !answers.has(field.id))
+    .filter((field) => conditionMet(field, field.conditionFieldId ? answers.get(field.conditionFieldId) : undefined))
+    .map((field) => field.label);
 }
 
 // Refused answers of an opening. Field ids and fixed codes are safe to show: they let the form
@@ -199,6 +303,10 @@ export function formatFieldAnswer(type: ServiceFieldRecord["type"], value: strin
       return value === "true" ? "Sim" : value === "false" ? "Não" : value;
     case "INTEGER":
       return INTEGER_PATTERN.test(value) ? Number(value).toLocaleString("pt-BR") : value;
+    case "MULTI_SELECT": {
+      const options = multipleChoiceOptions(value);
+      return options.length > 0 ? options.join(", ") : value;
+    }
     default:
       return value;
   }

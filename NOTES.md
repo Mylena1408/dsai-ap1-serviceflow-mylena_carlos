@@ -1825,3 +1825,25 @@ Padrão a replicar nas SF-039 e SF-040:
   - histórico com rótulos sem valores.
 - Tarefas SF-133 a SF-137.
 - **Ponto de projeto:** duas migrations, porque um valor novo de enum não pode ser usado na mesma transação em que é criado.
+
+## SF-133 — Migrations e domínio dos campos condicionais (2026-11-03)
+
+- **Duas migrations:** `20261103500000_field_type_multi_select` só acrescenta o valor ao enum; `20261103500100_conditional_attendant_fields` usa o valor (na restrição de opções), por isso vem separada, como fizeram as migrations do gestor.
+- **Controlador no mesmo serviço:** chave estrangeira composta `(conditionFieldId, serviceId)` → `ServiceField(id, serviceId)`, só no SQL. O Prisma não aceita relação opcional com um campo obrigatório na chave, então o schema tem a relação simples por `conditionFieldId`, e a composta fica na migration, como as outras restrições.
+- **Defeito meu, pego pelo teste de schema antes do commit:** a primeira versão de `ServiceField_condition_check` usava `char_length("conditionValue") BETWEEN 1 AND 80` sem `IS NOT NULL`; com o valor nulo, o resultado é `NULL`, e um `CHECK` com `NULL` passa. Mesmo erro da SF-081. Corrigido no arquivo; nos dois bancos locais, a restrição foi recriada e o checksum atualizado; nada publicado. Registrei uma memória para escrever sempre o `IS NOT NULL` explícito.
+- **Domínio:**
+  - `normalizeFieldValue` aceita lista na seleção múltipla e grava JSON na ordem configurada; nos outros tipos, uma lista com mais de um valor é recusada;
+  - `collectFieldAnswers` decide primeiro os campos sem condição e descarta, sem erro, os valores dos campos com condição não atendida;
+  - `missingRequiredFields` serve à conclusão (SF-136);
+  - regras `assertConditionTarget`, `assertCanDeactivateController`, `assertOptionsKeepConditions`, `assertConditionControllerActive` e `assertNotControllerOfActiveFields`.
+- **Casos de uso de configuração (antecipados da SF-134):** a mudança de tipo do domínio quebrava a compilação das telas e dos casos de uso. Para cada commit continuar compilando:
+  - criar, editar, desativar e reativar já aplicam as regras de condição e integridade;
+  - mudar o público de um controlador com dependentes ativos dá `409`, porque os dependentes têm o mesmo público (5.2.2);
+  - o editor ganhou o tipo "Seleção múltipla" com o campo de opções;
+  - a abertura mostra caixas de seleção.
+
+  A tela de público e condição e o envio em lista ficam para a SF-134 e a SF-135.
+- **A abertura** lê só os campos do solicitante (`audience: REQUESTER`), então campos do atendimento não entram no formulário.
+- **Teste anterior alterado:** `service-field-schemas.test.ts` usava `MULTI_SELECT` como exemplo de tipo desconhecido. A SPEC o tornou válido, e o exemplo passou a ser `FILE`, com comentário.
+- **Testes novos:** `tests/unit/modules/service-fields/conditional-fields.test.ts` e `tests/integration/conditional-fields-schema.test.ts`.
+- **Resultados:** lint, typecheck e build OK; unitários 876/876; integração 394/394 + 1 pulado.

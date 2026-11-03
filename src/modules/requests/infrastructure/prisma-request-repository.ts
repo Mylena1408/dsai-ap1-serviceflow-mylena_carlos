@@ -298,7 +298,8 @@ export function createPrismaRequestTransaction(
     },
     listActiveFields(serviceId) {
       return transaction.serviceField.findMany({
-        where: { serviceId, isActive: true },
+        // The opening form has only the requester's fields (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4).
+        where: { serviceId, isActive: true, audience: "REQUESTER" },
         orderBy: [{ position: "asc" }, { id: "asc" }],
         select: {
           id: true,
@@ -309,6 +310,8 @@ export function createPrismaRequestTransaction(
           minValue: true,
           maxValue: true,
           position: true,
+          conditionFieldId: true,
+          conditionValue: true,
         },
       });
     },

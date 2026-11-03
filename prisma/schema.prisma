@@ -121,6 +121,14 @@ enum ServiceFieldType {
   DATE
   SELECT
   YES_NO
+  /// SPEC 2026-11-03-campos-condicionais-atendimento, 5.1.
+  MULTI_SELECT
+}
+
+/// Who fills a custom field (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4).
+enum ServiceFieldAudience {
+  REQUESTER
+  ATTENDANT
 }
 
 model Sector {
@@ -160,33 +168,35 @@ model User {
   /// SPEC 2026-11-02-auditoria-lgpd, 5.5: set once, when the person is anonymized.
   anonymizedAt DateTime? @db.Timestamptz
 
-  sector                Sector?                  @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests              Request[]                @relation("UserRequests")
-  requestStatusEvents   RequestStatusEvent[]     @relation("RequestStatusEventActor")
-  uploadedAttachments   RequestAttachment[]      @relation("RequestAttachmentUploader")
-  assignedRequests      Request[]                @relation("RequestAssignee")
-  assignmentEventsActed RequestAssignmentEvent[] @relation("RequestAssignmentEventActor")
-  assignmentEventsFrom  RequestAssignmentEvent[] @relation("RequestAssignmentEventFrom")
-  assignmentEventsTo    RequestAssignmentEvent[] @relation("RequestAssignmentEventTo")
-  comments              RequestComment[]         @relation("RequestCommentAuthor")
-  notifications         RequestNotification[]    @relation("NotificationRecipient")
-  priorityEvents        RequestPriorityEvent[]   @relation("RequestPriorityEventActor")
-  stageEvents           RequestStageEvent[]      @relation("RequestStageEventActor")
-  sectorEvents          RequestSectorEvent[]     @relation("RequestSectorEventActor")
-  commentFiles          RequestCommentFile[]     @relation("RequestCommentFileUploader")
-  approvalsDecided      RequestApproval[]        @relation("RequestApprovalDecider")
-  permissions           UserPermission[]         @relation("UserPermissionHolder")
-  permissionsGranted    UserPermission[]         @relation("UserPermissionGrantor")
-  permissionEvents      UserPermissionEvent[]    @relation("UserPermissionEventUser")
-  permissionEventsActed UserPermissionEvent[]    @relation("UserPermissionEventActor")
+  sector                Sector?                   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requests              Request[]                 @relation("UserRequests")
+  requestStatusEvents   RequestStatusEvent[]      @relation("RequestStatusEventActor")
+  uploadedAttachments   RequestAttachment[]       @relation("RequestAttachmentUploader")
+  assignedRequests      Request[]                 @relation("RequestAssignee")
+  assignmentEventsActed RequestAssignmentEvent[]  @relation("RequestAssignmentEventActor")
+  assignmentEventsFrom  RequestAssignmentEvent[]  @relation("RequestAssignmentEventFrom")
+  assignmentEventsTo    RequestAssignmentEvent[]  @relation("RequestAssignmentEventTo")
+  comments              RequestComment[]          @relation("RequestCommentAuthor")
+  notifications         RequestNotification[]     @relation("NotificationRecipient")
+  priorityEvents        RequestPriorityEvent[]    @relation("RequestPriorityEventActor")
+  stageEvents           RequestStageEvent[]       @relation("RequestStageEventActor")
+  sectorEvents          RequestSectorEvent[]      @relation("RequestSectorEventActor")
+  commentFiles          RequestCommentFile[]      @relation("RequestCommentFileUploader")
+  approvalsDecided      RequestApproval[]         @relation("RequestApprovalDecider")
+  permissions           UserPermission[]          @relation("UserPermissionHolder")
+  permissionsGranted    UserPermission[]          @relation("UserPermissionGrantor")
+  permissionEvents      UserPermissionEvent[]     @relation("UserPermissionEventUser")
+  permissionEventsActed UserPermissionEvent[]     @relation("UserPermissionEventActor")
   notificationPrefs     NotificationPreference[]
   emailDeliveries       EmailDelivery[]
-  apiTokens             ApiToken[]               @relation("ApiTokenOwner")
-  apiTokensRevoked      ApiToken[]               @relation("ApiTokenRevoker")
-  slaPauses             RequestSlaPause[]        @relation("RequestSlaPauseActor")
-  slaResumes            RequestSlaPause[]        @relation("RequestSlaResumeActor")
-  holidaysCreated       BusinessHoliday[]        @relation("BusinessHolidayCreator")
-  calendarUpdates       BusinessCalendar[]       @relation("BusinessCalendarUpdater")
+  apiTokens             ApiToken[]                @relation("ApiTokenOwner")
+  apiTokensRevoked      ApiToken[]                @relation("ApiTokenRevoker")
+  slaPauses             RequestSlaPause[]         @relation("RequestSlaPauseActor")
+  slaResumes            RequestSlaPause[]         @relation("RequestSlaResumeActor")
+  holidaysCreated       BusinessHoliday[]         @relation("BusinessHolidayCreator")
+  calendarUpdates       BusinessCalendar[]        @relation("BusinessCalendarUpdater")
+  fieldValuesUpdated    RequestFieldValue[]       @relation("RequestFieldValueUpdater")
+  fieldUpdateEvents     RequestFieldUpdateEvent[] @relation("RequestFieldUpdateEventActor")
 }
 
 model Service {
@@ -250,10 +260,10 @@ model Request {
   /// Start of the current SLA pause; null when not paused (5.3).
   slaPausedAt                DateTime?       @db.Timestamptz
 
-  requester        User                     @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
-  assignee         User?                    @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
-  service          Service                  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  sector           Sector                   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requester        User                      @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
+  assignee         User?                     @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  service          Service                   @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  sector           Sector                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
   events           RequestStatusEvent[]
   attachments      RequestAttachment[]
   assignmentEvents RequestAssignmentEvent[]
@@ -263,6 +273,7 @@ model Request {
   sectorEvents     RequestSectorEvent[]
   commentFiles     RequestCommentFile[]
   slaPauses        RequestSlaPause[]
+  fieldUpdates     RequestFieldUpdateEvent[]
   approval         RequestApproval?
   comments         RequestComment[]
   outboxEvents     OutboxEvent[]
@@ -481,24 +492,33 @@ model RequestPriorityEvent {
 
 /// Custom field of a service (SPEC 2026-11-01-campos-personalizados, section 6).
 model ServiceField {
-  id         String           @id @default(uuid()) @db.Uuid
-  serviceId  String           @db.Uuid
-  label      String           @db.Citext
-  helpText   String?
-  type       ServiceFieldType
-  isRequired Boolean
-  options    String[]
-  minValue   Int?
-  maxValue   Int?
-  position   Int
-  isActive   Boolean          @default(true)
-  createdAt  DateTime         @default(now()) @db.Timestamptz
-  updatedAt  DateTime         @updatedAt @db.Timestamptz
+  id               String               @id @default(uuid()) @db.Uuid
+  serviceId        String               @db.Uuid
+  label            String               @db.Citext
+  helpText         String?
+  type             ServiceFieldType
+  isRequired       Boolean
+  options          String[]
+  minValue         Int?
+  maxValue         Int?
+  position         Int
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now()) @db.Timestamptz
+  updatedAt        DateTime             @updatedAt @db.Timestamptz
+  /// SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.4. The controller belongs to the
+  /// same service (composite key in SQL).
+  audience         ServiceFieldAudience @default(REQUESTER)
+  conditionFieldId String?              @db.Uuid
+  conditionValue   String?
 
-  service Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  values  RequestFieldValue[]
+  service        Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  values         RequestFieldValue[]
+  conditionField ServiceField?       @relation("ServiceFieldCondition", fields: [conditionFieldId], references: [id], onDelete: Restrict)
+  dependents     ServiceField[]      @relation("ServiceFieldCondition")
 
+  @@unique([id, serviceId])
   @@index([serviceId])
+  @@index([conditionFieldId])
 }
 
 /// Answer given on opening, with a snapshot of the field definition; immutable.
@@ -512,11 +532,31 @@ model RequestFieldValue {
   value            String
   createdAt        DateTime         @default(now()) @db.Timestamptz
 
-  request Request      @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  field   ServiceField @relation(fields: [fieldId], references: [id], onDelete: Restrict)
+  /// Set by the attendance's saves (SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.5).
+  updatedAt   DateTime? @db.Timestamptz
+  updatedById String?   @db.Uuid
+
+  request   Request      @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  field     ServiceField @relation(fields: [fieldId], references: [id], onDelete: Restrict)
+  updatedBy User?        @relation("RequestFieldValueUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
 
   @@unique([requestId, fieldId])
   @@index([fieldId])
+}
+
+/// A save of the attendance's fields (SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.3): the
+/// labels that changed, never the values.
+model RequestFieldUpdateEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  requestId  String   @db.Uuid
+  actorId    String   @db.Uuid
+  labels     String[]
+  occurredAt DateTime @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  actor   User    @relation("RequestFieldUpdateEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId])
 }
 
 /// Stage of a service's attendance flow (SPEC 2026-11-01-fluxos-configuraveis, section 6).

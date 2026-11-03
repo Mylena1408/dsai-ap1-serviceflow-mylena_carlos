@@ -64,3 +64,4 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 > pode prosseguir
 
 1. SPEC `SPEC/2026-11-03-campos-condicionais-atendimento.md` (funcionalidade 8), decisões K1 a K10 adotadas como recomendadas; tarefas SF-133 a SF-137.
+2. SF-133: migrations e domínio; `CHECK` com `NULL` corrigido antes do commit.

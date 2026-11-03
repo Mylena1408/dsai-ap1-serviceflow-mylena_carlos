@@ -11,10 +11,22 @@ import { entityIdSchema } from "@/shared/validation";
 import { serviceFieldInputSchema, serviceFieldMoveSchema } from "./service-field-schemas";
 import {
   assertCanAddActiveField,
+  assertCanDeactivateController,
+  assertConditionControllerActive,
+  assertConditionTarget,
   assertFieldTypeUnchanged,
+  assertNotControllerOfActiveFields,
+  assertOptionsKeepConditions,
+  type ConditionController,
+  type ServiceFieldAudience,
   type ServiceFieldRecord,
 } from "../domain/service-field";
-import type { ServiceFieldRepository, ServiceFieldTransaction, ServiceFieldTransactionRunner } from "./ports";
+import type {
+  ServiceFieldRepository,
+  ServiceFieldSummary,
+  ServiceFieldTransaction,
+  ServiceFieldTransactionRunner,
+} from "./ports";
 
 // Administrative configuration of custom fields (SPEC 2026-11-01-campos-personalizados, 5.1).
 // Fields are deactivated, never deleted, and can be reactivated. Changes affect future requests
@@ -60,9 +72,18 @@ export async function createServiceField(
     const active = existing.filter((field) => field.isActive);
     assertCanAddActiveField(active.length);
     assertLabelAvailable(active, parsed.label);
+    const { audience = "REQUESTER", conditionFieldId = null, conditionValue = null, ...definition } = parsed;
+    checkCondition({ id: null, audience }, conditionFieldId, conditionValue, existing);
 
     return transaction.audited({ actor: editor.actor, action: "CREATED", entityType: "SERVICE_FIELD" }, () =>
-      transaction.create({ serviceId: id, ...parsed, position: nextPosition(existing) }),
+      transaction.create({
+        serviceId: id,
+        ...definition,
+        audience,
+        conditionFieldId,
+        conditionValue: conditionFieldId === null ? null : conditionValue,
+        position: nextPosition(existing),
+      }),
     );
   });
 }
@@ -85,13 +106,34 @@ export async function updateServiceField(
     }
 
     assertFieldTypeUnchanged(current.type, type);
-    const others = (await transaction.listForService(current.serviceId)).filter(
-      (field) => field.isActive && field.id !== id,
-    );
+    const existing = await transaction.listForService(current.serviceId);
+    const others = existing.filter((field) => field.isActive && field.id !== id);
     assertLabelAvailable(others, changes.label);
 
+    // SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.3: omitted values stay as they are.
+    const { audience = current.audience, conditionFieldId: requestedController, conditionValue: requestedValue, ...definition } = changes;
+    const conditionFieldId = requestedController === undefined ? current.conditionFieldId : requestedController;
+    const conditionValue = requestedController === undefined ? current.conditionValue : (requestedValue ?? null);
+    const dependents = others.filter((field) => field.conditionFieldId === id);
+    assertNotControllerOfActiveFields(dependents.length, conditionFieldId);
+    // Dependents share the controller's audience (5.2.2), so it does not change under them.
+    if (audience !== current.audience && dependents.length > 0) {
+      throw new ConflictError();
+    }
+    assertOptionsKeepConditions(
+      current.type,
+      definition.options,
+      dependents.map((field) => field.conditionValue ?? ""),
+    );
+    checkCondition({ id, audience }, conditionFieldId, conditionValue, existing);
+
     return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
-      transaction.update(id, changes),
+      transaction.update(id, {
+        ...definition,
+        audience,
+        conditionFieldId,
+        conditionValue: conditionFieldId === null ? null : conditionValue,
+      }),
     );
   });
 }
@@ -134,6 +176,12 @@ export async function deactivateServiceField(
   return transactions.run(async (transaction) => {
     const current = await loadField(transaction, id, editor);
 
+    if (current.isActive) {
+      // SPEC 2026-11-03-campos-condicionais-atendimento, 5.3.1.
+      const existing = await transaction.listForService(current.serviceId);
+      assertCanDeactivateController(existing.filter((field) => field.isActive && field.conditionFieldId === id).length);
+    }
+
     return current.isActive
       ? transaction.audited({ actor: editor.actor, action: "DEACTIVATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
           transaction.update(id, { isActive: false }),
@@ -162,11 +210,41 @@ export async function reactivateServiceField(
     const active = existing.filter((field) => field.isActive);
     assertCanAddActiveField(active.length);
     assertLabelAvailable(active, current.label);
+    // SPEC 2026-11-03-campos-condicionais-atendimento, 5.3.3.
+    assertConditionControllerActive(
+      existing.find((field) => field.id === current.conditionFieldId) ?? null,
+      current.conditionFieldId,
+    );
 
     return transaction.audited({ actor: editor.actor, action: "REACTIVATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
       transaction.update(id, { isActive: true, position: nextPosition(existing) }),
     );
   });
+}
+
+/** Section 5.2 of SPEC 2026-11-03-campos-condicionais-atendimento, against the fields of the same service. */
+function checkCondition(
+  field: { id: string | null; audience: ServiceFieldAudience },
+  conditionFieldId: string | null,
+  conditionValue: string | null,
+  serviceFields: readonly ServiceFieldSummary[],
+): void {
+  if (conditionFieldId === null) {
+    return;
+  }
+
+  const found = serviceFields.find((item) => item.id === conditionFieldId);
+  const controller: ConditionController | null = found
+    ? {
+        id: found.id,
+        type: found.type ?? "SHORT_TEXT",
+        options: found.options ?? [],
+        audience: found.audience ?? "REQUESTER",
+        isActive: found.isActive,
+        conditionFieldId: found.conditionFieldId ?? null,
+      }
+    : null;
+  assertConditionTarget(field, controller, conditionValue ?? "");
 }
 
 // Labels are unique among the active fields of a service, ignoring case; the database

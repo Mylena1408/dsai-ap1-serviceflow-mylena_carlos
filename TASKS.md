@@ -1430,7 +1430,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-133 — Migrations e domínio dos campos
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. Duas migrations; seleção múltipla, condições e obrigatórios na conclusão em `field-value.ts`; regras de configuração e de integridade em `service-field.ts` e nos casos de uso de configuração (antecipados da SF-134 para manter o código compilando a cada commit); tipo novo no editor e caixas de seleção na abertura. Regras de CA-CND-02 a 05 e 07 cobertas por unitários; CA-CND-10 parcial.
 - **Objetivo:** Duas migrations (valor `MULTI_SELECT` do enum; público, condição, autor da gravação e histórico dos campos do atendimento); validação da seleção múltipla, avaliação das condições, regras de configuração e integridade e obrigatórios na conclusão.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/service-fields/domain/`, `src/modules/requests/domain/`, testes.
 - **Dependências:** SF-132.

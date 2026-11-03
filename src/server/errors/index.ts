@@ -77,6 +77,9 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "timeZone",
   "day",
   "reason",
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.2.
+  "conditionFieldId",
+  "conditionValue",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

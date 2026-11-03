@@ -16,7 +16,7 @@ type FormAction = (
 
 type RedirectAction = (formData: FormData) => Promise<never>;
 
-type FieldType = "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO";
+type FieldType = "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO" | "MULTI_SELECT";
 
 export type AdminServiceField = {
   id: string;
@@ -50,7 +50,7 @@ const initialState: AdminUpdateState = {
 };
 
 function fieldSummary(field: AdminServiceField): string | null {
-  if (field.type === "SELECT") return `Opções: ${field.options.join(", ")}`;
+  if (field.type === "SELECT" || field.type === "MULTI_SELECT") return `Opções: ${field.options.join(", ")}`;
   if (field.type !== "INTEGER") return null;
   if (field.minValue !== null && field.maxValue !== null) return `De ${field.minValue} a ${field.maxValue}`;
   if (field.minValue !== null) return `Mínimo ${field.minValue}`;
@@ -110,7 +110,7 @@ function FieldInputs({ field }: { field?: AdminServiceField }) {
         Texto de ajuda (opcional)
         <input defaultValue={field?.helpText ?? ""} maxLength={200} name="helpText" />
       </label>
-      {type === "SELECT" ? (
+      {type === "SELECT" || type === "MULTI_SELECT" ? (
         <label className="wide-field">
           Opções (uma por linha, de 2 a 20)
           <textarea defaultValue={field?.options.join("\n")} name="options" required rows={4} />

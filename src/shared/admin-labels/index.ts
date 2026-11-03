@@ -15,4 +15,6 @@ export const FIELD_TYPE_LABELS = {
   DATE: "Data",
   SELECT: "Lista de opções",
   YES_NO: "Sim ou não",
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.1.
+  MULTI_SELECT: "Seleção múltipla",
 } as const;

@@ -42,7 +42,17 @@ function createPrismaServiceFieldTransaction(transaction: Prisma.TransactionClie
     listForService(serviceId) {
       return transaction.serviceField.findMany({
         where: { serviceId },
-        select: { id: true, position: true, label: true, isActive: true },
+        select: {
+          id: true,
+          position: true,
+          label: true,
+          isActive: true,
+          type: true,
+          options: true,
+          audience: true,
+          conditionFieldId: true,
+          conditionValue: true,
+        },
       });
     },
     async find(fieldId) {

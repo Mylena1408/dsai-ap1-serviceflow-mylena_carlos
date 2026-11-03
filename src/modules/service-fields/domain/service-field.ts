@@ -1,10 +1,24 @@
-import { ConflictError } from "@/server/errors";
+import { ConflictError, ValidationError } from "@/server/errors";
 
 // SPEC 2026-11-01-campos-personalizados, sections 5.1, 5.2 and 6.
 
-export const SERVICE_FIELD_TYPES = ["SHORT_TEXT", "LONG_TEXT", "INTEGER", "DATE", "SELECT", "YES_NO"] as const;
+// "MULTI_SELECT" added by SPEC 2026-11-03-campos-condicionais-atendimento, 5.1.
+export const SERVICE_FIELD_TYPES = ["SHORT_TEXT", "LONG_TEXT", "INTEGER", "DATE", "SELECT", "YES_NO", "MULTI_SELECT"] as const;
 
 export type ServiceFieldType = (typeof SERVICE_FIELD_TYPES)[number];
+
+/** Who fills the field (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4). */
+export const SERVICE_FIELD_AUDIENCES = ["REQUESTER", "ATTENDANT"] as const;
+
+export type ServiceFieldAudience = (typeof SERVICE_FIELD_AUDIENCES)[number];
+
+/** Types with a list of options. */
+export function hasOptions(type: ServiceFieldType): boolean {
+  return type === "SELECT" || type === "MULTI_SELECT";
+}
+
+/** Types that may control a condition (5.2.2). */
+export const CONDITION_CONTROLLER_TYPES: readonly ServiceFieldType[] = ["SELECT", "YES_NO", "MULTI_SELECT"];
 
 // Decision F4: at most ten active fields per service.
 export const MAX_ACTIVE_SERVICE_FIELDS = 10;
@@ -31,6 +45,10 @@ export interface ServiceFieldDefinition {
   options: string[];
   minValue: number | null;
   maxValue: number | null;
+  /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.4. */
+  audience: ServiceFieldAudience;
+  conditionFieldId: string | null;
+  conditionValue: string | null;
 }
 
 export interface ServiceFieldRecord extends ServiceFieldDefinition {
@@ -51,6 +69,73 @@ export function assertCanAddActiveField(activeFieldCount: number): void {
 // Section 5.1: the type never changes; the administrator deactivates the field and creates another.
 export function assertFieldTypeUnchanged(current: ServiceFieldType, requested: ServiceFieldType): void {
   if (current !== requested) {
+    throw new ConflictError();
+  }
+}
+
+// Conditions and their integrity (SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.3).
+
+export type ConditionController = Pick<
+  ServiceFieldRecord,
+  "id" | "type" | "options" | "audience" | "isActive" | "conditionFieldId"
+>;
+
+/**
+ * Section 5.2 items 2 and 3: an active field of the same service (the caller loads it from the
+ * service) and audience, of a type with choices, without its own condition, and not the field
+ * itself; the value is one of its options, or "true"/"false". Refusals name the field.
+ */
+export function assertConditionTarget(
+  field: { id: string | null; audience: ServiceFieldAudience },
+  controller: ConditionController | null,
+  value: string,
+): void {
+  if (
+    !controller ||
+    controller.id === field.id ||
+    !controller.isActive ||
+    controller.audience !== field.audience ||
+    !CONDITION_CONTROLLER_TYPES.includes(controller.type) ||
+    controller.conditionFieldId !== null
+  ) {
+    throw new ValidationError([{ path: ["conditionFieldId"], code: "invalid_value" }]);
+  }
+
+  const accepted = controller.type === "YES_NO" ? ["true", "false"] : controller.options;
+
+  if (!accepted.includes(value)) {
+    throw new ValidationError([{ path: ["conditionValue"], code: "invalid_value" }]);
+  }
+}
+
+/** Section 5.3 item 4: a controller of an active field does not get a condition itself. */
+export function assertNotControllerOfActiveFields(activeDependents: number, conditionFieldId: string | null): void {
+  if (conditionFieldId !== null && activeDependents > 0) {
+    throw new ConflictError();
+  }
+}
+
+/** Section 5.3 item 1: a controller of an active field is not deactivated. */
+export function assertCanDeactivateController(activeDependents: number): void {
+  if (activeDependents > 0) {
+    throw new ConflictError();
+  }
+}
+
+/** Section 5.3 item 2: the options keep every value used by an active condition. */
+export function assertOptionsKeepConditions(
+  type: ServiceFieldType,
+  options: readonly string[],
+  usedValues: readonly string[],
+): void {
+  if (hasOptions(type) && usedValues.some((value) => !options.includes(value))) {
+    throw new ConflictError();
+  }
+}
+
+/** Section 5.3 item 3: a field whose controller is inactive is not reactivated. */
+export function assertConditionControllerActive(controller: { isActive: boolean } | null, conditionFieldId: string | null): void {
+  if (conditionFieldId !== null && !controller?.isActive) {
     throw new ConflictError();
   }
 }
