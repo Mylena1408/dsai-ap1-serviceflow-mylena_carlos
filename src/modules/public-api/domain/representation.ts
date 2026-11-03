@@ -106,7 +106,9 @@ export function requestDetailRepresentation(
     // SPEC 2026-11-03-pausa-sla-calendario, 5.8.3.
     slaBusinessHours: request.slaBusinessHours ?? false,
     slaPausedAt: iso(request.slaPausedAt),
-    fieldAnswers: extra.answers.map((answer) => ({ label: answer.label, type: answer.type, value: answer.value })),
+    // "audience" (SPEC 2026-11-03-campos-condicionais-atendimento, 5.8.1): the attendance's answers
+    // reach only the team, already filtered by the use case.
+    fieldAnswers: extra.answers.map((answer) => ({ label: answer.label, type: answer.type, value: answer.value, audience: answer.audience ?? "REQUESTER" })),
     // Name, format and size only: the API has no download (section 4).
     attachments: extra.attachments.map((attachment) => ({
       id: attachment.id,

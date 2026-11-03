@@ -114,13 +114,14 @@ export function fieldErrorMessage(field: OpeningField, code: FieldErrorCode): st
   }
 }
 
-function FieldInput({ field, value, invalid, describedBy, disabled }: {
+function FieldInput({ field, value, invalid, describedBy, disabled, required }: {
   field: OpeningField;
   value: string | string[] | undefined;
   invalid: boolean;
   describedBy: string | undefined;
   /** A hidden conditional field is disabled, so it is neither sent nor required (5.2.6). */
   disabled: boolean;
+  required: boolean;
 }) {
   // SPEC 2026-11-03-campos-condicionais-atendimento, 5.1: one box per option, all with the same name.
   if (field.type === "MULTI_SELECT") {
@@ -141,7 +142,7 @@ function FieldInput({ field, value, invalid, describedBy, disabled }: {
   const common = {
     id: `field-${field.id}`,
     name: `field.${field.id}`,
-    required: field.isRequired,
+    required,
     disabled,
     defaultValue: single,
     "aria-invalid": invalid || undefined,
@@ -186,18 +187,22 @@ function FieldInput({ field, value, invalid, describedBy, disabled }: {
   }
 }
 
-function CustomFields({ fields, fieldErrors, values, current }: {
+export function CustomFields({ fields, fieldErrors, values, current, legend = "Informações do serviço", requiredAttribute = true }: {
   fields: OpeningField[];
   fieldErrors: Record<string, FieldErrorCode>;
   values: Record<string, string | string[]>;
   /** Values as typed now, to show and hide conditional fields (5.2.6). */
   current: Record<string, string | string[]>;
+  /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.5: the attendance's form has its own title. */
+  legend?: string;
+  /** Whether the browser demands required fields; the attendance's form demands them only at the completion. */
+  requiredAttribute?: boolean;
 }) {
   const hydrated = useHydrated();
 
   return (
     <fieldset className="custom-fields">
-      <legend>Informações do serviço</legend>
+      <legend>{legend}</legend>
       {fields.map((field) => {
         // A hidden field is disabled too, so the browser neither sends nor requires it.
         const hidden = hydrated && !conditionShown(field, fields, current);
@@ -215,6 +220,7 @@ function CustomFields({ fields, fieldErrors, values, current }: {
             <FieldInput
               describedBy={describedBy}
               disabled={hidden}
+              required={field.isRequired && requiredAttribute}
               field={field}
               invalid={Boolean(code)}
               value={values[`field.${field.id}`]}

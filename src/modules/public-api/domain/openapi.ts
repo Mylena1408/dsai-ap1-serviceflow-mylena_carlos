@@ -374,7 +374,20 @@ export const OPENAPI_DOCUMENT = {
             properties: {
               slaBusinessHours: { type: "boolean", description: "O prazo conta só horas úteis do calendário." },
               slaPausedAt: nullable("string", { format: "date-time" }),
-              fieldAnswers: { type: "array", items: { type: "object", properties: { label: { type: "string" }, type: { type: "string" }, value: { type: "string" } } } },
+              fieldAnswers: {
+                type: "array",
+                description:
+                  "Respostas dos campos. Na seleção múltipla, value é uma lista JSON em texto. audience ATTENDANT marca as informações do atendimento, que só a equipe do setor recebe.",
+                items: {
+                  type: "object",
+                  properties: {
+                    label: { type: "string" },
+                    type: { type: "string" },
+                    value: { type: "string" },
+                    audience: { type: "string", enum: ["REQUESTER", "ATTENDANT"] },
+                  },
+                },
+              },
               attachments: {
                 type: "array",
                 items: {

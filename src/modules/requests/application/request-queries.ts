@@ -26,7 +26,17 @@ export async function getRequesterRequest(
     throw new NotFoundError();
   }
 
-  return request;
+  return withoutAttendanceHistory(request);
+}
+
+/**
+ * The saves of the attendance fields are seen only by the team (SPEC 2026-11-03-campos-condicionais-
+ * atendimento, 5.6), so the requester's and the manager's details leave them out.
+ */
+function withoutAttendanceHistory(request: RequestWithHistory): RequestWithHistory {
+  const rest = { ...request };
+  delete rest.fieldUpdates;
+  return rest;
 }
 
 export async function listAttendantQueue(
@@ -105,7 +115,7 @@ export async function getManagerRequest(
     throw new NotFoundError();
   }
 
-  return request;
+  return withoutAttendanceHistory(request);
 }
 
 /**

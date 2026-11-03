@@ -10,6 +10,7 @@ import { assertCanStartWithApproval } from "../domain/approval";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
 import { closePause, resumeColumns } from "./sla-pause";
+import { assertAttendanceFieldsComplete } from "./attendance-fields";
 
 export async function transitionRequestStatus(
   input: unknown,
@@ -51,6 +52,8 @@ export async function transitionRequestStatus(
     // stage (5.3.3); starting copies the active stages and enters the first one (5.2.2).
     if (parsed.toStatus === "COMPLETED") {
       assertCanCompleteAtStage(stageState);
+      // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.4.
+      await assertAttendanceFieldsComplete(transaction, parsed.requestId, currentRequest.serviceId);
     }
     // SPEC 2026-11-01-aprovacoes, 5.3.2: nobody starts while the approval is pending.
     if (parsed.toStatus === "IN_PROGRESS") {

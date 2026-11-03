@@ -58,6 +58,11 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.3.
+  fieldUpdates: {
+    orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+    include: { actor: { select: { id: true, name: true } } },
+  },
   // SPEC 2026-11-03-pausa-sla-calendario, 5.5.
   slaPauses: {
     orderBy: [{ pausedAt: "asc" }, { id: "asc" }],
@@ -329,6 +334,63 @@ export function createPrismaRequestTransaction(
     },
     async insertFieldValues(values) {
       await transaction.requestFieldValue.createMany({ data: values });
+    },
+    // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.
+    listActiveAttendanceFields(serviceId) {
+      return transaction.serviceField.findMany({
+        where: { serviceId, isActive: true, audience: "ATTENDANT" },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          label: true,
+          helpText: true,
+          type: true,
+          isRequired: true,
+          options: true,
+          minValue: true,
+          maxValue: true,
+          position: true,
+          conditionFieldId: true,
+          conditionValue: true,
+        },
+      });
+    },
+    async listAttendanceAnswers(requestId) {
+      const rows = await transaction.requestFieldValue.findMany({
+        where: { requestId, updatedById: { not: null } },
+        select: { fieldId: true, typeSnapshot: true, value: true },
+      });
+      return rows.map((row) => ({ fieldId: row.fieldId, type: row.typeSnapshot, value: row.value }));
+    },
+    async saveAttendanceAnswers({ requestId, actorId, at, upserts, removals }) {
+      if (removals.length > 0) {
+        await transaction.requestFieldValue.deleteMany({ where: { requestId, fieldId: { in: removals }, updatedById: { not: null } } });
+      }
+      for (const answer of upserts) {
+        const data = {
+          labelSnapshot: answer.labelSnapshot,
+          typeSnapshot: answer.typeSnapshot,
+          positionSnapshot: answer.positionSnapshot,
+          value: answer.value,
+          updatedAt: at,
+          updatedById: actorId,
+        };
+        await transaction.requestFieldValue.upsert({
+          where: { requestId_fieldId: { requestId, fieldId: answer.fieldId } },
+          create: { requestId, fieldId: answer.fieldId, createdAt: at, ...data },
+          update: data,
+        });
+      }
+    },
+    async insertFieldUpdateEvent(event) {
+      await transaction.requestFieldUpdateEvent.create({ data: event });
+    },
+    async touchRequestIfCurrent(update) {
+      const result = await transaction.request.updateMany({
+        where: { id: update.requestId, status: update.expectedStatus, assigneeId: update.expectedAssigneeId },
+        data: { updatedAt: update.updatedAt },
+      });
+      return result.count;
     },
     async updateStatusIfCurrent(update) {
       const result = await transaction.request.updateMany({

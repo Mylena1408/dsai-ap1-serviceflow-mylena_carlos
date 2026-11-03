@@ -14,14 +14,18 @@ export function createPrismaFieldAnswerQueryRepository(database: PrismaClient): 
       const rows = await database.requestFieldValue.findMany({
         where: { requestId },
         orderBy: [{ positionSnapshot: "asc" }, { id: "asc" }],
-        select: { id: true, labelSnapshot: true, typeSnapshot: true, positionSnapshot: true, value: true },
+        select: { id: true, labelSnapshot: true, typeSnapshot: true, positionSnapshot: true, value: true, updatedById: true },
       });
+      // The requester's answers first, then the attendance's, each in its own order
+      // (SPEC 2026-11-03-campos-condicionais-atendimento, 5.6).
+      rows.sort((left, right) => Number(left.updatedById !== null) - Number(right.updatedById !== null));
       return rows.map((row) => ({
         id: row.id,
         label: row.labelSnapshot,
         type: row.typeSnapshot,
         position: row.positionSnapshot,
         value: row.value,
+        audience: row.updatedById === null ? ("REQUESTER" as const) : ("ATTENDANT" as const),
       }));
     },
   };

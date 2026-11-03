@@ -148,6 +148,11 @@ export interface RequestWithHistory extends RequestRecord {
   attachments?: Array<{ id: string; requirementNameSnapshot: string; createdAt: Date; uploadedBy: { id: string; name: string } }>;
   /** SLA pauses (SPEC 2026-11-03-pausa-sla-calendario, 5.5). Optional like sectorEvents. */
   slaPauses?: RequestSlaPauseRecord[];
+  /**
+   * Saves of the attendance fields, labels only (SPEC 2026-11-03-campos-condicionais-atendimento,
+   * 5.5.3). Only the team sees them; optional like sectorEvents.
+   */
+  fieldUpdates?: Array<{ id: string; labels: string[]; occurredAt: Date; actor: { id: string; name: string } }>;
   service: {
     id: string;
     isActive: boolean;

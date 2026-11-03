@@ -27,7 +27,12 @@ import { DEFAULT_CALENDAR, type BusinessCalendar } from "@/shared/business-clock
 
 export type StoredActor = TransactionActor & { name: string; email: string };
 export type StoredRequirement = ActiveDocumentRequirement & { serviceId: string; isActive: boolean };
-export type StoredField = AnswerableField & { serviceId: string; isActive: boolean };
+export type StoredField = AnswerableField & {
+  serviceId: string;
+  isActive: boolean;
+  /** SPEC 2026-11-03-campos-condicionais-atendimento; requester when absent. */
+  audience?: "REQUESTER" | "ATTENDANT";
+};
 export type StoredStage = { serviceId: string; name: string; position: number; isActive: boolean };
 type StoredEvent = Omit<RequestStatusEventRecord, "actor">;
 
@@ -44,7 +49,9 @@ export interface InMemoryRequestStore {
   outbox: DomainEvent[];
   priorityEvents: NewPriorityEvent[];
   fields: StoredField[];
-  fieldValues: NewRequestFieldValue[];
+  fieldValues: Array<NewRequestFieldValue & { updatedById?: string; updatedAt?: Date }>;
+  /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.3. */
+  fieldUpdateEvents?: Array<{ requestId: string; actorId: string; labels: string[]; occurredAt: Date }>;
   stages: StoredStage[];
   stageEvents: Array<NewStageEvent & { id: string }>;
   approvals: NewApproval[];
@@ -260,7 +267,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
     },
     async listActiveFields(serviceId) {
       return store.fields
-        .filter((field) => field.serviceId === serviceId && field.isActive)
+        .filter((field) => field.serviceId === serviceId && field.isActive && (field.audience ?? "REQUESTER") === "REQUESTER")
         .sort((left, right) => left.position - right.position)
         .map(({ id, label, type, isRequired, options, minValue, maxValue, position }) => ({
           id,
@@ -361,6 +368,49 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       return store.attachments
         .filter((attachment) => attachment.requestId === requestId)
         .map(({ requirementId, sizeBytes }) => ({ requirementId, sizeBytes }));
+    },
+    async listActiveAttendanceFields(serviceId) {
+      return store.fields
+        .filter((field) => field.serviceId === serviceId && field.isActive && field.audience === "ATTENDANT")
+        .sort((left, right) => left.position - right.position)
+        .map(({ id, label, type, isRequired, options, minValue, maxValue, position, conditionFieldId, conditionValue }) => ({
+          id,
+          label,
+          type,
+          isRequired,
+          options,
+          minValue,
+          maxValue,
+          position,
+          conditionFieldId,
+          conditionValue,
+        }));
+    },
+    async listAttendanceAnswers(requestId) {
+      return store.fieldValues
+        .filter((value) => value.requestId === requestId && value.updatedById)
+        .map(({ fieldId, typeSnapshot, value }) => ({ fieldId, type: typeSnapshot, value }));
+    },
+    async saveAttendanceAnswers({ requestId, actorId, at, upserts, removals }) {
+      store.fieldValues = store.fieldValues.filter(
+        (value) => !(value.requestId === requestId && removals.includes(value.fieldId) && value.updatedById),
+      );
+      for (const answer of upserts) {
+        const current = store.fieldValues.find((value) => value.requestId === requestId && value.fieldId === answer.fieldId);
+        if (current) Object.assign(current, answer, { updatedById: actorId, updatedAt: at });
+        else store.fieldValues.push({ ...answer, requestId, createdAt: at, updatedById: actorId, updatedAt: at });
+      }
+    },
+    async insertFieldUpdateEvent(event) {
+      (store.fieldUpdateEvents ??= []).push(event);
+    },
+    async touchRequestIfCurrent(update) {
+      const request = store.requests.find(
+        ({ id, status, assigneeId }) => id === update.requestId && status === update.expectedStatus && assigneeId === update.expectedAssigneeId,
+      );
+      if (!request) return 0;
+      request.updatedAt = update.updatedAt;
+      return 1;
     },
     async insertFieldValues(values) {
       store.fieldValues.push(...values);

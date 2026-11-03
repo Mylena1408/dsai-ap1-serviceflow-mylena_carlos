@@ -13,6 +13,7 @@ import * as stageUseCase from "./application/stages";
 import * as sectorTransfer from "./application/sector-transfer";
 import * as lateDocument from "./application/late-document";
 import * as slaPause from "./application/sla-pause";
+import * as attendanceFields from "./application/attendance-fields";
 import type { ActiveDocumentRequirement } from "./domain/attachment-requirements";
 import * as approvalUseCase from "./application/approval";
 import * as transitionUseCase from "./application/transition-request-status";
@@ -289,4 +290,19 @@ export async function resumeSlaOnRequesterReply(
   authorId: string,
 ): Promise<void> {
   await slaPause.resumeOnRequesterReply(createPrismaRequestTransaction(transaction), requestId, authorId);
+}
+
+// Fields filled by the attendance (SPEC 2026-11-03-campos-condicionais-atendimento, 5.5).
+export { AttendanceFieldsMissingError } from "./application/attendance-fields";
+export type { AttendanceFieldsView } from "./application/attendance-fields";
+
+export async function saveAttendanceFields(input: unknown, database: PrismaClient = prisma): Promise<{ changed: string[] }> {
+  return attendanceFields.saveAttendanceFields(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
+export async function getAttendanceFields(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<attendanceFields.AttendanceFieldsView> {
+  return attendanceFields.getAttendanceFields(requestId, createPrismaRequestTransactionRunner(database, lifecycleErrors));
 }

@@ -67,3 +67,8 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 2. SF-133: migrations e domínio; `CHECK` com `NULL` corrigido antes do commit.
 3. SF-134: configuração na administração.
 4. SF-135: abertura com seleção múltipla e condições.
+5. SF-136: campos do atendimento.
+
+> ao terminar me avise o que foi construido,aonde se encontra no escopo, quantas linhas de codigo produzidos hoje e a produção total de linhas de codigo com o cloc --diff
+
+> retorno de todas as respostas em português (brasil)

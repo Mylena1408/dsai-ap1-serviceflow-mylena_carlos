@@ -60,6 +60,11 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
       await transaction.requestSectorEvent.updateMany({ where: { actorId: userId }, data: { note: replacement } });
       // SPEC 2026-11-03-pausa-sla-calendario, 5.9.2: the reason of a pause is mandatory too.
       await transaction.requestSlaPause.updateMany({ where: { pausedById: userId }, data: { reason: replacement } });
+      // SPEC 2026-11-03-campos-condicionais-atendimento, 5.8.2: free text the person saved in attendance fields.
+      await transaction.requestFieldValue.updateMany({
+        where: { updatedById: userId, typeSnapshot: { in: ["SHORT_TEXT", "LONG_TEXT"] } },
+        data: { value: replacement },
+      });
     },
     async deleteNotificationData(userId) {
       await transaction.emailDelivery.deleteMany({ where: { recipientId: userId } });

@@ -1878,3 +1878,21 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Teste de integração da API em arquivo próprio:** com `@/server/auth` simulado, a API respondeu `500`, problema já visto na SF-122, porque o simulado substitui o contexto do token. Por isso `public-api-conditional-fields.test.ts` não simula a sessão e cria os campos direto no banco.
 - **Testes novos:** `tests/integration/conditional-fields-opening.test.ts`, `tests/integration/public-api-conditional-fields.test.ts` e `tests/unit/conditional-fields-form.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 880/880; integração 401/401 + 1 pulado; E2E de campos personalizados e de anexos 2/2.
+
+## SF-136 — Campos do atendimento (2026-11-03)
+
+- **Caso de uso (`requests/application/attendance-fields.ts`):**
+  - valida pelo tipo e pela condição, com os obrigatórios afrouxados, porque a obrigatoriedade só é cobrada na conclusão;
+  - compara com o que está gravado e grava só o que mudou: `upsert` das respostas com `updatedAt`/`updatedById` e remoção das que foram apagadas;
+  - confere status e responsável lidos (`touchRequestIfCurrent`) e grava a linha do histórico só com os rótulos.
+  - A conclusão chama `assertAttendanceFieldsComplete`, que lança `AttendanceFieldsMissingError` (um `409` com os rótulos que faltam).
+- **Quem vê:** uma resposta é do atendimento quando tem autor de gravação (`updatedById`). Assim, a visibilidade não depende do público atual do campo, e mudar o público depois não esconde do solicitante o que ele respondeu na abertura.
+  - `listRequestFieldAnswers` devolve as do atendimento só para atendentes;
+  - o detalhe do solicitante e o do gestor tiram as linhas `fieldUpdates`;
+  - "Meus dados" lê só `updatedById: null`.
+- **Defeito pego pelo teste:** na primeira versão, o detalhe do solicitante trazia as linhas do histórico dos campos do atendimento (só rótulos, mas a SPEC 5.6 diz que só a equipe vê). Corrigido no caso de uso, que agora as tira para o solicitante e para o gestor.
+- **Tela:** "Informações do atendimento" é um componente cliente que usa o mesmo `CustomFields` da abertura. Ganhou o título e `requiredAttribute={false}`, para o navegador não barrar uma gravação parcial. Enquanto o formulário aparece, o bloco "Informações do serviço" mostra só as respostas do solicitante.
+- **Ações:** os erros do atendimento são reconhecidos pela forma (`labels` no conflito, `reason` na validação), não pela classe. Na primeira versão, com `instanceof`, seis testes antigos de ações falharam: eles simulam `@/modules/requests` sem a classe nova. Os testes não mudaram; mudou o código.
+- **Anonimização:** textos curtos e longos gravados pela pessoa nos campos do atendimento.
+- **Testes novos:** `tests/integration/attendance-fields.test.ts` e `tests/unit/attendance-fields-timeline.test.ts`; o dublê em memória ganhou as operações novas.
+- **Resultados:** lint, typecheck e build OK; unitários 881/881; integração 404/404 + 1 pulado; E2E 23/23.

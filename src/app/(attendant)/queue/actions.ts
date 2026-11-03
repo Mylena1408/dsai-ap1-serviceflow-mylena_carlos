@@ -10,6 +10,7 @@ import {
   pauseRequestSla,
   releaseRequest,
   resumeRequestSla,
+  saveAttendanceFields,
   sendRequestToSector,
   transferRequest,
   transitionRequestStatus,
@@ -25,6 +26,13 @@ function field(formData: FormData, name: string): string {
 }
 
 function errorCode(error: ApplicationError, noteCode: string): string {
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5. Recognized by shape, not by class, so
+  // this file does not depend on more of the modules than the use cases it calls.
+  if (error.code === "CONFLICT" && Array.isArray((error as { labels?: unknown }).labels)) return "attendance-required";
+  const fieldsReason = (error as { reason?: unknown }).reason;
+  if (error instanceof ValidationError && (fieldsReason === "stale_form" || fieldsReason === "invalid")) {
+    return fieldsReason === "stale_form" ? "attendance-changed" : "attendance-invalid";
+  }
   const fileCode = commentFileErrorCode(error);
   if (fileCode) return fileCode;
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("note"))) {
@@ -144,6 +152,20 @@ export async function pauseSlaAction(formData: FormData): Promise<never> {
 
 export async function resumeSlaAction(formData: FormData): Promise<never> {
   return runOnRequest(formData, (requestId) => resumeRequestSla({ requestId }), "resumed");
+}
+
+// SPEC 2026-11-03-campos-condicionais-atendimento, 5.5: "Informações do atendimento". The boxes of a
+// multiple choice share the name and go as a list.
+export async function saveAttendanceFieldsAction(formData: FormData): Promise<never> {
+  const values: Record<string, string | string[]> = {};
+  for (const [name, value] of formData.entries()) {
+    if (name.startsWith("field.") && typeof value === "string") {
+      const id = name.slice("field.".length);
+      const previous = values[id];
+      values[id] = previous === undefined ? value : [...(Array.isArray(previous) ? previous : [previous]), value];
+    }
+  }
+  return runOnRequest(formData, (requestId) => saveAttendanceFields({ requestId, values }), "attendance-saved");
 }
 
 // Section 5.4: the attendant cancels with a mandatory reason.

@@ -51,7 +51,8 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
             completedAt: true,
             cancelledAt: true,
             dueAt: true,
-            fieldValues: { orderBy: { positionSnapshot: "asc" }, select: { labelSnapshot: true, value: true } },
+            // Only the requester's answers (SPEC 2026-11-03-campos-condicionais-atendimento, 5.8.3).
+            fieldValues: { where: { updatedById: null }, orderBy: { positionSnapshot: "asc" }, select: { labelSnapshot: true, value: true } },
             events: {
               orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
               select: { occurredAt: true, toStatus: true, note: true, actor: { select: { name: true } } },

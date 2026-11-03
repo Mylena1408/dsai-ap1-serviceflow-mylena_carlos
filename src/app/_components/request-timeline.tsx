@@ -67,6 +67,14 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     actor: event.actor.name,
     note: event.note,
   }));
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.3: labels of the changed fields, never values.
+  const fieldEntries = (request.fieldUpdates ?? []).map((update) => ({
+    id: `fields-${update.id}`,
+    occurredAt: update.occurredAt,
+    title: `Informações do atendimento atualizadas: ${update.labels.join(", ")}`,
+    actor: update.actor.name,
+    note: null,
+  }));
   // SPEC 2026-11-03-pausa-sla-calendario, 5.5: the pause with its reason, and the resume with its cause.
   const pauseEntries = (request.slaPauses ?? []).flatMap((pause) => [
     {
@@ -135,7 +143,7 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
 
   // Stable sort: on equal times, status events come first, then sector moves, assignments,
   // priorities, stages and the approval.
-  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries].sort(
+  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries, ...fieldEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }

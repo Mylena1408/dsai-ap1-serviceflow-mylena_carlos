@@ -224,6 +224,23 @@ export interface SlaPauseClosing {
   resumeCause: SlaResumeCause;
 }
 
+/** SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.2 and 5.5.5. */
+export interface AttendanceAnswersChange {
+  requestId: string;
+  actorId: string;
+  at: Date;
+  upserts: FieldAnswer[];
+  removals: string[];
+}
+
+/** History line of a save of the attendance fields: labels only (5.5.3). */
+export interface NewFieldUpdateEvent {
+  requestId: string;
+  actorId: string;
+  labels: string[];
+  occurredAt: Date;
+}
+
 /** Changes the priority only while status, assignee and priority are still the ones read. */
 export interface PriorityUpdate {
   requestId: string;
@@ -347,6 +364,15 @@ export interface RequestTransaction {
   /** Documents already in the request (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.3). */
   listRequestDocuments(requestId: string): Promise<Array<{ requirementId: string; sizeBytes: number }>>;
   insertFieldValues(values: NewRequestFieldValue[]): Promise<void>;
+  /** Active fields filled by the attendance (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4). */
+  listActiveAttendanceFields(serviceId: string): Promise<Array<AnswerableField & { helpText?: string | null }>>;
+  /** Answers saved by the attendance (the ones with an author of the save). */
+  listAttendanceAnswers(requestId: string): Promise<Array<{ fieldId: string; type: AnswerableField["type"]; value: string }>>;
+  /** Writes the changed answers and removes the cleared ones (5.5.2). */
+  saveAttendanceAnswers(change: AttendanceAnswersChange): Promise<void>;
+  insertFieldUpdateEvent(event: NewFieldUpdateEvent): Promise<void>;
+  /** Moves `updatedAt` only while status and assignee are the ones read; returns the rows changed. */
+  touchRequestIfCurrent(update: { requestId: string; expectedStatus: RequestStatus; expectedAssigneeId: string | null; updatedAt: Date }): Promise<number>;
   /** Updates the status only while it still equals `expectedStatus`; returns the number of rows changed. */
   updateStatusIfCurrent(update: StatusUpdate): Promise<number>;
   insertStatusEvent(event: NewStatusEvent): Promise<void>;

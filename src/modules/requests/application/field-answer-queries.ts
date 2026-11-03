@@ -1,3 +1,4 @@
+import { requireCurrentActor } from "@/server/authorization";
 import type { RequestFieldAnswer } from "../domain/field-answer";
 import { authorizeRequestRead } from "./attachment-queries";
 import type { FieldAnswerQueryRepository } from "./ports";
@@ -10,6 +11,9 @@ export async function listRequestFieldAnswers(
   repository: FieldAnswerQueryRepository,
 ): Promise<RequestFieldAnswer[]> {
   const id = await authorizeRequestRead(requestId, repository);
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.6: the attendance's answers only for the team.
+  const actor = await requireCurrentActor();
+  const answers = await repository.listForRequest(id);
 
-  return repository.listForRequest(id);
+  return actor.role === "ATTENDANT" ? answers : answers.filter((answer) => answer.audience !== "ATTENDANT");
 }

@@ -22,6 +22,8 @@ export {
   assertFieldAnswers,
   collectFieldAnswers,
   formatFieldAnswer,
+  missingRequiredFields,
+  multipleChoiceOptions,
   normalizeFieldValue,
 } from "./domain/field-value";
 export type {

@@ -1460,7 +1460,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-136 — Campos do atendimento
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-03. `saveAttendanceFields` e `getAttendanceFields`, formulário "Informações do atendimento" na fila, linha no histórico, obrigatórios na conclusão, visibilidade só para a equipe (tela, API, "Meus dados", gestor), `audience` na API e anonimização dos textos. CA-CND-06 a 09 verificados.
 - **Objetivo:** Formulário "Informações do atendimento" na fila, gravação com histórico e concorrência, obrigatórios na conclusão, visibilidade, API, anonimização e "Meus dados".
 - **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/service-fields/`, `src/app/(attendant)/`, `src/modules/public-api/`, `src/modules/users/`, testes.
 - **Dependências:** SF-135.

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   effectiveAssigneeId,
+  getAttendanceFields,
   getAttendantRequest,
   listRequestAttachments,
   listRequestFieldAnswers,
@@ -23,6 +24,7 @@ import { RequestSla } from "@/app/_components/request-sla";
 import { PriorityForm } from "./priority-form";
 import { SectorTransferForm } from "./sector-transfer-form";
 import { SlaPausePanel } from "./sla-pause-panel";
+import { AttendanceFieldsForm } from "./attendance-fields-form";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
@@ -54,6 +56,11 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "paused") return "Prazo pausado. O solicitante foi avisado.";
   if (notice === "resumed") return "Prazo retomado.";
   if (error === "pause-reason") return "Informe o motivo da pausa, com até 500 caracteres.";
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.
+  if (notice === "attendance-saved") return "Informações do atendimento salvas.";
+  if (error === "attendance-required") return "Preencha as informações do atendimento obrigatórias antes de concluir.";
+  if (error === "attendance-invalid") return "Confira as informações do atendimento: há valores inválidos.";
+  if (error === "attendance-changed") return "Os campos do atendimento mudaram. Atualize a página e preencha de novo.";
   if (error === "stage-note") return "Informe a justificativa do retorno, com até 1.000 caracteres.";
   if (error === "priority") return "Escolha uma prioridade diferente da atual.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
@@ -79,6 +86,7 @@ export default async function QueueRequestPage({
   let comments;
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
+  let attendance: Awaited<ReturnType<typeof getAttendanceFields>> = { fields: [], values: {} };
   // SPEC 2026-11-01-permissoes-configuraveis, 5.3.3.
   const supervisor = await actorHasPermission(actor, "QUEUE_SUPERVISION");
 
@@ -87,6 +95,7 @@ export default async function QueueRequestPage({
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
+    attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
       candidates = await listTransferCandidates(request.id);
@@ -109,6 +118,9 @@ export default async function QueueRequestPage({
   const assigneeId = effectiveAssigneeId(request);
   const heldByColleague = assigneeId !== null && assigneeId !== actor.id;
   // SPEC 2026-11-01-fluxos-configuraveis, 5.3.3: with a flow, completion only at the last stage.
+  // SPEC 2026-11-03-campos-condicionais-atendimento, 5.4.2.
+  const attendanceFormShown =
+    attendance.fields.length > 0 && (request.status === "OPEN" || request.status === "IN_PROGRESS") && (!heldByColleague || supervisor);
   const atLastStage =
     request.stageIndex === null || request.stageIndex === request.stageNamesSnapshot.length - 1;
 
@@ -173,7 +185,12 @@ export default async function QueueRequestPage({
           <button type="submit">Concluir solicitação</button>
         </form>
       ) : null}
-      <RequestFieldAnswers answers={answers} />
+      {/* SPEC 2026-11-03-campos-condicionais-atendimento, 5.4.2: for whoever may change the priority. */}
+      {attendanceFormShown ? (
+        <AttendanceFieldsForm fields={attendance.fields} requestId={request.id} values={attendance.values} />
+      ) : null}
+      {/* While the form shows the attendance's answers, the block keeps only the requester's. */}
+      <RequestFieldAnswers answers={attendanceFormShown ? answers.filter((answer) => answer.audience !== "ATTENDANT") : answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <RequestConversation
         requestId={request.id}
