@@ -1812,3 +1812,16 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Revisão:** nenhuma dependência nova; uma migration; nenhum segredo; SPEC concluída, com dois esclarecimentos registrados (linha do calendário sem `INSERT`; liberar não muda o status).
 - **Resultados:** lint, typecheck e build OK; unitários 865/865; integração 390/390 + 1 pulado; E2E 23/23.
 - **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors`, `20261103200000_request_sector_events`, `20261103300000_request_comment_files` e `20261103400000_sla_pause_calendar`.
+
+## SPEC de campos condicionais, seleção múltipla e campos do atendimento (2026-11-03)
+
+- **SPEC `2026-11-03-campos-condicionais-atendimento.md`** (funcionalidade 8 da lista aprovada), decisões K1 a K10 adotadas como recomendadas:
+  - seleção múltipla com caixas, guardada como lista JSON na ordem configurada;
+  - uma condição por campo, "igual a"/"contém", um nível só;
+  - valor de campo escondido descartado sem erro;
+  - mudanças que quebrariam condições recusadas;
+  - campos do atendimento no mesmo cadastro, editáveis, vistos só pela equipe e cobrados na conclusão;
+  - limite de 10 no total;
+  - histórico com rótulos sem valores.
+- Tarefas SF-133 a SF-137.
+- **Ponto de projeto:** duas migrations, porque um valor novo de enum não pode ser usado na mesma transação em que é criado.

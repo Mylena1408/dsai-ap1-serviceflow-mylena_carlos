@@ -1423,3 +1423,57 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-PSL-01 a 11.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-03-pausa-sla-calendario.md`.
+
+## Campos condicionais, seleção múltipla e campos do atendimento — SPEC de 2026-11-03
+
+**Ordem:** SF-133 → SF-134 → SF-135 → SF-136 → SF-137.
+
+### SF-133 — Migrations e domínio dos campos
+
+- **Estado:** Pendente.
+- **Objetivo:** Duas migrations (valor `MULTI_SELECT` do enum; público, condição, autor da gravação e histórico dos campos do atendimento); validação da seleção múltipla, avaliação das condições, regras de configuração e integridade e obrigatórios na conclusão.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/service-fields/domain/`, `src/modules/requests/domain/`, testes.
+- **Dependências:** SF-132.
+- **Critérios de conclusão:** Parte de dados de CA-CND-10; regras de CA-CND-02 a 05 e 07 cobertas por unitários.
+- **Testes relacionados:** Unitários; integração do schema.
+- **SPEC:** `SPEC/2026-11-03-campos-condicionais-atendimento.md`.
+
+### SF-134 — Configuração dos campos na administração
+
+- **Estado:** Pendente.
+- **Objetivo:** Tipo "Seleção múltipla", "Quem preenche" e "Mostrar só quando" no editor de campos; regras de 5.2 e 5.3 nos casos de uso; lista com público e condição; auditoria.
+- **Arquivos/módulos esperados:** `src/modules/service-fields/`, `src/app/(admin)/admin/`, testes.
+- **Dependências:** SF-133.
+- **Critérios de conclusão:** CA-CND-02 e 03.
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-03-campos-condicionais-atendimento.md`.
+
+### SF-135 — Abertura com seleção múltipla e condições
+
+- **Estado:** Pendente.
+- **Objetivo:** Caixas de seleção, mostrar e esconder condicionais no formulário, descarte de valores escondidos no servidor, lista na API de abertura.
+- **Arquivos/módulos esperados:** `src/app/(requester)/`, `src/modules/requests/`, `src/modules/public-api/`, testes.
+- **Dependências:** SF-134.
+- **Critérios de conclusão:** CA-CND-04 e 05.
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-03-campos-condicionais-atendimento.md`.
+
+### SF-136 — Campos do atendimento
+
+- **Estado:** Pendente.
+- **Objetivo:** Formulário "Informações do atendimento" na fila, gravação com histórico e concorrência, obrigatórios na conclusão, visibilidade, API, anonimização e "Meus dados".
+- **Arquivos/módulos esperados:** `src/modules/requests/`, `src/modules/service-fields/`, `src/app/(attendant)/`, `src/modules/public-api/`, `src/modules/users/`, testes.
+- **Dependências:** SF-135.
+- **Critérios de conclusão:** CA-CND-06 a 09.
+- **Testes relacionados:** Unitários; integração.
+- **SPEC:** `SPEC/2026-11-03-campos-condicionais-atendimento.md`.
+
+### SF-137 — E2E, README e revisão
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8, README e revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-136.
+- **Critérios de conclusão:** CA-CND-01 a 10.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-03-campos-condicionais-atendimento.md`.

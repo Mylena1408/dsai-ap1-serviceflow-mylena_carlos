@@ -58,3 +58,9 @@ Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada
 4. SF-130: pausa e retomada do prazo; esclarecimento na SPEC sobre liberar (não muda o status).
 5. SF-131: API, OpenAPI e webhooks da pausa.
 6. SF-132: E2E, README e revisão; SPEC concluída.
+
+## Continuação — campos condicionais, seleção múltipla e campos do atendimento
+
+> pode prosseguir
+
+1. SPEC `SPEC/2026-11-03-campos-condicionais-atendimento.md` (funcionalidade 8), decisões K1 a K10 adotadas como recomendadas; tarefas SF-133 a SF-137.
