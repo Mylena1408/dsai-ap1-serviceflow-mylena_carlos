@@ -21,3 +21,13 @@
 ## Resultado
 
 Ver `NOTES.md`, seções SF-116 a SF-119. A migration ainda precisa ser aplicada no Neon antes do próximo deploy.
+
+## Continuação — transferência entre setores
+
+> pode prosseguir
+
+1. SPEC `SPEC/2026-11-03-transferencia-entre-setores.md` (funcionalidade 5), decisões T1 a T7 adotadas como recomendadas; tarefas SF-120 a SF-123.
+2. SF-120: migration aditiva (`RequestSectorEvent`) e regras de domínio.
+3. SF-121: caso de uso, formulário na fila, histórico, notificações, anonimização e "Meus dados" (esclarecimento na SPEC, 5.9).
+4. SF-122: rotas da API, OpenAPI e webhooks da origem e do destino (esclarecimento na SPEC, 5.8.2).
+5. SF-123: E2E e README; a primeira abordagem do E2E (mover o Diego de setor) foi descartada porque a entrada de demonstração restaura o setor.

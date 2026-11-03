@@ -1664,3 +1664,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu no teste, corrigido:** a primeira versão do teste de integração simulava a sessão (`@/server/auth`) para abrir a solicitação e cadastrar webhooks; isso substitui também o contexto do token da API, e as rotas responderam `500`. O teste passou a criar a solicitação e os webhooks direto no banco, sem simular a sessão.
 - **Testes novos:** unitário `tests/unit/modules/webhooks/sector-move.test.ts`; integração `tests/integration/public-api-sector-transfer.test.ts`.
 - **Resultados:** lint, typecheck e build OK; unitários 813/813; integração 363/363 + 1 pulado. O E2E não foi rodado nesta tarefa (nenhuma tela mudou); roda inteiro na SF-123.
+
+## SF-123 — E2E e revisão do encaminhamento entre setores (2026-11-03)
+
+- **E2E `tests/e2e/request-sector-transfer.spec.ts`:** a Ana abre uma solicitação no catálogo; o Diego escreve uma nota interna, assume e encaminha pela tela para um segundo setor criado pelo teste (o setor atual não aparece entre os destinos); volta para a fila com o aviso; a solicitação some da fila dele e o detalhe responde `404`; o atendente do segundo setor lê pela API o histórico (encaminhamento com justificativa, assunção e liberação) e a nota interna, e recebe a notificação; a Ana vê "Setor responsável" com o novo setor e a linha com a justificativa, sem a nota interna.
+- **Primeira tentativa, descartada:** mover o Diego para o segundo setor no banco para olhar a fila desse setor pela tela. Não funciona: o clique "Entrar como Atendente" restaura a conta de demonstração, setor incluído (SPEC principal, seção 22), e o Diego voltava ao setor original. Como só as pessoas da demonstração entram pela tela, a leitura pelo novo setor passou a ser feita pela API com um token do atendente do segundo setor; a tela de fila do novo setor é a mesma de qualquer setor, e a leitura no banco está coberta pela integração.
+- **README:** encaminhamento em "Fluxos disponíveis" e as rotas `transfer-sector` e `sector-candidates` na seção da API.
+- **CA-SET-01:** os testes anteriores que enumeram todos os tipos de evento e as categorias de e-mail tiveram a lista estendida (padrão das SPECs anteriores); os demais arquivos anteriores só ganharam linhas.
+- **Resultados:** lint, typecheck e build OK; unitários 813/813; integração 363/363 + 1 pulado; E2E 21/21.
+- **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors` e `20261103200000_request_sector_events`.
