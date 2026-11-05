@@ -1906,3 +1906,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** lint, typecheck e build OK; unitários 881/881; integração 404/404 + 1 pulado; E2E 24/24.
 - **Antes do próximo deploy:** aplicar no Neon as migrations `20261103100000_webhook_sectors`, `20261103200000_request_sector_events`, `20261103300000_request_comment_files`, `20261103400000_sla_pause_calendar`, `20261103500000_field_type_multi_select` e `20261103500100_conditional_attendant_fields`.
 - **Teste anterior com navegação ajustada:** `tests/e2e/demo-data.spec.ts` procurava na primeira página da fila uma solicitação que ele mesmo abre. A fila mostra as mais antigas primeiro, 20 por página, e com o E2E novo a fila do setor passou a ter 21; a solicitação foi para a página 2 e o teste falhou duas vezes seguidas na suíte completa (sozinho passava). As asserções são as mesmas; só a busca da solicitação nova passou a usar `/queue?q=…`. A dependência do tamanho da fila era do teste, não do sistema.
+
+## Node 22 fixado pelo Volta e integração do CI do Carlos (2026-11-05)
+
+- **Pedido:** "fixe o node 22; faça o push dos 27 commits".
+- **Rebase:** `git pull --rebase` trouxe os commits `f575adc` e `7b6142d` do Carlos (CI no GitHub Actions, SPEC `2026-11-04-integracao-continua.md`). Nenhum arquivo em comum com os 27 commits locais; sem conflitos.
+- **Node:** o Node padrão da máquina (18.20.8) quebra o Vitest (`ERR_REQUIRE_ESM` ao carregar a configuração). `volta pin node@22` gravou `"volta": { "node": "22.23.4" }` no `package.json`; dentro do projeto, `node` e `npm` passam a usar o 22 sem `volta run`. Substitui a decisão anterior de não versionar a versão (seção de Node acima). O CI continua com o Node 24 do `setup-node`; o `engines` (>= 20.9.0) não mudou.
+- **Verificação após o rebase:** typecheck e lint OK; build OK; unitários 881/881; integração 404/404 + 1 pulado (adaptador real do armazenamento, sem credenciais); E2E 24/24. Banco de teste em `../pgtest`.
+- **Medição (`scripts/cloc-diff.sh`, `baseline-ap2` → HEAD):** linhas da base 10.743; `added` 43.451 (src 21.030, tests 22.212, scripts 209); modified 440; removed 2.539; saldo 40.912. Os commits do Carlos não têm TypeScript/JavaScript. Faltam 56.549 para a meta.
