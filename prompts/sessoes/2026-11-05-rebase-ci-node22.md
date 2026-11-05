@@ -29,3 +29,30 @@
 5. Status do roadmap e próximos passos apresentados (pendentes da lista aprovada: funcionalidades 1 e 2, sem SPEC).
 6. `volta pin node@22`; registro em `NOTES.md` e diário; commit e push.
 7. Início da SF-030 guiada passo a passo.
+
+## Continuação — CI e SF-030
+
+> entrar aqui https://vercel.com/topicos-especiais/~/integrations/neon/icfg_OOGrWBQ9ISpjYCtnaynNsh6q/resources/storage/store_ODdGufJKJpmvtBfe/guides?
+
+> como eu chego ate o supabase? podem e indicar passo a passo desde o google-> vercel .....supabase?
+
+> o endereço da supabase nao esta funcionandos na minha maquina, ela carrega e depois gera: Código de erro: RESULT_CODE_HUNG
+
+> certo, prossisga com as instruções
+
+> é pra habilitar API de dados?
+
+> tem habilitar API de DADOS; EXPOR AUTOMATICAMENTE NOVAS TABELAS; HABILITAR RLS AUTOMATICO; QUAL DEVO MARCAR?
+
+> https://supabase.com/dashboard/project/ygwsxyppnzlgleefbwbk
+
+> (chave pública `sb_publishable_` do botão "Connect" colada; explicado que não serve)
+
+> https://ygwsxyppnzlgleefbwbk.supabase.co
+
+> (chave secreta colada no chat — omitida deste registro) → escolha: "não mudar e prosseguir, é para fins didáticos"
+
+1. CI: `DATABASE_URL` separado do banco de teste (`4ba4ada`). A falha seguinte na integração não foi reproduzida localmente; log no GitHub pendente.
+2. Link da Vercel: é o banco Neon, não armazenamento de arquivos; mantido o Supabase Storage da SPEC.
+3. Supabase: projeto `serviceflow-nonprod`; URL e chave nos `.env` locais.
+4. Provisionamento: defeito do adaptador com respostas 400 do Supabase hospedado, diagnosticado e corrigido com testes; buckets de teste e desenvolvimento verificados; todas as suítes aprovadas.

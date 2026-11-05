@@ -169,6 +169,49 @@ describe("Supabase document storage (simulated HTTP)", () => {
     expect(exposed).not.toContain("provider detail");
   });
 
+  // Shapes observed on the hosted Storage API on 2026-11-05 (SF-030): HTTP 400 with the real
+  // code in the body.
+  const hosted = (statusCode: string, code: string) =>
+    new Response(JSON.stringify({ statusCode, error: "x", message: `detail ${SECRET}`, code }), {
+      status: 400,
+      headers: { "content-type": "application/json" },
+    });
+
+  it.each([
+    ["put", "409", "KeyAlreadyExists", "ALREADY_EXISTS"],
+    ["get", "404", "NoSuchKey", "NOT_FOUND"],
+    ["put", "400", "InvalidRequest", "WRITE_FAILED"],
+    ["get", "400", "InvalidRequest", "READ_FAILED"],
+    ["get", "not-a-number", "InvalidRequest", "READ_FAILED"],
+  ] as const)(
+    "maps the hosted %s answer HTTP 400 with statusCode %s (%s) to %s",
+    async (operation, statusCode, code, reason) => {
+      const { storage } = storageWith(hosted(statusCode, code));
+      const error = await captureStorageError(() =>
+        operation === "put" ? storage.put(KEY, BYTES, "text/plain") : storage.get(KEY),
+      );
+
+      expect(error.reason).toBe(reason);
+      expect(error.message + JSON.stringify(toErrorResponse(error))).not.toContain(SECRET);
+    },
+  );
+
+  it("tolerates the hosted answer for removing an object that is already gone", async () => {
+    const { storage } = storageWith(hosted("404", "NoSuchKey"));
+
+    await expect(storage.remove(KEY)).resolves.toBeUndefined();
+  });
+
+  it.each([
+    ["a JSON body with another code", () => hosted("403", "AccessDenied")],
+    ["a body that is not JSON", () => new Response("not json", { status: 400 })],
+  ])("still fails removal on HTTP 400 with %s", async (_label, response) => {
+    const { storage } = storageWith(response());
+    const error = await captureStorageError(() => storage.remove(KEY));
+
+    expect(error.reason).toBe("DELETE_FAILED");
+  });
+
   it("converts network failures into fixed errors", async () => {
     const { storage } = storageWith(new Error(`connect failed ${SECRET}`));
     const error = await captureStorageError(() => storage.get(KEY));

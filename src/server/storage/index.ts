@@ -266,8 +266,27 @@ export function createMemoryDocumentStorage(
 // Supabase Storage HTTP API without an SDK dependency (SPEC 21.15.8). Routes follow the
 // storage-api server: POST/DELETE /object/{bucket}/{path} and
 // GET /object/authenticated/{bucket}/{path}. Upsert stays disabled. The secret key goes in
-// the `apikey` header, as Supabase documents for non-JWT keys. Not yet exercised against a
-// real bucket (SF-030 provisioning pending).
+// the `apikey` header, as Supabase documents for non-JWT keys. Checked against a real bucket
+// on 2026-11-05 (SF-030).
+//
+// The hosted Storage API answers HTTP 400 for a missing object or a duplicate upload and
+// carries the real code in the JSON body (`{"statusCode":"404","code":"NoSuchKey"}`,
+// `{"statusCode":"409","code":"KeyAlreadyExists"}`). This reads that code; the body itself is
+// never exposed.
+async function providerStatus(response: Response): Promise<number> {
+  if (response.status !== 400) {
+    return response.status;
+  }
+
+  try {
+    const body = (await response.json()) as { statusCode?: unknown };
+    const code = Number(body.statusCode);
+    return Number.isInteger(code) && code >= 400 && code < 600 ? code : 400;
+  } catch {
+    return 400;
+  }
+}
+
 export function createSupabaseDocumentStorage(
   config: DocumentStorageConfig,
   fetchImplementation: typeof fetch = fetch,
@@ -299,24 +318,20 @@ export function createSupabaseDocumentStorage(
         "WRITE_FAILED",
       );
 
-      if (response.status === 409) {
-        throw new DocumentStorageError("ALREADY_EXISTS");
-      }
-
       if (!response.ok) {
-        throw new DocumentStorageError("WRITE_FAILED");
+        throw new DocumentStorageError(
+          (await providerStatus(response)) === 409 ? "ALREADY_EXISTS" : "WRITE_FAILED",
+        );
       }
     },
     async get(key) {
       assertStorageKey(key);
       const response = await send(objectUrl(key, true), { method: "GET", headers }, "READ_FAILED");
 
-      if (response.status === 404) {
-        throw new DocumentStorageError("NOT_FOUND");
-      }
-
       if (!response.ok) {
-        throw new DocumentStorageError("READ_FAILED");
+        throw new DocumentStorageError(
+          (await providerStatus(response)) === 404 ? "NOT_FOUND" : "READ_FAILED",
+        );
       }
 
       try {
@@ -375,7 +390,7 @@ export function createSupabaseDocumentStorage(
       assertStorageKey(key);
       const response = await send(objectUrl(key), { method: "DELETE", headers }, "DELETE_FAILED");
 
-      if (!response.ok && response.status !== 404) {
+      if (!response.ok && (await providerStatus(response)) !== 404) {
         throw new DocumentStorageError("DELETE_FAILED");
       }
     },
