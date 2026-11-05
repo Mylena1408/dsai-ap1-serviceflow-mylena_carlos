@@ -26,3 +26,7 @@ Adicionar um pipeline de integração contínua que execute, em cada push e pull
 - CA-CI-02: o job usa serviço PostgreSQL com healthcheck.
 - CA-CI-03: todas as etapas do README (typecheck, lint, build, unit, integration, e2e) são executadas.
 - CA-CI-04: nenhuma credencial real é versionada.
+
+## 5. Correção (2026-11-05)
+
+As primeiras execuções falharam nos testes de integração porque `DATABASE_URL` e `TEST_DATABASE_URL` apontavam para o mesmo banco, o que a proteção dos testes recusa. O CI passa a usar um banco de desenvolvimento separado (`serviceflow_dev`), criado no próprio job. Detalhes em `NOTES.md`.

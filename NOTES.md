@@ -1914,3 +1914,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Node:** o Node padrão da máquina (18.20.8) quebra o Vitest (`ERR_REQUIRE_ESM` ao carregar a configuração). `volta pin node@22` gravou `"volta": { "node": "22.23.4" }` no `package.json`; dentro do projeto, `node` e `npm` passam a usar o 22 sem `volta run`. Substitui a decisão anterior de não versionar a versão (seção de Node acima). O CI continua com o Node 24 do `setup-node`; o `engines` (>= 20.9.0) não mudou.
 - **Verificação após o rebase:** typecheck e lint OK; build OK; unitários 881/881; integração 404/404 + 1 pulado (adaptador real do armazenamento, sem credenciais); E2E 24/24. Banco de teste em `../pgtest`.
 - **Medição (`scripts/cloc-diff.sh`, `baseline-ap2` → HEAD):** linhas da base 10.743; `added` 43.451 (src 21.030, tests 22.212, scripts 209); modified 440; removed 2.539; saldo 40.912. Os commits do Carlos não têm TypeScript/JavaScript. Faltam 56.549 para a meta.
+
+## Correção do CI: banco de desenvolvimento separado (2026-11-05)
+
+- **Sintoma:** as execuções do CI em `7b6142d` (Carlos) e `66e0b19` falharam em "Integration tests"; typecheck, lint, build e unitários passaram. O log completo exige login no GitHub (sem `gh` nesta máquina).
+- **Causa:** o workflow definia `DATABASE_URL` e `TEST_DATABASE_URL` com o mesmo host e o mesmo banco (`serviceflow_test`). `tests/integration/database-url.ts` recusa esse caso de propósito ("TEST_DATABASE_URL points to the development database"), para nunca apagar o banco de desenvolvimento. O `playwright.config.ts` usa a mesma proteção, então o E2E falharia igual.
+- **Correção:** `DATABASE_URL` do CI aponta para `serviceflow_dev`, criado no job com `createdb` antes do checkout do Node. A proteção não mudou. Verificado com a função real: a URL antiga é recusada e a nova aceita; YAML válido.
+- **SPEC:** `2026-11-04-integracao-continua.md` (CA-CI-03), sem mudança de escopo.
