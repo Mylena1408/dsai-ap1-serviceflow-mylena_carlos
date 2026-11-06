@@ -313,6 +313,9 @@ model RequestStatusEvent {
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor   User    @relation("RequestStatusEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  /// History of one request and "last status before an instant" (SPEC 2026-11-06-desempenho-volume).
+  @@index([requestId, occurredAt, id])
 }
 
 model RequestAssignmentEvent {

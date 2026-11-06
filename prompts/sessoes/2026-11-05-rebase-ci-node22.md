@@ -122,3 +122,4 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 
 1. SF-158: formulários mantêm os dados no envio recusado (SPEC `2026-11-06-formularios-mantem-dados`).
 2. SF-159: revisão de acessibilidade; contraste dos textos secundários (SPEC `2026-11-06-contraste-textos`).
+3. SF-160: medição com 98 mil solicitações; índice em `RequestStatusEvent` e duas consultas das análises reescritas (SPEC `2026-11-06-desempenho-volume`). "Aprovações" sem paginação ficou para decisão.

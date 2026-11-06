@@ -1698,3 +1698,13 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-CTR-01 e 02.
 - **Testes relacionados:** Varredura de acessibilidade, build e E2E.
 - **SPEC:** `SPEC/2026-11-06-contraste-textos.md`.
+
+### SF-160 — Desempenho das análises com volume alto
+
+- **Estado:** Concluída em 2026-11-06 para as análises. Migration `20261106500000_status_event_request_index` (índice `RequestStatusEvent(requestId, occurredAt, id)`); `pendingAt` reescrita com intervalos (`lead`); `firstResponse` com CTE `MATERIALIZED`. Com 98.014 solicitações, as análises passaram de "sem resposta em 120 s" para cerca de 1 s. "Aprovações" continua lenta por falta de paginação (seção 7 da SPEC), à espera de decisão.
+- **Objetivo:** Seção 3 da SPEC.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/reports/infrastructure/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-DVO-01 (análises), 02 e 03.
+- **Testes relacionados:** Integração `analytics-reader.test.ts`, todas as suítes e a medição com volume.
+- **SPEC:** `SPEC/2026-11-06-desempenho-volume.md`.

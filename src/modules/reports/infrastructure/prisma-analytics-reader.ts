@@ -157,18 +157,27 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
     async pendingAt(scope, instants) {
       if (instants.length === 0) return [];
       // For each instant, the last status event before it decides whether the request was
-      // pending: reopenings and cancellations count as they happened (5.4).
+      // pending: reopenings and cancellations count as they happened (5.4). Each event lasts
+      // until the next one of the same request (same order: occurredAt, id), so the last event
+      // before an instant is the one whose interval contains it. The events are read once, not
+      // once per instant and request (SPEC 2026-11-06-desempenho-volume, 3.2).
+      const first = new Date(Math.min(...instants.map((instant) => instant.getTime())));
+      const last = new Date(Math.max(...instants.map((instant) => instant.getTime())));
       const rows = await database.$queryRaw<Array<{ position: number; count: number }>>`
-        SELECT t."position"::int AS "position", count(r."id")::int AS "count"
+        WITH events AS (
+          SELECT r."createdAt", e."toStatus", e."occurredAt" AS "from",
+            lead(e."occurredAt") OVER (PARTITION BY e."requestId" ORDER BY e."occurredAt", e."id") AS "until"
+          FROM "RequestStatusEvent" e
+          JOIN "Request" r ON r."id" = e."requestId"
+          WHERE e."occurredAt" < ${last} ${scopeSql(scope)}
+        ), pending AS (
+          SELECT * FROM events
+          WHERE "toStatus" IN ('OPEN', 'IN_PROGRESS') AND ("until" IS NULL OR "until" >= ${first})
+        )
+        SELECT t."position"::int AS "position", count(p."from")::int AS "count"
         FROM unnest(${instants.map((instant) => instant.toISOString())}::timestamptz[]) WITH ORDINALITY AS t("at", "position")
-        LEFT JOIN "Request" r
-          ON r."createdAt" < t."at" ${scopeSql(scope)}
-          AND (
-            SELECT e."toStatus" FROM "RequestStatusEvent" e
-            WHERE e."requestId" = r."id" AND e."occurredAt" < t."at"
-            ORDER BY e."occurredAt" DESC, e."id" DESC
-            LIMIT 1
-          ) IN ('OPEN', 'IN_PROGRESS')
+        LEFT JOIN pending p
+          ON p."createdAt" < t."at" AND p."from" < t."at" AND (p."until" IS NULL OR p."until" >= t."at")
         GROUP BY t."position"
         ORDER BY t."position"`;
       return instants.map((_, index) => rows.find((row) => row.position === index + 1)?.count ?? 0);
@@ -177,8 +186,9 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
     async firstResponse(scope, range) {
       // The first thing the requester sees from the team: a public comment of an attendant or
       // the start of the attendance, whichever comes first (5.5.1). LEAST ignores nulls.
+      // MATERIALIZED: computed once per request, not once per aggregate below (SPEC 2026-11-06-desempenho-volume).
       const [row] = await database.$queryRaw<Array<AggregateRow & { unanswered: number }>>`
-        WITH opened AS (
+        WITH opened AS MATERIALIZED (
           SELECT r."createdAt", LEAST(
             (SELECT min(c."createdAt") FROM "RequestComment" c JOIN "User" u ON u."id" = c."authorId"
               WHERE c."requestId" = r."id" AND c."isInternal" = false AND u."role" = 'ATTENDANT'),

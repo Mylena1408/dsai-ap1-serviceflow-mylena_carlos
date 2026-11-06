@@ -2051,3 +2051,22 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Achado:** só contraste. `--soft-muted` (3,12:1) e `--muted` (4,06 a 4,45:1 nos fundos claros) ficavam abaixo de 4,5:1. Nenhuma outra regra falhou (rótulos, nomes de botões, landmarks, ARIA, idioma).
 - **Correção:** as duas variáveis foram escurecidas, mantendo `--soft-muted` um pouco mais clara. Os novos valores foram calculados contra todos os fundos claros do CSS. Depois: 28 de 28 páginas sem violação.
 - **Limites:** a varredura automática não substitui o teste com leitor de tela nem cobre estados que só aparecem depois de ações (erros de formulário, por exemplo). Pôr o `axe` no CI exigiria uma dependência nova; fica como proposta.
+
+## SF-160 — Desempenho com 98 mil solicitações (2026-11-06)
+
+- **Correção de uma afirmação minha:** ao sugerir esta manutenção, eu disse que havia "dados sintéticos do plano de 100 mil". Não havia: aquele plano trata de linhas de código. O volume foi criado agora, num banco local separado (`serviceflow_perf`), clonando os dados de demonstração 7.000 vezes, com deslocamento aleatório de até 12 meses e os mesmos intervalos entre datas. Os scripts ficaram fora do repositório.
+- **Como foi medido:** `next start` contra esse banco; cada página aberta duas vezes, valendo a segunda; `log_min_duration_statement = 150` para achar as consultas lentas e `pg_stat_activity` para as que não terminavam.
+- **Achados e correções:**
+  1. `RequestStatusEvent` não tinha índice em `requestId` (o Prisma não cria índice para chave estrangeira). Novo índice (`requestId`, `occurredAt`, `id`), que também atende à ordem de "último status antes do instante".
+  2. `pendingAt` buscava o último evento de cada solicitação já criada, para cada ponto: O(pontos × histórico). Reescrita com `lead()`: cada evento vira um intervalo até o próximo da mesma solicitação, e conta-se, para cada ponto, quantos intervalos pendentes o contêm. Os eventos depois do último ponto e os intervalos encerrados antes do primeiro são descartados antes do cruzamento. O resultado foi comparado com o da consulta antiga em 8 cenários: todos iguais.
+  3. `firstResponse`: a CTE era embutida e as subconsultas rodavam uma vez por agregado; `MATERIALIZED` resolve.
+- **Antes e depois:**
+
+  | Tela | Antes | Depois |
+  |---|---|---|
+  | Análises (gestor e administrador, 30 e 90 dias) | sem resposta em 120 s | 0,9 a 1,15 s |
+  | Catálogo, listas, busca, fila, painéis, auditoria | 110 a 450 ms | 110 a 450 ms |
+
+- **Chaves estrangeiras sem índice:** a varredura achou outras, quase todas de "quem fez" (`actorId`, `createdById`...). Só pesam ao excluir um usuário, o que o sistema não faz. Ficaram como estão.
+- **Pendente: "Aprovações" sem paginação** (seção 7 da SPEC): 4,3 s com 7.001 pendentes e 13,8 s em "Todas". Depende de decisão sobre a tela.
+- **Produção:** a migration nova precisa ir ao Neon antes do push (ordem: backup → migrations → push). Lá as tabelas são pequenas, e o `CREATE INDEX` comum é instantâneo.
