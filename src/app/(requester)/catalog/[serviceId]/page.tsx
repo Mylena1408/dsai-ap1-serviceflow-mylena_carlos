@@ -8,6 +8,8 @@ import { NotFoundError } from "@/server/errors";
 import { requireRequesterPageAccess } from "../../page-access";
 import { createRequestAction } from "../../requests/actions";
 import { RequestForm, type FieldErrorCode } from "./request-form";
+import { listPublishedArticles } from "@/modules/knowledge";
+import { KnowledgeArticles } from "@/app/_components/knowledge-editor";
 
 type ServicePageProps = {
   params: Promise<{ serviceId: string }>;
@@ -68,11 +70,14 @@ export default async function ServicePage({
   let service;
   let requirements;
   let fields;
+  let articles;
 
   try {
     service = await getPublishedService(serviceId);
     requirements = await listPublishedServiceRequirements(service.id);
     fields = await listPublishedServiceFields(service.id);
+    // SPEC 2026-11-06-base-conhecimento, 4.2.
+    articles = await listPublishedArticles(service.id);
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -95,6 +100,7 @@ export default async function ServicePage({
         <p>Categoria: {service.category.name}</p>
         <p>Setor responsável: {service.sector.name}</p>
       </article>
+      <KnowledgeArticles articles={articles} />
       {message ? <p className="feedback feedback-error" role="alert">{message}</p> : null}
       <section className="surface-card content-section" aria-labelledby="request-heading">
         <p className="eyebrow">Próximo passo</p>

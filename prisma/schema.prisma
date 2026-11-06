@@ -78,6 +78,7 @@ enum AuditEntityType {
   WEBHOOK
   BUSINESS_CALENDAR
   HOLIDAY
+  KNOWLEDGE_ARTICLE
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -204,6 +205,8 @@ model User {
   satisfactionEvents     RequestSatisfactionEvent[] @relation("RequestSatisfactionEventActor")
   cannedResponsesCreated CannedResponse[]           @relation("CannedResponseCreator")
   cannedResponsesUpdated CannedResponse[]           @relation("CannedResponseUpdater")
+  knowledgeCreated       KnowledgeArticle[]         @relation("KnowledgeArticleCreator")
+  knowledgeUpdated       KnowledgeArticle[]         @relation("KnowledgeArticleUpdater")
 }
 
 model Service {
@@ -228,6 +231,7 @@ model Service {
   documentRequirements ServiceDocumentRequirement[]
   fields               ServiceField[]
   stages               ServiceStage[]
+  knowledgeArticles    KnowledgeArticle[]
 }
 
 model Request {
@@ -707,6 +711,27 @@ model RequestEscalation {
 
   @@index([requestId])
   @@index([occurredAt])
+}
+
+/// A knowledge base article of a service (SPEC 2026-11-06-base-conhecimento, 4 and 5). Limits and
+/// the title unique within a service are checked in SQL; a new article is a draft.
+model KnowledgeArticle {
+  id          String   @id @default(uuid()) @db.Uuid
+  serviceId   String   @db.Uuid
+  title       String   @db.Citext
+  body        String
+  isPublished Boolean  @default(false)
+  position    Int      @default(999)
+  createdById String   @db.Uuid
+  updatedById String   @db.Uuid
+  createdAt   DateTime @db.Timestamptz
+  updatedAt   DateTime @db.Timestamptz
+
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  createdBy User    @relation("KnowledgeArticleCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy User    @relation("KnowledgeArticleUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@unique([serviceId, title])
 }
 
 enum SlaResumeCause {

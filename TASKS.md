@@ -1658,3 +1658,23 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ESC-01 a 08.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-06-escalonamento.md`.
+
+### SF-156 — Base de conhecimento: migration e módulo
+
+- **Estado:** Concluída em 2026-11-06. Migration `20261106400000_knowledge_articles` (tabela com CHECKs e título único por serviço; `KNOWLEDGE_ARTICLE` na auditoria), módulo `knowledge` (domínio, casos de uso com `requireCatalogEditor`, Prisma com escopo de auditoria). Unitários e integração.
+- **Objetivo:** Seções 4 e 5 da SPEC.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/knowledge/`, `src/modules/audit/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-KB-01, 02, 04 e 05.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-base-conhecimento.md`.
+
+### SF-157 — Base de conhecimento: telas e E2E
+
+- **Estado:** Concluída em 2026-11-06. Seção "Base de conhecimento" da administração, editor em "Serviços do setor", bloco "Antes de abrir, veja se isto resolve" na página do serviço, E2E `tests/e2e/knowledge.spec.ts`.
+- **Objetivo:** Seções 2 e 4.2.
+- **Arquivos/módulos esperados:** `src/app/`.
+- **Dependências:** SF-156.
+- **Critérios de conclusão:** CA-KB-01 a 05.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-06-base-conhecimento.md`.

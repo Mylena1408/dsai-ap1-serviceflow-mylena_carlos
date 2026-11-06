@@ -8,12 +8,14 @@ import { listServiceStages } from "@/modules/service-stages";
 import { listSectorsForCatalog } from "@/modules/sectors";
 import { listServices } from "@/modules/services";
 import { requireCatalogEditor } from "@/server/authorization";
+import { listArticlesForEditor } from "@/modules/knowledge";
+import { KnowledgeEditor } from "@/app/_components/knowledge-editor";
 import { AuthenticationError, AuthorizationError } from "@/server/errors";
 import { ServicesSection } from "@/app/(admin)/admin/_sections/services/services-section";
 import { announcement } from "@/app/(admin)/admin/_shared/announcement";
 
 type SectorServicesPageProps = {
-  searchParams: Promise<{ error?: string; entity?: string; notice?: string }>;
+  searchParams: Promise<{ error?: string; entity?: string; notice?: string; knowledge?: string }>;
 };
 
 // Services of the own sector for holders of "Gerir serviços do setor" (SPEC
@@ -32,7 +34,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
     throw error;
   }
 
-  const [{ error, entity, notice }, services, categories, sectors, documentRequirements, serviceFields, serviceStages] =
+  const [{ error, entity, notice, knowledge }, services, categories, sectors, documentRequirements, serviceFields, serviceStages, knowledgeServices] =
     await Promise.all([
       searchParams,
       listServices(),
@@ -41,6 +43,8 @@ export default async function SectorServicesPage({ searchParams }: SectorService
       listDocumentRequirements(),
       listServiceFields(),
       listServiceStages(),
+      // SPEC 2026-11-06-base-conhecimento, 2.2: the sector's services only.
+      listArticlesForEditor(),
     ]);
   const message = announcement(error, notice, entity);
 
@@ -82,6 +86,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
             serviceStages={serviceStages}
             services={services}
           />
+          <KnowledgeEditor services={knowledgeServices} returnTo="/sector-services" notice={knowledge} />
         </div>
       </main>
     </>

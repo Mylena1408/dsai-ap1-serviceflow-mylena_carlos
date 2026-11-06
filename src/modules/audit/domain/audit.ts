@@ -29,6 +29,8 @@ export const AUDIT_ENTITY_TYPES = [
   // SPEC 2026-11-03-pausa-sla-calendario, 5.9.
   "BUSINESS_CALENDAR",
   "HOLIDAY",
+  // SPEC 2026-11-06-base-conhecimento, 4.5.
+  "KNOWLEDGE_ARTICLE",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -58,6 +60,8 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   WEBHOOK: [],
   BUSINESS_CALENDAR: [],
   HOLIDAY: [],
+  // The text can be long: the record says it changed, without copying it.
+  KNOWLEDGE_ARTICLE: ["body"],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -88,6 +92,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   WEBHOOK: "Webhook",
   BUSINESS_CALENDAR: "Calendário",
   HOLIDAY: "Feriado",
+  KNOWLEDGE_ARTICLE: "Artigo da base de conhecimento",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -104,6 +109,9 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   requiresApproval: "Exige aprovação",
   slaBusinessHours: "Prazo em horas úteis",
   escalateOverdue: "Escalar solicitações vencidas",
+  title: "Título",
+  body: "Texto",
+  isPublished: "Publicado",
   isRequired: "Obrigatório",
   acceptedFormats: "Formatos aceitos",
   label: "Rótulo",
@@ -202,6 +210,7 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   // The window is recorded as "HH:MM" and the weekdays by name, as the screen shows them.
   BUSINESS_CALENDAR: ["weekdays", "startTime", "endTime", "timeZone"],
   HOLIDAY: ["day", "name", "yearly"],
+  KNOWLEDGE_ARTICLE: ["serviceId", "title", "body", "isPublished", "position"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

@@ -1826,3 +1826,26 @@ p {
   justify-content: space-between;
   gap: 8px;
 }
+
+/* Knowledge base (SPEC 2026-11-06-base-conhecimento). */
+.knowledge-article {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.knowledge-article summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.knowledge-article-editor {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.knowledge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

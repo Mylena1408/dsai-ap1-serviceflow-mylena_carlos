@@ -19,6 +19,8 @@ import { listAuditTrail } from "@/modules/audit";
 import { AuditSection } from "./_sections/audit/audit-section";
 import { DashboardView } from "@/app/_components/dashboard-view";
 import { AnalyticsView } from "@/app/_components/analytics-view";
+import { KnowledgeEditor } from "@/app/_components/knowledge-editor";
+import { listArticlesForEditor } from "@/modules/knowledge";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { announcement } from "./_shared/announcement";
 import { OverviewSection } from "./_sections/overview-section";
@@ -46,6 +48,7 @@ type AdminPageProps = {
     type?: string;
     actor?: string;
     page?: string;
+    knowledge?: string;
   }>;
 };
 
@@ -55,6 +58,7 @@ const adminSections = [
   { id: "sectors", label: "Setores" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
+  { id: "knowledge", label: "Base de conhecimento" },
   { id: "calendar", label: "Calendário" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
@@ -91,7 +95,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
+  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -111,6 +115,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const dashboard = selectedSection === "dashboard" ? await getDashboard({ period, from, to, sector }) : null;
   // SPEC 2026-11-06-analises-operacionais, 5.1: computed only when the section is open.
   const analytics = selectedSection === "analytics" ? await getAnalytics({ period, from, to, sector }) : null;
+  // SPEC 2026-11-06-base-conhecimento, 2.2: read only when the section is open.
+  const knowledgeServices = selectedSection === "knowledge" ? await listArticlesForEditor() : null;
   // SPEC 2026-11-02-auditoria-lgpd, 5.2: read only when the section is open.
   const auditTrail =
     selectedSection === "audit" ? await listAuditTrail({ period, from, to, entity: type, actor, page }) : null;
@@ -230,6 +236,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <AnalyticsView action="/admin" analytics={analytics} hidden={{ section: "analytics" }} />
         </section>
       ) : null}
+
+      {knowledgeServices ? <KnowledgeEditor services={knowledgeServices} returnTo="/admin?section=knowledge" notice={knowledge} /> : null}
 
       {auditTrail ? <AuditSection trail={auditTrail} /> : null}
 

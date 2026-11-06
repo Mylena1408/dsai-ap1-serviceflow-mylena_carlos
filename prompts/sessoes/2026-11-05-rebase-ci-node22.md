@@ -103,3 +103,13 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 1. Push de `09f5f4c` e `30c2a4e`. O CI ficou sem conferência: limite da API pública do GitHub.
 2. SPEC `2026-11-06-analises-operacionais.md` e SF-144 a SF-149, com a skill de visualização de dados para os gráficos.
 3. Domínio, leitor e casos de uso (`30da811`); gráficos, telas, E2E e registros.
+
+## Manutenção e leva recomendada
+
+> me indique os próximos passos para crescimento da aplicação
+> comece pela manutenção e depois a leva recomendada
+> escolhas: "Pode ligar para a leva toda", "Node 24"
+
+1. Node 24 único (`f3caf40`).
+2. Satisfação (`dfb03d2`), respostas prontas (`db01f27`), escalonamento (`49bb49d`) e base de conhecimento, cada uma com SPEC própria.
+3. Todas as suítes verdes; push depende das migrations no Neon.

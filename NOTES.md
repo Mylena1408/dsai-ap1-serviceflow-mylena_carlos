@@ -2028,3 +2028,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** a mudança só era registrada para campos de `AUDITED_FIELDS`; `escalateOverdue` entrou na lista, no estado lido pelo escopo de auditoria e nos rótulos. Com isso a criação de setor passou a registrar `escalateOverdue: false`, e a asserção do teste de auditoria de setores foi atualizada com o motivo.
 - **E2E:** o `playwright.config.ts` gera `E2E_CRON_SECRET` por execução e o passa como `CRON_SECRET` ao servidor; o teste chama `/api/cron/daily` como a Vercel Cron (sem segredo: 401) e desliga a opção no fim para não afetar os testes seguintes.
 - **Resultados:** lint e typecheck OK; unitários 1182/1182; integração 441/441; E2E do escalonamento aprovado.
+
+## SF-156 e SF-157 — Base de conhecimento; fim da leva (2026-11-06)
+
+- **SPEC:** `2026-11-06-base-conhecimento.md`, decisões K1 a K7: artigos por serviço, mantidos pelos mesmos responsáveis do catálogo, rascunho por padrão, texto simples em parágrafos, só rascunho se exclui.
+- **Auditoria:** novo tipo `KNOWLEDGE_ARTICLE` (valor acrescentado ao enum do banco); o texto do artigo entra como campo "pessoal" (registra só que mudou), para não copiar até 20 mil caracteres em cada entrada. Publicar e despublicar são `UPDATED`; excluir é `DELETED`. O teste unitário que exige todas as entidades foi atualizado.
+- **Leva concluída:** satisfação, respostas prontas, escalonamento e base de conhecimento, cada uma com SPEC, migration aditiva, unitários, integração e E2E. Lint, typecheck e build OK; unitários 1191/1191; integração 445/445; E2E 30/30 (todas as suítes no Node 24).
+- **Antes do push (produção):** são 4 migrations novas (`20261106100000` a `20261106400000`). Ordem: backup do Neon → migrations no Neon → push.

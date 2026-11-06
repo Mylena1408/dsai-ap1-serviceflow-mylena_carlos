@@ -116,6 +116,13 @@ async function loadState(
         },
       };
     }
+    case "KNOWLEDGE_ARTICLE": {
+      const row = await transaction.knowledgeArticle.findUnique({
+        where: { id },
+        select: { serviceId: true, title: true, body: true, isPublished: true, position: true },
+      });
+      return row && { label: row.title, state: row };
+    }
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };

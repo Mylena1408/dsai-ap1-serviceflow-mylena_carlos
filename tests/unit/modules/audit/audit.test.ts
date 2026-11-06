@@ -143,6 +143,8 @@ describe("texts (section 5.2)", () => {
       // Added by SPEC 2026-11-03 (pausa do prazo e calendário).
       BUSINESS_CALENDAR: true,
       HOLIDAY: true,
+      // Added by SPEC 2026-11-06-base-conhecimento, 4.5.
+      KNOWLEDGE_ARTICLE: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());
