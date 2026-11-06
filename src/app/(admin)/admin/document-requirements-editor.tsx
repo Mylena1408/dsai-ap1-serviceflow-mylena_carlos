@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
 import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 type FormAction = (
   previousState: AdminUpdateState,
@@ -91,7 +92,7 @@ function RequirementEditForm({
   }, [onDone, state.message, state.status]);
 
   return (
-    <form action={formAction} className="entity-editor-form">
+    <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="entity-editor-form">
       <input name="id" type="hidden" value={requirement.id} />
       <div className="editor-fields">
         <RequirementFields requirement={requirement} />

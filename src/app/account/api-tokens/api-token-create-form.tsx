@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import type { ApiTokenCreationState } from "./actions";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 // Creation of a personal token (SPEC 2026-11-02-api-externa-webhooks, 5.1): the value appears once.
 
@@ -35,7 +36,7 @@ export function ApiTokenCreateForm({ action }: { action: CreateAction }) {
           {state.message}
         </p>
       ) : null}
-      <form action={formAction} className="account-form" ref={formRef}>
+      <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="account-form" ref={formRef}>
         <label>
           Nome
           <input maxLength={60} name="name" placeholder="Ex.: Integração do portal" required type="text" />

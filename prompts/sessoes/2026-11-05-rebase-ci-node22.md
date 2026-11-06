@@ -113,3 +113,11 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 1. Node 24 único (`f3caf40`).
 2. Satisfação (`dfb03d2`), respostas prontas (`db01f27`), escalonamento (`49bb49d`) e base de conhecimento, cada uma com SPEC própria.
 3. Todas as suítes verdes; push depende das migrations no Neon.
+
+## Manutenção curta
+
+> me indique os próximos passos para crescimento da aplicação
+> mensagem para o Carlos enviada, senha da chave de produção e da URL do Neon: salvar;1- manutenção curta aprovada,pode prosseguir
+> escolha: "Pode ligar" (banco de teste)
+
+1. SF-158: formulários mantêm os dados no envio recusado (SPEC `2026-11-06-formularios-mantem-dados`).

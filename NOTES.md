@@ -2035,3 +2035,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** novo tipo `KNOWLEDGE_ARTICLE` (valor acrescentado ao enum do banco); o texto do artigo entra como campo "pessoal" (registra só que mudou), para não copiar até 20 mil caracteres em cada entrada. Publicar e despublicar são `UPDATED`; excluir é `DELETED`. O teste unitário que exige todas as entidades foi atualizado.
 - **Leva concluída:** satisfação, respostas prontas, escalonamento e base de conhecimento, cada uma com SPEC, migration aditiva, unitários, integração e E2E. Lint, typecheck e build OK; unitários 1191/1191; integração 445/445; E2E 30/30 (todas as suítes no Node 24).
 - **Antes do push (produção):** são 4 migrations novas (`20261106100000` a `20261106400000`). Ordem: backup do Neon → migrations no Neon → push.
+
+## SF-158 — Formulários mantêm o que foi digitado (2026-11-06)
+
+- **Origem:** a observação da SF-072 ("um envio recusado também limpa o que foi digitado"). A causa é o React 19: um formulário com `action` é limpo depois de toda ação, inclusive as recusadas.
+- **Correção única:** `keepValuesOnSubmit(dispatch)` faz `preventDefault`, monta o `FormData` com o botão que enviou e chama a ação do `useActionState` dentro de `startTransition`. Com o padrão prevenido, o React não roda a ação nativa e não limpa nada; a criação continua limpando com `reset()` só no sucesso.
+- **`action` mantido no formulário:** antes da hidratação, o navegador ainda envia a ação do servidor; sem ele, o envio seria um GET nativo que poria os campos (inclusive a senha inicial) na URL.
+- **Fora:** troca de senha (limpar é desejável), abertura e campos de atendimento (já têm rascunho próprio) e botões sem campos.
+- **Prova:** o E2E novo falha sem a correção (nome apagado depois da recusa) e passa com ela.
+- **Resultados:** lint, typecheck e build OK; unitários 1193/1193; E2E 31/31. Integração não foi rodada: nenhuma mudança fora da camada de telas.

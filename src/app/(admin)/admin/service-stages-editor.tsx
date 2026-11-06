@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
 import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 // Attendance flow of a service (SPEC 2026-11-01-fluxos-configuraveis, 5.1 and 5.6).
 
@@ -75,7 +76,7 @@ function RenameForm({
   }, [onDone, state.message, state.status]);
 
   return (
-    <form action={formAction} className="entity-editor-form">
+    <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="entity-editor-form">
       <input name="id" type="hidden" value={stage.id} />
       <div className="editor-fields">
         <NameInput defaultValue={stage.name} />

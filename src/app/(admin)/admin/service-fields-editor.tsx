@@ -6,6 +6,7 @@ import { AdminCreateForm } from "./create-form";
 import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
 import { FIELD_TYPE_LABELS as SHARED_FIELD_TYPE_LABELS } from "@/shared/admin-labels";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 // Custom fields of a service (SPEC 2026-11-01-campos-personalizados, 5.1 and 5.2).
 
@@ -95,7 +96,7 @@ function FieldInputs({ field, fields = [] }: { field?: AdminServiceField; fields
   const [type, setType] = useState<FieldType>(field?.type ?? "SHORT_TEXT");
   const typeSelect = useRef<HTMLSelectElement>(null);
 
-  // React resets the form after each action; the select goes back to its first option, so the
+  // A successful creation resets the form (create-form.tsx); the select goes back to its first option, so the
   // fields shown must follow it instead of keeping the type chosen before.
   useEffect(() => {
     const form = typeSelect.current?.form;
@@ -206,7 +207,7 @@ function FieldEditForm({
   }, [onDone, state.message, state.status]);
 
   return (
-    <form action={formAction} className="entity-editor-form">
+    <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="entity-editor-form">
       <input name="id" type="hidden" value={field.id} />
       <div className="editor-fields">
         <FieldInputs field={field} fields={fields} />

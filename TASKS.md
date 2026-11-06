@@ -1678,3 +1678,13 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-KB-01 a 05.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-06-base-conhecimento.md`.
+
+### SF-158 — Formulários mantêm o que foi digitado quando o envio é recusado
+
+- **Estado:** Concluída em 2026-11-06. `src/app/_components/keep-values-on-submit.ts` envia pelo `onSubmit` dentro de uma transição; aplicado à criação compartilhada da administração, aos 4 editores, à criação de webhook e de token de API. Unitário e E2E `form-keeps-values.spec.ts`.
+- **Objetivo:** Seções 2 e 4 da SPEC.
+- **Arquivos/módulos esperados:** `src/app/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-FMD-01 a 04.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-06-formularios-mantem-dados.md`.

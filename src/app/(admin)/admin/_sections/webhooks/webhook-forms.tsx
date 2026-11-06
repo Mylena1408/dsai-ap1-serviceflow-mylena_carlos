@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import type { WebhookSecretState } from "./actions";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 // Forms that show a webhook secret once (SPEC 2026-11-02-api-externa-webhooks, 5.6).
 
@@ -81,7 +82,7 @@ export function WebhookCreateForm({
   return (
     <>
       <SecretOnce state={state} />
-      <form action={formAction} className="create-form" ref={formRef}>
+      <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="create-form" ref={formRef}>
         <label>
           Nome
           <input disabled={disabled} maxLength={60} name="name" required type="text" />

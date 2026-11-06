@@ -7,6 +7,7 @@ import type { AdminUpdateState } from "./actions";
 import { PRIORITY_LABELS, type PriorityValue } from "@/app/_components/request-priority";
 import { ServiceSlaFields } from "./service-sla-fields";
 import { ROLE_LABELS } from "@/shared/admin-labels";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 type UpdateAction = (
   previousState: AdminUpdateState,
@@ -91,7 +92,7 @@ function EditorForm({
   }, [onSaved, state.message, state.status]);
 
   return (
-    <form action={formAction} className="entity-editor-form">
+    <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="entity-editor-form">
       <input name="id" type="hidden" value={record.id} />
       <div className="editor-fields">
         <label>

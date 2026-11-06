@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import type { AdminUpdateState } from "./actions";
+import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 type CreateAction = (
   previousState: AdminUpdateState,
@@ -38,7 +39,7 @@ export function AdminCreateForm({
   }, [router, state]);
 
   return (
-    <form action={formAction} className="create-form" ref={formRef}>
+    <form action={formAction} onSubmit={keepValuesOnSubmit(formAction)} className="create-form" ref={formRef}>
       {children}
       <button disabled={isPending} type="submit">
         {isPending ? "Criando..." : submitLabel}
