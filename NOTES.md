@@ -1933,3 +1933,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** lint, typecheck e build OK; unitários 889/889; integração **405/405, nenhum pulado** (o teste do adaptador real rodou contra o bucket); E2E 24/24.
 - **Medição:** +50 linhas `added` (adaptador e testes); acumulado 43.501 sobre a base de 10.743.
 - **Pendente (produção):** projeto Supabase exclusivo de produção, bucket `serviceflow-documents`, as três variáveis `DOCUMENT_STORAGE_*` na Vercel (chave como Secret, só em Production) e novo deploy, depois de aplicar no Neon as migrations pendentes. Com isso o CA-DOC-21 fica completo.
+
+## Produção: região das funções da Vercel (2026-11-05)
+
+- **Sintoma:** no teste de produção da SF-030, abrir uma solicitação com anexo ora funcionava, ora falhava com `Transaction already closed ... timeout 5000 ms, however 5115 ms passed`, sempre em `getWithHistory`. Na tela, o formulário voltava vazio ("nenhum arquivo escolhido") nos dois casos, e a responsável repetiu o envio: 11 solicitações de teste foram criadas, cada uma com o PDF no bucket (11 objetos = 11 linhas, sem órfãos). As tentativas que estouraram o tempo foram desfeitas e a compensação removeu o arquivo.
+- **Causa:** as funções rodavam na região padrão da Vercel, `iad1` (EUA); o banco Neon fica em `sa-east-1` (São Paulo). Abrir uma solicitação faz cerca de 35 idas e voltas ao banco dentro de uma transação Serializable com o limite padrão de 5 s do Prisma; com ~140 ms por ida e volta o total ficou no limite depois que o histórico ganhou novas relações (setor, campos do atendimento, anexos de comentário). Não havia bloqueio no banco (`pg_locks` vazio) nem erro no armazenamento.
+- **Correção:** `"regions": ["gru1"]` em `vercel.json` (São Paulo, ao lado do banco). Sem migration.
+- **Pendente (precisa de SPEC):** a transação de abertura continua sensível a latência; avaliar limite explícito de tempo ou menos consultas dentro dela. Também: o push para `main` publica em produção automaticamente, então a ordem dos próximos deploys é backup → migrations no Neon → push (hoje o código novo ficou ~2 h no ar antes das migrations).
