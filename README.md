@@ -14,8 +14,8 @@ Plataforma configurável para gerenciamento de solicitações de serviços inter
 
 ## Requisitos e stack
 
-- Node.js 24.21.0 (mínimo suportado pelo Next.js: 20.9.0).
-- npm 11.19.0.
+- Node.js 24, a mesma versão em todos os ambientes (decidido em 2026-11-06): `engines` `"24.x"` no `package.json` (a Vercel usa esse campo), Volta `24.22.2` na máquina e `node-version: "24"` no CI. Diferenças de versão já esconderam um defeito (veja o `NOTES.md`).
+- npm 11.
 
 Essas versões foram usadas nas validações do projeto. A stack inclui Next.js 16.3.8, React 19.2.8, TypeScript 5, PostgreSQL com Prisma 6.16.0, Auth.js com Argon2id, Vitest e Playwright com Chromium.
 

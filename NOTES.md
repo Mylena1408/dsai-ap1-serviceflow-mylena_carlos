@@ -1993,3 +1993,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Correção:** `EMPTY_FILE_INPUT_NAMES = {"", "undefined", "blob"}` em `comment-form-data.ts`, usado pelo comentário e pela abertura. Um arquivo vazio realmente escolhido (com nome próprio) continua recusado; um arquivo com conteúdo chamado `blob` também continua aceito como arquivo.
 - **Verificação:** os 5 E2E passam com o Node 24; a suíte E2E inteira passou com o Node 24 (26/26) e com o Node 22 antes; unitários atualizados.
 - **Lição:** o Node local (22, fixado pelo Volta) difere do CI (24) e da produção (26). Vale avaliar fixar a mesma versão nos três; fica como sugestão, sem mudança agora.
+
+## Manutenção: Node 24 em todos os ambientes e teste dependente da hora (2026-11-06)
+
+- **Pedido:** "comece pela manutenção e depois a leva recomendada". Escolhas: Node 24; banco de teste ligado durante a leva toda.
+- **Node 24 único:** `engines.node` passou de `>=20.9.0` para `"24.x"` (a Vercel escolhe a versão por esse campo; até aqui a produção rodava em `nodejs26.x`); Volta fixado em `24.22.2` (antes `22.23.4`); o CI já usava `node-version: "24"`. Lint, typecheck, build, unitários 1140, integração 427 e E2E 26 passaram com o Node 24.
+- **CI da correção do arquivo vazio (`ba84534`, execução `42205142445`):** passou gitleaks, typecheck, lint, build e unitários; falhou na integração, em `business-hours-sla.test.ts`. Reproduzido aqui no mesmo horário: o teste usa uma janela útil de 10:00 às 11:00 UTC e afirmava que o vencimento é sempre 11:00, o que só vale se a solicitação abre fora da janela; rodando entre 10:00 e 11:00 UTC (7 h às 8 h em São Paulo), o vencimento é "agora + 1 hora útil". A aplicação estava certa (as asserções que calculam o esperado passavam). A asserção passou a exigir só que o vencimento caia dentro da janela; verificado às 10:54 UTC, o horário que falhava.
+- **Aviso ao Carlos:** texto preparado para a responsável enviar (mudanças no `ci.yml`, `vercel.json`, Node 24 e módulos novos).

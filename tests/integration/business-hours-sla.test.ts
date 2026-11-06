@@ -157,8 +157,11 @@ describe("business hours in the SLA calculations (SF-129)", () => {
     const inBusiness = await stored((await createRequest({ serviceId: business.id, description: "Tomada" }, prisma)).id);
     const expected = slaScheduleFrom(inBusiness.createdAt, 1, "NORMAL", await businessClock())!;
     expect(inBusiness).toMatchObject({ slaBusinessHours: true, dueAt: expected.dueAt, dueSoonAt: expected.dueSoonAt });
-    // One business hour a day: the due date is the end of a window, 11:00 UTC.
-    expect(inBusiness.dueAt!.toISOString().slice(11)).toBe("11:00:00.000Z");
+    // One business hour a day (10:00 to 11:00 UTC): the due date always falls inside a window. It is
+    // 11:00 when the request opens outside the window, and "now + 1 business hour" (the next day)
+    // when it opens inside it — the earlier exact "11:00" check failed between 10:00 and 11:00 UTC.
+    const dueTime = inBusiness.dueAt!.toISOString().slice(11);
+    expect(dueTime >= "10:00:00.000Z" && dueTime <= "11:00:00.000Z").toBe(true);
     expect(clockTimeBetween(inBusiness.createdAt, inBusiness.dueAt!, await businessClock())).toBe(HOUR);
 
     // Calendar hours work as before: the trigger fills "due soon".
