@@ -68,3 +68,7 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 3. Variáveis na Vercel corrigidas (nome, ambiente e valor da chave).
 4. Falha intermitente diagnosticada pelos logs da Vercel e consultas só de leitura no Neon: região das funções. Corrigida (`69d2b07`).
 5. Teste em produção aprovado pela responsável.
+
+> execute as 11 solicitações de testes da fila de RH → escolhas: "Cancelar", "Eu, por script"
+
+6. Cancelamento das 11 por script temporário (fora do Git) com as regras de domínio do cancelamento pela solicitante; ensaio com transação desfeita, depois aplicação: 11/11, 11 eventos de status no histórico.
