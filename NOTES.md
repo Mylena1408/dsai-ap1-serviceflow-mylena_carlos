@@ -1950,3 +1950,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Mesma resposta para o que não se vê:** qualquer `ApplicationError` de uma ferramenta de leitura vira "Not found." (como o download pela tela), exceto `InternalServerError` (por exemplo, SHA-256 diferente), que vira "Internal error." e registra só o nome do erro.
 - **Gestor:** a tela não mostra comentários ao gestor, então `list_request_documents` não lê comentários para ele e diz o motivo.
 - **Resultados:** typecheck e lint OK; unitários 1066/1066 (177 novos do MCP).
+
+## SF-140 e SF-141 — MCP com banco real, instruções e E2E (2026-11-06)
+
+- **Banco de teste:** o PostgreSQL local (`../pgtest`) tinha sido desligado pelo Claude Code por falta de memória; religado com autorização da responsável ("Pode ligar").
+- **Integração (`tests/integration/mcp-documents.test.ts`, 13 casos):** tokens recusados (ausente, formato inválido, revogado, expirado, dona inativa), READ e WRITE nas 4 ferramentas, janela de limite compartilhada com `/api/v1` e 429, solicitante dono, outro solicitante (mesmo "Not found." que id inexistente ou malformado), atendente do setor antes e depois de mudar o setor, gestor sem e com a permissão e numa aprovação, nota interna, SHA-256 alterado ("Internal error." sem a chave no registro), nenhuma escrita (7 tabelas, armazenamento e `updatedAt` iguais), e as duas eras do protocolo.
+- **Tela "Acesso à API":** novo bloco "Assistentes de IA (MCP)" com o endereço do ambiente (lido de `x-forwarded-host`/`host`, com validação; valor estranho vira `<endereço>`), o comando `claude mcp add --transport http` e o aviso de que o assistente lê tudo o que a pessoa lê. `headers()` do Next 16 é assíncrono (documentação local conferida).
+- **E2E (`tests/e2e/mcp-documents.spec.ts`):** solicitante abre a Solicitação de férias com PDF pela tela, cria token "Somente leitura", cliente sem cookies faz `initialize` → `notifications/initialized` (202) → `tools/list` → `find_requests` → `list_request_documents` → `read_request_document` (hash igual ao PDF enviado), depois o fluxo moderno e o 405 do GET; após revogar, 401.
+- **Incidente na sessão:** um `cat > /tmp/...` sem entrada travou um comando de edição do README; foi interrompido antes de alterar qualquer arquivo e refeito com script.
+- **Resultados:** lint, typecheck e build OK (`ƒ /api/mcp`); unitários 1076/1076; integração 418/418; E2E 25/25.
+- **Medição (`scripts/cloc-diff.sh`, `baseline-ap2`):** base 10.743; `added` 45.462 (src 21.747, tests 23.506, scripts 209); removed 2.545; saldo 42.917. A funcionalidade acrescentou 1.961 linhas `added`. Faltam 54.538 para a meta.

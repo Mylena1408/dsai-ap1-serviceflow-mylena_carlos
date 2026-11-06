@@ -1535,3 +1535,14 @@ p {
   font-size: 13px;
   overflow-wrap: anywhere;
 }
+
+/* MCP connection instructions on "Acesso à API" (SPEC 2026-11-05-mcp-documentos, 5.5). */
+.mcp-command {
+  margin: 8px 0 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

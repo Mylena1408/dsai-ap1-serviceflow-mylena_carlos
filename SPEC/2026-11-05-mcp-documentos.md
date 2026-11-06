@@ -1,7 +1,7 @@
 # SPEC — Ferramentas MCP de consulta a documentos
 
 **Data:** 2026-11-05
-**Status:** Aprovada. A funcionalidade 2 ("ferramentas MCP de documentos") foi aprovada pela responsável em 2026-11-03, com a lista de pendências 1 a 8. Em 2026-11-05 ela pediu: "faça a ferramentas MCP de documentos". Como nas SPECs anteriores, as decisões M1 a M9 da seção 11 foram adotadas como recomendadas; a responsável pode rever qualquer uma.
+**Status:** Aprovada. A funcionalidade 2 ("ferramentas MCP de documentos") foi aprovada pela responsável em 2026-11-03, com a lista de pendências 1 a 8. Em 2026-11-05 ela pediu: "faça a ferramentas MCP de documentos". Como nas SPECs anteriores, as decisões M1 a M9 da seção 11 foram adotadas como recomendadas; a responsável pode rever qualquer uma. **Concluída em 2026-11-06** (SF-138 a SF-141; CA-MCP-01 a 12 verificados).
 **Projeto:** ServiceFlow
 **Referências:**
 - `SPEC/2026-09-30-catalogo-e-solicitacoes.md`: seção 21, em especial 21.11 (requisito MCP) e 21.5 (download).
@@ -147,18 +147,18 @@ Nenhuma tabela nova e nenhuma migration. Os tokens e as janelas de limite são o
 
 ## 7. Critérios de aceitação
 
-- [ ] **CA-MCP-01** — Sem token, com token inválido, revogado, expirado ou de pessoa inativa, toda requisição recebe 401 com `WWW-Authenticate: Bearer`, e nenhum caso de uso roda.
-- [ ] **CA-MCP-02** — Um token READ executa as 4 ferramentas. As chamadas contam no mesmo limite de 60 por minuto da API, e a 61ª chamada no minuto recebe 429 com `Retry-After`.
-- [ ] **CA-MCP-03** — O solicitante lista e lê os documentos e arquivos de comentário das próprias solicitações. Para uma solicitação de outra pessoa, recebe "Not found.", igual à de um id inexistente.
-- [ ] **CA-MCP-04** — O atendente lê os documentos das solicitações do setor atual e recebe "Not found." para as de outro setor. Depois de uma transferência de setor, perde o acesso, como na tela.
-- [ ] **CA-MCP-05** — O gestor segue a regra da tela: lê os documentos das solicitações com aprovação do seu setor, ou de todas do setor se tiver a permissão de leitura do setor. Não vê arquivos de comentário.
-- [ ] **CA-MCP-06** — Arquivos de nota interna não aparecem para o solicitante, nem na lista nem na leitura direta pelo id. Arquivos removidos recebem "Not found.".
-- [ ] **CA-MCP-07** — Na leitura, TXT volta como texto, e PDF e DOCX voltam em base64 com o tipo detectado. Os bytes são idênticos aos enviados, e um arquivo corrompido no armazenamento (tamanho ou SHA-256 diferente) dá "Internal error.".
-- [ ] **CA-MCP-08** — Um cliente moderno (`2026-07-28`) usa `server/discover`, `tools/list` e `tools/call` sem `initialize`. Cabeçalho ausente ou diferente do corpo recebe 400 com `-32020`, e versão desconhecida recebe 400 com `-32022` e a lista de versões.
-- [ ] **CA-MCP-09** — Um cliente com `initialize` (`2025-06-18` ou `2025-11-25`) negocia a versão, envia `notifications/initialized` (resposta 202) e usa as ferramentas. Nenhuma resposta traz `Mcp-Session-Id`.
-- [ ] **CA-MCP-10** — `GET` e `DELETE` recebem 405. Corpo inválido, lote, `Content-Type` errado, `Origin` estranho e corpo grande demais recebem os códigos da seção 5.2.
-- [ ] **CA-MCP-11** — Argumentos inválidos ou campos extras dão `isError: true` com a mensagem do campo, e ferramenta desconhecida dá `-32602`. Nenhuma ferramenta altera dados: o banco e o armazenamento ficam iguais depois de chamar as 4.
-- [ ] **CA-MCP-12** — Nenhuma dependência nova. Os registros do servidor não contêm token, argumento, nome nem conteúdo de arquivo. README e tela de tokens trazem as instruções da seção 5.5.
+- [x] **CA-MCP-01** — Sem token, com token inválido, revogado, expirado ou de pessoa inativa, toda requisição recebe 401 com `WWW-Authenticate: Bearer`, e nenhum caso de uso roda. *Verificado em 2026-11-06: integração (6 tipos de token recusados) e E2E (revogação).*
+- [x] **CA-MCP-02** — Um token READ executa as 4 ferramentas. As chamadas contam no mesmo limite de 60 por minuto da API, e a 61ª chamada no minuto recebe 429 com `Retry-After`. *Verificado em 2026-11-06: integração (tokens READ e WRITE; janela compartilhada com `/api/v1`; 429).*
+- [x] **CA-MCP-03** — O solicitante lista e lê os documentos e arquivos de comentário das próprias solicitações. Para uma solicitação de outra pessoa, recebe "Not found.", igual à de um id inexistente. *Verificado em 2026-11-06: integração e E2E.*
+- [x] **CA-MCP-04** — O atendente lê os documentos das solicitações do setor atual e recebe "Not found." para as de outro setor. Depois de uma transferência de setor, perde o acesso, como na tela. *Verificado em 2026-11-06: integração, com mudança de setor.*
+- [x] **CA-MCP-05** — O gestor segue a regra da tela: lê os documentos das solicitações com aprovação do seu setor, ou de todas do setor se tiver a permissão de leitura do setor. Não vê arquivos de comentário. *Verificado em 2026-11-06: integração (sem e com a permissão; aprovação do setor).*
+- [x] **CA-MCP-06** — Arquivos de nota interna não aparecem para o solicitante, nem na lista nem na leitura direta pelo id. Arquivos removidos recebem "Not found.". *Verificado em 2026-11-06: integração (nota interna) e unitário do despacho (removidos).*
+- [x] **CA-MCP-07** — Na leitura, TXT volta como texto, e PDF e DOCX voltam em base64 com o tipo detectado. Os bytes são idênticos aos enviados, e um arquivo corrompido no armazenamento (tamanho ou SHA-256 diferente) dá "Internal error.". *Verificado em 2026-11-06: integração (bytes iguais; SHA-256 alterado) e E2E (hash do PDF).*
+- [x] **CA-MCP-08** — Um cliente moderno (`2026-07-28`) usa `server/discover`, `tools/list` e `tools/call` sem `initialize`. Cabeçalho ausente ou diferente do corpo recebe 400 com `-32020`, e versão desconhecida recebe 400 com `-32022` e a lista de versões. *Verificado em 2026-11-06: unitários do protocolo, integração e E2E.*
+- [x] **CA-MCP-09** — Um cliente com `initialize` (`2025-06-18` ou `2025-11-25`) negocia a versão, envia `notifications/initialized` (resposta 202) e usa as ferramentas. Nenhuma resposta traz `Mcp-Session-Id`. *Verificado em 2026-11-06: unitários, integração e E2E (`2025-06-18`).*
+- [x] **CA-MCP-10** — `GET` e `DELETE` recebem 405. Corpo inválido, lote, `Content-Type` errado, `Origin` estranho e corpo grande demais recebem os códigos da seção 5.2. *Verificado em 2026-11-06: unitários do transporte e E2E (405).*
+- [x] **CA-MCP-11** — Argumentos inválidos ou campos extras dão `isError: true` com a mensagem do campo, e ferramenta desconhecida dá `-32602`. Nenhuma ferramenta altera dados: o banco e o armazenamento ficam iguais depois de chamar as 4. *Verificado em 2026-11-06: unitários e integração (contagens de 7 tabelas e do armazenamento iguais).*
+- [x] **CA-MCP-12** — Nenhuma dependência nova. Os registros do servidor não contêm token, argumento, nome nem conteúdo de arquivo. README e tela de tokens trazem as instruções da seção 5.5. *Verificado em 2026-11-06: nenhuma dependência nova em `package.json`; unitários dos registros; README e tela verificados (unitário e E2E).*
 
 ## 8. Estratégia de testes
 

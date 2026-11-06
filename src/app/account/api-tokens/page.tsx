@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { API_CALLS_PER_MINUTE, MAX_ACTIVE_API_TOKENS, listOwnApiTokens } from "@/modules/api-tokens";
@@ -7,6 +8,7 @@ import { AuthenticationError } from "@/server/errors";
 import { ApiTokenList } from "@/app/_components/api-token-list";
 import { createApiTokenAction, revokeOwnApiTokenAction } from "./actions";
 import { ApiTokenCreateForm } from "./api-token-create-form";
+import { McpInstructions, mcpEndpointUrl } from "./mcp-instructions";
 
 // "Acesso à API" (SPEC 2026-11-02-api-externa-webhooks, 5.1; decision A1): the requester, attendant
 // or manager creates and revokes her own tokens. The administrator sees all tokens in her area.
@@ -35,7 +37,7 @@ export default async function ApiTokensPage({ searchParams }: ApiTokensPageProps
   if (actor.role === "ADMIN") redirect("/admin?section=api-tokens");
 
   const home = homeByRole[actor.role];
-  const [tokens, { notice }] = await Promise.all([listOwnApiTokens(), searchParams]);
+  const [tokens, { notice }, requestHeaders] = await Promise.all([listOwnApiTokens(), searchParams, headers()]);
   const message = notice ? NOTICES[notice] : undefined;
 
   return (
@@ -73,6 +75,7 @@ export default async function ApiTokensPage({ searchParams }: ApiTokensPageProps
           ) : null}
           <ApiTokenList emptyText="Você ainda não criou nenhum token." revokeAction={revokeOwnApiTokenAction} tokens={tokens} />
         </section>
+        <McpInstructions url={mcpEndpointUrl(requestHeaders)} />
       </main>
     </>
   );

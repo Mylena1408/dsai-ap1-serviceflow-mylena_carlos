@@ -190,6 +190,20 @@ curl -X POST -H "Authorization: Bearer sf_..." -H "Content-Type: application/jso
 - Erros sempre no formato `{"error": {"code", "message"}}`: `401 invalid_token`, `403 forbidden` ou `insufficient_scope`, `404 not_found` (também para o que a pessoa não pode ler), `422 documents_required` (serviço com documento obrigatório) e `429 rate_limited` com `Retry-After`. Limite de 60 chamadas por minuto por token; até 10 tokens ativos por pessoa.
 - A pessoa revoga os próprios tokens na mesma página; o administrador vê e revoga todos em **Administração → Acesso à API**. A revogação vale na chamada seguinte.
 
+### Assistentes de IA (MCP)
+
+Um assistente compatível com MCP (Claude Code, Claude Desktop e outros) pode procurar solicitações e ler os documentos e arquivos de comentário que a pessoa já vê na tela (`SPEC/2026-11-05-mcp-documentos.md`). O servidor MCP fica em `POST /api/mcp` (Streamable HTTP, só JSON, sem sessão) e usa o **mesmo token** da API: um token "Somente leitura" basta, e as chamadas contam no mesmo limite de 60 por minuto.
+
+```bash
+claude mcp add --transport http serviceflow https://<endereço>/api/mcp \
+  --header "Authorization: Bearer sf_..."
+```
+
+- Ferramentas, todas só de leitura: `find_requests` (mesma lista da `GET /api/v1/requests`), `list_request_documents`, `read_request_document` e `read_comment_file`. TXT volta como texto; PDF e DOCX voltam em base64 com o tipo detectado.
+- As regras são as da tela: o solicitante lê as próprias solicitações, o atendente as do setor atual e o gestor as aprovações do setor (ou todas do setor, com a permissão). Notas internas não aparecem para o solicitante, e o gestor não vê arquivos de comentário. O que a pessoa não pode ver responde "Not found.", igual a um id que não existe.
+- Versões do protocolo: a revisão `2026-07-28` (sem `initialize`) e clientes que abrem com `initialize` (`2025-03-26`, `2025-06-18` e `2025-11-25`).
+- A tela **Acesso à API** mostra o endereço certo do ambiente e o comando acima. O assistente lê tudo o que a pessoa lê, então revogue o token quando deixar de usá-lo.
+
 ### Webhooks de saída
 
 Em **Administração → Webhooks**, o administrador cadastra um endereço `https` público e os eventos (solicitação aberta, mudança de status, de responsável, de prioridade ou de etapa, comentário, prazos e decisão de aprovação). O **segredo** (`whsec_...`) aparece uma única vez; "Gerar novo segredo" troca o segredo na hora.
@@ -241,6 +255,7 @@ function isFromServiceFlow(signatureHeader, rawBody, secret, maxAgeSeconds = 300
 - Anexos em comentários e documentos depois da abertura (`SPEC/2026-11-03-anexos-comentarios-documentos.md`): solicitante e atendentes anexam até 3 arquivos PDF, DOCX ou TXT a um comentário (2 MiB cada, 4 MiB somados, até 30 por solicitação), com o formato conferido pelo conteúdo, como nos documentos de abertura. O arquivo segue a visibilidade do comentário: o de uma nota interna só a equipe vê e baixa. O solicitante envia depois da abertura um documento do serviço que ainda falta (opcional deixado para depois ou exigência acrescentada), enquanto a solicitação está aberta ou em atendimento; ele entra na lista de documentos e no histórico, e o responsável é notificado. Os arquivos ficam no mesmo armazenamento privado dos documentos: em produção dependem da configuração do Supabase (SF-030); sem ela, comentários sem arquivo continuam funcionando e o envio de arquivo é recusado com aviso.
 - Encaminhamento entre setores (`SPEC/2026-11-03-transferencia-entre-setores.md`): na página da solicitação na fila, o atendente do setor (o responsável, se houver, ou quem supervisiona a fila) encaminha uma solicitação **aberta** e sem aprovação pendente para outro setor ativo que tenha atendente ativo, com justificativa obrigatória. O responsável sai; status, prioridade, prazo, respostas, documentos e comentários continuam. O novo setor passa a vê-la na fila com todo o histórico, inclusive as notas internas, e o setor anterior deixa de vê-la. O histórico mostra "Encaminhada do setor X para o setor Y" com a justificativa; os atendentes do novo setor e o solicitante são notificados; o evento "Mudança de setor" chega aos webhooks sem filtro e aos filtrados pela origem ou pelo destino. Como a demonstração tem um setor só, para mostrar o encaminhamento o administrador cria antes um segundo setor com um atendente.
 - Ações pela API e webhooks por setor (`SPEC/2026-11-03-api-acoes-webhooks-setor.md`): assumir, liberar, transferir, iniciar, concluir, cancelar e reabrir pela API; filtro de setores e reenvio de entregas nos webhooks.
+- Ferramentas MCP de documentos (`SPEC/2026-11-05-mcp-documentos.md`): servidor MCP em `/api/mcp`, com o token da API, para assistentes de IA procurarem solicitações e lerem documentos e arquivos de comentário com as mesmas regras da tela. Detalhes na seção "Assistentes de IA (MCP)" acima.
 - A rota inicial encaminha a sessão autenticada à interface do perfil obtido do servidor; o cliente não escolhe papel.
 - A abertura valida no servidor a disponibilidade atual do serviço, categoria e setor e grava snapshots e evento inicial junto da solicitação. Transições persistem status e evento de histórico atomicamente.
 - Administradores configuram, por serviço, até 5 documentos exigidos (PDF, DOCX ou TXT; obrigatórios ou opcionais). O solicitante anexa um arquivo por documento ao abrir a solicitação (até 2 MiB cada, 4 MiB no total); o servidor confere o conteúdo real de cada arquivo.

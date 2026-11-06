@@ -72,3 +72,15 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 > execute as 11 solicitações de testes da fila de RH → escolhas: "Cancelar", "Eu, por script"
 
 6. Cancelamento das 11 por script temporário (fora do Git) com as regras de domínio do cancelamento pela solicitante; ensaio com transação desfeita, depois aplicação: 11/11, 11 eventos de status no histórico.
+
+## Ferramentas MCP de documentos
+
+> me indique os proximos passos previstos para incrementar a aplicação web
+> faça a ferramentas MCP de documentos
+> faça a sf-138 (já concluída quando a mensagem chegou)
+> Banco de teste → escolha: "Pode ligar"
+
+1. Especificação MCP consultada (revisão `2026-07-28`, transporte, ferramentas, versionamento e `server/discover`); SPEC `2026-11-05-mcp-documentos.md` e tarefas SF-138 a SF-141.
+2. SF-138/139: protocolo, ferramentas, despacho, transporte e rota, com unitários (`c8cafa4`).
+3. SF-140: integração com banco real (`abd5c4e`).
+4. SF-141: instruções na tela e no README, E2E e revisão; todas as suítes verdes.

@@ -1511,7 +1511,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-141 — Instruções de conexão, E2E e revisão
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. Bloco "Assistentes de IA (MCP)" na tela "Acesso à API" (endereço do ambiente e comando do Claude Code), seção no README, E2E `tests/e2e/mcp-documents.spec.ts` e revisão da SPEC. CA-MCP-01 a 12 verificados; SPEC concluída.
 - **Objetivo:** Instruções na tela de tokens e no README (5.5), E2E da sessão MCP completa por HTTP (eras moderna e com `initialize`) e revisão da SPEC.
 - **Arquivos/módulos esperados:** tela de tokens da API, README, `tests/e2e/`, `NOTES.md`, `diario/`, `prompts/sessoes/`.
 - **Dependências:** SF-140.
