@@ -2011,3 +2011,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Banco de teste:** foi desligado pelo Claude Code por falta de memória enquanto as SPECs eram escritas; religado com 2,5 GB livres, dentro da autorização da responsável para a leva.
 - **Erro meu:** um script de edição com barra invertida dentro de heredoc quebrou (regra já registrada na memória); refeito com a ferramenta de edição.
 - **Resultados:** lint e typecheck OK; unitários 1164/1164; integração 433/433; E2E da satisfação aprovado (a suíte E2E inteira roda no fim da leva).
+
+## SF-152 e SF-153 — Respostas prontas (2026-11-06)
+
+- **SPEC:** `2026-11-06-respostas-prontas.md`, decisões R1 a R6: respostas do setor mantidas pelos próprios atendentes, desativar em vez de excluir, 4 campos (`{{solicitante}}`, `{{servico}}`, `{{codigo}}`, `{{atendente}}`), só preenche o campo.
+- **Título único entre as ativas:** índice único parcial `(sectorId, title) WHERE isActive` sobre `citext`; o P2002 vira conflito. Reativar com título já usado é recusado pelo mesmo índice.
+- **Navegador × servidor:** o seletor é um componente do navegador e não pode importar o módulo (puxaria o Prisma); `appendToComment` foi para `src/shared/comments`. Os textos chegam ao seletor já com os campos substituídos por `listResponsesForRequest`, que também confere o setor da solicitação.
+- **Erro meu:** tentei editar um script de edição com outro script e escapes; não funcionou e reescrevi o arquivo com a ferramenta de escrita (mesma lição da memória sobre barras invertidas).
+- **Resultados:** unitários e integração novos aprovados; E2E aprovado na primeira execução.

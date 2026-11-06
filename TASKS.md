@@ -1618,3 +1618,23 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-SAT-01 a 08.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-06-pesquisa-satisfacao.md`.
+
+### SF-152 — Respostas prontas: migration e módulo
+
+- **Estado:** Concluída em 2026-11-06. Migration `20261106200000_canned_responses` (tabela com CHECKs e índice único parcial por setor e título ativo), módulo `canned-responses` (domínio, casos de uso, Prisma). Unitários e integração.
+- **Objetivo:** Seções 4 e 5 da SPEC.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/canned-responses/`, `src/shared/comments/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-RSP-01, 02 e 05.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-respostas-prontas.md`.
+
+### SF-153 — Respostas prontas: página, seletor e E2E
+
+- **Estado:** Concluída em 2026-11-06. Página `/queue/responses`, link no menu do atendente, seletor no formulário de comentário da fila (componente do navegador que só preenche o campo) e E2E `tests/e2e/canned-responses.spec.ts`.
+- **Objetivo:** Seções 2 e 4.4.
+- **Arquivos/módulos esperados:** `src/app/(attendant)/`, `src/app/_components/`.
+- **Dependências:** SF-152.
+- **Critérios de conclusão:** CA-RSP-01 a 05.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-06-respostas-prontas.md`.

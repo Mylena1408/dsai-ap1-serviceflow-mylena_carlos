@@ -43,6 +43,7 @@ async function prepareDatabase(): Promise<void> {
       database.requestSlaPause.deleteMany(),
       database.requestSatisfactionEvent.deleteMany(),
       database.requestSatisfaction.deleteMany(),
+      database.cannedResponse.deleteMany(),
       database.requestFieldUpdateEvent.deleteMany(),
       database.requestStageEvent.deleteMany(),
       database.requestFieldValue.deleteMany(),

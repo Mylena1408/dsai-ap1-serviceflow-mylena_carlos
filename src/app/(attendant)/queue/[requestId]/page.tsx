@@ -31,6 +31,7 @@ import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
 import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
+import { listResponsesForRequest } from "@/modules/canned-responses";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 
 type QueueRequestPageProps = {
@@ -87,6 +88,7 @@ export default async function QueueRequestPage({
   let answers;
   let comments;
   let satisfaction;
+  let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
   let attendance: Awaited<ReturnType<typeof getAttendanceFields>> = { fields: [], values: {} };
@@ -99,6 +101,8 @@ export default async function QueueRequestPage({
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
     satisfaction = await getRequestSatisfaction(request.id);
+    // SPEC 2026-11-06-respostas-prontas, 4.4: rendered with what the attendant already sees.
+    cannedResponses = await listResponsesForRequest(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -203,6 +207,7 @@ export default async function QueueRequestPage({
         canWrite={request.status !== "CANCELLED"}
         allowInternal
         action={addCommentAction}
+        cannedResponses={cannedResponses}
       />
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
     </main>

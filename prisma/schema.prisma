@@ -143,6 +143,7 @@ model Sector {
   requests         Request[]
   requestsSentAway RequestSectorEvent[] @relation("RequestSectorEventFrom")
   requestsReceived RequestSectorEvent[] @relation("RequestSectorEventTo")
+  cannedResponses  CannedResponse[]
 }
 
 model Category {
@@ -168,37 +169,39 @@ model User {
   /// SPEC 2026-11-02-auditoria-lgpd, 5.5: set once, when the person is anonymized.
   anonymizedAt DateTime? @db.Timestamptz
 
-  sector                Sector?                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests              Request[]                  @relation("UserRequests")
-  requestStatusEvents   RequestStatusEvent[]       @relation("RequestStatusEventActor")
-  uploadedAttachments   RequestAttachment[]        @relation("RequestAttachmentUploader")
-  assignedRequests      Request[]                  @relation("RequestAssignee")
-  assignmentEventsActed RequestAssignmentEvent[]   @relation("RequestAssignmentEventActor")
-  assignmentEventsFrom  RequestAssignmentEvent[]   @relation("RequestAssignmentEventFrom")
-  assignmentEventsTo    RequestAssignmentEvent[]   @relation("RequestAssignmentEventTo")
-  comments              RequestComment[]           @relation("RequestCommentAuthor")
-  notifications         RequestNotification[]      @relation("NotificationRecipient")
-  priorityEvents        RequestPriorityEvent[]     @relation("RequestPriorityEventActor")
-  stageEvents           RequestStageEvent[]        @relation("RequestStageEventActor")
-  sectorEvents          RequestSectorEvent[]       @relation("RequestSectorEventActor")
-  commentFiles          RequestCommentFile[]       @relation("RequestCommentFileUploader")
-  approvalsDecided      RequestApproval[]          @relation("RequestApprovalDecider")
-  permissions           UserPermission[]           @relation("UserPermissionHolder")
-  permissionsGranted    UserPermission[]           @relation("UserPermissionGrantor")
-  permissionEvents      UserPermissionEvent[]      @relation("UserPermissionEventUser")
-  permissionEventsActed UserPermissionEvent[]      @relation("UserPermissionEventActor")
-  notificationPrefs     NotificationPreference[]
-  emailDeliveries       EmailDelivery[]
-  apiTokens             ApiToken[]                 @relation("ApiTokenOwner")
-  apiTokensRevoked      ApiToken[]                 @relation("ApiTokenRevoker")
-  slaPauses             RequestSlaPause[]          @relation("RequestSlaPauseActor")
-  slaResumes            RequestSlaPause[]          @relation("RequestSlaResumeActor")
-  holidaysCreated       BusinessHoliday[]          @relation("BusinessHolidayCreator")
-  calendarUpdates       BusinessCalendar[]         @relation("BusinessCalendarUpdater")
-  fieldValuesUpdated    RequestFieldValue[]        @relation("RequestFieldValueUpdater")
-  fieldUpdateEvents     RequestFieldUpdateEvent[]  @relation("RequestFieldUpdateEventActor")
-  satisfactionRatings   RequestSatisfaction[]      @relation("RequestSatisfactionRequester")
-  satisfactionEvents    RequestSatisfactionEvent[] @relation("RequestSatisfactionEventActor")
+  sector                 Sector?                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requests               Request[]                  @relation("UserRequests")
+  requestStatusEvents    RequestStatusEvent[]       @relation("RequestStatusEventActor")
+  uploadedAttachments    RequestAttachment[]        @relation("RequestAttachmentUploader")
+  assignedRequests       Request[]                  @relation("RequestAssignee")
+  assignmentEventsActed  RequestAssignmentEvent[]   @relation("RequestAssignmentEventActor")
+  assignmentEventsFrom   RequestAssignmentEvent[]   @relation("RequestAssignmentEventFrom")
+  assignmentEventsTo     RequestAssignmentEvent[]   @relation("RequestAssignmentEventTo")
+  comments               RequestComment[]           @relation("RequestCommentAuthor")
+  notifications          RequestNotification[]      @relation("NotificationRecipient")
+  priorityEvents         RequestPriorityEvent[]     @relation("RequestPriorityEventActor")
+  stageEvents            RequestStageEvent[]        @relation("RequestStageEventActor")
+  sectorEvents           RequestSectorEvent[]       @relation("RequestSectorEventActor")
+  commentFiles           RequestCommentFile[]       @relation("RequestCommentFileUploader")
+  approvalsDecided       RequestApproval[]          @relation("RequestApprovalDecider")
+  permissions            UserPermission[]           @relation("UserPermissionHolder")
+  permissionsGranted     UserPermission[]           @relation("UserPermissionGrantor")
+  permissionEvents       UserPermissionEvent[]      @relation("UserPermissionEventUser")
+  permissionEventsActed  UserPermissionEvent[]      @relation("UserPermissionEventActor")
+  notificationPrefs      NotificationPreference[]
+  emailDeliveries        EmailDelivery[]
+  apiTokens              ApiToken[]                 @relation("ApiTokenOwner")
+  apiTokensRevoked       ApiToken[]                 @relation("ApiTokenRevoker")
+  slaPauses              RequestSlaPause[]          @relation("RequestSlaPauseActor")
+  slaResumes             RequestSlaPause[]          @relation("RequestSlaResumeActor")
+  holidaysCreated        BusinessHoliday[]          @relation("BusinessHolidayCreator")
+  calendarUpdates        BusinessCalendar[]         @relation("BusinessCalendarUpdater")
+  fieldValuesUpdated     RequestFieldValue[]        @relation("RequestFieldValueUpdater")
+  fieldUpdateEvents      RequestFieldUpdateEvent[]  @relation("RequestFieldUpdateEventActor")
+  satisfactionRatings    RequestSatisfaction[]      @relation("RequestSatisfactionRequester")
+  satisfactionEvents     RequestSatisfactionEvent[] @relation("RequestSatisfactionEventActor")
+  cannedResponsesCreated CannedResponse[]           @relation("CannedResponseCreator")
+  cannedResponsesUpdated CannedResponse[]           @relation("CannedResponseUpdater")
 }
 
 model Service {
@@ -665,6 +668,26 @@ model RequestSatisfactionEvent {
   actor   User    @relation("RequestSatisfactionEventActor", fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId])
+}
+
+/// A canned response of a sector (SPEC 2026-11-06-respostas-prontas, 4 and 5). Title and body
+/// limits and the title unique among the active responses of a sector are checked in SQL.
+model CannedResponse {
+  id          String   @id @default(uuid()) @db.Uuid
+  sectorId    String   @db.Uuid
+  title       String   @db.Citext
+  body        String
+  isActive    Boolean  @default(true)
+  createdById String   @db.Uuid
+  updatedById String   @db.Uuid
+  createdAt   DateTime @db.Timestamptz
+  updatedAt   DateTime @db.Timestamptz
+
+  sector    Sector @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  createdBy User   @relation("CannedResponseCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy User   @relation("CannedResponseUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@index([sectorId])
 }
 
 enum SlaResumeCause {

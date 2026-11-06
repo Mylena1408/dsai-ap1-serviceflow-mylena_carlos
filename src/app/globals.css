@@ -1799,3 +1799,21 @@ p {
   border-color: var(--brand);
   background: var(--brand-soft);
 }
+
+/* Canned responses (SPEC 2026-11-06-respostas-prontas). */
+.canned-picker {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.canned-picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.canned-picker-row select {
+  flex: 1 1 220px;
+  min-width: 0;
+}

@@ -1,5 +1,6 @@
 import { MAX_COMMENT_LENGTH, type CommentRecord } from "@/modules/comments";
 import { COMMENT_FILES_FIELD } from "./comment-form-data";
+import { CannedResponsePicker, type PickerResponse } from "./canned-response-picker";
 
 type RequestConversationProps = {
   requestId: string;
@@ -9,6 +10,8 @@ type RequestConversationProps = {
   /** Attendants may mark a comment as an internal note (decision C3). */
   allowInternal: boolean;
   action: (formData: FormData) => Promise<never>;
+  /** Canned responses of the attendant's sector, already rendered (SPEC 2026-11-06-respostas-prontas). */
+  cannedResponses?: readonly PickerResponse[];
 };
 
 function fileSize(bytes: number): string {
@@ -30,6 +33,7 @@ export function RequestConversation({
   canWrite,
   allowInternal,
   action,
+  cannedResponses = [],
 }: RequestConversationProps) {
   return (
     <section id="conversa" className="surface-card content-section" aria-labelledby="conversation-heading">
@@ -75,6 +79,7 @@ export function RequestConversation({
       {canWrite ? (
         <form action={action} className="comment-form">
           <input type="hidden" name="requestId" value={requestId} />
+          <CannedResponsePicker responses={cannedResponses} targetId="comment-body" />
           <label htmlFor="comment-body">Novo comentário</label>
           <textarea id="comment-body" name="body" required maxLength={MAX_COMMENT_LENGTH} rows={3} />
           <label htmlFor="comment-files">Arquivos (opcional)</label>
