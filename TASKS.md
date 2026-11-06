@@ -1501,7 +1501,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-140 — Integração das ferramentas MCP com banco real
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-05. `tests/integration/mcp-documents.test.ts` (13 casos) com token real, autorização real e armazenamento em memória; integração completa 418/418. O caso "arquivo removido" ficou coberto no unitário do despacho e nos testes de integração já existentes do download (a remoção só acontece pela anonimização).
 - **Objetivo:** Testes de integração da seção 8: perfis, propriedade, setor e transferência, gestor, notas internas, removidos, arquivo corrompido, tokens recusados, limite compartilhado e ausência de escrita.
 - **Arquivos/módulos esperados:** `tests/integration/mcp-*.test.ts`.
 - **Dependências:** SF-139.
