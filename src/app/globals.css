@@ -1,8 +1,8 @@
 :root {
   color-scheme: light;
   --ink: #172b3a;
-  --muted: #657887;
-  --soft-muted: #8494a0;
+  --muted: #596b79; /* WCAG AA: >= 4.9:1 on every light surface (SF-159) */
+  --soft-muted: #5f7180; /* WCAG AA: 5.05:1 on white, 4.65:1 on the canvas (SF-159) */
   --brand: #176b69;
   --brand-strong: #105653;
   --brand-soft: #e8f4f2;

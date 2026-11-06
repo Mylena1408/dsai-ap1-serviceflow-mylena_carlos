@@ -1688,3 +1688,13 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-FMD-01 a 04.
 - **Testes relacionados:** Unitários e E2E.
 - **SPEC:** `SPEC/2026-11-06-formularios-mantem-dados.md`.
+
+### SF-159 — Contraste dos textos secundários
+
+- **Estado:** Concluída em 2026-11-06. `--muted` `#657887` → `#596b79` e `--soft-muted` `#8494a0` → `#5f7180` em `src/app/globals.css`; varredura `axe-core` WCAG 2.x A/AA de 28 páginas sem violação.
+- **Objetivo:** Seção 2 da SPEC.
+- **Arquivos/módulos esperados:** `src/app/globals.css`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-CTR-01 e 02.
+- **Testes relacionados:** Varredura de acessibilidade, build e E2E.
+- **SPEC:** `SPEC/2026-11-06-contraste-textos.md`.

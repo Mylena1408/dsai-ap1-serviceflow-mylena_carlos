@@ -2044,3 +2044,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Fora:** troca de senha (limpar é desejável), abertura e campos de atendimento (já têm rascunho próprio) e botões sem campos.
 - **Prova:** o E2E novo falha sem a correção (nome apagado depois da recusa) e passa com ela.
 - **Resultados:** lint, typecheck e build OK; unitários 1193/1193; E2E 31/31. Integração não foi rodada: nenhuma mudança fora da camada de telas.
+
+## SF-159 — Revisão de acessibilidade: contraste (2026-11-06)
+
+- **Como foi revisado:** teste Playwright temporário (não versionado) que entra com cada perfil, abre 28 páginas (todas as telas e um detalhe de cada lista), abre todos os `<details>` e roda o `axe-core` com as regras WCAG 2.x A e AA. O `axe-core` já estava em `node_modules` como dependência de outro pacote; o `package.json` não mudou.
+- **Achado:** só contraste. `--soft-muted` (3,12:1) e `--muted` (4,06 a 4,45:1 nos fundos claros) ficavam abaixo de 4,5:1. Nenhuma outra regra falhou (rótulos, nomes de botões, landmarks, ARIA, idioma).
+- **Correção:** as duas variáveis foram escurecidas, mantendo `--soft-muted` um pouco mais clara. Os novos valores foram calculados contra todos os fundos claros do CSS. Depois: 28 de 28 páginas sem violação.
+- **Limites:** a varredura automática não substitui o teste com leitor de tela nem cobre estados que só aparecem depois de ações (erros de formulário, por exemplo). Pôr o `axe` no CI exigiria uma dependência nova; fica como proposta.

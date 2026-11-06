@@ -121,3 +121,4 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 > escolha: "Pode ligar" (banco de teste)
 
 1. SF-158: formulários mantêm os dados no envio recusado (SPEC `2026-11-06-formularios-mantem-dados`).
+2. SF-159: revisão de acessibilidade; contraste dos textos secundários (SPEC `2026-11-06-contraste-textos`).
