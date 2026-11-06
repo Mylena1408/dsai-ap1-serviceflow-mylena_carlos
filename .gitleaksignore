@@ -1,0 +1,4 @@
+# Reviewed gitleaks findings that are not secrets (SPEC 2026-11-04-integracao-continua, section 6).
+# Synthetic CRON_SECRET fixture of the unit tests ("a-cron-secret-with-24-chars"), checked on 2026-11-06.
+3260a2b5a1a646d2eecba8f915885be57f884440:tests/unit/cron-route.test.ts:generic-api-key:10
+3260a2b5a1a646d2eecba8f915885be57f884440:tests/unit/server/jobs/cron-and-cleanup.test.ts:generic-api-key:8

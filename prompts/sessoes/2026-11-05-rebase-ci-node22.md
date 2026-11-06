@@ -84,3 +84,13 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 2. SF-138/139: protocolo, ferramentas, despacho, transporte e rota, com unitários (`c8cafa4`).
 3. SF-140: integração com banco real (`abd5c4e`).
 4. SF-141: instruções na tela e no README, E2E e revisão; todas as suítes verdes.
+
+## Item 1 (correções antes de crescer)
+
+> me indique os próximos passos para crescimento da aplicação
+> comece pelo item 1
+> escolhas: "Pode ligar", "Ler histórico fora + limite 10 s", "Binário oficial fixado"
+
+1. CI diagnosticado pela API pública do GitHub; teste instável corrigido; Ubuntu fixado.
+2. SPEC `2026-11-06-transacao-abertura.md` e SF-142.
+3. Gitleaks 8.30.1 no CI com SHA-256; `.gitleaksignore` com 2 falsos positivos revisados.

@@ -12,7 +12,9 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    # Pinned: "ubuntu-latest" moves to Ubuntu 26 from 2026-10-19, which the Playwright in use
+    # (1.56) does not support for `install --with-deps`.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
 
     services:
@@ -40,6 +42,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history, so the secret scan covers every commit, not only the last one.
+          fetch-depth: 0
+
+      # Official gitleaks release, pinned by version and SHA-256 (no third-party Action, no npm
+      # dependency). Reviewed false positives are listed in .gitleaksignore.
+      - name: Secret scan (gitleaks)
+        env:
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gitleaks.tar.gz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner --exit-code 1 .
 
       - name: Create development database
         run: createdb -h localhost -U serviceflow serviceflow_dev

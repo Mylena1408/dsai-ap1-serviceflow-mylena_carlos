@@ -150,7 +150,13 @@ describe("attendance fields over the database (SF-136)", () => {
     actAs(admin);
     await anonymizeUser({ userId: ana.id, confirmed: true }, prisma, createMemoryDocumentStorage());
     await expect(
-      prisma.requestFieldValue.findMany({ where: { requestId: request.id }, orderBy: { positionSnapshot: "asc" }, select: { value: true } }),
+      // The requester's answers and the attendance's are numbered separately (both start at 0), so
+      // the position alone ties; the requester's come first, as on the screens.
+      prisma.requestFieldValue.findMany({
+        where: { requestId: request.id },
+        orderBy: [{ updatedById: { sort: "asc", nulls: "first" } }, { positionSnapshot: "asc" }],
+        select: { value: true },
+      }),
     ).resolves.toEqual([
       { value: "4521" },
       { value: "[conteúdo removido na anonimização]" },

@@ -1518,3 +1518,23 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-MCP-01 a 12.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-05-mcp-documentos.md`.
+
+### SF-142 — Leitura do histórico fora da transação de escrita e limite de 10 s
+
+- **Estado:** Concluída em 2026-11-06. `readRequestAfterWrite` (nova) lê o histórico numa transação própria depois do commit, na abertura e na mudança de status; na abertura com documentos a compensação só cobre a escrita. `REQUEST_TRANSACTION_TIMEOUT_MS = 10_000` no executor do módulo de solicitações. 8 unitários novos (6 falham com o código anterior); todas as suítes passaram.
+- **Objetivo:** Encurtar as transações de escrita das solicitações e tornar o limite explícito.
+- **Arquivos/módulos esperados:** `src/modules/requests/application/`, `src/modules/requests/infrastructure/prisma-request-repository.ts`, `tests/unit/modules/requests/application/read-after-write.test.ts`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-TXA-01 a 05.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-06-transacao-abertura.md`.
+
+### SF-143 — CI: teste instável, Ubuntu fixado e varredura de segredos
+
+- **Estado:** Concluída localmente em 2026-11-06; a execução no GitHub (CA-CI-06) é conferida depois do push. Teste de `attendance-fields` com ordenação sem empate; `runs-on: ubuntu-24.04`; passo gitleaks 8.30.1 com SHA-256 fixo e histórico completo; `.gitleaksignore` com os 2 falsos positivos revisados.
+- **Objetivo:** Fazer o CI passar de forma estável e varrer segredos automaticamente.
+- **Arquivos/módulos esperados:** `.github/workflows/ci.yml`, `.gitleaksignore`, `tests/integration/attendance-fields.test.ts`, SPEC de integração contínua (seção 6).
+- **Dependências:** nenhuma.
+- **Critérios de conclusão:** CA-CI-05 e 06.
+- **Testes relacionados:** Integração (teste corrigido 8 vezes seguidas) e gitleaks local.
+- **SPEC:** `SPEC/2026-11-04-integracao-continua.md`, seção 6.

@@ -1960,3 +1960,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Incidente na sessão:** um `cat > /tmp/...` sem entrada travou um comando de edição do README; foi interrompido antes de alterar qualquer arquivo e refeito com script.
 - **Resultados:** lint, typecheck e build OK (`ƒ /api/mcp`); unitários 1076/1076; integração 418/418; E2E 25/25.
 - **Medição (`scripts/cloc-diff.sh`, `baseline-ap2`):** base 10.743; `added` 45.462 (src 21.747, tests 23.506, scripts 209); removed 2.545; saldo 42.917. A funcionalidade acrescentou 1.961 linhas `added`. Faltam 54.538 para a meta.
+
+## Item 1 das próximas etapas: CI, transação de abertura e varredura de segredos (2026-11-06)
+
+- **Pedido:** "comece pelo item 1". Escolhas da responsável: religar o banco de teste; "Ler histórico fora + limite 10 s"; gitleaks pelo "Binário oficial fixado".
+- **CI sem log completo:** a API pública do GitHub (`/actions/runs`, `/jobs` e `/check-runs/{id}/annotations`) mostrou o passo e a asserção que falharam, sem login. Das 6 últimas execuções, 5 falharam no mesmo teste de integração e 1 na instalação do Playwright.
+- **Teste instável:** `attendance-fields.test.ts` ordenava por `positionSnapshot`, que empata entre as respostas do solicitante e as do atendimento (cada grupo começa em 0). A aplicação já ordena por grupo (`prisma-field-answer-repository.ts`); só o teste estava ambíguo. Reproduzido (1/6 com o antigo) e corrigido (8/8).
+- **Ubuntu 26:** o aviso do GitHub informa a migração de `ubuntu-latest` para o Ubuntu 26 desde 2026-10-19; o Playwright 1.56.1 só lista até `ubuntu24.04` (conferido em `playwright-core/lib/server/registry`). Job fixado em `ubuntu-24.04`. A confirmação definitiva vem da próxima execução.
+- **SF-142:** histórico lido depois do commit em transação própria (`readRequestAfterWrite`) na abertura e na mudança de status; na abertura com documentos, a compensação de arquivos ficou restrita à escrita (uma falha só na leitura não apaga arquivos de solicitação gravada). Limite explícito `REQUEST_TRANSACTION_TIMEOUT_MS = 10_000`. A transação de escrita da abertura perdeu cerca de 15 das ~35 idas e voltas.
+- **Gitleaks:** release oficial 8.30.1, checksums do projeto conferidos (linux `551f6fc8…70eb`, windows `d29144de…fc4e`), baixada numa pasta própria fora do projeto. Varredura local dos 202 commits: 2 achados, ambos o texto sintético `a-cron-secret-with-24-chars` de testes; revisados e listados por fingerprint em `.gitleaksignore`. Nenhum segredo real no histórico. No CI, o passo baixa a mesma versão, confere o SHA-256 e varre o histórico completo.
+- **Resultados:** lint, typecheck e build OK; unitários 1084/1084 (8 novos); integração 418/418; E2E 25/25.
+- **Medição (`scripts/cloc-diff.sh`, `baseline-ap2`):** base 10.743; `added` 45.649; removed 2.545; saldo 43.104. Faltam 54.351 para a meta.
+- **Pendente:** backup fora da máquina (operação da responsável); conferir o CI no GitHub depois do push; avisar o Carlos das mudanças no `ci.yml`.
