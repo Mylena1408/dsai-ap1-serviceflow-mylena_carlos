@@ -7,12 +7,20 @@ import { DocumentStorageError } from "@/server/storage";
 export const COMMENT_FILES_FIELD = "files";
 
 /**
- * A file input left empty. Browsers send it as an empty file without a name, and the Server Action
- * decoding of this Next.js version delivers that name as the text "undefined" (seen in the E2E of
- * SF-125). A real file the person chose has its own name, so an empty one is still refused.
+ * Names under which the Server Action decoding delivers a file input left empty (the browser
+ * sends an empty part without a file name). It depends on the Node.js version: "undefined" on
+ * Node 22 (seen in the E2E of SF-125) and "blob" on Node 24, the default name of a nameless Blob
+ * in a FormData (seen in the CI and reproduced locally on 2026-11-06). Production on Vercel runs a
+ * recent Node, so every known form is accepted.
+ */
+export const EMPTY_FILE_INPUT_NAMES: ReadonlySet<string> = new Set(["", "undefined", "blob"]);
+
+/**
+ * A file input left empty. A real file the person chose has its own name, so an empty file that
+ * was really chosen (for example "vazio.txt") is still refused by the file rules.
  */
 export function isEmptyFileInput(value: File): boolean {
-  return value.size === 0 && (value.name === "" || value.name === "undefined");
+  return value.size === 0 && EMPTY_FILE_INPUT_NAMES.has(value.name);
 }
 
 export async function commentFiles(formData: FormData): Promise<Array<{ name: string; bytes: Uint8Array }>> {

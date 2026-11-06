@@ -1984,3 +1984,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** lint, typecheck e build OK; unitários 1140/1140; integração 427/427; E2E 26/26. Nenhuma migration e nenhuma dependência nova.
 - **Medição (`scripts/cloc-diff.sh`, `baseline-ap2`):** base 10.743; `added` 47.211 (src 22.553, tests 24.449, scripts 209); removed 2.545; saldo 44.666. A funcionalidade acrescentou 1.562 linhas `added`. Faltam 52.789 para a meta.
 - **CI:** o resultado do workflow depois do push de `30c2a4e` não pôde ser conferido: a API pública do GitHub limitou as consultas sem login (60 por hora) durante o acompanhamento. Fica para a próxima sessão.
+
+## CI no GitHub: campo de arquivo vazio no Node 24 — defeito também de produção (2026-11-06)
+
+- **Achado pelo CI:** com o reporter `github` do Playwright, a execução de `e46f06b` mostrou 5 E2E falhando pelo mesmo motivo: enviar comentário **sem arquivo** (e abrir solicitação com um documento opcional em branco) dava "Arquivos não aceitos".
+- **Reproduzido aqui** rodando o E2E com o Node 24 do CI (`volta run --node 24`), com um registro temporário no servidor (removido): o campo de arquivo vazio chega à Server Action como `File` de tamanho 0 com nome **`"blob"`** no Node 24, e com nome `"undefined"` no Node 22. O código só reconhecia `""` e `"undefined"`. O Node e o busboy, isolados, se comportam igual nas duas versões; o nome `"blob"` vem do caminho de decodificação do React/Next no Node 24 (nome padrão de um Blob sem nome num FormData).
+- **Produção afetada:** as funções da Vercel rodam em `nodejs26.x` (registros de 2026-11-05). Comentários sem arquivo e aberturas com documento opcional vazio provavelmente estavam sendo recusados em produção. O teste de telas feito antes só navegou, sem enviar formulário, por isso não pegou. Não testei em produção para não criar dados.
+- **Correção:** `EMPTY_FILE_INPUT_NAMES = {"", "undefined", "blob"}` em `comment-form-data.ts`, usado pelo comentário e pela abertura. Um arquivo vazio realmente escolhido (com nome próprio) continua recusado; um arquivo com conteúdo chamado `blob` também continua aceito como arquivo.
+- **Verificação:** os 5 E2E passam com o Node 24; a suíte E2E inteira passou com o Node 24 (26/26) e com o Node 22 antes; unitários atualizados.
+- **Lição:** o Node local (22, fixado pelo Volta) difere do CI (24) e da produção (26). Vale avaliar fixar a mesma versão nos três; fica como sugestão, sem mudança agora.

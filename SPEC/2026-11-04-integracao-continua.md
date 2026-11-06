@@ -45,3 +45,5 @@ Novos critérios:
 - [ ] CA-CI-06: o workflow passa inteiro no GitHub. *A verificar na primeira execução depois do push.*
 
 **Atualização 2026-11-06 (depois do push de `30c2a4e`):** a execução `42157711665` passou pelo gitleaks, pela integração e pela instalação do Playwright, o que confirma as correções 1 a 3. A falha foi no passo de E2E, sem anotação que dissesse qual teste. O Playwright passa a usar também o reporter `github` quando `CI` está definido, para que a próxima execução mostre o teste que falhou nas anotações públicas.
+
+**Atualização 2026-11-06 (execução `42168361870`):** as anotações mostraram 5 E2E falhando porque, no Node 24 do CI, um campo de arquivo vazio chega à Server Action com o nome `"blob"`. Era um defeito real da aplicação, que também afetava a produção (Node 26), e não do CI. Corrigido em `comment-form-data.ts`; a suíte E2E inteira passou localmente com o Node 24. CA-CI-06 continua a verificar na próxima execução.
