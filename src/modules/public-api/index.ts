@@ -8,6 +8,15 @@ export { API_ERROR_CODES, API_ERROR_STATUS, apiErrorBody, apiErrorCodeFor } from
 export type { ApiErrorBody, ApiErrorCode } from "./domain/errors";
 export { API_V1_OPERATIONS, OPENAPI_DOCUMENT } from "./domain/openapi";
 export type { ApiOperation } from "./domain/openapi";
+export type { ApiCaller, RawQuery } from "./application/endpoints";
+
+/**
+ * The listing of `GET /api/v1/requests` for a caller already authenticated by another entry point
+ * (SPEC 2026-11-05-mcp-documentos, 5.4 item 1). Must run inside `runAsApiUser`.
+ */
+export async function listRequestsAsCaller(caller: endpoints.ApiCaller, rawQuery: endpoints.RawQuery, now: Date): Promise<unknown> {
+  return (await endpoints.listRequests(caller, rawQuery, now)).body;
+}
 
 type RequestRouteContext = { params: Promise<{ requestId: string }> };
 

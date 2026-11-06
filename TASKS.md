@@ -1478,3 +1478,43 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-CND-01 a 10.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-03-campos-condicionais-atendimento.md`.
+
+### SF-138 — Protocolo MCP: mensagens, versões, cabeçalhos e erros
+
+- **Estado:** Concluída em 2026-11-05. `src/modules/mcp/domain/protocol.ts`; 67 testes unitários em `tests/unit/modules/mcp/protocol.test.ts`.
+- **Objetivo:** Domínio puro do protocolo (seções 5.2 e 5.3 da SPEC): leitura da mensagem JSON-RPC, era moderna ou com `initialize`, versões aceitas, conferência de cabeçalhos com o corpo (com o formato base64 do `Mcp-Name`), respostas de `server/discover`, `initialize` e `ping`, e códigos de erro.
+- **Arquivos/módulos esperados:** `src/modules/mcp/domain/`, `tests/unit/modules/mcp/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** regras de protocolo de CA-MCP-08 a 10 cobertas por testes unitários.
+- **Testes relacionados:** Unitários.
+- **SPEC:** `SPEC/2026-11-05-mcp-documentos.md`.
+
+### SF-139 — Ferramentas e endpoint `/api/mcp`
+
+- **Estado:** Concluída em 2026-11-05. Ferramentas, conteúdo, despacho, transporte HTTP e rota `src/app/api/mcp/route.ts`; `listRequestsAsCaller` exposto pelo módulo `public-api` para a ferramenta de busca. 110 testes unitários novos (ferramentas, conteúdo, despacho, HTTP e rota). A verificação com banco real fica na SF-140.
+- **Objetivo:** As 4 ferramentas (seção 5.4), com esquemas estritos, conteúdo em texto ou base64 e a mesma resposta para tudo que não pode ser visto; autenticação pelo token da API com escopo READ e o mesmo limite (5.1); rota HTTP (5.2).
+- **Arquivos/módulos esperados:** `src/modules/mcp/`, `src/app/api/mcp/route.ts`, `tests/unit/modules/mcp/`.
+- **Dependências:** SF-138.
+- **Critérios de conclusão:** CA-MCP-01, 10, 11 e 12 (parte de código) com testes unitários.
+- **Testes relacionados:** Unitários.
+- **SPEC:** `SPEC/2026-11-05-mcp-documentos.md`.
+
+### SF-140 — Integração das ferramentas MCP com banco real
+
+- **Estado:** Pendente.
+- **Objetivo:** Testes de integração da seção 8: perfis, propriedade, setor e transferência, gestor, notas internas, removidos, arquivo corrompido, tokens recusados, limite compartilhado e ausência de escrita.
+- **Arquivos/módulos esperados:** `tests/integration/mcp-*.test.ts`.
+- **Dependências:** SF-139.
+- **Critérios de conclusão:** CA-MCP-01 a 07 e 11.
+- **Testes relacionados:** Integração.
+- **SPEC:** `SPEC/2026-11-05-mcp-documentos.md`.
+
+### SF-141 — Instruções de conexão, E2E e revisão
+
+- **Estado:** Pendente.
+- **Objetivo:** Instruções na tela de tokens e no README (5.5), E2E da sessão MCP completa por HTTP (eras moderna e com `initialize`) e revisão da SPEC.
+- **Arquivos/módulos esperados:** tela de tokens da API, README, `tests/e2e/`, `NOTES.md`, `diario/`, `prompts/sessoes/`.
+- **Dependências:** SF-140.
+- **Critérios de conclusão:** CA-MCP-01 a 12.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-05-mcp-documentos.md`.
