@@ -1538,3 +1538,63 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-CI-05 e 06.
 - **Testes relacionados:** Integração (teste corrigido 8 vezes seguidas) e gitleaks local.
 - **SPEC:** `SPEC/2026-11-04-integracao-continua.md`, seção 6.
+
+### SF-144 — Domínio das análises
+
+- **Estado:** Concluída em 2026-11-06. `src/modules/reports/domain/analytics.ts`: intervalos (dia até 31 dias, semana de segunda a domingo acima), séries de tendência, prazo por grupo com "poucos dados", grade dia × hora, tabela da equipe em ordem alfabética, tempo por etapa. 18 unitários.
+- **Objetivo:** Regras puras das seções 5.2 a 5.6.
+- **Arquivos/módulos esperados:** `src/modules/reports/domain/`, `tests/unit/modules/reports/analytics-domain.test.ts`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-ANL-04 e 07 (parte de domínio).
+- **Testes relacionados:** Unitários.
+- **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.
+
+### SF-145 — Leitor Prisma e casos de uso das análises
+
+- **Estado:** Concluída em 2026-11-06. `AnalyticsReader` (porta), `createPrismaAnalyticsReader` (consultas de agregação no PostgreSQL, sem ler texto de solicitação nem de comentário), `getAttendantDashboard` e `getAnalytics` com a autorização da seção 5.1 (o recorte do painel atual foi exportado como `resolveScope`). 18 unitários dos casos de uso e 9 de integração com um cenário calculado à mão.
+- **Objetivo:** Leitura dos números e autorização por perfil.
+- **Arquivos/módulos esperados:** `src/modules/reports/application/`, `src/modules/reports/infrastructure/prisma-analytics-reader.ts`, `tests/integration/analytics-reader.test.ts`.
+- **Dependências:** SF-144.
+- **Critérios de conclusão:** CA-ANL-02 a 08 (casos de uso e banco).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.
+
+### SF-146 — Gráficos SVG e barras
+
+- **Estado:** Pendente.
+- **Objetivo:** Componentes de gráfico da seção 5.7, com paleta validada.
+- **Arquivos/módulos esperados:** `src/app/_components/`, `src/app/globals.css`, testes unitários.
+- **Dependências:** SF-145.
+- **Critérios de conclusão:** CA-ANL-09.
+- **Testes relacionados:** Unitários.
+- **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.
+
+### SF-147 — Meu painel do atendente
+
+- **Estado:** Pendente.
+- **Objetivo:** Página `/queue/dashboard` (5.3).
+- **Arquivos/módulos esperados:** `src/app/(attendant)/`.
+- **Dependências:** SF-146.
+- **Critérios de conclusão:** CA-ANL-02 e 03 (tela).
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.
+
+### SF-148 — Análises do administrador e do gestor
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção `/admin?section=analytics` e página `/approvals/analytics` (5.4 a 5.6).
+- **Arquivos/módulos esperados:** `src/app/(admin)/`, `src/app/(manager)/`, `src/app/_components/`.
+- **Dependências:** SF-146.
+- **Critérios de conclusão:** CA-ANL-02, 04 a 09 (tela).
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.
+
+### SF-149 — E2E, README e revisão das análises
+
+- **Estado:** Pendente.
+- **Objetivo:** E2E da seção 8, README e revisão da SPEC.
+- **Arquivos/módulos esperados:** `tests/e2e/`, README, registros.
+- **Dependências:** SF-147 e SF-148.
+- **Critérios de conclusão:** CA-ANL-01 a 10.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.

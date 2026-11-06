@@ -1,7 +1,9 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
+import * as analytics from "./application/analytics";
 import * as dashboard from "./application/dashboard";
 import type { Dashboard, DashboardCsv } from "./application/dashboard";
+import { createPrismaAnalyticsReader } from "./infrastructure/prisma-analytics-reader";
 import { createPrismaDashboardReader } from "./infrastructure/prisma-dashboard-reader";
 
 // Dashboard, indicators and CSV export (SPEC 2026-11-02-painel-relatorios).
@@ -58,4 +60,44 @@ export async function exportDashboardCsv(
   now: Date = new Date(),
 ): Promise<DashboardCsv> {
   return dashboard.exportDashboardCsv(params, createPrismaDashboardReader(database), now);
+}
+
+// Operational analytics (SPEC 2026-11-06-analises-operacionais).
+export {
+  FEW_DATA_THRESHOLD,
+  WEEKDAY_LABELS,
+  analyticsGranularity,
+  analyticsIntervals,
+  arrivalGrid,
+  intensityStep,
+} from "./domain/analytics";
+export type {
+  AnalyticsGranularity,
+  AnalyticsInterval,
+  ArrivalGrid,
+  OnTimeGroup,
+  StageTime,
+  TeamMember,
+  TrendPoint,
+} from "./domain/analytics";
+export { PRIORITY_ORDER } from "./application/analytics";
+export type { Analytics, AttendantDashboard, WorkSummary } from "./application/analytics";
+export type { AnalyticsReader } from "./application/analytics-ports";
+
+/** "Meu painel" of the signed-in attendant (section 5.3). */
+export async function getAttendantDashboard(
+  params: RawParams,
+  database: PrismaClient = prisma,
+  now: Date = new Date(),
+): Promise<analytics.AttendantDashboard> {
+  return analytics.getAttendantDashboard(params, createPrismaAnalyticsReader(database), now);
+}
+
+/** "Análises" of the signed-in administrator or manager (sections 5.4 to 5.6). */
+export async function getAnalytics(
+  params: RawParams,
+  database: PrismaClient = prisma,
+  now: Date = new Date(),
+): Promise<analytics.Analytics> {
+  return analytics.getAnalytics(params, createPrismaAnalyticsReader(database), now);
 }

@@ -56,7 +56,7 @@ export interface DashboardCsv {
   content: string;
 }
 
-interface ResolvedScope {
+export interface ResolvedScope {
   audience: DashboardAudience;
   sectors: ReportSector[];
   /** Null when there is nothing the actor may read (manager without an active sector). */
@@ -82,7 +82,11 @@ function single(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-async function resolveScope(raw: RawParams, reader: DashboardReader): Promise<ResolvedScope> {
+/** Also used by the analytics page (SPEC 2026-11-06-analises-operacionais, 5.1), with the same rules. */
+export async function resolveScope(
+  raw: RawParams,
+  reader: Pick<DashboardReader, "listSectors" | "findSector">,
+): Promise<ResolvedScope> {
   const actor = await requireCurrentActor();
 
   if (actor.role === "ADMIN") {
