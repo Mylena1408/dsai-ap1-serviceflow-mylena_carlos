@@ -600,6 +600,12 @@ export function createPrismaRequestTransaction(
   };
 }
 
+/**
+ * Explicit limit of the request transactions (SPEC 2026-11-06-transacao-abertura, 2.2), instead of
+ * Prisma's implicit 5 s: room for a slow database or network without holding locks for long.
+ */
+export const REQUEST_TRANSACTION_TIMEOUT_MS = 10_000;
+
 /** Serializable transaction runner that translates errors according to `policy`. */
 export function createPrismaRequestTransactionRunner(
   database: PrismaClient,
@@ -611,6 +617,7 @@ export function createPrismaRequestTransactionRunner(
         database,
         (transaction) => work(createPrismaRequestTransaction(transaction)),
         policy,
+        { timeoutMs: REQUEST_TRANSACTION_TIMEOUT_MS },
       );
     },
   };

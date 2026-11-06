@@ -11,6 +11,7 @@ import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
 import { closePause, resumeColumns } from "./sla-pause";
 import { assertAttendanceFieldsComplete } from "./attendance-fields";
+import { readRequestAfterWrite } from "./read-after-write";
 
 export async function transitionRequestStatus(
   input: unknown,
@@ -19,7 +20,7 @@ export async function transitionRequestStatus(
   const parsed = validateInput(requestStatusTransitionInputSchema, input);
   const authorizedActor = await requireStatusChangeActor(parsed.requestId);
 
-  return transactions.run(async (transaction) => {
+  await transactions.run(async (transaction) => {
     const currentActor = await transaction.findActor(authorizedActor.actorId);
 
     if (
@@ -124,6 +125,8 @@ export async function transitionRequestStatus(
       });
     }
 
-    return transaction.getWithHistory(parsed.requestId);
   });
+
+  // SPEC 2026-11-06-transacao-abertura: the history is read after the commit, outside the write.
+  return readRequestAfterWrite(transactions, parsed.requestId);
 }

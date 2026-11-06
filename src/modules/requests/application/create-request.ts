@@ -21,6 +21,7 @@ import { approvalStateOnOpening } from "../domain/approval";
 import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
 import { buildRequestSnapshot } from "../domain/snapshot";
+import { readRequestAfterWrite } from "./read-after-write";
 import type {
   AttachmentStorage,
   RequestTransaction,
@@ -61,9 +62,8 @@ export async function createRequest(
   const requestId = randomUUID();
 
   if (uploads.length === 0) {
-    return transactions.run((transaction) =>
-      openRequest(transaction, actor.id, parsed, requestId, []),
-    );
+    await transactions.run((transaction) => openRequest(transaction, actor.id, parsed, requestId, []));
+    return readRequestAfterWrite(transactions, requestId);
   }
 
   assertAttachmentBatchLimits(uploads.map(({ bytes }) => ({ size: bytes.length })));
@@ -96,13 +96,15 @@ export async function createRequest(
       written.push(attachment.storageKey);
     }
 
-    return await transactions.run((transaction) =>
-      openRequest(transaction, actor.id, parsed, requestId, prepared),
-    );
+    await transactions.run((transaction) => openRequest(transaction, actor.id, parsed, requestId, prepared));
   } catch (error) {
     await removeWrittenObjects(storage, written);
     throw error;
   }
+
+  // After the commit the files belong to a saved request: a failure of this read must not remove
+  // them (SPEC 2026-11-06-transacao-abertura, 4.4).
+  return readRequestAfterWrite(transactions, requestId);
 }
 
 async function loadOpeningContext(
@@ -153,7 +155,7 @@ async function openRequest(
   parsed: RequestCreationInput,
   requestId: string,
   prepared: readonly PreparedAttachment[],
-): Promise<RequestWithHistory> {
+): Promise<void> {
   const context = await loadOpeningContext(transaction, actorId, parsed.serviceId);
   const answers = await fieldAnswers(transaction, context.service.id, parsed);
 
@@ -230,8 +232,6 @@ async function openRequest(
       answers.map((answer) => ({ ...answer, requestId: created.id, createdAt: openedAt })),
     );
   }
-
-  return transaction.getWithHistory(created.id);
 }
 
 // Compensation (SPEC 21.15.5). A failed removal leaves an object that no route can read,
