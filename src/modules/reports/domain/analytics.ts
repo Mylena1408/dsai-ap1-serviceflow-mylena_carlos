@@ -257,3 +257,47 @@ export function stageTimes(rows: readonly StageTimeRow[]): StageTime[] {
     .sort((left, right) => collator.compare(left.serviceName, right.serviceName) || left.stageOrder - right.stageOrder)
     .map((row) => ({ serviceName: row.serviceName, stageName: row.stageName, count: row.duration.count, times: durationTimes(row.duration) }));
 }
+
+/** Ratings of the period as the database returns them (SPEC 2026-11-06-pesquisa-satisfacao, 4.7). */
+export interface SatisfactionRows {
+  /** Count per rating 1 to 5 of the ratings given in the period. */
+  distribution: ReadonlyArray<{ rating: number; count: number }>;
+  /** Requests completed in the period, and how many of them have a rating of that completion. */
+  completed: number;
+  ratedCompletions: number;
+  byService: ReadonlyArray<{ label: string; count: number; sum: number }>;
+}
+
+export interface SatisfactionSummary {
+  count: number;
+  /** One decimal place; null without ratings. */
+  average: number | null;
+  /** Ratings 5 down to 1, every one present. */
+  distribution: Array<{ rating: number; count: number }>;
+  /** Whole percentage of the completed requests of the period that were rated; null without any. */
+  responseRate: number | null;
+  byService: Array<{ label: string; count: number; average: number; fewData: boolean }>;
+}
+
+function oneDecimal(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+export function satisfactionSummary(rows: SatisfactionRows): SatisfactionSummary {
+  const distribution = [5, 4, 3, 2, 1].map((rating) => ({
+    rating,
+    count: rows.distribution.filter((row) => row.rating === rating).reduce((sum, row) => sum + row.count, 0),
+  }));
+  const count = distribution.reduce((sum, row) => sum + row.count, 0);
+  const total = distribution.reduce((sum, row) => sum + row.rating * row.count, 0);
+  return {
+    count,
+    average: count === 0 ? null : oneDecimal(total / count),
+    distribution,
+    responseRate: rows.completed === 0 ? null : Math.round((rows.ratedCompletions / rows.completed) * 100),
+    byService: rows.byService
+      .filter((row) => row.count > 0)
+      .map((row) => ({ label: row.label, count: row.count, average: oneDecimal(row.sum / row.count), fewData: row.count < FEW_DATA_THRESHOLD }))
+      .sort((left, right) => right.count - left.count || collator.compare(left.label, right.label)),
+  };
+}

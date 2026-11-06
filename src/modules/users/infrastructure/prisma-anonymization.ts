@@ -44,6 +44,8 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
         data: { value: replacement },
       });
       await transaction.requestComment.updateMany({ where: { authorId: userId }, data: { body: replacement } });
+      // SPEC 2026-11-06-pesquisa-satisfacao, 4.8 (decision P7): the comment goes, the rating stays.
+      await transaction.requestSatisfaction.updateMany({ where: { requesterId: userId, comment: { not: null } }, data: { comment: replacement } });
       await transaction.requestApproval.updateMany({
         where: { deciderId: userId, note: { not: null } },
         data: { note: replacement },

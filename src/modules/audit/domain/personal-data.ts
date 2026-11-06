@@ -64,6 +64,8 @@ export interface PersonalDataSource {
     /** Public comments only: internal notes belong to the team. */
     /** `files`: names of the files of the comment (SPEC 2026-11-03-anexos-comentarios-documentos, 5.4). */
     comments: Array<{ createdAt: Date; authorName: string; body: string; isInternal: boolean; files?: string[] }>;
+    /** SPEC 2026-11-06-pesquisa-satisfacao, 4.8: the requester's own rating, if any. */
+    satisfaction?: { rating: number; comment: string | null; ratedAt: Date } | null;
     attachments: Array<{ requirementName: string; filename: string; createdAt: Date; removed: boolean }>;
   }>;
   /** Comments and notes the person wrote in requests opened by others. */
@@ -158,6 +160,10 @@ export function buildPersonalDataExport(source: PersonalDataSource, now: Date) {
           // Only when the comment has files, so the other entries keep their shape.
           ...(comment.files && comment.files.length > 0 ? { arquivos: comment.files } : {}),
         })),
+      // Only when the request was rated, so files of other requests keep their shape.
+      ...(request.satisfaction
+        ? { avaliacao: { nota: request.satisfaction.rating, comentario: request.satisfaction.comment, avaliadaEm: iso(request.satisfaction.ratedAt) } }
+        : {}),
       anexos: request.attachments.map((attachment) => ({
         documento: attachment.requirementName,
         arquivo: attachment.removed ? "Arquivo removido na anonimização" : attachment.filename,

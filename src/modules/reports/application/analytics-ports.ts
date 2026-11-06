@@ -1,5 +1,5 @@
 import type { PriorityValue } from "@/shared/requests";
-import type { DailyCounts, DurationAggregate, StageTimeRow, TeamMemberRow } from "../domain/analytics";
+import type { DailyCounts, DurationAggregate, SatisfactionRows, StageTimeRow, TeamMemberRow } from "../domain/analytics";
 import type { DashboardRange, DashboardScope, ReportSector } from "./ports";
 
 // Reading port of the operational analytics (SPEC 2026-11-06-analises-operacionais, 5.8): every
@@ -80,4 +80,6 @@ export interface AnalyticsReader {
   onTimeByPriority(scope: DashboardScope, range: DashboardRange): Promise<Array<{ priority: PriorityValue; withDueDate: number; onTime: number }>>;
   arrivals(scope: DashboardScope, range: DashboardRange): Promise<Array<{ isoWeekday: number; hour: number; count: number }>>;
   team(scope: DashboardScope, range: DashboardRange): Promise<TeamMemberRow[]>;
+  /** SPEC 2026-11-06-pesquisa-satisfacao, 4.7: numbers only, never a comment. */
+  satisfaction(scope: DashboardScope, range: DashboardRange): Promise<SatisfactionRows>;
 }

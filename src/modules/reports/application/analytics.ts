@@ -7,12 +7,14 @@ import {
   arrivalGrid,
   durationTimes,
   onTimeGroups,
+  satisfactionSummary,
   stageTimes,
   teamTable,
   trendSeries,
   type AnalyticsGranularity,
   type ArrivalGrid,
   type OnTimeGroup,
+  type SatisfactionSummary,
   type StageTime,
   type TeamMember,
   type TrendPoint,
@@ -77,6 +79,8 @@ export interface Analytics {
     arrivals: ArrivalGrid;
   };
   team: TeamMember[];
+  /** SPEC 2026-11-06-pesquisa-satisfacao, 4.7. */
+  satisfaction: SatisfactionSummary;
   /** The administrator without a sector filter sees each person's sector (5.6). */
   teamShowsSector: boolean;
 }
@@ -170,14 +174,21 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
   };
 
   if (!resolved.scope) {
-    return { ...base, withoutSector: true, trend: trendSeries(intervals, [], []), sla: EMPTY_ANALYTICS_SLA, team: [] };
+    return {
+      ...base,
+      withoutSector: true,
+      trend: trendSeries(intervals, [], []),
+      sla: EMPTY_ANALYTICS_SLA,
+      team: [],
+      satisfaction: satisfactionSummary({ distribution: [], completed: 0, ratedCompletions: 0, byService: [] }),
+    };
   }
 
   const scope = resolved.scope;
   const range = { from: period.from, before: period.before };
   // The pending count of an interval that has not ended yet is the count now.
   const ends = intervals.map((item) => (item.end.getTime() > now.getTime() ? now : item.end));
-  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team] = await Promise.all([
+  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings] = await Promise.all([
     reader.dailyCounts(scope, range),
     reader.pendingAt(scope, ends),
     reader.firstResponse(scope, range),
@@ -187,6 +198,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.onTimeByPriority(scope, range),
     reader.arrivals(scope, range),
     reader.team(scope, range),
+    reader.satisfaction(scope, range),
   ]);
 
   return {
@@ -212,5 +224,6 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
       arrivals: arrivalGrid(arrivals),
     },
     team: teamTable(team),
+    satisfaction: satisfactionSummary(ratings),
   };
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getManagerRequest, listRequestAttachments, listRequestFieldAnswers } from "@/modules/requests";
+import { getManagerRequest, getRequestSatisfaction, listRequestAttachments, listRequestFieldAnswers } from "@/modules/requests";
+import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { NotFoundError } from "@/server/errors";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { RequestAttachments } from "@/app/_components/request-attachments";
@@ -34,11 +35,13 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   let request;
   let attachments;
   let answers;
+  let satisfaction;
 
   try {
     request = await getManagerRequest(requestId);
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
+    satisfaction = await getRequestSatisfaction(request.id);
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -96,6 +99,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       ) : null}
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
+      <TeamSatisfaction view={satisfaction} />
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
     </main>
   );

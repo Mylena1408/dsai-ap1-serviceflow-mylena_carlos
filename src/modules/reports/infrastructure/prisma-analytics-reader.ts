@@ -283,6 +283,34 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
         GROUP BY 1, 2`;
     },
 
+    async satisfaction(scope, range) {
+      // SPEC 2026-11-06-pesquisa-satisfacao, 4.7: ratings given in the period, and the share of
+      // the requests completed in the period that were rated for that same completion.
+      const [distribution, [rate], byService] = await Promise.all([
+        database.$queryRaw<Array<{ rating: number; count: number }>>`
+          SELECT s."rating"::int AS "rating", count(*)::int AS "count"
+          FROM "RequestSatisfaction" s
+          JOIN "Request" r ON r."id" = s."requestId"
+          WHERE s."ratedAt" >= ${range.from} AND s."ratedAt" < ${range.before} ${scopeSql(scope)}
+          GROUP BY 1`,
+        database.$queryRaw<Array<{ completed: number; ratedCompletions: number }>>`
+          SELECT
+            count(*)::int AS "completed",
+            -- The snapshot went through JavaScript (milliseconds); compare at that precision.
+            (count(*) FILTER (WHERE date_trunc('milliseconds', s."completedAtSnapshot") = date_trunc('milliseconds', r."completedAt")))::int AS "ratedCompletions"
+          FROM "Request" r
+          LEFT JOIN "RequestSatisfaction" s ON s."requestId" = r."id"
+          WHERE r."status" = 'COMPLETED' AND r."completedAt" >= ${range.from} AND r."completedAt" < ${range.before} ${scopeSql(scope)}`,
+        database.$queryRaw<Array<{ label: string; count: number; sum: number }>>`
+          SELECT r."serviceNameSnapshot" AS "label", count(*)::int AS "count", sum(s."rating")::int AS "sum"
+          FROM "RequestSatisfaction" s
+          JOIN "Request" r ON r."id" = s."requestId"
+          WHERE s."ratedAt" >= ${range.from} AND s."ratedAt" < ${range.before} ${scopeSql(scope)}
+          GROUP BY 1`,
+      ]);
+      return { distribution, completed: rate?.completed ?? 0, ratedCompletions: rate?.ratedCompletions ?? 0, byService };
+    },
+
     async team(scope, range): Promise<TeamMemberRow[]> {
       // People are the attendants responsible for requests of the scope: completed in the
       // period or still pending now (5.6). Durations exist only for the completed ones.

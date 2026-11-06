@@ -271,6 +271,57 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
         <ArrivalHeatmap grid={sla.arrivals} />
       </section>
 
+      <section className="surface-card" aria-labelledby="analytics-satisfaction">
+        <h2 id="analytics-satisfaction">Satisfação</h2>
+        <p className="metadata">Avaliações dadas no período pelos solicitantes, de 1 a 5. Os comentários ficam só na solicitação.</p>
+        <dl className="dashboard-indicators">
+          <Indicator
+            label="Nota média"
+            value={analytics.satisfaction.average === null ? "—" : `${numbers.format(analytics.satisfaction.average)} de 5`}
+            detail={`${analytics.satisfaction.count} ${analytics.satisfaction.count === 1 ? "avaliação" : "avaliações"}`}
+          />
+          <Indicator
+            label="Taxa de resposta"
+            value={percent(analytics.satisfaction.responseRate)}
+            detail="das concluídas no período"
+          />
+        </dl>
+        <div className="dashboard-groups">
+          <GroupTable
+            title="Distribuição das notas"
+            groups={analytics.satisfaction.distribution.map((row) => ({ label: `${row.rating} de 5`, count: row.count }))}
+          />
+          <section className="dashboard-group" aria-label="Nota média por serviço">
+            <h3>Nota média por serviço</h3>
+            {analytics.satisfaction.byService.length === 0 ? (
+              <p className="metadata">Nenhuma avaliação no período.</p>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Serviço</th>
+                    <th scope="col">Média</th>
+                    <th scope="col">Avaliações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analytics.satisfaction.byService.map((row) => (
+                    <tr key={row.label}>
+                      <th scope="row">{row.label}</th>
+                      <td>
+                        {numbers.format(row.average)}
+                        {row.fewData ? <span className="tag-muted"> poucos dados</span> : null}
+                      </td>
+                      <td>{row.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+        </div>
+      </section>
+
       <section className="surface-card" aria-labelledby="analytics-team">
         <h2 id="analytics-team">Desempenho da equipe</h2>
         <p className="analytics-notice">{TEAM_NOTICE}</p>

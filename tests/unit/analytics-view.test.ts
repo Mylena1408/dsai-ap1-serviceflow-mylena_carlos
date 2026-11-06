@@ -58,6 +58,19 @@ const analytics: Analytics = {
     { userId: "b", name: "Bruno Lima", isActive: false, sectorName: "Central", completed: 1, completion: null, onTimePercentage: null, pendingNow: 0 },
   ],
   teamShowsSector: true,
+  satisfaction: {
+    count: 4,
+    average: 4.3,
+    distribution: [
+      { rating: 5, count: 3 },
+      { rating: 4, count: 0 },
+      { rating: 3, count: 0 },
+      { rating: 2, count: 1 },
+      { rating: 1, count: 0 },
+    ],
+    responseRate: 50,
+    byService: [{ label: "Reparo", count: 4, average: 4.3, fewData: false }],
+  },
 };
 
 describe("Meu painel (5.3)", () => {

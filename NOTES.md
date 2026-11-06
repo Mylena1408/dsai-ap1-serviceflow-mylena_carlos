@@ -2000,3 +2000,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Node 24 único:** `engines.node` passou de `>=20.9.0` para `"24.x"` (a Vercel escolhe a versão por esse campo; até aqui a produção rodava em `nodejs26.x`); Volta fixado em `24.22.2` (antes `22.23.4`); o CI já usava `node-version: "24"`. Lint, typecheck, build, unitários 1140, integração 427 e E2E 26 passaram com o Node 24.
 - **CI da correção do arquivo vazio (`ba84534`, execução `42205142445`):** passou gitleaks, typecheck, lint, build e unitários; falhou na integração, em `business-hours-sla.test.ts`. Reproduzido aqui no mesmo horário: o teste usa uma janela útil de 10:00 às 11:00 UTC e afirmava que o vencimento é sempre 11:00, o que só vale se a solicitação abre fora da janela; rodando entre 10:00 e 11:00 UTC (7 h às 8 h em São Paulo), o vencimento é "agora + 1 hora útil". A aplicação estava certa (as asserções que calculam o esperado passavam). A asserção passou a exigir só que o vencimento caia dentro da janela; verificado às 10:54 UTC, o horário que falhava.
 - **Aviso ao Carlos:** texto preparado para a responsável enviar (mudanças no `ci.yml`, `vercel.json`, Node 24 e módulos novos).
+
+## SF-150 e SF-151 — Pesquisa de satisfação (2026-11-06)
+
+- **Pedido:** "comece pela manutenção e depois a leva recomendada" (satisfação, respostas prontas, escalonamento, base de conhecimento). SPEC `2026-11-06-pesquisa-satisfacao.md`, decisões P1 a P7.
+- **Mudança na SPEC antes do código:** a primeira versão previa o evento de domínio `request.rated`. Retirado (P6): exigiria recriar os CHECKs de tipo da fila de saída e dos webhooks sem que nada consumisse o evento. O histórico vem de `RequestSatisfactionEvent`.
+- **Leitura:** `getRequestSatisfaction` usa `authorizeRequestRead` (a mesma regra dos anexos), então o gestor com "Ver todas as solicitações do setor" também lê.
+- **Defeito pego pela integração:** a taxa de resposta compara `completedAtSnapshot` (passou pelo JavaScript, milissegundos) com `Request.completedAt`; gravado pelo `now()` do banco, este tem microssegundos e a igualdade falhava. A comparação agora usa `date_trunc('milliseconds', ...)` dos dois lados.
+- **Limpezas do banco de teste:** as tabelas novas entraram em `tests/integration/fixtures.ts` e `scripts/prepare-e2e.ts` (a primeira execução falhou na chave estrangeira).
+- **Banco de teste:** foi desligado pelo Claude Code por falta de memória enquanto as SPECs eram escritas; religado com 2,5 GB livres, dentro da autorização da responsável para a leva.
+- **Erro meu:** um script de edição com barra invertida dentro de heredoc quebrou (regra já registrada na memória); refeito com a ferramenta de edição.
+- **Resultados:** lint e typecheck OK; unitários 1164/1164; integração 433/433; E2E da satisfação aprovado (a suíte E2E inteira roda no fim da leva).

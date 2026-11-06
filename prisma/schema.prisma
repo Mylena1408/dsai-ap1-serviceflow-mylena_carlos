@@ -168,35 +168,37 @@ model User {
   /// SPEC 2026-11-02-auditoria-lgpd, 5.5: set once, when the person is anonymized.
   anonymizedAt DateTime? @db.Timestamptz
 
-  sector                Sector?                   @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests              Request[]                 @relation("UserRequests")
-  requestStatusEvents   RequestStatusEvent[]      @relation("RequestStatusEventActor")
-  uploadedAttachments   RequestAttachment[]       @relation("RequestAttachmentUploader")
-  assignedRequests      Request[]                 @relation("RequestAssignee")
-  assignmentEventsActed RequestAssignmentEvent[]  @relation("RequestAssignmentEventActor")
-  assignmentEventsFrom  RequestAssignmentEvent[]  @relation("RequestAssignmentEventFrom")
-  assignmentEventsTo    RequestAssignmentEvent[]  @relation("RequestAssignmentEventTo")
-  comments              RequestComment[]          @relation("RequestCommentAuthor")
-  notifications         RequestNotification[]     @relation("NotificationRecipient")
-  priorityEvents        RequestPriorityEvent[]    @relation("RequestPriorityEventActor")
-  stageEvents           RequestStageEvent[]       @relation("RequestStageEventActor")
-  sectorEvents          RequestSectorEvent[]      @relation("RequestSectorEventActor")
-  commentFiles          RequestCommentFile[]      @relation("RequestCommentFileUploader")
-  approvalsDecided      RequestApproval[]         @relation("RequestApprovalDecider")
-  permissions           UserPermission[]          @relation("UserPermissionHolder")
-  permissionsGranted    UserPermission[]          @relation("UserPermissionGrantor")
-  permissionEvents      UserPermissionEvent[]     @relation("UserPermissionEventUser")
-  permissionEventsActed UserPermissionEvent[]     @relation("UserPermissionEventActor")
+  sector                Sector?                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requests              Request[]                  @relation("UserRequests")
+  requestStatusEvents   RequestStatusEvent[]       @relation("RequestStatusEventActor")
+  uploadedAttachments   RequestAttachment[]        @relation("RequestAttachmentUploader")
+  assignedRequests      Request[]                  @relation("RequestAssignee")
+  assignmentEventsActed RequestAssignmentEvent[]   @relation("RequestAssignmentEventActor")
+  assignmentEventsFrom  RequestAssignmentEvent[]   @relation("RequestAssignmentEventFrom")
+  assignmentEventsTo    RequestAssignmentEvent[]   @relation("RequestAssignmentEventTo")
+  comments              RequestComment[]           @relation("RequestCommentAuthor")
+  notifications         RequestNotification[]      @relation("NotificationRecipient")
+  priorityEvents        RequestPriorityEvent[]     @relation("RequestPriorityEventActor")
+  stageEvents           RequestStageEvent[]        @relation("RequestStageEventActor")
+  sectorEvents          RequestSectorEvent[]       @relation("RequestSectorEventActor")
+  commentFiles          RequestCommentFile[]       @relation("RequestCommentFileUploader")
+  approvalsDecided      RequestApproval[]          @relation("RequestApprovalDecider")
+  permissions           UserPermission[]           @relation("UserPermissionHolder")
+  permissionsGranted    UserPermission[]           @relation("UserPermissionGrantor")
+  permissionEvents      UserPermissionEvent[]      @relation("UserPermissionEventUser")
+  permissionEventsActed UserPermissionEvent[]      @relation("UserPermissionEventActor")
   notificationPrefs     NotificationPreference[]
   emailDeliveries       EmailDelivery[]
-  apiTokens             ApiToken[]                @relation("ApiTokenOwner")
-  apiTokensRevoked      ApiToken[]                @relation("ApiTokenRevoker")
-  slaPauses             RequestSlaPause[]         @relation("RequestSlaPauseActor")
-  slaResumes            RequestSlaPause[]         @relation("RequestSlaResumeActor")
-  holidaysCreated       BusinessHoliday[]         @relation("BusinessHolidayCreator")
-  calendarUpdates       BusinessCalendar[]        @relation("BusinessCalendarUpdater")
-  fieldValuesUpdated    RequestFieldValue[]       @relation("RequestFieldValueUpdater")
-  fieldUpdateEvents     RequestFieldUpdateEvent[] @relation("RequestFieldUpdateEventActor")
+  apiTokens             ApiToken[]                 @relation("ApiTokenOwner")
+  apiTokensRevoked      ApiToken[]                 @relation("ApiTokenRevoker")
+  slaPauses             RequestSlaPause[]          @relation("RequestSlaPauseActor")
+  slaResumes            RequestSlaPause[]          @relation("RequestSlaResumeActor")
+  holidaysCreated       BusinessHoliday[]          @relation("BusinessHolidayCreator")
+  calendarUpdates       BusinessCalendar[]         @relation("BusinessCalendarUpdater")
+  fieldValuesUpdated    RequestFieldValue[]        @relation("RequestFieldValueUpdater")
+  fieldUpdateEvents     RequestFieldUpdateEvent[]  @relation("RequestFieldUpdateEventActor")
+  satisfactionRatings   RequestSatisfaction[]      @relation("RequestSatisfactionRequester")
+  satisfactionEvents    RequestSatisfactionEvent[] @relation("RequestSatisfactionEventActor")
 }
 
 model Service {
@@ -260,24 +262,26 @@ model Request {
   /// Start of the current SLA pause; null when not paused (5.3).
   slaPausedAt                DateTime?       @db.Timestamptz
 
-  requester        User                      @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
-  assignee         User?                     @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
-  service          Service                   @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  sector           Sector                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  events           RequestStatusEvent[]
-  attachments      RequestAttachment[]
-  assignmentEvents RequestAssignmentEvent[]
-  priorityEvents   RequestPriorityEvent[]
-  fieldValues      RequestFieldValue[]
-  stageEvents      RequestStageEvent[]
-  sectorEvents     RequestSectorEvent[]
-  commentFiles     RequestCommentFile[]
-  slaPauses        RequestSlaPause[]
-  fieldUpdates     RequestFieldUpdateEvent[]
-  approval         RequestApproval?
-  comments         RequestComment[]
-  outboxEvents     OutboxEvent[]
-  notifications    RequestNotification[]
+  requester          User                       @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
+  assignee           User?                      @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  service            Service                    @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  sector             Sector                     @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  events             RequestStatusEvent[]
+  attachments        RequestAttachment[]
+  assignmentEvents   RequestAssignmentEvent[]
+  priorityEvents     RequestPriorityEvent[]
+  fieldValues        RequestFieldValue[]
+  stageEvents        RequestStageEvent[]
+  sectorEvents       RequestSectorEvent[]
+  commentFiles       RequestCommentFile[]
+  slaPauses          RequestSlaPause[]
+  fieldUpdates       RequestFieldUpdateEvent[]
+  satisfaction       RequestSatisfaction?
+  satisfactionEvents RequestSatisfactionEvent[]
+  approval           RequestApproval?
+  comments           RequestComment[]
+  outboxEvents       OutboxEvent[]
+  notifications      RequestNotification[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -626,6 +630,39 @@ model RequestSlaPause {
   request   Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   pausedBy  User    @relation("RequestSlaPauseActor", fields: [pausedById], references: [id], onDelete: Restrict)
   resumedBy User?   @relation("RequestSlaResumeActor", fields: [resumedById], references: [id], onDelete: Restrict)
+
+  @@index([requestId])
+}
+
+/// The requester's rating of a completed request (SPEC 2026-11-06-pesquisa-satisfacao, 4 and 5).
+/// One row per request; a new completion lets the requester rate again, replacing this row. The
+/// rating range and the comment length are checked in SQL.
+model RequestSatisfaction {
+  id                  String   @id @default(uuid()) @db.Uuid
+  requestId           String   @unique @db.Uuid
+  requesterId         String   @db.Uuid
+  rating              Int      @db.SmallInt
+  comment             String?
+  completedAtSnapshot DateTime @db.Timestamptz
+  ratedAt             DateTime @db.Timestamptz
+
+  request   Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  requester User    @relation("RequestSatisfactionRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+
+  @@index([ratedAt])
+}
+
+/// History of the ratings (SPEC 2026-11-06-pesquisa-satisfacao, 4.5): never the comment.
+model RequestSatisfactionEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  requestId  String   @db.Uuid
+  actorId    String   @db.Uuid
+  rating     Int      @db.SmallInt
+  replaced   Boolean
+  occurredAt DateTime @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  actor   User    @relation("RequestSatisfactionEventActor", fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId])
 }

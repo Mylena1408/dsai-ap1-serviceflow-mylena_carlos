@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { addComment } from "@/modules/comments";
 import { scheduleEventProcessing } from "@/server/jobs/schedule";
-import { addLateDocument, cancelRequest, createRequest, reopenRequest } from "@/modules/requests";
+import { addLateDocument, cancelRequest, createRequest, rateRequest, reopenRequest } from "@/modules/requests";
 import { FieldAnswersError } from "@/modules/service-fields";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { DocumentStorageError } from "@/server/storage";
@@ -185,4 +185,24 @@ export async function addOwnCommentAction(formData: FormData): Promise<never> {
   return runOnOwnRequest(formData, async (requestId) => {
     await addComment({ requestId, body, ...(files.length > 0 ? { files } : {}) });
   }, "commented");
+}
+
+// Satisfaction survey (SPEC 2026-11-06-pesquisa-satisfacao, 4): the owner rates a completed request.
+export async function rateOwnRequestAction(formData: FormData): Promise<never> {
+  const requestId = field(formData, "requestId");
+
+  try {
+    await rateRequest({ requestId, rating: field(formData, "rating"), comment: field(formData, "comment") });
+  } catch (error) {
+    if (error instanceof ApplicationError) {
+      const code =
+        error instanceof ValidationError ? "rating" : error.code === "CONFLICT" ? "rating-closed" : lifecycleErrorCode(error);
+      redirect(`/requests/${encodeURIComponent(requestId)}?error=${code}`);
+    }
+
+    throw error;
+  }
+
+  revalidatePath(`/requests/${requestId}`);
+  redirect(`/requests/${requestId}?notice=rated`);
 }

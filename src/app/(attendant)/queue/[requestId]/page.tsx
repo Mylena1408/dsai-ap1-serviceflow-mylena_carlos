@@ -4,6 +4,7 @@ import {
   effectiveAssigneeId,
   getAttendanceFields,
   getAttendantRequest,
+  getRequestSatisfaction,
   listRequestAttachments,
   listRequestFieldAnswers,
   listSectorDestinations,
@@ -29,6 +30,7 @@ import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
+import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 
 type QueueRequestPageProps = {
@@ -84,6 +86,7 @@ export default async function QueueRequestPage({
   let attachments;
   let answers;
   let comments;
+  let satisfaction;
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
   let attendance: Awaited<ReturnType<typeof getAttendanceFields>> = { fields: [], values: {} };
@@ -95,6 +98,7 @@ export default async function QueueRequestPage({
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
+    satisfaction = await getRequestSatisfaction(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -192,6 +196,7 @@ export default async function QueueRequestPage({
       {/* While the form shows the attendance's answers, the block keeps only the requester's. */}
       <RequestFieldAnswers answers={attendanceFormShown ? answers.filter((answer) => answer.audience !== "ATTENDANT") : answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
+      <TeamSatisfaction view={satisfaction} />
       <RequestConversation
         requestId={request.id}
         comments={comments}

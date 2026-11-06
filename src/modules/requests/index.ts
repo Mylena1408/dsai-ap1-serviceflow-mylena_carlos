@@ -26,6 +26,8 @@ import {
   createPrismaRequestExistenceReader,
 } from "./infrastructure/prisma-attachment-repository";
 import * as orphanCleanup from "./application/orphan-cleanup";
+import * as satisfaction from "./application/satisfaction";
+import { createPrismaSatisfactionStore } from "./infrastructure/prisma-satisfaction";
 import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import {
   createPrismaRequestQueryRepository,
@@ -305,4 +307,32 @@ export async function getAttendanceFields(
   database: PrismaClient = prisma,
 ): Promise<attendanceFields.AttendanceFieldsView> {
   return attendanceFields.getAttendanceFields(requestId, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
+// Satisfaction survey (SPEC 2026-11-06-pesquisa-satisfacao).
+export {
+  MAX_SATISFACTION_COMMENT_LENGTH,
+  SATISFACTION_RATINGS,
+  SATISFACTION_WINDOW_MS,
+} from "./domain/satisfaction";
+export type { SatisfactionAvailability } from "./domain/satisfaction";
+export type { RequestSatisfactionView, SatisfactionHistoryEntry, SatisfactionRecord } from "./application/satisfaction";
+
+/** The owner rates a completed request (section 4). */
+export async function rateRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return satisfaction.rateRequest(input, createPrismaSatisfactionStore(database));
+}
+
+/** The rating of a request, for whoever reads the request (section 4.6). */
+export async function getRequestSatisfaction(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+  now: Date = new Date(),
+): Promise<satisfaction.RequestSatisfactionView> {
+  return satisfaction.getRequestSatisfaction(
+    requestId,
+    createPrismaAttachmentQueryRepository(database),
+    createPrismaSatisfactionStore(database),
+    now,
+  );
 }

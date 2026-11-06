@@ -76,6 +76,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
                 files: { orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: { originalFilename: true } },
               },
             },
+            satisfaction: { select: { rating: true, comment: true, ratedAt: true } },
             attachments: {
               orderBy: [{ createdAt: "asc" }, { id: "asc" }],
               select: { requirementNameSnapshot: true, originalFilename: true, createdAt: true, removedAt: true },
@@ -165,6 +166,7 @@ export function createPrismaPersonalDataReader(database: PrismaClient): Personal
             isInternal: comment.isInternal,
             files: comment.files.map(({ originalFilename }) => originalFilename),
           })),
+          satisfaction: request.satisfaction,
           attachments: request.attachments.map((attachment) => ({
             requirementName: attachment.requirementNameSnapshot,
             filename: attachment.originalFilename,

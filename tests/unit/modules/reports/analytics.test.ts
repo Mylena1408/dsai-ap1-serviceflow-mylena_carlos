@@ -82,11 +82,21 @@ function reader(overrides: Partial<AnalyticsReader> = {}): AnalyticsReader {
         pendingNow: 2,
       },
     ]),
+    // SPEC 2026-11-06-pesquisa-satisfacao, 4.7.
+    satisfaction: vi.fn(async () => ({
+      distribution: [
+        { rating: 5, count: 3 },
+        { rating: 2, count: 1 },
+      ],
+      completed: 8,
+      ratedCompletions: 4,
+      byService: [{ label: "Reparo", count: 4, sum: 17 }],
+    })),
     ...overrides,
   };
 }
 
-const actor = (role: string, sectorId: string | null = central.id) => ({ id: `${role.toLowerCase()}-1`, role, sectorId, isActive: true });
+const actor =(role: string, sectorId: string | null = central.id) => ({ id: `${role.toLowerCase()}-1`, role, sectorId, isActive: true });
 
 beforeEach(() => {
   vi.clearAllMocks();

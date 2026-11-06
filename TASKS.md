@@ -1598,3 +1598,23 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ANL-01 a 10.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-06-analises-operacionais.md`.
+
+### SF-150 — Avaliação: migration, domínio e caso de uso
+
+- **Estado:** Concluída em 2026-11-06. Migration `20261106100000_request_satisfaction` (tabelas `RequestSatisfaction` e `RequestSatisfactionEvent`, com CHECKs), regras em `requests/domain/satisfaction.ts`, casos de uso `rateRequest` e `getRequestSatisfaction` (mesma regra de leitura dos anexos) e armazenamento Prisma próprio. Unitários e integração.
+- **Objetivo:** Gravar e ler a avaliação conforme a seção 4.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-SAT-01 a 04, 07 e 08.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-pesquisa-satisfacao.md`.
+
+### SF-151 — Avaliação: telas, análises, LGPD e E2E
+
+- **Estado:** Concluída em 2026-11-06. Bloco do solicitante, bloco da equipe (fila e gestor), seção "Satisfação" em "Análises", "Meus dados" e anonimização, E2E `tests/e2e/satisfaction.spec.ts`.
+- **Objetivo:** Seções 2, 4.6 a 4.8.
+- **Arquivos/módulos esperados:** `src/app/`, `src/modules/reports/`, `src/modules/audit/`, `src/modules/users/`.
+- **Dependências:** SF-150.
+- **Critérios de conclusão:** CA-SAT-01 a 08.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-06-pesquisa-satisfacao.md`.

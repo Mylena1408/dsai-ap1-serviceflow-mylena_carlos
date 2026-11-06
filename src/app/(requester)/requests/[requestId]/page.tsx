@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   effectiveAssigneeId,
   getRequesterRequest,
+  getRequestSatisfaction,
   listMissingDocuments,
   listRequestAttachments,
   listRequestFieldAnswers,
@@ -21,7 +22,8 @@ import { LifecyclePanel } from "./lifecycle-panel";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
-import { addOwnCommentAction } from "../actions";
+import { addOwnCommentAction, rateOwnRequestAction } from "../actions";
+import { RequesterSatisfaction } from "@/app/_components/request-satisfaction";
 
 type RequestPageProps = {
   params: Promise<{ requestId: string }>;
@@ -36,10 +38,13 @@ function feedback(notice?: string, error?: string): string | null {
   if (notice === "reopened") return "Sua solicitação foi reaberta.";
   if (notice === "commented") return "Comentário enviado.";
   if (notice === "document") return "Documento enviado.";
+  if (notice === "rated") return "Obrigado pela avaliação.";
   if (error === "late-document") {
     return "O documento não foi aceito: escolha um documento que ainda falta e envie um arquivo no formato aceito, de até 2 MiB (até 4 MiB somando todos os documentos da solicitação).";
   }
   if (error === "documents-unavailable") return "O envio de documentos não está disponível agora. Tente mais tarde.";
+  if (error === "rating") return "Escolha uma nota de 1 a 5 e escreva no máximo 1.000 caracteres.";
+  if (error === "rating-closed") return "Esta solicitação não pode mais ser avaliada.";
   if (error === "body") return "Escreva um comentário com até 5.000 caracteres.";
   if (error && COMMENT_FILE_MESSAGES[error]) return COMMENT_FILE_MESSAGES[error];
   if (error === "note") return "Informe o motivo com até 1.000 caracteres (obrigatório para reabrir).";
@@ -62,6 +67,7 @@ export default async function RequestPage({
   let answers;
   let comments;
   let missingDocuments;
+  let satisfaction;
 
   try {
     request = await getRequesterRequest(requestId);
@@ -69,6 +75,7 @@ export default async function RequestPage({
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
     missingDocuments = await listMissingDocuments(request.id);
+    satisfaction = await getRequestSatisfaction(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
     throw error;
@@ -123,6 +130,7 @@ export default async function RequestPage({
       <RequestAttachments requestId={request.id} attachments={attachments} />
       {missingDocuments.length > 0 ? <LateDocumentForm requestId={request.id} requirements={missingDocuments} /> : null}
       <LifecyclePanel request={request} now={new Date()} />
+      <RequesterSatisfaction requestId={request.id} view={satisfaction} action={rateOwnRequestAction} />
       <RequestConversation
         requestId={request.id}
         comments={comments}

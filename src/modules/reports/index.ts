@@ -76,6 +76,7 @@ export type {
   AnalyticsInterval,
   ArrivalGrid,
   OnTimeGroup,
+  SatisfactionSummary,
   StageTime,
   TeamMember,
   TrendPoint,

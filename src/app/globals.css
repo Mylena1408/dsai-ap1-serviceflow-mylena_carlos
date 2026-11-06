@@ -1756,3 +1756,46 @@ p {
 .heatmap-scroll {
   position: relative;
 }
+
+/* Satisfaction survey (SPEC 2026-11-06-pesquisa-satisfacao). Stars are decoration: the number
+   and the label are always written next to them. */
+.rating-stars {
+  color: #c98500;
+  letter-spacing: 1px;
+}
+
+.rating-stars-empty {
+  color: var(--line);
+}
+
+.satisfaction-form fieldset {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.satisfaction-form legend {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.rating-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rating-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.rating-options label:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
