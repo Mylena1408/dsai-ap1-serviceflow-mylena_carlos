@@ -15,7 +15,9 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
   workers: 1,
-  reporter: "list",
+  // On GitHub Actions (CI=true), failures also become annotations of the run, readable without
+  // the full log (SPEC 2026-11-04-integracao-continua, section 6).
+  reporter: process.env.CI ? [["list"], ["github"]] : "list",
   globalSetup: "./tests/e2e/global-setup.ts",
   use: {
     ...devices["Desktop Chrome"],

@@ -43,3 +43,5 @@ Novos critérios:
 
 - [x] CA-CI-05: o CI varre o histórico completo com gitleaks em versão e SHA-256 fixos, e falha se encontrar segredo. *Verificado em 2026-11-06: a mesma versão rodou localmente sobre os 202 commits, com 0 achados depois da revisão dos 2 falsos positivos; checksum e extração simulados.*
 - [ ] CA-CI-06: o workflow passa inteiro no GitHub. *A verificar na primeira execução depois do push.*
+
+**Atualização 2026-11-06 (depois do push de `30c2a4e`):** a execução `42157711665` passou pelo gitleaks, pela integração e pela instalação do Playwright, o que confirma as correções 1 a 3. A falha foi no passo de E2E, sem anotação que dissesse qual teste. O Playwright passa a usar também o reporter `github` quando `CI` está definido, para que a próxima execução mostre o teste que falhou nas anotações públicas.
