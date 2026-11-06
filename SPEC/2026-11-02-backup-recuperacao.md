@@ -79,3 +79,10 @@ Se o banco restaurado não tiver as extensões do original, criar antes `CREATE 
 - Cópia `serviceflow-2026-11-03.dump` (124 KB) em `C:\Users\Mylena Reis\serviceflow-backups\`, pasta e arquivo cifrados pelo EFS do Windows.
 - Verificação: restaurada num banco local isolado (criando antes a extensão `citext`), com as 28 tabelas e a mesma contagem de linhas da produção (por exemplo, 10 pessoas, 26 solicitações, 21 migrations) e `prisma migrate status` em dia; o banco de verificação foi apagado.
 - Falta, pela política, guardar uma cópia fora da máquina, com cifra própria.
+
+## 8. Cópia antes do deploy de 2026-11-05
+
+- Feita pelo agente antes de aplicar 6 migrations no Neon (SF-030), com a URL direta lida de um arquivo da responsável fora do projeto, sem aparecer na saída.
+- Cópia `serviceflow-2026-11-05-pre-deploy.dump` (124.778 bytes) em `C:\Users\Mylena Reis\serviceflow-backups\`, cifrada pelo EFS.
+- Verificação: restaurada num banco local isolado; as 28 tabelas com a mesma contagem de linhas da produção (10 pessoas, 26 solicitações, 21 migrations); o banco de verificação foi apagado.
+- Continua faltando a cópia fora da máquina, com cifra própria.

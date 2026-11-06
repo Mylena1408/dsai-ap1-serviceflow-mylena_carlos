@@ -56,3 +56,15 @@
 2. Link da Vercel: é o banco Neon, não armazenamento de arquivos; mantido o Supabase Storage da SPEC.
 3. Supabase: projeto `serviceflow-nonprod`; URL e chave nos `.env` locais.
 4. Provisionamento: defeito do adaptador com respostas 400 do Supabase hospedado, diagnosticado e corrigido com testes; buckets de teste e desenvolvimento verificados; todas as suítes aprovadas.
+
+## Produção da SF-030
+
+> vamos para a produção, passo a passo
+
+Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da chave e da URL do Neon (ambos fora do repositório), "variáveis salvas", "alterações feitas", "o arquivo continua sendo rejeitado", "aplique as correções", "teste ok, o pdf baixou".
+
+1. Supabase de produção e bucket verificados; arquivo da chave movido para fora da pasta do projeto.
+2. Backup do Neon verificado; 6 migrations aplicadas pela responsável com `!` (script que esconde a URL).
+3. Variáveis na Vercel corrigidas (nome, ambiente e valor da chave).
+4. Falha intermitente diagnosticada pelos logs da Vercel e consultas só de leitura no Neon: região das funções. Corrigida (`69d2b07`).
+5. Teste em produção aprovado pela responsável.
