@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getManagerRequest, getRequestSatisfaction, listRequestAttachments, listRequestFieldAnswers } from "@/modules/requests";
+import {
+  getManagerRequest,
+  getRequestSatisfaction,
+  listRequestAttachments,
+  listRequestEscalations,
+  listRequestFieldAnswers,
+} from "@/modules/requests";
+import { RequestEscalations } from "@/app/_components/request-escalations";
 import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { NotFoundError } from "@/server/errors";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
@@ -36,12 +43,14 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   let attachments;
   let answers;
   let satisfaction;
+  let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
 
   try {
     request = await getManagerRequest(requestId);
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
     satisfaction = await getRequestSatisfaction(request.id);
+    escalations = await listRequestEscalations(request.id);
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -100,6 +109,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <TeamSatisfaction view={satisfaction} />
+      <RequestEscalations escalations={escalations} />
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
     </main>
   );

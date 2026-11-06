@@ -10,6 +10,9 @@ process.env.DATABASE_URL ??= developmentEnvironment.DATABASE_URL;
 process.env.TEST_DATABASE_URL ??= testEnvironment.TEST_DATABASE_URL;
 
 const testDatabaseUrl = getIsolatedTestDatabaseUrl();
+// Secret of the daily job route for this run only (SPEC 2026-11-06-escalonamento, 7). The workers
+// inherit it from the main process, so the tests can call the route like Vercel Cron does.
+process.env.E2E_CRON_SECRET ??= randomBytes(24).toString("base64url");
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -35,6 +38,7 @@ export default defineConfig({
       WEBHOOK_ALLOW_LOCAL: "true",
       // Documents go to an in-process memory store; no real bucket is used (SPEC 21.15.7).
       TEST_DOCUMENT_STORAGE: "memory",
+      CRON_SECRET: process.env.E2E_CRON_SECRET,
     },
     timeout: 120_000,
     reuseExistingServer: false,

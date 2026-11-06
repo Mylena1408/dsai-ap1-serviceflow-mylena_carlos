@@ -11,6 +11,7 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.requestCommentFile.deleteMany(),
     prisma.requestSectorEvent.deleteMany(),
     prisma.requestSlaPause.deleteMany(),
+    prisma.requestEscalation.deleteMany(),
     prisma.requestSatisfactionEvent.deleteMany(),
     prisma.requestSatisfaction.deleteMany(),
     prisma.cannedResponse.deleteMany(),

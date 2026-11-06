@@ -21,6 +21,7 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   "comment.internal": "COMMENTS",
   "sla.warning": "SLA",
   "sla.breached": "SLA",
+  "sla.escalated": "SLA",
   "stage.changed": "STAGES",
   "approval.requested": "APPROVALS",
   "approval.approved": "APPROVALS",

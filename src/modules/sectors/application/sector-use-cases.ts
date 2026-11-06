@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { requireCatalogEditor, requireConfigurationAdministrator } from "@/server/authorization";
 import { NotFoundError } from "@/server/errors";
 import { activeStateAction } from "@/modules/audit";
@@ -51,6 +52,27 @@ export async function updateSector(
 
     return transaction.audited({ actor, action: "UPDATED", entityType: "SECTOR", entityId: sectorId }, () =>
       transaction.update(sectorId, { name }),
+    );
+  });
+}
+
+/** SPEC 2026-11-06-escalonamento, 2.1 and 4.6: only the administrator; audited as a sector change. */
+export async function setSectorEscalation(
+  id: unknown,
+  enabled: unknown,
+  transactions: SectorTransactionRunner,
+): Promise<SectorRecord> {
+  const actor = await requireConfigurationAdministrator();
+  const sectorId = validateInput(entityIdSchema, id);
+  const escalateOverdue = validateInput(z.boolean(), enabled);
+
+  return transactions.run(async (transaction) => {
+    if (!(await transaction.exists(sectorId))) {
+      throw new NotFoundError();
+    }
+
+    return transaction.audited({ actor, action: "UPDATED", entityType: "SECTOR", entityId: sectorId }, () =>
+      transaction.update(sectorId, { escalateOverdue }),
     );
   });
 }

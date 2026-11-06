@@ -132,11 +132,13 @@ enum ServiceFieldAudience {
 }
 
 model Sector {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @db.Citext
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now()) @db.Timestamptz
-  updatedAt DateTime @updatedAt @db.Timestamptz
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String   @db.Citext
+  isActive        Boolean  @default(true)
+  /// SPEC 2026-11-06-escalonamento, 2.1: overdue requests raise their priority and warn the managers.
+  escalateOverdue Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
 
   users            User[]
   services         Service[]
@@ -280,6 +282,7 @@ model Request {
   slaPauses          RequestSlaPause[]
   fieldUpdates       RequestFieldUpdateEvent[]
   satisfaction       RequestSatisfaction?
+  escalations        RequestEscalation[]
   satisfactionEvents RequestSatisfactionEvent[]
   approval           RequestApproval?
   comments           RequestComment[]
@@ -688,6 +691,22 @@ model CannedResponse {
   updatedBy User   @relation("CannedResponseUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
 
   @@index([sectorId])
+}
+
+/// An automatic escalation of an overdue request (SPEC 2026-11-06-escalonamento, 4 and 5): written
+/// by the daily job with the SLA breach alert; the priorities before and after may be equal
+/// (already urgent).
+model RequestEscalation {
+  id           String          @id @default(uuid()) @db.Uuid
+  requestId    String          @db.Uuid
+  fromPriority RequestPriority
+  toPriority   RequestPriority
+  occurredAt   DateTime        @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@index([requestId])
+  @@index([occurredAt])
 }
 
 enum SlaResumeCause {

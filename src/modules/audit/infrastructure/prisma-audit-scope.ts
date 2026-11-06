@@ -25,7 +25,7 @@ async function loadState(
       return row && { label: row.name, state: row };
     }
     case "SECTOR": {
-      const row = await transaction.sector.findUnique({ where: { id }, select: { name: true, isActive: true } });
+      const row = await transaction.sector.findUnique({ where: { id }, select: { name: true, isActive: true, escalateOverdue: true } });
       return row && { label: row.name, state: row };
     }
     case "CATEGORY": {

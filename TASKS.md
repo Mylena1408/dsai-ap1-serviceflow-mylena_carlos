@@ -1638,3 +1638,23 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-RSP-01 a 05.
 - **Testes relacionados:** Todas as suítes.
 - **SPEC:** `SPEC/2026-11-06-respostas-prontas.md`.
+
+### SF-154 — Escalonamento: migration, configuração, job e notificações
+
+- **Estado:** Concluída em 2026-11-06. Migration `20261106300000_escalation` (`Sector.escalateOverdue` e `RequestEscalation`), `setSectorEscalation` (só administrador, auditado), escalonamento na transação do alerta de vencimento (`prisma-sla-alerts.ts`), notificação `sla.escalated` aos gestores. Unitários e integração.
+- **Objetivo:** Seções 4 e 5 da SPEC.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/`, `src/modules/sectors/`, `src/modules/notifications/`, `src/modules/audit/`, `src/shared/notifications/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-ESC-01 a 05 e 08.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-escalonamento.md`.
+
+### SF-155 — Escalonamento: telas, análises e E2E
+
+- **Estado:** Concluída em 2026-11-06. Bloco na seção "Setores", bloco "Escalonamentos" no detalhe da fila e do gestor, indicador em "Análises", E2E `tests/e2e/escalation.spec.ts` (chama a rota do job diário com um segredo gerado para a execução).
+- **Objetivo:** Seções 2.3, 2.4 e 4.7.
+- **Arquivos/módulos esperados:** `src/app/`, `src/modules/reports/`, `playwright.config.ts`.
+- **Dependências:** SF-154.
+- **Critérios de conclusão:** CA-ESC-01 a 08.
+- **Testes relacionados:** Todas as suítes.
+- **SPEC:** `SPEC/2026-11-06-escalonamento.md`.

@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { recordOutboxEvent } from "@/modules/events";
 import type { SlaAlertStore } from "../application/sla-alerts";
+import { escalatedPriority } from "../domain/escalation";
 import type { RequestStatus } from "../domain/request";
 
 const ACTIVE_STATUSES: RequestStatus[] = ["OPEN", "IN_PROGRESS"];
@@ -51,6 +52,24 @@ export function createPrismaSlaAlertStore(database: PrismaClient): SlaAlertStore
 
         if (changed.count !== 1) {
           return false;
+        }
+
+        // SPEC 2026-11-06-escalonamento, 4.1 to 4.4: in the same transaction as the breach alert,
+        // when the request's current sector escalates overdue requests. The due date stays.
+        if (kind === "breach") {
+          const request = await transaction.request.findUniqueOrThrow({
+            where: { id: candidate.id },
+            select: { priority: true, sector: { select: { escalateOverdue: true } } },
+          });
+          if (request.sector.escalateOverdue) {
+            const toPriority = escalatedPriority(request.priority);
+            if (toPriority !== request.priority) {
+              await transaction.request.update({ where: { id: candidate.id }, data: { priority: toPriority } });
+            }
+            await transaction.requestEscalation.create({
+              data: { requestId: candidate.id, fromPriority: request.priority, toPriority, occurredAt: now },
+            });
+          }
         }
 
         await recordOutboxEvent(transaction, {

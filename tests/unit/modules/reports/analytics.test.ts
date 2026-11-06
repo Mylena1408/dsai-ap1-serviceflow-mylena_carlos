@@ -82,6 +82,7 @@ function reader(overrides: Partial<AnalyticsReader> = {}): AnalyticsReader {
         pendingNow: 2,
       },
     ]),
+    escalations: vi.fn(async () => 2),
     // SPEC 2026-11-06-pesquisa-satisfacao, 4.7.
     satisfaction: vi.fn(async () => ({
       distribution: [

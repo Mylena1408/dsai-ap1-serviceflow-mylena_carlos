@@ -3,6 +3,7 @@
 import {
   createSector,
   setSectorActive,
+  setSectorEscalation,
   updateSector,
 } from "@/modules/sectors";
 import {
@@ -51,6 +52,17 @@ export async function toggleSectorAction(formData: FormData): Promise<never> {
       field(formData, "id"),
       activeState(formData),
     );
+  } catch (error) {
+    reportFailure("sectors", section, error);
+  }
+  return finish("sectors", "status", section);
+}
+
+// SPEC 2026-11-06-escalonamento, 2.1: the "Escalar solicitações vencidas" setting of a sector.
+export async function setSectorEscalationAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await setSectorEscalation(field(formData, "id"), field(formData, "escalateOverdue") === "true");
   } catch (error) {
     reportFailure("sectors", section, error);
   }

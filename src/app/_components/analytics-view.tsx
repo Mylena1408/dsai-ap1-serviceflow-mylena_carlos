@@ -224,6 +224,11 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
             detail={`${sla.firstResponse.times ? `mediana ${hours(sla.firstResponse.times.medianHours)} · ` : ""}${sla.firstResponse.unanswered} ainda sem resposta`}
           />
           <Indicator
+            label="Escaladas por vencimento"
+            value={String(sla.escalated)}
+            detail="setores com escalonamento ligado"
+          />
+          <Indicator
             label="Concluídas com pausa"
             value={`${sla.pauses.withPause} de ${sla.pauses.completed}`}
             detail={sla.pauses.times ? `tempo pausado médio ${hours(sla.pauses.times.averageHours)}` : undefined}

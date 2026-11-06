@@ -24,6 +24,8 @@ export interface NotificationStore {
   findRequestState(requestId: string): Promise<NotificationRequestState | null>;
   /** Active managers of a sector (approval requests, SPEC de aprovações 5.6.3). */
   sectorManagerIds(sectorId: string): Promise<string[]>;
+  /** Whether the request was escalated at that instant (SPEC 2026-11-06-escalonamento, 4.5). */
+  escalatedAt(requestId: string, occurredAt: Date): Promise<boolean>;
   /** Active attendants of a sector (SLA alerts without an assignee). */
   sectorAttendantIds(sectorId: string): Promise<string[]>;
   /** The subset of `userIds` that are active. */

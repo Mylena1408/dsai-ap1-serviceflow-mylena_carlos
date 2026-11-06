@@ -41,6 +41,7 @@ async function prepareDatabase(): Promise<void> {
       database.requestCommentFile.deleteMany(),
       database.requestSectorEvent.deleteMany(),
       database.requestSlaPause.deleteMany(),
+      database.requestEscalation.deleteMany(),
       database.requestSatisfactionEvent.deleteMany(),
       database.requestSatisfaction.deleteMany(),
       database.cannedResponse.deleteMany(),

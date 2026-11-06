@@ -82,4 +82,6 @@ export interface AnalyticsReader {
   team(scope: DashboardScope, range: DashboardRange): Promise<TeamMemberRow[]>;
   /** SPEC 2026-11-06-pesquisa-satisfacao, 4.7: numbers only, never a comment. */
   satisfaction(scope: DashboardScope, range: DashboardRange): Promise<SatisfactionRows>;
+  /** SPEC 2026-11-06-escalonamento, 2.4: requests escalated in the range. */
+  escalations(scope: DashboardScope, range: DashboardRange): Promise<number>;
 }

@@ -9,6 +9,8 @@ export type NotificationType =
   | "comment.internal"
   | "sla.warning"
   | "sla.breached"
+  // SPEC 2026-11-06-escalonamento, 4.5.
+  | "sla.escalated"
   | "stage.changed"
   | "approval.requested"
   | "approval.approved"
@@ -32,6 +34,7 @@ const MESSAGES: Record<NotificationType, (service: string, stage?: string) => st
   "comment.internal": (service) => `Nova nota interna em ${service}`,
   "sla.warning": (service) => `Prazo próximo do vencimento: ${service}`,
   "sla.breached": (service) => `Prazo vencido: ${service}`,
+  "sla.escalated": (service) => `Solicitação vencida escalada: ${service}`,
   "approval.requested": (service) => `Aprovação pendente: ${service}`,
   "approval.approved": (service) => `Solicitação aprovada: ${service}`,
   "approval.rejected": (service) => `Solicitação rejeitada: ${service}`,

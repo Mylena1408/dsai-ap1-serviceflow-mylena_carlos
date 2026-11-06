@@ -89,6 +89,8 @@ describe("audit of sectors and categories (SF-103)", () => {
       changes: [
         { field: "name", before: null, after: "Infraestrutura" },
         { field: "isActive", before: null, after: true },
+        // Audited since SPEC 2026-11-06-escalonamento, 4.6 (off by default).
+        { field: "escalateOverdue", before: null, after: false },
       ],
     });
     expect(recorded[1]).toMatchObject({

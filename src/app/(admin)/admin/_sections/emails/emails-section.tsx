@@ -13,6 +13,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "comment.internal": "Nota interna",
   "sla.warning": "Prazo próximo",
   "sla.breached": "Prazo vencido",
+  "sla.escalated": "Solicitação vencida escalada",
   "stage.changed": "Mudança de etapa",
   "approval.requested": "Aprovação pendente",
   "approval.approved": "Solicitação aprovada",

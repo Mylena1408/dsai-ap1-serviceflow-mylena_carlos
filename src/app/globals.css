@@ -1817,3 +1817,12 @@ p {
   flex: 1 1 220px;
   min-width: 0;
 }
+
+/* Escalation setting per sector (SPEC 2026-11-06-escalonamento). */
+.escalation-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

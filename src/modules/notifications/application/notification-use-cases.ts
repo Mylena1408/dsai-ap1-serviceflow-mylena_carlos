@@ -45,6 +45,10 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         effectiveAssigneeId: assigneeId,
         ...(SLA_EVENTS.has(event.type) ? { slaRecipients: await slaRecipients(store, request, assigneeId) } : {}),
         approvalState: request.approvalState,
+        // SPEC 2026-11-06-escalonamento, 4.5: managers only when this breach escalated the request.
+        ...(event.type === "request.sla_breached" && (await store.escalatedAt(event.requestId, event.occurredAt))
+          ? { escalationManagerIds: await store.sectorManagerIds(request.sectorId) }
+          : {}),
         // SPEC 2026-11-01-aprovacoes, 5.6.3: managers are loaded only when the opening needs them.
         ...(event.type === "request.opened" && request.approvalState === "PENDING"
           ? { approvalManagerIds: await store.sectorManagerIds(request.sectorId) }

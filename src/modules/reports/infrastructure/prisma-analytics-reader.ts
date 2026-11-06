@@ -283,6 +283,15 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
         GROUP BY 1, 2`;
     },
 
+    async escalations(scope, range) {
+      const [row] = await database.$queryRaw<Array<{ count: number }>>`
+        SELECT count(DISTINCT e."requestId")::int AS "count"
+        FROM "RequestEscalation" e
+        JOIN "Request" r ON r."id" = e."requestId"
+        WHERE e."occurredAt" >= ${range.from} AND e."occurredAt" < ${range.before} ${scopeSql(scope)}`;
+      return row?.count ?? 0;
+    },
+
     async satisfaction(scope, range) {
       // SPEC 2026-11-06-pesquisa-satisfacao, 4.7: ratings given in the period, and the share of
       // the requests completed in the period that were rated for that same completion.

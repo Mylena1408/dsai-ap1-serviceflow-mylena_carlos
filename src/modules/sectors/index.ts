@@ -34,6 +34,14 @@ export async function updateSector(
   return useCases.updateSector(id, input, createPrismaSectorTransactionRunner(database));
 }
 
+export async function setSectorEscalation(
+  id: unknown,
+  enabled: unknown,
+  database: PrismaClient = prisma,
+): Promise<SectorRecord> {
+  return useCases.setSectorEscalation(id, enabled, createPrismaSectorTransactionRunner(database));
+}
+
 export async function setSectorActive(
   id: unknown,
   isActive: unknown,

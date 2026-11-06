@@ -103,6 +103,7 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   slaHours: "Prazo-base (horas)",
   requiresApproval: "Exige aprovação",
   slaBusinessHours: "Prazo em horas úteis",
+  escalateOverdue: "Escalar solicitações vencidas",
   isRequired: "Obrigatório",
   acceptedFormats: "Formatos aceitos",
   label: "Rótulo",
@@ -187,7 +188,8 @@ export function describeAuditChange(change: AuditChange, format?: AuditValueForm
 /** Fields kept in a record for each entity (section 5.1); anything else, like hashes, is left out. */
 export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>> = {
   USER: ["name", "email", "role", "sectorId", "isActive"],
-  SECTOR: ["name", "isActive"],
+  // "escalateOverdue": SPEC 2026-11-06-escalonamento, 4.6.
+  SECTOR: ["name", "isActive", "escalateOverdue"],
   CATEGORY: ["name", "isActive"],
   SERVICE: ["name", "description", "categoryId", "sectorId", "defaultPriority", "slaHours", "requiresApproval", "slaBusinessHours", "isActive"],
   DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],

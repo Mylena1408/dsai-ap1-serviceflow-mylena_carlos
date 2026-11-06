@@ -77,6 +77,8 @@ export interface Analytics {
     onTimeByService: OnTimeGroup[];
     onTimeByPriority: OnTimeGroup[];
     arrivals: ArrivalGrid;
+    /** SPEC 2026-11-06-escalonamento, 2.4. */
+    escalated: number;
   };
   team: TeamMember[];
   /** SPEC 2026-11-06-pesquisa-satisfacao, 4.7. */
@@ -156,6 +158,7 @@ const EMPTY_ANALYTICS_SLA: Analytics["sla"] = {
   onTimeByService: [],
   onTimeByPriority: [],
   arrivals: arrivalGrid([]),
+  escalated: 0,
 };
 
 /** "Análises" (5.4 to 5.6): administrator or manager, with the dashboard scope rules. */
@@ -188,7 +191,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
   const range = { from: period.from, before: period.before };
   // The pending count of an interval that has not ended yet is the count now.
   const ends = intervals.map((item) => (item.end.getTime() > now.getTime() ? now : item.end));
-  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings] = await Promise.all([
+  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings, escalated] = await Promise.all([
     reader.dailyCounts(scope, range),
     reader.pendingAt(scope, ends),
     reader.firstResponse(scope, range),
@@ -199,6 +202,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.arrivals(scope, range),
     reader.team(scope, range),
     reader.satisfaction(scope, range),
+    reader.escalations(scope, range),
   ]);
 
   return {
@@ -222,6 +226,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
         "given",
       ),
       arrivals: arrivalGrid(arrivals),
+      escalated,
     },
     team: teamTable(team),
     satisfaction: satisfactionSummary(ratings),

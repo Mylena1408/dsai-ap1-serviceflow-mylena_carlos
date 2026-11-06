@@ -27,6 +27,7 @@ import {
 } from "./infrastructure/prisma-attachment-repository";
 import * as orphanCleanup from "./application/orphan-cleanup";
 import * as satisfaction from "./application/satisfaction";
+import * as escalations from "./application/escalations";
 import { createPrismaSatisfactionStore } from "./infrastructure/prisma-satisfaction";
 import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import {
@@ -335,4 +336,23 @@ export async function getRequestSatisfaction(
     createPrismaSatisfactionStore(database),
     now,
   );
+}
+
+// Automatic escalation of overdue requests (SPEC 2026-11-06-escalonamento).
+export { escalatedPriority } from "./domain/escalation";
+export type { RequestEscalationRecord } from "./application/escalations";
+
+/** Escalations of a request, for the sector's team and a reading manager (section 4.7). */
+export async function listRequestEscalations(
+  requestId: unknown,
+  database: PrismaClient = prisma,
+): Promise<escalations.RequestEscalationRecord[]> {
+  return escalations.listRequestEscalations(requestId, createPrismaAttachmentQueryRepository(database), {
+    listForRequest: (id) =>
+      database.requestEscalation.findMany({
+        where: { requestId: id },
+        orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+        select: { fromPriority: true, toPriority: true, occurredAt: true },
+      }),
+  });
 }

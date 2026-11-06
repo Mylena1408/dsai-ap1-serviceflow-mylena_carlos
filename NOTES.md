@@ -2019,3 +2019,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Navegador × servidor:** o seletor é um componente do navegador e não pode importar o módulo (puxaria o Prisma); `appendToComment` foi para `src/shared/comments`. Os textos chegam ao seletor já com os campos substituídos por `listResponsesForRequest`, que também confere o setor da solicitação.
 - **Erro meu:** tentei editar um script de edição com outro script e escapes; não funcionou e reescrevi o arquivo com a ferramenta de escrita (mesma lição da memória sobre barras invertidas).
 - **Resultados:** unitários e integração novos aprovados; E2E aprovado na primeira execução.
+
+## SF-154 e SF-155 — Escalonamento de vencidas (2026-11-06)
+
+- **SPEC:** `2026-11-06-escalonamento.md`, decisões E1 a E7: opção por setor, desligada por padrão; no alerta de vencimento do job diário, a prioridade sobe um nível e os gestores ativos do setor recebem `sla.escalated`.
+- **Sem evento de domínio novo (E5):** o escalonamento é gravado na mesma transação do alerta, com o mesmo instante; o consumidor de notificações, ao tratar `request.sla_breached`, procura um escalonamento com esse instante e só então carrega os gestores. Assim os CHECKs de tipo da fila de saída e dos webhooks não mudam.
+- **Vencimento mantido (E4):** o gatilho `request_due_soon_at` recalcula `dueSoonAt` quando a prioridade muda, sem efeito prático numa solicitação já vencida; o `dueAt` não é tocado (verificado na integração).
+- **Auditoria:** a mudança só era registrada para campos de `AUDITED_FIELDS`; `escalateOverdue` entrou na lista, no estado lido pelo escopo de auditoria e nos rótulos. Com isso a criação de setor passou a registrar `escalateOverdue: false`, e a asserção do teste de auditoria de setores foi atualizada com o motivo.
+- **E2E:** o `playwright.config.ts` gera `E2E_CRON_SECRET` por execução e o passa como `CRON_SECRET` ao servidor; o teste chama `/api/cron/daily` como a Vercel Cron (sem segredo: 401) e desliga a opção no fim para não afetar os testes seguintes.
+- **Resultados:** lint e typecheck OK; unitários 1182/1182; integração 441/441; E2E do escalonamento aprovado.

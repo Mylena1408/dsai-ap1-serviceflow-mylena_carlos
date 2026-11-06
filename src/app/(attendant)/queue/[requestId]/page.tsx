@@ -6,6 +6,7 @@ import {
   getAttendantRequest,
   getRequestSatisfaction,
   listRequestAttachments,
+  listRequestEscalations,
   listRequestFieldAnswers,
   listSectorDestinations,
   listTransferCandidates,
@@ -32,6 +33,7 @@ import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
 import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { listResponsesForRequest } from "@/modules/canned-responses";
+import { RequestEscalations } from "@/app/_components/request-escalations";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 
 type QueueRequestPageProps = {
@@ -88,6 +90,7 @@ export default async function QueueRequestPage({
   let answers;
   let comments;
   let satisfaction;
+  let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
   let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
@@ -103,6 +106,7 @@ export default async function QueueRequestPage({
     satisfaction = await getRequestSatisfaction(request.id);
     // SPEC 2026-11-06-respostas-prontas, 4.4: rendered with what the attendant already sees.
     cannedResponses = await listResponsesForRequest(request.id);
+    escalations = await listRequestEscalations(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -201,6 +205,7 @@ export default async function QueueRequestPage({
       <RequestFieldAnswers answers={attendanceFormShown ? answers.filter((answer) => answer.audience !== "ATTENDANT") : answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <TeamSatisfaction view={satisfaction} />
+      <RequestEscalations escalations={escalations} />
       <RequestConversation
         requestId={request.id}
         comments={comments}

@@ -14,6 +14,8 @@ export interface NotificationContext {
    * progress, and the active attendants of its sector, used when nobody holds it.
    */
   slaRecipients?: { requestActive: boolean; sectorAttendantIds: readonly string[] };
+  /** SPEC 2026-11-06-escalonamento, 4.5: active managers of the sector when the breach escalated it. */
+  escalationManagerIds?: readonly string[];
   /** Approval state of the request now (SPEC 2026-11-01-aprovacoes). */
   approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
   /** Active managers of the sector, loaded only for an opening that requires approval. */
@@ -97,7 +99,14 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       if (!sla?.requestActive) return [];
       const type: NotificationType = event.type === "request.sla_warning" ? "sla.warning" : "sla.breached";
       const recipients = context.effectiveAssigneeId ? [context.effectiveAssigneeId] : sla.sectorAttendantIds;
-      return recipients.map((recipientId) => ({ recipientId, type }));
+      const planned = recipients.map((recipientId): PlannedNotification => ({ recipientId, type }));
+      // SPEC 2026-11-06-escalonamento, 4.5: the managers hear about an escalated breach, in addition.
+      if (event.type === "request.sla_breached") {
+        for (const recipientId of context.escalationManagerIds ?? []) {
+          if (!planned.some((item) => item.recipientId === recipientId)) planned.push({ recipientId, type: "sla.escalated" });
+        }
+      }
+      return planned;
     }
 
     case "request.approval_decided":

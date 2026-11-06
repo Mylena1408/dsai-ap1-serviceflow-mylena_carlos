@@ -22,7 +22,8 @@ describe("notification categories (SF-092)", () => {
       ASSIGNMENT: ["assignment.received", "sector.received"],
       // "document.added" added by SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6.
       COMMENTS: ["comment.public", "comment.internal", "document.added"],
-      SLA: ["sla.warning", "sla.breached"],
+      // "sla.escalated" added by SPEC 2026-11-06-escalonamento, 4.5.
+      SLA: ["sla.warning", "sla.breached", "sla.escalated"],
       STAGES: ["stage.changed"],
       APPROVALS: ["approval.requested", "approval.approved", "approval.rejected"],
     });

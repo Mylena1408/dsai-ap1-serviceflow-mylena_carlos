@@ -10,7 +10,7 @@ export interface SectorRepository {
 export interface SectorTransaction extends AuditScope {
   exists(sectorId: string): Promise<boolean>;
   create(name: string): Promise<SectorRecord>;
-  update(sectorId: string, data: { name?: string; isActive?: boolean }): Promise<SectorRecord>;
+  update(sectorId: string, data: { name?: string; isActive?: boolean; escalateOverdue?: boolean }): Promise<SectorRecord>;
   findDeactivationDependencies(sectorId: string): Promise<SectorDeactivationDependencies>;
 }
 
