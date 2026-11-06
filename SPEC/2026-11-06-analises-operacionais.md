@@ -1,7 +1,7 @@
 # SPEC — Análises operacionais: painel do atendente, tendências, SLA detalhado e desempenho da equipe
 
 **Data:** 2026-11-06
-**Status:** Aprovada em 2026-11-06. A responsável pediu "funcionalidades de análises como dashboards para uso dos profissionais desta aplicação web" e marcou as quatro partes propostas: painel do atendente, tendências no tempo, SLA e tempos detalhados, e desempenho por atendente. As decisões A1 a A9 da seção 11 foram adotadas como recomendadas; a responsável pode rever qualquer uma.
+**Status:** Aprovada em 2026-11-06. A responsável pediu "funcionalidades de análises como dashboards para uso dos profissionais desta aplicação web" e marcou as quatro partes propostas: painel do atendente, tendências no tempo, SLA e tempos detalhados, e desempenho por atendente. As decisões A1 a A9 da seção 11 foram adotadas como recomendadas; a responsável pode rever qualquer uma. **Concluída em 2026-11-06** (SF-144 a SF-149; CA-ANL-01 a 10 verificados).
 **Projeto:** ServiceFlow
 **Referências:**
 - `SPEC/2026-11-02-painel-relatorios.md`: painel existente, período e indicadores. Esta SPEC amplia o "fora de escopo" daquela.
@@ -192,21 +192,21 @@ Nenhuma mudança no banco. As tabelas usadas são:
 
 ## 7. Critérios de aceitação
 
-- [ ] **CA-ANL-01** — Sem uso das páginas novas, nada muda: o painel atual, o CSV, as regras de leitura e todas as suítes anteriores passam sem alteração de asserções.
-- [ ] **CA-ANL-02** — Acesso conforme 5.1:
+- [x] **CA-ANL-01** — Sem uso das páginas novas, nada muda: o painel atual, o CSV, as regras de leitura e todas as suítes anteriores passam sem alteração de asserções. *Verificado em 2026-11-06: o painel e o CSV não mudaram de comportamento; as suítes anteriores passam sem mudar asserções (unitários 1140, integração 427, E2E 26). O `GroupTable` passou a medir as barras pelo maior valor, o que não muda nada no painel, cujos grupos já vêm do maior para o menor.*
+- [x] **CA-ANL-02** — Acesso conforme 5.1:
   - o atendente vê só "Meu painel", do próprio setor;
   - o gestor vê "Análises" só do próprio setor;
   - o administrador vê a organização ou um setor;
   - o solicitante não vê nenhuma página;
-  - sem setor ativo, aparece o aviso, e nenhuma solicitação é lida.
-- [ ] **CA-ANL-03** — "Fila agora" e "Meu período" seguem 5.3, inclusive "sem responsável" excluindo aprovação pendente e "respostas" excluindo notas internas.
-- [ ] **CA-ANL-04** — As séries de 5.4 usam dias até 31 dias e semanas de segunda a domingo acima disso, no fuso de São Paulo. As pendentes seguem o último evento de status, considerando reabertura e cancelamento.
-- [ ] **CA-ANL-05** — A primeira resposta segue 5.5.1: comentário não interno de atendente ou início do atendimento; nota interna e comentário do solicitante não contam.
-- [ ] **CA-ANL-06** — O tempo por etapa, as pausas e o prazo por serviço e por prioridade seguem 5.5.2 a 5.5.4, com o aviso "poucos dados".
-- [ ] **CA-ANL-07** — A grade dia × hora conta as solicitações abertas no fuso de São Paulo, inclusive perto da meia-noite.
-- [ ] **CA-ANL-08** — A tabela da equipe segue 5.6: só atendentes do recorte, ordem alfabética, inativos marcados, aviso fixo, sem conteúdo das solicitações. O atendente nunca vê números de colegas.
-- [ ] **CA-ANL-09** — Os gráficos seguem 5.7: sem dependência nova, sem eixo duplo, tabela equivalente e paleta validada.
-- [ ] **CA-ANL-10** — Nenhuma migration e nenhuma dependência nova (salvo índice aditivo registrado). Nenhuma página de análise tem link para uma solicitação.
+  - sem setor ativo, aparece o aviso, e nenhuma solicitação é lida. *Verificado em 2026-11-06: unitários dos casos de uso (cada perfil, setor inativo ou ausente sem leitura) e E2E (atendente, gestor, administrador com filtro e solicitante recusado).*
+- [x] **CA-ANL-03** — "Fila agora" e "Meu período" seguem 5.3, inclusive "sem responsável" excluindo aprovação pendente e "respostas" excluindo notas internas. *Verificado em 2026-11-06: integração (aprovação pendente fora de "sem responsável"; nota interna, comentário do solicitante e de outro setor fora das respostas) e unitários da tela.*
+- [x] **CA-ANL-04** — As séries de 5.4 usam dias até 31 dias e semanas de segunda a domingo acima disso, no fuso de São Paulo. As pendentes seguem o último evento de status, considerando reabertura e cancelamento. *Verificado em 2026-11-06: unitários dos intervalos (dias, semanas parciais, fuso) e integração (pendentes com cancelamento e reabertura).*
+- [x] **CA-ANL-05** — A primeira resposta segue 5.5.1: comentário não interno de atendente ou início do atendimento; nota interna e comentário do solicitante não contam. *Verificado em 2026-11-06: integração (comentário público antes do início; nota interna e comentário do solicitante não contam).*
+- [x] **CA-ANL-06** — O tempo por etapa, as pausas e o prazo por serviço e por prioridade seguem 5.5.2 a 5.5.4, com o aviso "poucos dados". *Verificado em 2026-11-06: integração (etapas, pausa sem retomada contada até a conclusão, prazo por serviço e por prioridade) e unitários ("poucos dados" abaixo de 3).*
+- [x] **CA-ANL-07** — A grade dia × hora conta as solicitações abertas no fuso de São Paulo, inclusive perto da meia-noite. *Verificado em 2026-11-06: integração (solicitação às 23:59 de 31/10 em São Paulo conta no sábado às 23 h e no dia 31).*
+- [x] **CA-ANL-08** — A tabela da equipe segue 5.6: só atendentes do recorte, ordem alfabética, inativos marcados, aviso fixo, sem conteúdo das solicitações. O atendente nunca vê números de colegas. *Verificado em 2026-11-06: unitários (ordem alfabética, inativa marcada, aviso fixo) e integração e E2E (pessoas de outro setor só para o administrador).*
+- [x] **CA-ANL-09** — Os gráficos seguem 5.7: sem dependência nova, sem eixo duplo, tabela equivalente e paleta validada. *Verificado em 2026-11-06: paleta validada pelo script da skill de visualização (azul e laranja: daltonismo ΔE 24,7, contraste ≥ 3:1); eixo único; tabela por gráfico; capturas revisadas no navegador; E2E sem rolagem lateral a 390 px.*
+- [x] **CA-ANL-10** — Nenhuma migration e nenhuma dependência nova (salvo índice aditivo registrado). Nenhuma página de análise tem link para uma solicitação. *Verificado em 2026-11-06: `package.json` e `prisma/` sem mudança; testes de tela confirmam a ausência de links para solicitações.*
 
 ## 8. Estratégia de testes
 

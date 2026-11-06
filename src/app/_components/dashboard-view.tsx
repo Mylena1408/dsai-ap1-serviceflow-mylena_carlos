@@ -33,7 +33,7 @@ export function dashboardFilterMessages(errors: Dashboard["errors"]): string[] {
   ];
 }
 
-function Indicator({ label, value, detail }: { label: string; value: string; detail?: string }) {
+export function Indicator({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <div className="dashboard-indicator">
       <dt>{label}</dt>
@@ -45,8 +45,9 @@ function Indicator({ label, value, detail }: { label: string; value: string; det
   );
 }
 
-function GroupTable({ title, groups }: { title: string; groups: ReportGroup[] }) {
-  const largest = groups[0]?.count ?? 0;
+export function GroupTable({ title, groups }: { title: string; groups: ReportGroup[] }) {
+  // The largest count, not the first group: "Meu painel" lists priorities in their own order.
+  const largest = Math.max(0, ...groups.map((group) => group.count));
 
   return (
     <section className="dashboard-group" aria-label={title}>

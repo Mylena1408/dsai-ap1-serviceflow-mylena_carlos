@@ -1561,7 +1561,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-146 — Gráficos SVG e barras
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. `chart-geometry.ts` (escalas com passos inteiros, colunas com ponta arredondada, linha interrompida em valores vazios, rótulos sem colisão) e `charts.tsx` (colunas pareadas, linha, barras de percentual, grade dia × hora), com CSS próprio; 12 unitários.
 - **Objetivo:** Componentes de gráfico da seção 5.7, com paleta validada.
 - **Arquivos/módulos esperados:** `src/app/_components/`, `src/app/globals.css`, testes unitários.
 - **Dependências:** SF-145.
@@ -1571,7 +1571,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-147 — Meu painel do atendente
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. `/queue/dashboard` e o link "Meu painel" no menu do atendente; unitários da tela e E2E.
 - **Objetivo:** Página `/queue/dashboard` (5.3).
 - **Arquivos/módulos esperados:** `src/app/(attendant)/`.
 - **Dependências:** SF-146.
@@ -1581,7 +1581,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-148 — Análises do administrador e do gestor
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. Seção "Análises" da administração, página `/approvals/analytics` e link no menu do gestor; unitários da tela e E2E. A revisão das capturas achou e corrigiu: barras vazias quando a primeira prioridade era 0, eixo de contagem com 2,5 e 7,5, rótulo final sobre o ponto no topo, e rolagem lateral no celular (menu do topo sem quebra de linha, defeito anterior, e textos ocultos da grade).
 - **Objetivo:** Seção `/admin?section=analytics` e página `/approvals/analytics` (5.4 a 5.6).
 - **Arquivos/módulos esperados:** `src/app/(admin)/`, `src/app/(manager)/`, `src/app/_components/`.
 - **Dependências:** SF-146.
@@ -1591,7 +1591,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-149 — E2E, README e revisão das análises
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. E2E `tests/e2e/analytics.spec.ts` (perfis, filtros, semana, celular sem rolagem lateral), README e revisão da SPEC; todas as suítes passaram.
 - **Objetivo:** E2E da seção 8, README e revisão da SPEC.
 - **Arquivos/módulos esperados:** `tests/e2e/`, README, registros.
 - **Dependências:** SF-147 e SF-148.

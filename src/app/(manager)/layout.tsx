@@ -18,6 +18,7 @@ export default function ManagerLayout({
         <nav aria-label="Navegação principal">
           <Link href="/approvals">Aprovações</Link>
           <Link href="/approvals/dashboard">Painel do setor</Link>
+          <Link href="/approvals/analytics">Análises</Link>
           <NotificationsLink href="/approvals/notifications" />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>

@@ -94,3 +94,12 @@ Prompts seguintes (resumo): links dos projetos Supabase, local dos arquivos da c
 1. CI diagnosticado pela API pública do GitHub; teste instável corrigido; Ubuntu fixado.
 2. SPEC `2026-11-06-transacao-abertura.md` e SF-142.
 3. Gitleaks 8.30.1 no CI com SHA-256; `.gitleaksignore` com 2 falsos positivos revisados.
+
+## Push do item 1 e análises
+
+> faça o push e posteriormente faça funcionalidades de analises como dashbords para uso dos profissionais desta aplicação web
+> escolhas: as quatro análises; "Pode ligar" (banco de teste)
+
+1. Push de `09f5f4c` e `30c2a4e`. O CI ficou sem conferência: limite da API pública do GitHub.
+2. SPEC `2026-11-06-analises-operacionais.md` e SF-144 a SF-149, com a skill de visualização de dados para os gráficos.
+3. Domínio, leitor e casos de uso (`30da811`); gráficos, telas, E2E e registros.

@@ -14,10 +14,11 @@ import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
 import { listPermissionOverview } from "@/modules/permissions";
 import { getEmailOverview } from "@/modules/notifications";
-import { getDashboard } from "@/modules/reports";
+import { getAnalytics, getDashboard } from "@/modules/reports";
 import { listAuditTrail } from "@/modules/audit";
 import { AuditSection } from "./_sections/audit/audit-section";
 import { DashboardView } from "@/app/_components/dashboard-view";
+import { AnalyticsView } from "@/app/_components/analytics-view";
 import { CategoriesSection } from "./_sections/categories/categories-section";
 import { announcement } from "./_shared/announcement";
 import { OverviewSection } from "./_sections/overview-section";
@@ -57,6 +58,7 @@ const adminSections = [
   { id: "calendar", label: "Calendário" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
+  { id: "analytics", label: "Análises" },
   { id: "audit", label: "Auditoria" },
   { id: "api-tokens", label: "Acesso à API" },
   { id: "webhooks", label: "Webhooks" },
@@ -107,6 +109,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const emailOverview = selectedSection === "emails" ? await getEmailOverview() : null;
   // SPEC 2026-11-02-painel-relatorios, 5.1: computed only when the section is open.
   const dashboard = selectedSection === "dashboard" ? await getDashboard({ period, from, to, sector }) : null;
+  // SPEC 2026-11-06-analises-operacionais, 5.1: computed only when the section is open.
+  const analytics = selectedSection === "analytics" ? await getAnalytics({ period, from, to, sector }) : null;
   // SPEC 2026-11-02-auditoria-lgpd, 5.2: read only when the section is open.
   const auditTrail =
     selectedSection === "audit" ? await listAuditTrail({ period, from, to, entity: type, actor, page }) : null;
@@ -209,6 +213,21 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             </div>
           </div>
           <DashboardView action="/admin" dashboard={dashboard} hidden={{ section: "dashboard" }} />
+        </section>
+      ) : null}
+
+      {analytics ? (
+        <section className="admin-section" aria-labelledby="analytics-heading">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Indicadores</p>
+              <h2 id="analytics-heading">Análises</h2>
+              <p className="section-description">
+                Tendências, tempos de atendimento e distribuição do trabalho, da organização inteira ou de um setor.
+              </p>
+            </div>
+          </div>
+          <AnalyticsView action="/admin" analytics={analytics} hidden={{ section: "analytics" }} />
         </section>
       ) : null}
 

@@ -16,6 +16,7 @@ export default function AttendantLayout({
         </Link>
         <nav aria-label="Navegação principal">
           <Link href="/queue">Fila do meu setor</Link>
+          <Link href="/queue/dashboard">Meu painel</Link>
           <NotificationsLink href="/queue/notifications" />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>

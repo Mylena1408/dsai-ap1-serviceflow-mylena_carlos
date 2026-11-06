@@ -1283,6 +1283,9 @@ p {
   .app-topbar nav {
     order: 3;
     width: 100%;
+    /* The links wrap instead of pushing the page sideways on phones (found by the analytics E2E). */
+    flex-wrap: wrap;
+    gap: 8px 14px;
   }
 
   .page-shell {
@@ -1545,4 +1548,211 @@ p {
   font-size: 13px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* Operational analytics charts (SPEC 2026-11-06-analises-operacionais, 5.7). Series colors come
+   from the validated reference palette (blue and orange: CVD ΔE 24.7, contrast >= 3:1); the
+   grid is a single-hue blue ramp. Text never wears a series color. */
+.analytics {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --chart-grid: #e6ebed;
+  --heat-0: #f3f6f7;
+  --heat-1: #cde2fb;
+  --heat-2: #9ec5f4;
+  --heat-3: #6da7ec;
+  --heat-4: #2a78d6;
+  --heat-5: #1c5cab;
+  display: grid;
+  gap: 18px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.chart {
+  margin: 0;
+  min-width: 0;
+}
+
+.chart-title {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+}
+
+.chart-tick {
+  fill: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-series-1 {
+  fill: var(--series-1);
+}
+
+.chart-series-2 {
+  fill: var(--series-2);
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--series-1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-dot {
+  fill: var(--series-1);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.chart-hit {
+  fill: transparent;
+}
+
+.chart-end-label {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 6px;
+  padding: 0;
+  color: var(--ink);
+  font-size: 13px;
+  list-style: none;
+}
+
+.chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--series-1);
+}
+
+.chart-swatch.chart-series-2 {
+  background: var(--series-2);
+}
+
+.chart-table summary {
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.data-table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table th,
+.data-table td {
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.tag-muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.analytics-charts {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
+
+.heatmap-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.heatmap {
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.heatmap th {
+  padding: 0 4px;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.heatmap td {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 3px;
+}
+
+.heat-0 { background: var(--heat-0); }
+.heat-1 { background: var(--heat-1); }
+.heat-2 { background: var(--heat-2); }
+.heat-3 { background: var(--heat-3); }
+.heat-4 { background: var(--heat-4); }
+.heat-5 { background: var(--heat-5); }
+
+.analytics-notice {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--brand);
+  background: var(--brand-soft);
+  font-size: 14px;
+}
+
+.analytics .dashboard-groups + .chart {
+  margin-top: 18px;
+}
+
+/* Grid items may shrink below their content, so wide blocks (the hour grid, the team table)
+   scroll inside their own box instead of widening the page (5.7). */
+.analytics > *,
+.analytics .chart,
+.analytics .dashboard-group {
+  min-width: 0;
+}
+
+/* Hidden labels are absolutely positioned: the scroll box must contain them, or they widen the page. */
+.heatmap-scroll {
+  position: relative;
 }
