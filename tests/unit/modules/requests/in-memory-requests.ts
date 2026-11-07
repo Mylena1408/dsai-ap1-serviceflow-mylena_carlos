@@ -283,6 +283,15 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
           position,
         }));
     },
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3: the in-memory sectors never distribute (covered by the
+    // integration tests).
+    async lockSectorDistribution() {
+      return null;
+    },
+    async distributionCandidates() {
+      return [];
+    },
+    async setLastDistributed() {},
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3: bundles are covered by the integration tests.
     async findBundleForOpening() {
       return null;

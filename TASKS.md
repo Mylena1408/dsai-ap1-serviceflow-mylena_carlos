@@ -1911,7 +1911,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-181 — Distribuição na entrada da fila
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. `distributeOnEntry` (trava a linha do setor, escolhe, atribui pelo sistema com o motivo, avisa, move a vez) chamado na abertura, na aprovação final, no encaminhamento e na liberação; histórico e API com o motivo da atribuição.
 - **Objetivo:** Seção 4.3 (regras 2, 5 e 6), parte B.
 - **Arquivos/módulos esperados:** `src/modules/requests/application/` (abertura, aprovação, encaminhamento, liberação).
 - **Dependências:** SF-180.

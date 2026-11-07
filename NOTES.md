@@ -2309,3 +2309,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Configuração:** `setSectorDistribution`, só do administrador, com a auditoria do setor; os nomes dos modos aparecem na auditoria.
 - **Resultados:** typecheck, lint e build OK; unitários 1401/1401; integração 559/559 (a asserção exata da auditoria do setor foi atualizada com os campos novos e rodada de novo); E2E 40/40.
 - **Linhas:** 512 `added` (aplicação 271, testes 241).
+
+## SF-181 — Distribuição na entrada da fila (2026-11-07)
+
+- **Onde:** `distributeOnEntry` roda dentro da transação de cada entrada: `openRequest` (abertura isolada e de pacote, se não aguarda aprovação), a aprovação final, o encaminhamento e a liberação (excluindo quem liberou e quem tinha). Reabertura e solicitação com responsável não distribuem.
+- **Concorrência:** `lockSectorDistribution` lê o setor com `SELECT … FOR UPDATE`; a segunda entrada no mesmo setor espera a primeira terminar e já vê a carga e a vez atualizadas. Num teste com três aberturas simultâneas e limite 1, ninguém passou do limite.
+- **Histórico:** a linha do tempo diz "Distribuída automaticamente a …" (autor "Sistema (distribuição automática)") e a API traz `reason` no histórico de atribuição; as atribuições das regras de escalonamento continuam lendo como antes.
+- **Resultados:** typecheck, lint e build OK; unitários 1405/1405; integração 569/569; E2E 40/40.
+- **Linhas:** 449 `added` (aplicação 152, testes 297).

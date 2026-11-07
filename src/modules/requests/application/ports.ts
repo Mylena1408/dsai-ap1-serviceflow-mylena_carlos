@@ -1,3 +1,4 @@
+import type { DistributionCandidate, DistributionSettings } from "../domain/distribution";
 import type { SlaResumeCause } from "../domain/sla-pause";
 import type { OpeningAnswer, StageSettings } from "../domain/stages";
 import type { BusinessCalendar } from "@/shared/business-clock";
@@ -215,7 +216,9 @@ export interface AssigneeUpdate {
 
 export interface NewAssignmentEvent {
   requestId: string;
-  actorId: string;
+  /** Null when the system made the change, with its reason (SPEC 2026-11-07-operacao-e-automacao, 4.4). */
+  actorId: string | null;
+  reason?: "DISTRIBUTION" | "ABSENCE" | "ESCALATION_RULE";
   fromAssigneeId: string | null;
   toAssigneeId: string | null;
   occurredAt: Date;
@@ -468,6 +471,16 @@ export interface RequestTransaction {
   /** Returns the number of rows changed (0 when status or assignee changed meanwhile). */
   updateAssigneeIfCurrent(update: AssigneeUpdate): Promise<number>;
   insertAssignmentEvent(event: NewAssignmentEvent): Promise<void>;
+  /**
+   * The distribution settings of a sector, locking its row until the transaction ends, so two
+   * entries at once neither exceed the limit nor skip a turn (SPEC 2026-11-07-operacao-e-automacao,
+   * 4.3 item 6). Null when the sector does not exist.
+   */
+  lockSectorDistribution(sectorId: string): Promise<DistributionSettings | null>;
+  /** Every attendant of the sector, with the active requests they hold and whether absent today (4.3 item 3). */
+  distributionCandidates(sectorId: string): Promise<DistributionCandidate[]>;
+  /** The round-robin's turn (4.3 item 4). */
+  setLastDistributed(sectorId: string, userId: string): Promise<void>;
   /** Returns the number of rows changed (0 when the request changed meanwhile). */
   updatePriorityIfCurrent(update: PriorityUpdate): Promise<number>;
   /** A sector with its count of active attendants, read in this transaction (5.2). */

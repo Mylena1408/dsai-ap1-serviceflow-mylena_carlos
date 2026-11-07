@@ -77,6 +77,8 @@ export interface RequestAssignmentEventRecord {
   toAssigneeId: string | null;
   occurredAt: Date;
   actor: { id: string; name: string } | null;
+  /** Why the system made the change (SPEC 2026-11-07-operacao-e-automacao, 4.4); optional for older doubles. */
+  reason?: "DISTRIBUTION" | "ABSENCE" | "ESCALATION_RULE" | null;
   fromAssignee: { id: string; name: string } | null;
   toAssignee: { id: string; name: string } | null;
 }

@@ -247,8 +247,10 @@ export function requestDetailRepresentation(
       assignment: request.assignmentEvents.map((event) => ({
         from: event.fromAssignee && { id: event.fromAssignee.id, name: event.fromAssignee.name },
         to: event.toAssignee && { id: event.toAssignee.id, name: event.toAssignee.name },
-        // Null when an escalation rule made the handover (SPEC 2026-11-06-aprofundamento-configurabilidade, G17).
+        // Null when the system made the change (SPEC 2026-11-06-aprofundamento-configurabilidade, G17), with
+        // the reason (SPEC 2026-11-07-operacao-e-automacao, 4.4).
         actor: event.actor && { id: event.actor.id, name: event.actor.name },
+        reason: event.reason ?? null,
         occurredAt: iso(event.occurredAt),
       })),
       priority: request.priorityEvents.map((event) => ({

@@ -142,3 +142,7 @@
 > quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
 
 35. Contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-180.
+
+> pode continuar
+
+36. SF-181: distribuição na entrada da fila (abertura, aprovação final, encaminhamento, liberação), trava do setor, motivo no histórico e na API (ver `NOTES.md`).

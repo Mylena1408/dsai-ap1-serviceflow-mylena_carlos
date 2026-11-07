@@ -12,6 +12,7 @@ import {
 } from "../domain/lifecycle";
 import { requestAssignmentInputSchema, requestTransferInputSchema } from "./request-schemas";
 import type { RequestTransaction, RequestTransactionRunner } from "./ports";
+import { distributeOnEntry } from "./distribute";
 
 // Assume, release and transfer within the request's sector (SPEC 2026-10-31, section 5.2).
 // The session check rejects anyone who is not an attendant of the request's sector; the
@@ -67,6 +68,18 @@ async function changeAssignee(
       occurredAt,
       payload: { fromAssigneeId, toAssigneeId, actorId: actor.id },
     });
+
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 2: a released request goes back to the queue and is
+    // distributed again, never to who released it nor to who held it.
+    if (toAssigneeId === null) {
+      await distributeOnEntry(transaction, {
+        requestId,
+        sectorId: request.sectorId,
+        status: request.status,
+        occurredAt,
+        exclude: [actor.id, ...(fromAssigneeId ? [fromAssigneeId] : [])],
+      });
+    }
   });
 }
 

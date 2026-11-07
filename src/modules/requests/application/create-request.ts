@@ -22,6 +22,7 @@ import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
 import { buildRequestSnapshot } from "../domain/snapshot";
 import { readRequestAfterWrite } from "./read-after-write";
+import { distributeOnEntry } from "./distribute";
 import type {
   AttachmentStorage,
   RequestTransaction,
@@ -242,6 +243,12 @@ export async function openRequest(
     occurredAt: openedAt,
     payload: { requesterId: context.actorId, sectorId: context.service.sector.id },
   });
+
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 2: an opening without a pending approval enters the
+  // sector's queue now. The attachments and answers below do not depend on the assignee.
+  if (approvalState !== "PENDING") {
+    await distributeOnEntry(transaction, { requestId: created.id, sectorId: context.service.sector.id, status: "OPEN", occurredAt: openedAt });
+  }
 
   if (matches.length > 0) {
     await transaction.insertAttachments(

@@ -487,7 +487,7 @@ export const OPENAPI_DOCUMENT = {
               history: {
                 type: "object",
                 description:
-                  "status, assignment, sectors (encaminhamentos), priority, pauses (pausas do prazo), stages, approval (a última decisão) e approvals (todas as decisões, por nível, com onBehalfOf quando um substituto decidiu na ausência do gestor). Em assignment, actor é null quando uma regra de escalonamento do setor atribuiu a solicitação",
+                  "status, assignment, sectors (encaminhamentos), priority, pauses (pausas do prazo), stages, approval (a última decisão) e approvals (todas as decisões, por nível, com onBehalfOf quando um substituto decidiu na ausência do gestor). Em assignment, actor é null quando o sistema atribuiu a solicitação, e reason diz por quê: ESCALATION_RULE (regra de escalonamento do setor), DISTRIBUTION (distribuição automática) ou ABSENCE (ausência do responsável)",
               },
             },
           },

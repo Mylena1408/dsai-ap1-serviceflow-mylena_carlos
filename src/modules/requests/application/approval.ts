@@ -1,3 +1,4 @@
+import { distributeOnEntry } from "./distribute";
 import { requireCurrentActor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
@@ -136,5 +137,10 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
       occurredAt: decidedAt,
       payload: { decision: parsed.decision, actorId: actor.id, level, nextSectorId: next?.sectorId ?? null },
     });
+
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 2: the final approval puts it in the sector's queue.
+    if (finalApproval) {
+      await distributeOnEntry(transaction, { requestId: parsed.requestId, sectorId: request.sectorId, status: "OPEN", occurredAt: decidedAt });
+    }
   });
 }

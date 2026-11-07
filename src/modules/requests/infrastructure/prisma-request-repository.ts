@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { loadBusinessCalendar } from "@/modules/calendar";
-import { loadEffectivePermissions } from "@/server/authorization/effective-permissions";
+import { loadEffectivePermissions, organizationToday } from "@/server/authorization/effective-permissions";
+import type { DistributionCandidate } from "../domain/distribution";
 import {
   runSerializableTransaction,
   type PersistenceErrorPolicy,
@@ -396,6 +397,29 @@ export function createPrismaRequestTransaction(
     },
     async insertAttachments(attachments) {
       await transaction.requestAttachment.createMany({ data: attachments });
+    },
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3 items 3, 4 and 6.
+    async lockSectorDistribution(sectorId) {
+      const [row] = await transaction.$queryRaw<
+        Array<{ distributionMode: "NONE" | "ROUND_ROBIN" | "LEAST_LOAD"; maxActivePerAttendant: number | null; lastDistributedToId: string | null }>
+      >`SELECT "distributionMode", "maxActivePerAttendant", "lastDistributedToId"::text AS "lastDistributedToId"
+        FROM "Sector" WHERE "id" = ${sectorId}::uuid FOR UPDATE`;
+      return row ? { mode: row.distributionMode, maxActivePerAttendant: row.maxActivePerAttendant, lastDistributedToId: row.lastDistributedToId } : null;
+    },
+    async distributionCandidates(sectorId) {
+      const today = await organizationToday(transaction);
+      return transaction.$queryRaw<DistributionCandidate[]>`
+        SELECT u."id"::text AS "id", u."name", u."role"::text AS "role", u."isActive", u."sectorId"::text AS "sectorId",
+          (SELECT count(*)::int FROM "Request" r WHERE r."assigneeId" = u."id" AND r."status" IN ('OPEN', 'IN_PROGRESS')) AS "activeRequests",
+          EXISTS (
+            SELECT 1 FROM "AttendantAbsence" a
+            WHERE a."userId" = u."id" AND a."cancelledAt" IS NULL AND a."startsOn" <= ${today}::date AND a."endsOn" >= ${today}::date
+          ) AS "absentToday"
+        FROM "User" u
+        WHERE u."sectorId" = ${sectorId}::uuid AND u."role" = 'ATTENDANT'`;
+    },
+    async setLastDistributed(sectorId, userId) {
+      await transaction.sector.update({ where: { id: sectorId }, data: { lastDistributedToId: userId } });
     },
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3.
     findBundleForOpening(bundleId) {

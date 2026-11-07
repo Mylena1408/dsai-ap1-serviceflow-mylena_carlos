@@ -24,13 +24,28 @@ type RequestTimelineProps = {
 /** Who made an assignment change: a person or, for a rule's handover, the system (decision G17). */
 export const SYSTEM_ACTOR_NAME = "Sistema (regra de escalonamento)";
 
-function assignmentTitle(event: RequestWithHistory["assignmentEvents"][number]): string {
-  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 3: a rule's handover.
-  if (!event.actor) {
-    return event.fromAssignee
-      ? `Transferida de ${event.fromAssignee.name} para ${event.toAssignee?.name} pela regra de escalonamento`
-      : `Atribuída a ${event.toAssignee?.name} pela regra de escalonamento`;
-  }
+type AssignmentEvent = RequestWithHistory["assignmentEvents"][number];
+
+/** Who made a system change, by its reason (SPEC 2026-11-07-operacao-e-automacao, 4.4, decision H19). */
+export function systemActorName(reason: AssignmentEvent["reason"]): string {
+  if (reason === "DISTRIBUTION") return "Sistema (distribuição automática)";
+  if (reason === "ABSENCE") return "Sistema (ausência do responsável)";
+  return SYSTEM_ACTOR_NAME;
+}
+
+function systemAssignmentTitle(event: AssignmentEvent): string {
+  const to = event.toAssignee?.name;
+  if (event.reason === "DISTRIBUTION") return `Distribuída automaticamente a ${to}`;
+  if (event.reason === "ABSENCE") return `Passada de ${event.fromAssignee?.name} para ${to} pela ausência do responsável`;
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 3: a rule's handover (the reason was
+  // added later; older rows read the same).
+  return event.fromAssignee
+    ? `Transferida de ${event.fromAssignee.name} para ${to} pela regra de escalonamento`
+    : `Atribuída a ${to} pela regra de escalonamento`;
+}
+
+function assignmentTitle(event: AssignmentEvent): string {
+  if (!event.actor) return systemAssignmentTitle(event);
   if (!event.fromAssignee && event.toAssignee) return `Assumida por ${event.toAssignee.name}`;
   if (event.fromAssignee && !event.toAssignee) {
     // A supervisor of the queue may release a colleague's request (SPEC de permissões, 5.3.3).
@@ -124,7 +139,7 @@ export function buildTimeline(request: RequestWithHistory, linkEvents: readonly 
     id: `assignment-${event.id}`,
     occurredAt: event.occurredAt,
     title: assignmentTitle(event),
-    actor: event.actor?.name ?? SYSTEM_ACTOR_NAME,
+    actor: event.actor?.name ?? systemActorName(event.reason),
     note: null,
   }));
 

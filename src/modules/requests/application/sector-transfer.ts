@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { assertCanSendToSector, assertSectorDestination, sectorTransferNote } from "../domain/lifecycle";
 import { supervises } from "./assignment";
+import { distributeOnEntry } from "./distribute";
 import { getAttendantRequest } from "./request-queries";
 import { requestSectorTransferInputSchema } from "./request-schemas";
 import type { RequestQueryRepository, RequestTransactionRunner } from "./ports";
@@ -77,6 +78,9 @@ export async function sendRequestToSector(input: unknown, transactions: RequestT
       occurredAt,
       payload: { fromSectorId: origin.id, toSectorId: destination.id, actorId: actor.id },
     });
+
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 2: it arrives in the new sector's queue.
+    await distributeOnEntry(transaction, { requestId, sectorId: destination.id, status: request.status, occurredAt });
   });
 }
 
