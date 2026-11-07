@@ -237,6 +237,9 @@ model User {
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.
   escalationRulesAssigned SectorEscalationRule[]    @relation("SectorEscalationRuleAssignee")
   escalationsAssigned     RequestEscalation[]       @relation("RequestEscalationAssignee")
+  /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1.
+  requestLinksCreated     RequestLink[]             @relation("RequestLinkCreator")
+  requestLinkEvents       RequestLinkEvent[]        @relation("RequestLinkEventActor")
 }
 
 model Service {
@@ -347,6 +350,11 @@ model Request {
   fieldUpdates          RequestFieldUpdateEvent[]
   satisfaction          RequestSatisfaction?
   escalations           RequestEscalation[]
+  /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1.
+  linksFrom             RequestLink[]              @relation("RequestLinkFrom")
+  linksTo               RequestLink[]              @relation("RequestLinkTo")
+  linkEventsFrom        RequestLinkEvent[]         @relation("RequestLinkEventFrom")
+  linkEventsTo          RequestLinkEvent[]         @relation("RequestLinkEventTo")
   satisfactionEvents    RequestSatisfactionEvent[]
   approvals             RequestApproval[]
   comments              RequestComment[]
@@ -817,6 +825,55 @@ model RequestEscalation {
 
   @@index([requestId])
   @@index([occurredAt])
+}
+
+/// Kind of link between two requests (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1).
+enum RequestLinkKind {
+  /// Symmetric: shown on both requests.
+  RELATED
+  /// The "from" request duplicates the "to" request (the original).
+  DUPLICATE_OF
+}
+
+enum RequestLinkAction {
+  LINKED
+  UNLINKED
+}
+
+/// A link between two requests (3.3 item 1). One per pair, whatever the kind; the shape and the
+/// "one duplicate per request" rule are checked in SQL.
+model RequestLink {
+  id            String          @id @default(uuid()) @db.Uuid
+  fromRequestId String          @db.Uuid
+  toRequestId   String          @db.Uuid
+  kind          RequestLinkKind
+  createdById   String          @db.Uuid
+  createdAt     DateTime        @db.Timestamptz
+
+  fromRequest Request @relation("RequestLinkFrom", fields: [fromRequestId], references: [id], onDelete: Restrict)
+  toRequest   Request @relation("RequestLinkTo", fields: [toRequestId], references: [id], onDelete: Restrict)
+  createdBy   User    @relation("RequestLinkCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([fromRequestId])
+  @@index([toRequestId])
+}
+
+/// History of the links (3.3 item 1): shown on both requests.
+model RequestLinkEvent {
+  id            String            @id @default(uuid()) @db.Uuid
+  fromRequestId String            @db.Uuid
+  toRequestId   String            @db.Uuid
+  kind          RequestLinkKind
+  action        RequestLinkAction
+  actorId       String            @db.Uuid
+  occurredAt    DateTime          @db.Timestamptz
+
+  fromRequest Request @relation("RequestLinkEventFrom", fields: [fromRequestId], references: [id], onDelete: Restrict)
+  toRequest   Request @relation("RequestLinkEventTo", fields: [toRequestId], references: [id], onDelete: Restrict)
+  actor       User    @relation("RequestLinkEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([fromRequestId, occurredAt])
+  @@index([toRequestId, occurredAt])
 }
 
 /// An escalation rule of a sector (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.1 to 7.4),

@@ -35,6 +35,8 @@ import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import { createPrismaApprovalDeadlineStore } from "./infrastructure/prisma-approval-deadline-alerts";
 import { createPrismaStageDeadlineStore } from "./infrastructure/prisma-stage-deadline-alerts";
 import * as ruleRuns from "./application/escalation-rule-runs";
+import * as links from "./application/links";
+import { createPrismaLinkReader, createPrismaLinkStore } from "./infrastructure/prisma-request-links";
 import { createPrismaEscalationRuleRunStore } from "./infrastructure/prisma-escalation-rule-runs";
 import {
   createPrismaRequestQueryRepository,
@@ -417,4 +419,21 @@ export async function listRequestEscalations(
         },
       }).then((rows) => rows.map(({ notifiedUserIds, ...row }) => ({ ...row, notifiedCount: notifiedUserIds.length }))),
   });
+}
+
+// Links between requests (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1).
+export { LINK_KINDS, LINK_ROLE_LABELS, MAX_LINKS_PER_REQUEST, type LinkKind, type LinkRole } from "./domain/links";
+export type { RequestLinkEventView, RequestLinkView } from "./application/links";
+
+export async function linkRequests(input: unknown, database: PrismaClient = prisma): Promise<{ linkId: string }> {
+  return links.linkRequests(input, createPrismaLinkStore(database));
+}
+
+export async function unlinkRequests(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return links.unlinkRequests(input, createPrismaLinkStore(database));
+}
+
+/** Links and their history, for whoever reads the request. */
+export async function listRequestLinks(requestId: unknown, database: PrismaClient = prisma) {
+  return links.listRequestLinks(requestId, createPrismaAttachmentQueryRepository(database), createPrismaLinkReader(database));
 }

@@ -114,3 +114,7 @@
 > faça a SPEC com os itens 2, 3, 4, 6 e 7
 
 28. SPEC `SPEC/2026-11-07-operacao-e-automacao.md` (partes A a E, decisões H1 a H22, tarefas SF-175 a SF-193), com as tarefas registradas em `TASKS.md`.
+
+> pode iniciar a SF-175
+
+29. SF-175: migration dos vínculos, regras, casos de uso com histórico e leitura por perfil (ver `NOTES.md`).

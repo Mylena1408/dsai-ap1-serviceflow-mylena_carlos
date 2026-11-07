@@ -80,6 +80,11 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 
 - Nova tabela `RequestLink` (`fromRequestId`, `toRequestId`, `kind` `RELATED` ou `DUPLICATE_OF`, `createdById`, `createdAt`), com `CHECK` contra vínculo consigo mesma e índices únicos: um par por tipo (para `RELATED`, com o menor id primeiro) e uma linha `DUPLICATE_OF` por origem.
 - Nova tabela `RequestLinkEvent` (vinculou ou removeu, com o tipo, as duas solicitações, quem e quando), para o histórico.
+- *Esclarecimentos registrados em 2026-11-07 (SF-175):*
+  - "um par só uma vez" vale para qualquer tipo e direção: um índice único sobre (menor id, maior id); a SPEC falava em "um par por tipo", mas uma solicitação duplicada de outra já é relacionada a ela;
+  - o código curto é o começo do id (8 dígitos hexadecimais); a busca usa o intervalo de ids desse começo, servido pela chave primária; um código que casa com duas solicitações é recusado como inválido;
+  - quem remove: atendente do setor de qualquer uma das duas, desde que leia a outra;
+  - o administrador não opera solicitações e não vincula; o gestor só lê os vínculos das solicitações que já lê.
 - Nova tabela `ServiceBundle` (`name` `citext`, `description`, `serviceIds uuid[]` em ordem, `isActive`, datas), com `CHECK` do nome, da descrição e de 2 a 5 serviços sem repetição; índice único do nome entre os ativos.
 - Nova tabela `RequestGroup` (`bundleId` opcional, `bundleNameSnapshot`, `requesterId`, `createdAt`) e `Request.groupId` opcional.
 - Enum da auditoria ganha `SERVICE_BUNDLE`.
@@ -87,12 +92,12 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 ### 3.5 Critérios de aceitação
 
 - [ ] **CA-VNC-01** — Solicitações sem vínculo e fora de pacote se comportam como hoje.
-- [ ] **CA-VNC-02** — O atendente cria e remove "relacionada a" e "duplicada de" pelo código, com as recusas da regra 1 (si mesma, repetida, cadeia, mais de 10, sem leitura) e o histórico nas solicitações envolvidas; a duplicada não muda de status.
-- [ ] **CA-VNC-03** — O solicitante só vê vínculos entre solicitações dele; o atendente vê código, serviço, setor e status da outra.
+- [ ] **CA-VNC-02** — O atendente cria e remove "relacionada a" e "duplicada de" pelo código, com as recusas da regra 1 (si mesma, repetida, cadeia, mais de 10, sem leitura) e o histórico nas solicitações envolvidas; a duplicada não muda de status. *Parcial em 2026-11-07 (SF-175): regras e casos de uso prontos e verificados (código curto com ou sem "#", recusas de si mesma, par repetido, cadeia de duplicadas, mais de 10, código desconhecido, ambíguo ou de solicitação que o atendente não lê; histórico nas duas solicitações; status inalterado; dois vínculos simultâneos do mesmo par gravam um). Falta a tela (SF-176).*
+- [ ] **CA-VNC-03** — O solicitante só vê vínculos entre solicitações dele; o atendente vê código, serviço, setor e status da outra. *Parcial em 2026-11-07 (SF-175): a leitura dos vínculos já filtra para o solicitante (só entre solicitações dele) e marca, para quem atende, se a outra pode ser aberta. Falta a tela (SF-176).*
 - [ ] **CA-VNC-04** — Só o administrador configura pacotes; a configuração recusa nome vazio, longo ou repetido, menos de 2 ou mais de 5 serviços, repetição e serviço inativo ou com documento exigido; as mudanças entram na auditoria; o pacote some do catálogo quando deixa de poder ser aberto.
 - [ ] **CA-VNC-05** — Abrir um pacote cria uma solicitação por serviço numa transação, cada uma igual à abertura isolada; uma recusa não cria nenhuma e devolve o formulário preenchido.
 - [ ] **CA-VNC-06** — O andamento do grupo, o cancelamento do pacote (só do que o solicitante pode cancelar) e o bloco "Pacote" no detalhe funcionam como na regra 4.
-- [ ] **CA-VNC-07** — Migrations aditivas; nenhuma dependência nova.
+- [x] **CA-VNC-07** — Migrations aditivas; nenhuma dependência nova. *Verificado em 2026-11-07 (SF-175): migration `20261107900000_request_links` só acrescenta (dois enums, duas tabelas, restrições); cada recusa do banco conferida pelo nome da restrição; nenhuma dependência nova. A SF-177 acrescentará a migration dos pacotes.*
 
 ## 4. Parte B — Distribuição automática
 

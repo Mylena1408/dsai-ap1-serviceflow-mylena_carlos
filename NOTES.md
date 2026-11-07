@@ -2255,3 +2255,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Pontos de atenção registrados na SPEC:** pacote "tudo ou nada" e sem serviços com documentos exigidos (H5); distribuição só na entrada da fila sem responsável, com o sistema como autor e motivo no histórico (H7, H19); ausência de atendente afeta só a distribuição (H8); recorrência sem recuperar dias perdidos (H10); importação com prévia obrigatória, sem apagar nada e sem dados pessoais (H12, H13); lote item a item, com resultado por item (H18).
 - **Estimativa:** 16.000 a 21.000 linhas; o projeto ficaria entre 77.000 e 82.000, e a meta pedirá mais uma SPEC depois desta.
 - **Fora do levantamento aprovado:** múltiplas organizações (risco alto), calendário por setor, recuperação de senha e relatórios agendados ficam para decisão futura.
+
+## SF-175 — Vínculos entre solicitações: banco e domínio (2026-11-07)
+
+- **Banco:** `RequestLink` (de, para, tipo `RELATED`/`DUPLICATE_OF`, quem, quando) e `RequestLinkEvent` (vinculou/removeu). Restrições: não vincular a si mesma, um par só uma vez (índice sobre `LEAST`/`GREATEST` dos ids) e uma original por duplicada (índice parcial). Os limites de 10 e a regra "sem cadeias" ficam no domínio, numa transação serializável.
+- **Código curto:** é o começo do id; `codeRange` transforma o código num intervalo de uuids (`aaaaaaaa-0000-…` a `aaaaaaaa-ffff-…`), que a chave primária atende sem varrer a tabela. Duas solicitações com o mesmo começo tornam o código ambíguo, e o vínculo é recusado; no teste, criei esse caso trocando o id de duas solicitações.
+- **Onde ficou:** no módulo `requests`, que já tem a regra de leitura (`authorizeRequestRead`) e a de quem altera (`assertStatusChangeAllowed`).
+- **Leitura:** o solicitante vê só vínculos entre solicitações dele; quem atende vê todos, com `readable` dizendo se pode abrir a outra (por exemplo, depois de ela ir para outro setor).
+- **Resultados:** typecheck, lint e build OK; unitários 1359/1359; integração 539/539; E2E pendente: interrompido para seguir com a SF-176; roda junto com o da SF-176.
+- **Linhas:** 812 `added` (aplicação 432, testes 380).

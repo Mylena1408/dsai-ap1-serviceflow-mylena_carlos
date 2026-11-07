@@ -1851,7 +1851,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-175 — Vínculos entre solicitações: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107900000_request_links`; regras de vínculo (`requests/domain/links.ts`); casos de uso `linkRequests`, `unlinkRequests` e `listRequestLinks` com histórico e leitura por perfil; limpezas do banco de teste e do E2E. Telas na SF-176.
 - **Objetivo:** Seção 3.3 (regra 1), parte A.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/`.
 - **Dependências:** SPEC aprovada.
