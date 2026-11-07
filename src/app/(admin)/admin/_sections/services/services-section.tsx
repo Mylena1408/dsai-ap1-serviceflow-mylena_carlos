@@ -20,6 +20,7 @@ import {
   createServiceAction,
   createServiceFieldAction,
   configureServiceApprovalAction,
+  configureServiceStageAction,
   createServiceStageAction,
   deactivateDocumentRequirementAction,
   deactivateServiceFieldAction,
@@ -49,6 +50,8 @@ type ServicesSectionProps = {
   activeManagersBySector?: ReadonlyMap<string, number>;
   /** Active sectors any catalog editor may pick as approval levels (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1). */
   approvalSectors: Array<{ id: string; name: string }>;
+  /** Active attendants with their sector, for the stages' attendant (5.3.1). */
+  stageAssignees: Array<{ id: string; name: string; sectorId: string }>;
 };
 
 /**
@@ -79,6 +82,7 @@ export function ServicesSection({
   serviceStages,
   activeManagersBySector,
   approvalSectors,
+  stageAssignees,
 }: ServicesSectionProps) {
   return (
     <AdminSectionProvider section={section}>
@@ -212,9 +216,21 @@ export function ServicesSection({
                 reactivateAction={reactivateServiceStageAction}
                 renameAction={renameServiceStageAction}
                 serviceId={service.id}
+                // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.
+                settingsAction={configureServiceStageAction}
+                assigneeChoices={stageAssignees.filter((item) => item.sectorId === service.sectorId)}
+                conditionChoices={approvalConditionChoices(serviceFields, service.id)}
                 stages={serviceStages
                   .filter((stage) => stage.serviceId === service.id)
-                  .map((stage) => ({ id: stage.id, name: stage.name, isActive: stage.isActive }))}
+                  .map((stage) => ({
+                    id: stage.id,
+                    name: stage.name,
+                    isActive: stage.isActive,
+                    assigneeId: stage.assigneeId ?? null,
+                    targetDays: stage.targetDays ?? null,
+                    conditionFieldId: stage.conditionFieldId ?? null,
+                    conditionValue: stage.conditionValue ?? null,
+                  }))}
               />
             </AdminRecordEditor>
           ))}

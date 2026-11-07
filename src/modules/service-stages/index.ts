@@ -39,6 +39,11 @@ export async function renameServiceStage(
   return useCases.renameServiceStage(stageId, input, createPrismaServiceStageTransactionRunner(database));
 }
 
+/** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1. */
+export async function listStageAssigneeChoices(database: PrismaClient = prisma) {
+  return useCases.listStageAssigneeChoices(createPrismaServiceStageRepository(database));
+}
+
 /** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1 to 5.3.3. */
 export async function configureServiceStage(
   stageId: unknown,

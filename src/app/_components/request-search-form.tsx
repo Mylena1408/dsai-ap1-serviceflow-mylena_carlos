@@ -10,8 +10,16 @@ type RequestSearchFormProps = {
   showAssignee: boolean;
   /** The SLA filter and the "due" order exist only in the queue (SPEC 2026-11-01, 5.6). */
   showSla?: boolean;
+  /**
+   * The queue's "Etapa" filter (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4): the current
+   * stages of the sector's requests in progress. Absent in the requester list.
+   */
+  stageChoices?: string[];
   defaultOrder: "newest" | "oldest";
 };
+
+/** The value of "Sem etapa" (the same as the request module's NO_STAGE_FILTER). */
+const NO_STAGE = "__none__";
 
 const STATUSES: RequestStatus[] = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
 
@@ -25,7 +33,12 @@ function first(value: string | string[] | undefined): string {
 
 // GET form: works without JavaScript, keeps the criteria in the URL and always starts on
 // page 1 because it carries no page field (SPEC 2026-10-31-busca-filtros-paginacao, 5.5).
-export function RequestSearchForm({ basePath, params, showAssignee, showSla = false, defaultOrder }: RequestSearchFormProps) {
+export function RequestSearchForm({ basePath, params, showAssignee, showSla = false, stageChoices, defaultOrder }: RequestSearchFormProps) {
+  const currentStage = first(params.stage);
+  // A stage chosen before it left the list stays selectable, so the form shows what the URL filters.
+  const stageOptions = stageChoices && currentStage && currentStage !== NO_STAGE && !stageChoices.includes(currentStage)
+    ? [...stageChoices, currentStage]
+    : stageChoices;
   const statuses = values(params.status);
 
   return (
@@ -71,6 +84,20 @@ export function RequestSearchForm({ basePath, params, showAssignee, showSla = fa
             <option value="overdue">Vencido</option>
             <option value="none">Sem prazo</option>
             <option value="paused">Pausado</option>
+          </select>
+        </div>
+      ) : null}
+      {stageOptions ? (
+        <div className="search-field">
+          <label htmlFor="search-stage">Etapa</label>
+          <select id="search-stage" name="stage" defaultValue={currentStage}>
+            <option value="">Todas</option>
+            <option value={NO_STAGE}>Sem etapa</option>
+            {stageOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
           </select>
         </div>
       ) : null}

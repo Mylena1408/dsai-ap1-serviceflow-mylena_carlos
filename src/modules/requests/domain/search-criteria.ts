@@ -41,6 +41,26 @@ export interface SearchCriteria {
   page: number;
   /** Queue only, and present only when chosen (SPEC 2026-11-01, section 5.6). */
   sla?: SlaFilter;
+  /**
+   * Queue only (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4): the current stage's name,
+   * or "none" for requests without a stage. Present only when chosen.
+   */
+  stage?: StageFilter;
+}
+
+/** The value of the "Etapa" filter that means "Sem etapa". */
+export const NO_STAGE_FILTER = "__none__";
+export const MAX_STAGE_FILTER_LENGTH = 60;
+
+export type StageFilter = { kind: "none" } | { kind: "name"; name: string };
+
+/** 5.3.4: empty is no filter; "__none__" is "Sem etapa"; any other value is a stage name of 1 to 60 characters. */
+export function parseStageFilter(raw: string | undefined): StageFilter | null {
+  const value = raw?.trim() ?? "";
+  if (value === "") return null;
+  if (value === NO_STAGE_FILTER) return { kind: "none" };
+  if ([...value].length > MAX_STAGE_FILTER_LENGTH) invalid("too_big");
+  return { kind: "name", name: value };
 }
 
 /** Query parameters as Next.js delivers them: absent, one value or repeated. */
@@ -123,6 +143,9 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
     invalid("invalid_value");
   }
 
+  // The requester list has no stage filter either (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4).
+  const stage = audience === "attendant" ? parseStageFilter(single(raw.stage)) : null;
+
   return {
     term: parseTerm(single(raw.q)),
     statuses: statuses as RequestStatus[],
@@ -132,6 +155,7 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
     order: orderRaw as SearchOrder,
     page: parsePage(single(raw.page)),
     ...(slaRaw !== null ? { sla: slaRaw as SlaFilter } : {}),
+    ...(stage !== null ? { stage } : {}),
   };
 }
 

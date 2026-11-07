@@ -545,6 +545,7 @@ p {
 }
 
 .entity-editor-form,
+.stage-settings-form,
 .approval-editor-form {
   display: grid;
   gap: 14px;

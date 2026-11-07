@@ -20,6 +20,7 @@ import {
   updateServiceField,
 } from "@/modules/service-fields";
 import {
+  configureServiceStage,
   createServiceStage,
   deactivateServiceStage,
   moveServiceStage,
@@ -38,6 +39,8 @@ import {
   selectedSection,
   serviceApprovalFailure,
   serviceApprovalFields,
+  serviceStageSettingsFailure,
+  serviceStageSettingsFields,
   serviceFieldFields,
   serviceFieldFailure,
   updateFailure,
@@ -280,6 +283,19 @@ export async function configureServiceApprovalAction(
     await configureServiceApproval(field(formData, "serviceId"), serviceApprovalFields(formData));
   } catch (error) {
     return serviceApprovalFailure(error) ?? updateFailure(error);
+  }
+  return finishUpdate();
+}
+
+// SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.
+export async function configureServiceStageAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await configureServiceStage(field(formData, "id"), serviceStageSettingsFields(formData));
+  } catch (error) {
+    return serviceStageSettingsFailure(error) ?? updateFailure(error);
   }
   return finishUpdate();
 }

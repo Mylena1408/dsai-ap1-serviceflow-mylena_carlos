@@ -211,6 +211,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           serviceStages={serviceStages}
           activeManagersBySector={activeManagersBySector(users)}
           approvalSectors={sectors.filter((item) => item.isActive).map(({ id, name }) => ({ id, name }))}
+          stageAssignees={users.flatMap((user) =>
+            user.role === "ATTENDANT" && user.isActive && user.sectorId ? [{ id: user.id, name: user.name, sectorId: user.sectorId }] : [],
+          )}
           section={selectedSection}
           sectors={sectors}
           services={services}

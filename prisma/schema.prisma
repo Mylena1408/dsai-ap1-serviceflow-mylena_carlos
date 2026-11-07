@@ -295,6 +295,9 @@ model Request {
   /// Due date of the current stage and when its delay was announced (5.3.2).
   stageDueAt                   DateTime?       @db.Timestamptz
   stageOverdueNotifiedAt       DateTime?       @db.Timestamptz
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4: name of the current stage, computed by
+  /// PostgreSQL from the copy and the index (a generated column). Read only: no code writes it.
+  currentStageName             String?
   /// Approval situation (SPEC 2026-11-01-aprovacoes, 5.3); null when the service did not require it.
   approvalState                ApprovalState?
   /// Copy of Service.slaBusinessHours at the opening (SPEC 2026-11-03-pausa-sla-calendario, 5.2).
@@ -346,6 +349,7 @@ model Request {
   @@index([approvalPendingSectorId])
   @@index([approvalDueAt])
   @@index([stageDueAt])
+  @@index([sectorId, currentStageName])
 }
 
 model RequestStatusEvent {

@@ -202,3 +202,17 @@ export async function getApprovalLevels(
   const names = repository.sectorNames ? await repository.sectorNames(sectorIds) : new Map<string, string>();
   return approvalLevelsView(request, names, now);
 }
+
+/**
+ * The choices of the queue's "Etapa" filter (SPEC 2026-11-06-aprofundamento-configurabilidade,
+ * 5.3.4): the current stages of the sector's requests in progress. Same scope as the queue.
+ */
+export async function listQueueStageChoices(repository: Pick<RequestQueryRepository, "currentStageNames">): Promise<string[]> {
+  const actor = assertRole(await requireCurrentActor(), "ATTENDANT");
+
+  if (!actor.sectorId) {
+    throw new NotFoundError();
+  }
+
+  return repository.currentStageNames ? repository.currentStageNames(actor.sectorId) : [];
+}

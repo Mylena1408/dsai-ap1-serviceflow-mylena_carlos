@@ -15,6 +15,14 @@ export function createPrismaServiceStageRepository(database: PrismaClient): Serv
       });
       return rows.map(toDomain);
     },
+    async listActiveAttendants(sectorId) {
+      const rows = await database.user.findMany({
+        where: { role: "ATTENDANT", isActive: true, sectorId: sectorId === null ? { not: null } : sectorId },
+        orderBy: [{ name: "asc" }, { id: "asc" }],
+        select: { id: true, name: true, sectorId: true },
+      });
+      return rows.flatMap((row) => (row.sectorId ? [{ id: row.id, name: row.name, sectorId: row.sectorId }] : []));
+    },
     async listForSector(sectorId) {
       const rows = await database.serviceStage.findMany({
         where: { service: { sectorId } },

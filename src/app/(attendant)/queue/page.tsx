@@ -2,7 +2,7 @@ import Link from "next/link";
 import { RequestStageLabel } from "@/app/_components/request-stage";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { countComments } from "@/modules/comments";
-import { effectiveAssigneeId, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
+import { effectiveAssigneeId, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
 import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
@@ -25,6 +25,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   const actor = await requireAttendantPageAccess();
   const params = await searchParams;
   let result: RequestSearchResult | null = null;
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4.
+  const stageChoices = await listQueueStageChoices();
 
   try {
     result = await searchAttendantQueue(params);
@@ -51,7 +53,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
           Solicitação encaminhada ao outro setor. Ela saiu da fila deste setor.
         </p>
       ) : null}
-      <RequestSearchForm basePath="/queue" params={params} showAssignee showSla defaultOrder="oldest" />
+      <RequestSearchForm basePath="/queue" params={params} showAssignee showSla stageChoices={stageChoices} defaultOrder="oldest" />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
           Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.

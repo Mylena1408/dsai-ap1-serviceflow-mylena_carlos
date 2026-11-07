@@ -1801,7 +1801,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-170 — Filtro da fila por etapa, telas e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107500000_current_stage_name` (coluna calculada do nome da etapa atual, com índice); filtro "Etapa" da fila (com "Sem etapa"), no endereço e na paginação; "Ajustes" de cada etapa ativa (responsável, prazo, condição) na administração e em "Serviços do setor"; medição com volume; E2E `stage-settings.spec.ts`. Parte C concluída (CA-ETP-01 a 07).
 - **Objetivo:** Seção 5.3 (regra 4), parte C.
 - **Arquivos/módulos esperados:** Fila, detalhe, editor de etapas.
 - **Dependências:** SF-169.

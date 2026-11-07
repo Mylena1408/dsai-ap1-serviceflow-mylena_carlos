@@ -2192,3 +2192,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu no teste, corrigido:** pausei o SLA de uma solicitação sem SLA, que a restrição da pausa não admite. O teste agora dá um SLA à solicitação antes da pausa.
 - **Resultados:** typecheck, lint e build OK; unitários 1284/1284; integração 497/497; E2E 34/34.
 - **Linhas:** 453 `added` (aplicação 215, testes 238).
+
+## SF-170 — Filtro por etapa, telas e E2E; fim da parte C (2026-11-07)
+
+- **Coluna calculada:** `Request.currentStageName` é `GENERATED ALWAYS AS (CASE WHEN "stageIndex" IS NULL THEN NULL ELSE "stageNamesSnapshot"["stageIndex" + 1] END) STORED`, com índice (`sectorId`, `currentStageName`). Ela se mantém sozinha em todo caminho que muda a etapa (início, avanço, retorno, reabertura) e nasceu preenchida para as linhas existentes. O Prisma só a lê; um comentário no schema avisa que nenhum código a escreve.
+- **Filtro:** `stage` na URL (vazio = todas, `__none__` = "Sem etapa", outro valor = nome de até 60 caracteres), só na fila; a lista de escolhas são as etapas atuais das solicitações em atendimento do setor. Uma etapa escolhida que saiu da lista continua no seletor, para o formulário mostrar o que o endereço filtra.
+- **Ajustes da etapa:** botão "Ajustes" em cada etapa ativa, com o responsável (atendentes ativos do setor do serviço), o prazo e a condição, e um resumo de uma linha. Em "Serviços do setor", as escolhas de responsável vêm de `listStageAssigneeChoices`, que só entrega atendentes dos setores que o editor alcança. O formulário tem a classe própria `stage-settings-form`, pelo mesmo motivo da SF-167.
+- **Medição:** o `serviceflow_perf` não tinha nenhuma solicitação com etapa. Dei às 28.004 solicitações em atendimento desse banco local um fluxo de três etapas, com a etapa atual distribuída, e medi pelo repositório da aplicação (script temporário, apagado): filtro por etapa ~13 ms, "Sem etapa" ~38 ms, lista de etapas ~55 ms, sem filtro ~25 ms; com busca por termo, ~0,37 s (o termo domina, como na SF-163).
+- **Resultados:** typecheck, lint e build OK; unitários 1290/1290; integração 501/501; E2E 35/35.
+- **Linhas:** 535 `added` (aplicação 266, testes 269). Parte C inteira (SF-168 a SF-170): 1.471.

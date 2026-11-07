@@ -78,3 +78,7 @@
 > pode iniciar a SF-169
 
 19. SF-169: entrada na etapa com responsável e vencimento, evento e aviso de etapa atrasada, telas da equipe. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> pode iniciar a SF-170
+
+20. SF-170: coluna calculada da etapa atual, filtro "Etapa" da fila, "Ajustes" das etapas na tela, medição com volume e E2E da parte C (ver `NOTES.md`).

@@ -207,3 +207,14 @@ export async function configureServiceStage(
     );
   });
 }
+
+/**
+ * Who may be a stage's attendant (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1): the
+ * active attendants of the sectors the catalog editor reaches, with their sector. Names only.
+ */
+export async function listStageAssigneeChoices(
+  repository: ServiceStageRepository,
+): Promise<Array<{ id: string; name: string; sectorId: string }>> {
+  const editor = await requireCatalogEditor();
+  return repository.listActiveAttendants ? repository.listActiveAttendants(editor.sectorId) : [];
+}

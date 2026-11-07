@@ -4,7 +4,7 @@ import { SignOutButton } from "@/modules/auth";
 import { listCategoriesForCatalog } from "@/modules/categories";
 import { listDocumentRequirements } from "@/modules/document-requirements";
 import { listServiceFields } from "@/modules/service-fields";
-import { listServiceStages } from "@/modules/service-stages";
+import { listServiceStages, listStageAssigneeChoices } from "@/modules/service-stages";
 import { listApprovalSectorChoices, listSectorsForCatalog } from "@/modules/sectors";
 import { listServices } from "@/modules/services";
 import { requireCatalogEditor } from "@/server/authorization";
@@ -34,7 +34,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
     throw error;
   }
 
-  const [{ error, entity, notice, knowledge }, services, categories, sectors, documentRequirements, serviceFields, serviceStages, knowledgeServices, approvalSectors] =
+  const [{ error, entity, notice, knowledge }, services, categories, sectors, documentRequirements, serviceFields, serviceStages, knowledgeServices, approvalSectors, stageAssignees] =
     await Promise.all([
       searchParams,
       listServices(),
@@ -47,6 +47,8 @@ export default async function SectorServicesPage({ searchParams }: SectorService
       listArticlesForEditor(),
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 (decision G19).
       listApprovalSectorChoices(),
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1.
+      listStageAssigneeChoices(),
     ]);
   const message = announcement(error, notice, entity);
 
@@ -85,6 +87,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
             section="sector-services"
             sectors={sectors}
             approvalSectors={approvalSectors}
+            stageAssignees={stageAssignees}
             serviceFields={serviceFields}
             serviceStages={serviceStages}
             services={services}

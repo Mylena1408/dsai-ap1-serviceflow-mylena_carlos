@@ -129,6 +129,43 @@ export function serviceApprovalFields(formData: FormData) {
   };
 }
 
+/**
+ * Settings form of a stage (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3): empty attendant
+ * and blank days mean none; the condition is "<field id>::<value>" or empty.
+ */
+export function serviceStageSettingsFields(formData: FormData) {
+  const assignee = field(formData, "assigneeId").trim();
+  const days = field(formData, "targetDays").trim();
+  const condition = field(formData, "condition");
+  const separator = condition.indexOf("::");
+
+  return {
+    assigneeId: assignee === "" ? null : assignee,
+    targetDays: days === "" ? null : /^\d+$/.test(days) ? Number(days) : days,
+    conditionFieldId: condition === "" ? null : separator < 0 ? condition : condition.slice(0, separator),
+    conditionValue: separator < 0 ? null : condition.slice(separator + 2),
+  };
+}
+
+/** Fixed messages for the stage settings form (5.3). */
+export function serviceStageSettingsFailure(error: unknown): AdminUpdateState | null {
+  if (!(error instanceof ValidationError)) return null;
+  const paths = error.issues.map(({ path }) => String(path[0]));
+  if (paths.includes("assigneeId")) {
+    return { status: "error", message: "Escolha um atendente ativo do setor do serviço, ou nenhum." };
+  }
+  if (paths.includes("targetDays")) {
+    return { status: "error", message: "Informe de 1 a 30 dias para a etapa, ou deixe em branco para não ter prazo." };
+  }
+  if (paths.includes("conditionFieldId") || paths.includes("conditionValue")) {
+    return {
+      status: "error",
+      message: "Escolha uma condição válida: um campo de escolha ativo da abertura, sem condição própria, e uma das suas opções.",
+    };
+  }
+  return null;
+}
+
 /** Fixed messages for the approval form (4.3.1, 4.3.6 and 4.3.7). */
 export function serviceApprovalFailure(error: unknown): AdminUpdateState | null {
   if (!(error instanceof ValidationError)) return null;

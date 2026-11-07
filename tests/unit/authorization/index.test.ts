@@ -68,6 +68,7 @@ function persistedRequest(requesterId: string, sectorId: string) {
     stageTargetDaysSnapshot: [],
     stageDueAt: null,
     stageOverdueNotifiedAt: null,
+    currentStageName: null,
   };
 }
 

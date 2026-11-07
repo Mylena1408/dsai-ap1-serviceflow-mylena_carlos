@@ -221,6 +221,11 @@ function searchWhere(
     and.push(slaWhere(criteria.sla, now));
   }
 
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4: the generated column of the current stage.
+  if ("sectorId" in scope && criteria.stage) {
+    and.push({ currentStageName: criteria.stage.kind === "none" ? null : criteria.stage.name });
+  }
+
   return { AND: and };
 }
 
@@ -265,6 +270,16 @@ export function createPrismaRequestQueryRepository(
     },
     approvalCoverage(managerId) {
       return approvalCoverage(database, managerId);
+    },
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4.
+    async currentStageNames(sectorId) {
+      const rows = await database.request.findMany({
+        where: { sectorId, status: "IN_PROGRESS", currentStageName: { not: null } },
+        distinct: ["currentStageName"],
+        select: { currentStageName: true },
+        orderBy: { currentStageName: "asc" },
+      });
+      return rows.flatMap(({ currentStageName }) => (currentStageName === null ? [] : [currentStageName]));
     },
     async sectorNames(sectorIds) {
       const rows = await database.sector.findMany({ where: { id: { in: [...sectorIds] } }, select: { id: true, name: true } });

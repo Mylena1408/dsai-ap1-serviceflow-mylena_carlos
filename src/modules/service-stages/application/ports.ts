@@ -8,6 +8,11 @@ export interface ServiceStageRepository {
   listAll(): Promise<ServiceStageRecord[]>;
   /** The same list, only for the services of one sector. */
   listForSector(sectorId: string): Promise<ServiceStageRecord[]>;
+  /**
+   * Active attendants, by name, of every sector or of one (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 5.3.1). Optional for older doubles.
+   */
+  listActiveAttendants?(sectorId: string | null): Promise<Array<{ id: string; name: string; sectorId: string }>>;
 }
 
 /** Operations available inside a stage configuration transaction. */
