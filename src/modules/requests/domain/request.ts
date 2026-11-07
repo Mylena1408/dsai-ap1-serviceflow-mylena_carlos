@@ -134,6 +134,9 @@ export interface RequestApprovalRecord {
   decider: { id: string; name: string };
   /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3: 1 for decisions made before levels. */
   level?: number;
+  /** 4.3.5: the absent manager the decider replaced. */
+  onBehalfOfId?: string | null;
+  onBehalfOf?: { id: string; name: string } | null;
 }
 
 export interface RequestWithHistory extends RequestRecord {

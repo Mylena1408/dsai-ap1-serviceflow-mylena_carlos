@@ -41,6 +41,7 @@ export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/atta
 export type { RequestFieldAnswer } from "./domain/field-answer";
 export { effectiveAssigneeId, REOPEN_WINDOW_MS } from "./domain/lifecycle";
 export { pendingApprovalLevel, pendingApprovalSector, requestApprovalSectors } from "./domain/approval";
+export { sectorSubstituteIds } from "./infrastructure/approval-coverage";
 export {
   MAX_SEARCH_TERM,
   MIN_SEARCH_TERM,
@@ -120,6 +121,11 @@ export async function listManagerApprovals(
   database: PrismaClient = prisma,
 ): Promise<RequestWithHistory[]> {
   return queries.listManagerApprovals(filter, createPrismaRequestQueryRepository(database));
+}
+
+/** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5. */
+export async function getApprovalActingSectors(database: PrismaClient = prisma): Promise<string[]> {
+  return queries.getApprovalActingSectors(createPrismaRequestQueryRepository(database));
 }
 
 export async function getManagerRequest(requestId: unknown, database: PrismaClient = prisma): Promise<RequestWithHistory> {

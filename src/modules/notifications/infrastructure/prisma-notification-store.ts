@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { sectorSubstituteIds } from "@/modules/requests";
 import type { NotificationCategory } from "../domain/email";
 import type { NotificationType } from "../domain/recipients";
 import type { NotificationStore } from "../application/ports";
@@ -45,6 +46,15 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
     async escalatedAt(requestId, occurredAt) {
       // SPEC 2026-11-06-escalonamento, 4.5: the escalation is written with the breach's instant.
       return (await database.requestEscalation.count({ where: { requestId, occurredAt } })) > 0;
+    },
+    async approvalDeciderIds(sectorId) {
+      const managers = await database.user.findMany({
+        where: { sectorId, role: "MANAGER", isActive: true },
+        select: { id: true },
+        orderBy: { id: "asc" },
+      });
+      const substitutes = await sectorSubstituteIds(database, sectorId);
+      return [...new Set([...managers.map(({ id }) => id), ...substitutes])];
     },
     async sectorManagerIds(sectorId) {
       const rows = await database.user.findMany({

@@ -53,11 +53,11 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         // from the sector of the first level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3).
         // An opening that required approval has the level copy; before levels, the request's sector.
         ...(event.type === "request.opened" && request.approvalState === "PENDING"
-          ? { approvalManagerIds: await store.sectorManagerIds(request.approvalSectorIdsSnapshot?.[0] ?? request.sectorId) }
+          ? { approvalManagerIds: await approvalDeciders(store, request.approvalSectorIdsSnapshot?.[0] ?? request.sectorId) }
           : {}),
         // 4.3.3: an intermediate approval asks the managers of the next level, named by the event.
         ...(event.type === "request.approval_decided" && typeof event.payload.nextSectorId === "string"
-          ? { approvalManagerIds: await store.sectorManagerIds(event.payload.nextSectorId) }
+          ? { approvalManagerIds: await approvalDeciders(store, event.payload.nextSectorId) }
           : {}),
         // SPEC 2026-11-03-transferencia-entre-setores, 5.6: the team of the sector named by the event.
         ...(event.type === "request.sector_changed" && typeof event.payload.toSectorId === "string"
@@ -108,4 +108,9 @@ export async function openNotification(notificationId: unknown, store: Notificat
   const actor = await requireCurrentActor();
   const id = validateInput(entityIdSchema, notificationId);
   return store.markRead(id, actor.id);
+}
+
+/** Managers of the sector and today's substitutes (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5). */
+function approvalDeciders(store: NotificationStore, sectorId: string): Promise<string[]> {
+  return store.approvalDeciderIds ? store.approvalDeciderIds(sectorId) : store.sectorManagerIds(sectorId);
 }

@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import { approvalCoverage } from "./approval-coverage";
 import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domain/attachment";
 import type { AttachmentQueryRepository } from "../application/ports";
 import type { RequestExistenceReader } from "../application/orphan-cleanup";
@@ -42,9 +43,20 @@ export function createPrismaAttachmentQueryRepository(
     async findRequestScope(requestId) {
       const row = await database.request.findUnique({
         where: { id: requestId },
-        select: { requesterId: true, sectorId: true, approvalState: true },
+        select: { requesterId: true, sectorId: true, approvalState: true, approvalSectorIdsSnapshot: true },
       });
-      return row && { requesterId: row.requesterId, sectorId: row.sectorId, requiresApproval: row.approvalState !== null };
+      return (
+        row && {
+          requesterId: row.requesterId,
+          sectorId: row.sectorId,
+          requiresApproval: row.approvalState !== null,
+          // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.4: the managers of every level read it.
+          approvalSectorIds: row.approvalSectorIdsSnapshot,
+        }
+      );
+    },
+    approvalCoverage(managerId) {
+      return approvalCoverage(database, managerId);
     },
     async listForRequest(requestId) {
       const rows = await database.requestAttachment.findMany({

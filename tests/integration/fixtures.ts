@@ -29,10 +29,13 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.requestStatusEvent.deleteMany(),
     prisma.request.deleteMany(),
     prisma.serviceDocumentRequirement.deleteMany(),
+    // A service's approval condition points to one of its fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
+    prisma.service.updateMany({ data: { approvalConditionFieldId: null, approvalConditionValue: null } }),
     prisma.serviceField.deleteMany(),
     prisma.serviceStage.deleteMany(),
     prisma.service.deleteMany(),
     prisma.auditEntry.deleteMany(),
+    prisma.managerAbsence.deleteMany(),
     prisma.userPermissionEvent.deleteMany(),
     prisma.userPermission.deleteMany(),
     prisma.notificationPreference.deleteMany(),

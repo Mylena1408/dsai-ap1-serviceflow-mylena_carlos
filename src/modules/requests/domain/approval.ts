@@ -97,18 +97,40 @@ export function assertCanStartWithApproval(approvalState: ApprovalState | null):
  * Managers of the request's sector or of any of its levels see the request; anyone else does not.
  * A manager who sees it but is not of the pending level gets a conflict (not their turn).
  */
-export function assertCanDecideApproval(actor: LifecycleUser, request: ApprovalRequest): void {
+export function assertCanDecideApproval(
+  actor: LifecycleUser,
+  request: ApprovalRequest,
+  /** Sectors of absent managers this actor replaces today (4.3.5). */
+  coveredSectorIds: readonly string[] = [],
+): void {
   if (!actor.isActive || actor.role !== "MANAGER" || actor.sectorId === null) {
     throw new NotFoundError();
   }
 
-  if (request.approvalState === null || !canSeeApproval(actor.sectorId, request)) {
+  const actingSectors = [actor.sectorId, ...coveredSectorIds];
+
+  if (request.approvalState === null || !actingSectors.some((sectorId) => canSeeApproval(sectorId, request))) {
     throw new NotFoundError();
   }
 
-  if (request.approvalState !== "PENDING" || request.status !== "OPEN" || pendingApprovalSector(request) !== actor.sectorId) {
+  const pendingSector = pendingApprovalSector(request);
+
+  if (request.approvalState !== "PENDING" || request.status !== "OPEN" || pendingSector === null || !actingSectors.includes(pendingSector)) {
     throw new ConflictError();
   }
+}
+
+/**
+ * The absent manager a decision is made on behalf of (4.3.5): when the actor decides a level of a
+ * sector that is not their own, it is as the substitute of that sector's absent manager.
+ */
+export function decisionOnBehalfOf(
+  actorSectorId: string | null,
+  pendingSectorId: string | null,
+  coverage: ReadonlyArray<{ sectorId: string; managerId: string }>,
+): string | null {
+  if (pendingSectorId === null || pendingSectorId === actorSectorId) return null;
+  return coverage.find(({ sectorId }) => sectorId === pendingSectorId)?.managerId ?? null;
 }
 
 /** Managers of the request's sector or of one of its levels see the approval (4.3.4). */

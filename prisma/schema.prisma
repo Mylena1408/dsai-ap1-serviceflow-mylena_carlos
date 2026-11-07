@@ -216,6 +216,11 @@ model User {
   cannedResponsesUpdated CannedResponse[]           @relation("CannedResponseUpdater")
   knowledgeCreated       KnowledgeArticle[]         @relation("KnowledgeArticleCreator")
   knowledgeUpdated       KnowledgeArticle[]         @relation("KnowledgeArticleUpdater")
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5.
+  absences               ManagerAbsence[]           @relation("ManagerAbsenceManager")
+  substitutions          ManagerAbsence[]           @relation("ManagerAbsenceSubstitute")
+  absencesCreated        ManagerAbsence[]           @relation("ManagerAbsenceCreator")
+  approvalsOnBehalf      RequestApproval[]          @relation("RequestApprovalOnBehalfOf")
 }
 
 model Service {
@@ -800,20 +805,43 @@ model BusinessHoliday {
 
 /// Decision of a manager on a request that required approval (SPEC 2026-11-01-aprovacoes, 5.6).
 model RequestApproval {
-  id        String           @id @default(uuid()) @db.Uuid
-  requestId String           @db.Uuid
+  id           String           @id @default(uuid()) @db.Uuid
+  requestId    String           @db.Uuid
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4: one decision per level; 1 before levels.
-  level     Int              @default(1)
-  deciderId String           @db.Uuid
-  decision  ApprovalDecision
-  note      String?
-  decidedAt DateTime         @db.Timestamptz
+  level        Int              @default(1)
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: the absent manager the decider replaced.
+  onBehalfOfId String?          @db.Uuid
+  deciderId    String           @db.Uuid
+  decision     ApprovalDecision
+  note         String?
+  decidedAt    DateTime         @db.Timestamptz
 
-  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  decider User    @relation("RequestApprovalDecider", fields: [deciderId], references: [id], onDelete: Restrict)
+  request    Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  decider    User    @relation("RequestApprovalDecider", fields: [deciderId], references: [id], onDelete: Restrict)
+  onBehalfOf User?   @relation("RequestApprovalOnBehalfOf", fields: [onBehalfOfId], references: [id], onDelete: Restrict)
 
   @@unique([requestId, level])
   @@index([deciderId])
+}
+
+/// A manager's absence with a substitute (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5 and
+/// 4.4). Days are calendar days of the organization, both inclusive; cancelling keeps the row.
+model ManagerAbsence {
+  id           String    @id @default(uuid()) @db.Uuid
+  managerId    String    @db.Uuid
+  substituteId String    @db.Uuid
+  startsOn     DateTime  @db.Date
+  endsOn       DateTime  @db.Date
+  createdById  String    @db.Uuid
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  cancelledAt  DateTime? @db.Timestamptz
+
+  manager    User @relation("ManagerAbsenceManager", fields: [managerId], references: [id], onDelete: Restrict)
+  substitute User @relation("ManagerAbsenceSubstitute", fields: [substituteId], references: [id], onDelete: Restrict)
+  createdBy  User @relation("ManagerAbsenceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([managerId, endsOn])
+  @@index([substituteId, endsOn])
 }
 
 /// Additional permission granted to a user (SPEC 2026-11-01-permissoes-configuraveis, section 6).

@@ -48,3 +48,7 @@
 > pode prosseguir
 
 12. SF-164: migration dos níveis e da condição, configuração no serviço, abertura com cópia dos níveis, decisão por nível, listas do gestor, notificação do próximo nível e integridade do campo da condição. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> pode prosseguir (2026-11-07)
+
+13. SF-165: tabela de ausências, módulo `absences`, cobertura do substituto nas listas, leitura, decisão e notificações, tela "Ausências" do gestor; correção da leitura pelo gestor de outro nível (lacuna da SF-164) e das limpezas do banco de teste. Todas as suítes aprovadas (ver `NOTES.md`).

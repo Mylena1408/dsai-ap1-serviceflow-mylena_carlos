@@ -6,6 +6,7 @@ import {
 } from "@/server/db/serializable-transaction";
 import { recordOutboxEvent } from "@/modules/events";
 import { decimalLimitText } from "@/modules/service-fields";
+import { approvalCoverage } from "./approval-coverage";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import {
   DIGIT_ANSWER_TYPES,
@@ -46,10 +47,11 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
-  // One decision per level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
+  // One decision per level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4), with the
+  // absent manager the decider replaced (4.3.5).
   approvals: {
     orderBy: [{ level: "asc" }, { decidedAt: "asc" }],
-    include: { decider: { select: { id: true, name: true } } },
+    include: { decider: { select: { id: true, name: true } }, onBehalfOf: { select: { id: true, name: true } } },
   },
   assignmentEvents: {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
@@ -249,9 +251,10 @@ export function createPrismaRequestQueryRepository(
       });
       return rows.map(toDomain);
     },
-    async listForApproval(sectorId, onlyPending) {
+    async listForApproval(sectorId, onlyPending, coveredSectorIds = []) {
+      const sectors = [sectorId, ...coveredSectorIds];
       const rows = await database.request.findMany({
-        where: onlyPending ? pendingForSector(sectorId) : approvalVisibleTo(sectorId),
+        where: { OR: sectors.map((item) => (onlyPending ? pendingForSector(item) : approvalVisibleTo(item))) },
         include: requestWithHistory,
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       });
@@ -260,9 +263,12 @@ export function createPrismaRequestQueryRepository(
         .sort((left, right) => Number(right.approvalState === "PENDING") - Number(left.approvalState === "PENDING"))
         .map(toDomain);
     },
-    async findForApproval(requestId, sectorId) {
+    approvalCoverage(managerId) {
+      return approvalCoverage(database, managerId);
+    },
+    async findForApproval(requestId, sectorId, coveredSectorIds = []) {
       const row = await database.request.findFirst({
-        where: { id: requestId, ...approvalVisibleTo(sectorId) },
+        where: { id: requestId, OR: [sectorId, ...coveredSectorIds].map(approvalVisibleTo) },
         include: requestWithHistory,
       });
       return row && toDomain(row);
@@ -488,6 +494,9 @@ export function createPrismaRequestTransaction(
     },
     async insertApproval(approval) {
       await transaction.requestApproval.create({ data: approval });
+    },
+    approvalCoverage(managerId) {
+      return approvalCoverage(transaction, managerId);
     },
     async listActiveStageNames(serviceId) {
       const stages = await transaction.serviceStage.findMany({

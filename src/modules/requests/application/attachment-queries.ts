@@ -12,7 +12,7 @@ import type { AttachmentContentReader, AttachmentQueryRepository } from "./ports
 
 export async function authorizeRequestRead(
   requestId: unknown,
-  repository: Pick<AttachmentQueryRepository, "findRequestScope">,
+  repository: Pick<AttachmentQueryRepository, "findRequestScope" | "approvalCoverage">,
 ) {
   const actor = await requireCurrentActor();
   const id = validateInput(entityIdSchema, requestId);
@@ -25,7 +25,12 @@ export async function authorizeRequestRead(
   // SPEC 2026-11-01-permissoes-configuraveis, 5.3.2: a manager may read every request of the sector.
   const sectorReader =
     actor.role === "MANAGER" && !scope.requiresApproval && (await actorHasPermission(actor, "SECTOR_REQUESTS_READ"));
-  assertRequestReadable(actor, scope, { sectorReader });
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: a substitute reads the absent manager's sector.
+  const coveredSectorIds =
+    actor.role === "MANAGER" && scope.requiresApproval && repository.approvalCoverage
+      ? (await repository.approvalCoverage(actor.id)).map(({ sectorId }) => sectorId)
+      : [];
+  assertRequestReadable(actor, scope, { sectorReader, coveredSectorIds });
   return id;
 }
 

@@ -137,7 +137,7 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     occurredAt: decision.decidedAt,
     title: `${decision.decision === "APPROVED" ? "Aprovada" : "Rejeitada"}${
       levelCount > 1 ? ` no nível ${decision.level ?? 1} de ${levelCount}` : ""
-    } por ${decision.decider.name}`,
+    } por ${decision.decider.name}${decision.onBehalfOf ? `, substituindo ${decision.onBehalfOf.name}` : ""}`,
     actor: decision.decider.name,
     note: decision.note,
     noteLabel: "Observação",

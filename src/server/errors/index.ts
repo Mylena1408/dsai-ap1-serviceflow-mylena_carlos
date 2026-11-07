@@ -84,6 +84,10 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "decimalPlaces",
   "minDecimal",
   "maxDecimal",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5.
+  "startsOn",
+  "endsOn",
+  "substituteId",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

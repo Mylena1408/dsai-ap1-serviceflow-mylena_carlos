@@ -59,10 +59,13 @@ async function prepareDatabase(): Promise<void> {
       database.requestStatusEvent.deleteMany(),
       database.request.deleteMany(),
       database.serviceDocumentRequirement.deleteMany(),
+      // A service's approval condition points to one of its fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
+      database.service.updateMany({ data: { approvalConditionFieldId: null, approvalConditionValue: null } }),
       database.serviceField.deleteMany(),
       database.serviceStage.deleteMany(),
       database.service.deleteMany(),
       database.auditEntry.deleteMany(),
+      database.managerAbsence.deleteMany(),
       database.userPermissionEvent.deleteMany(),
       database.userPermission.deleteMany(),
       database.notificationPreference.deleteMany(),

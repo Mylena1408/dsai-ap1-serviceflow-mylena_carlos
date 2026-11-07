@@ -1,7 +1,13 @@
 import { requireCurrentActor } from "@/server/authorization";
 import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
-import { approvalAfterDecision, assertCanDecideApproval, decisionNote } from "../domain/approval";
+import {
+  approvalAfterDecision,
+  assertCanDecideApproval,
+  decisionNote,
+  decisionOnBehalfOf,
+  pendingApprovalSector,
+} from "../domain/approval";
 import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
 import { requestApprovalDecisionInputSchema } from "./request-schemas";
@@ -35,7 +41,15 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
       approvalLevel: request.approvalLevel ?? null,
       approvalPendingSectorId: request.approvalPendingSectorId ?? null,
     };
-    assertCanDecideApproval(actor, approvalRequest);
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: a substitute also decides the
+    // levels of the absent manager's sector, read in this transaction.
+    const coverage = actor.role === "MANAGER" && transaction.approvalCoverage ? await transaction.approvalCoverage(actor.id) : [];
+    assertCanDecideApproval(
+      actor,
+      approvalRequest,
+      coverage.map(({ sectorId }) => sectorId),
+    );
+    const onBehalfOfId = decisionOnBehalfOf(actor.sectorId, pendingApprovalSector(approvalRequest), coverage);
     const note = decisionNote(parsed.decision, parsed.note);
     const decidedAt = await transaction.currentTime();
     const { level, next } = approvalAfterDecision(approvalRequest, parsed.decision);
@@ -77,6 +91,7 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
       requestId: parsed.requestId,
       // Requests opened before levels take the column default, level 1.
       ...(approvalRequest.approvalLevel === null ? {} : { level }),
+      ...(onBehalfOfId === null ? {} : { onBehalfOfId }),
       deciderId: actor.id,
       decision: parsed.decision,
       note,

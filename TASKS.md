@@ -1751,7 +1751,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-165 — Ausência do gestor e substituto
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107100000_manager_absences` (tabela `ManagerAbsence`, `RequestApproval.onBehalfOfId`); módulo `absences` (cadastro e cancelamento pelo gestor ou pelo administrador); cobertura em vigor lida pelas solicitações (listas, leitura dos detalhes, decisão "por substituição de") e pelas notificações; tela "Ausências" do gestor. A regra de leitura também passou a aceitar o gestor de qualquer nível (lacuna da SF-164). CA-APM-04 verificado. A tela do administrador fica na SF-167.
 - **Objetivo:** Seção 4.3 (regra 5), parte B.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/approvals/`, área do gestor.
 - **Dependências:** SF-164.

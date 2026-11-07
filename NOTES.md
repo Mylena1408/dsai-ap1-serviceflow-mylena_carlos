@@ -2131,3 +2131,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu, corrigido:** o comentário da migration usava a palavra "copy", e o teste que proíbe `COPY` nas migrations falhou. Reescrevi o comentário depois de a migration já estar aplicada no banco de teste local; a soma de verificação foi atualizada nesse banco (só lá ela tinha sido aplicada).
 - **Resultados:** typecheck, lint e build OK; unitários 1249/1249; integração 470/470; E2E 32/32.
 - **Linhas:** 686 `added` (aplicação 259, testes 427).
+
+## SF-165 — Ausência do gestor e substituto (2026-11-07)
+
+- **Módulo novo `absences`:** cadastro, cancelamento e listagem. O gestor registra só a própria ausência; o administrador informa o gestor. Regras: até 90 dias contando os dois, fim não antes do início, período ainda não encerrado, substituto gestor ativo e diferente do ausente, sem sobreposição com outra ausência do mesmo gestor e sem o substituto ausente o período inteiro. A sobreposição é conferida pela aplicação numa transação Serializable; uma restrição de exclusão no banco exigiria a extensão `btree_gist`.
+- **Cobertura:** `requests/infrastructure/approval-coverage.ts` diz quais setores um substituto cobre hoje (dia da organização pelo relógio do banco no fuso do calendário de horas úteis; só gestores ativos dos dois lados). As listas do gestor, a leitura dos detalhes, a decisão e as notificações usam essa função. A decisão grava `onBehalfOfId` (o ausente) e a linha do tempo mostra ", substituindo …". O ausente continua decidindo.
+- **Lacuna da SF-164, achada agora:** a regra de leitura dos detalhes (respostas, anexos, satisfação, escalonamentos) exigia o setor da solicitação. O gestor de um nível de outro setor abriria o detalhe e a página daria 404. O teste da SF-164 só chamou `getManagerRequest`. A regra passou a aceitar os setores dos níveis e os cobertos; o teste novo cobre o caso.
+- **Limpezas do banco de teste e do E2E:** além da tabela nova, faltava tratar a referência circular que a SF-164 criou (o serviço aponta para o campo da condição, e o campo para o serviço). A limpeza apagaria os campos antes dos serviços e falharia se algum serviço tivesse condição; o teste da SF-164 só passou porque remove a condição no fim. As duas limpezas agora zeram a condição antes.
+- **Tela:** "Ausências" na área do gestor, com cadastro, "Minhas ausências" (situação e cancelamento) e "Substituições". A tela do administrador fica na SF-167.
+- **Resultados:** typecheck, lint e build OK; unitários 1254/1254; integração 477/477; E2E 33/33 (um novo).
+- **Linhas:** 864 `added` (aplicação 556, testes 306, scripts 2).

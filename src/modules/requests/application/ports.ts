@@ -20,10 +20,16 @@ export interface RequestQueryRepository {
   findForRequester(requestId: string, requesterId: string): Promise<RequestWithHistory | null>;
   listBySector(sectorId: string): Promise<RequestWithHistory[]>;
   findInSector(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
-  /** Requests of a sector that require approval, pending first (SPEC de aprovações, 5.7). */
-  listForApproval(sectorId: string, onlyPending: boolean): Promise<RequestWithHistory[]>;
-  /** A request of the sector that requires approval, or null. */
-  findForApproval(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
+  /**
+   * Requests that require approval of the given sectors, pending first (SPEC de aprovações, 5.7):
+   * the manager's own, and the sectors replaced in an absence (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 4.3.5). Older doubles may read only the first one.
+   */
+  listForApproval(sectorId: string, onlyPending: boolean, coveredSectorIds?: readonly string[]): Promise<RequestWithHistory[]>;
+  /** A request that requires approval of one of these sectors, or null. */
+  findForApproval(requestId: string, sectorId: string, coveredSectorIds?: readonly string[]): Promise<RequestWithHistory | null>;
+  /** 4.3.5: sectors this manager replaces today. Optional for older doubles: absent = none. */
+  approvalCoverage?(managerId: string): Promise<Array<{ sectorId: string; managerId: string }>>;
   /** Active attendants of a sector, by name, for the transfer form. */
   listSectorAttendants(sectorId: string): Promise<Array<{ id: string; name: string }>>;
   /**
@@ -147,6 +153,8 @@ export interface NewApproval {
   requestId: string;
   /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3; 1 when absent. */
   level?: number;
+  /** 4.3.5: the absent manager the decider replaced. */
+  onBehalfOfId?: string;
   deciderId: string;
   decision: "APPROVED" | "REJECTED";
   note: string | null;
@@ -318,7 +326,12 @@ export interface AttachmentContentReader {
 export interface FieldAnswerQueryRepository {
   findRequestScope(
     requestId: string,
-  ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean } | null>;
+  ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean; approvalSectorIds?: string[] } | null>;
+  /**
+   * Sectors an absent manager left to this substitute today (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 4.3.5). Optional for older doubles: absent = none.
+   */
+  approvalCoverage?(managerId: string): Promise<Array<{ sectorId: string; managerId: string }>>;
   /** Answers of the request in snapshot order. */
   listForRequest(requestId: string): Promise<RequestFieldAnswer[]>;
 }
@@ -326,7 +339,12 @@ export interface FieldAnswerQueryRepository {
 export interface AttachmentQueryRepository {
   findRequestScope(
     requestId: string,
-  ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean } | null>;
+  ): Promise<{ requesterId: string; sectorId: string; requiresApproval?: boolean; approvalSectorIds?: string[] } | null>;
+  /**
+   * Sectors an absent manager left to this substitute today (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 4.3.5). Optional for older doubles: absent = none.
+   */
+  approvalCoverage?(managerId: string): Promise<Array<{ sectorId: string; managerId: string }>>;
   listForRequest(requestId: string): Promise<RequestAttachmentSummary[]>;
   /**
    * Active requirements of the request's service without a document in it, with the owner and the
@@ -354,6 +372,8 @@ export interface RequestTransaction {
   listActiveRequirements(serviceId: string): Promise<ActiveDocumentRequirement[]>;
   /** Returns the number of rows changed (0 when the approval was already decided). */
   updateApprovalIfCurrent(update: ApprovalUpdate): Promise<number>;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: optional for older doubles. */
+  approvalCoverage?(managerId: string): Promise<Array<{ sectorId: string; managerId: string }>>;
   insertApproval(approval: NewApproval): Promise<void>;
   /** Names of the active stages of the service, in flow order (SPEC de fluxos, 5.2). */
   listActiveStageNames(serviceId: string): Promise<string[]>;

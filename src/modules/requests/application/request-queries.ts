@@ -93,7 +93,22 @@ export async function listManagerApprovals(
     return repository.listBySector(actor.sectorId);
   }
 
-  return repository.listForApproval(actor.sectorId, filter !== "all");
+  return repository.listForApproval(actor.sectorId, filter !== "all", await coveredSectors(repository, actor.id));
+}
+
+/** Sectors a manager replaces today (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5). */
+async function coveredSectors(repository: Pick<RequestQueryRepository, "approvalCoverage">, managerId: string): Promise<string[]> {
+  return repository.approvalCoverage ? (await repository.approvalCoverage(managerId)).map(({ sectorId }) => sectorId) : [];
+}
+
+/**
+ * The sectors whose pending levels the current manager decides: their own and, in an absence, the
+ * absent managers' (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5). Used by the screens
+ * to show the decision forms only to who may decide.
+ */
+export async function getApprovalActingSectors(repository: RequestQueryRepository): Promise<string[]> {
+  const actor = assertRole(await requireCurrentActor(), "MANAGER");
+  return actor.sectorId ? [actor.sectorId, ...(await coveredSectors(repository, actor.id))] : [];
 }
 
 export async function getManagerRequest(
@@ -108,7 +123,7 @@ export async function getManagerRequest(
   }
 
   const request =
-    (await repository.findForApproval(id, actor.sectorId)) ??
+    (await repository.findForApproval(id, actor.sectorId, await coveredSectors(repository, actor.id))) ??
     ((await actorHasPermission(actor, "SECTOR_REQUESTS_READ")) ? await repository.findInSector(id, actor.sectorId) : null);
 
   if (!request) {

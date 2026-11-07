@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  getApprovalActingSectors,
   pendingApprovalSector,
   getManagerRequest,
   getRequestSatisfaction,
@@ -38,13 +39,14 @@ function feedback(error?: string, notice?: string): string | null {
 
 // Read-only detail with the decision forms (SPEC 2026-11-01-aprovacoes, 5.4 and 5.7).
 export default async function ApprovalPage({ params, searchParams }: ApprovalPageProps) {
-  const manager = await requireManagerPageAccess();
+  await requireManagerPageAccess();
   const [{ requestId }, { error, notice }] = await Promise.all([params, searchParams]);
   let request;
   let attachments;
   let answers;
   let satisfaction;
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
+  let actingSectors: string[] = [];
 
   try {
     request = await getManagerRequest(requestId);
@@ -52,6 +54,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
     answers = await listRequestFieldAnswers(request.id);
     satisfaction = await getRequestSatisfaction(request.id);
     escalations = await listRequestEscalations(request.id);
+    actingSectors = await getApprovalActingSectors();
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -61,7 +64,9 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   const open = request.approvalState === "PENDING" && request.status === "OPEN";
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.4: only the pending level's managers
   // decide; managers of the other levels see the request and wait.
-  const pending = open && pendingApprovalSector(request) === manager.sectorId;
+  // In an absence, the substitute decides the absent manager's sector too (4.3.5).
+  const pendingSector = pendingApprovalSector(request);
+  const pending = open && pendingSector !== null && actingSectors.includes(pendingSector);
   const waitingOtherLevel = open && !pending;
 
   return (
