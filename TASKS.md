@@ -1731,7 +1731,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-163 — Busca pelas respostas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. A busca de "Minhas solicitações" e da fila procura também nas respostas (o solicitante, só nas que deu) e, para termos só com dígitos e pontuação, nos dígitos de telefone, CPF, CNPJ e CEP. "Aprovações" não tem busca (correção registrada na SPEC, 3.1.3). Medição com 98.014 solicitações e 196.029 respostas: 0,71 s no pior caso, sem índice. E2E `field-formats.spec.ts`, que achou e corrigiu a lista de códigos de erro da abertura. Parte A concluída (CA-CMP-01 a 06).
 - **Objetivo:** Seção 3.3 (regra 5), parte A.
 - **Arquivos/módulos esperados:** `src/modules/requests/infrastructure/`, listas da fila, do solicitante e das aprovações.
 - **Dependências:** SF-162.

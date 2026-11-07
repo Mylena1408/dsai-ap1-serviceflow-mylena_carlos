@@ -2098,3 +2098,22 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Teste da API em arquivo próprio:** com o mock de sessão de `@/server/auth`, o `runAsApiUser` da API some e a rota falha. O caso da API foi para `public-api-field-formats.test.ts`, sem mock de sessão, como no teste de API dos campos condicionais.
 - **Resultados:** typecheck, lint e build OK; unitários 1238/1238; integração 455/455; E2E de campos (3 arquivos) aprovados.
 - **Linhas:** 353 `added` (aplicação 117, testes 236).
+
+## SF-163 — Busca pelas respostas; fim da parte A (2026-11-06)
+
+- **Correção da SPEC (erro meu):** escrevi que a busca de "Aprovações" passaria a procurar nas respostas, mas essa lista não tem busca. A correção ficou registrada na SPEC (3.1.3): a busca pelas respostas vale para "Minhas solicitações" e para a fila. Busca em "Aprovações" seria funcionalidade nova, ligada à paginação pendente da SF-160.
+- **Como busca:** o termo também é procurado (`ILIKE`, com `%` e `_` escapados) nas respostas. Se o termo, sem espaços, pontos, hífens, barras e parênteses, tiver só dígitos (2 ou mais), ele é procurado também nos dígitos das respostas de telefone, CPF, CNPJ e CEP. O solicitante só busca nas respostas sem autor de gravação do atendimento, que é o mesmo critério de leitura da CA-CND-08. O texto do campo de busca passou a ser "Descrição, serviço ou respostas".
+- **Medição:** o `serviceflow_perf` tinha 98.014 solicitações, mas só 7 respostas, porque a clonagem da SF-160 não copiou respostas. Para medir, gerei nesse banco local duas respostas por solicitação (196.029 linhas: um CPF de 11 dígitos e um texto "PAT-n"). Apliquei antes as duas migrations da SF-161 nele. A medição chamou o repositório da aplicação, três vezes por caso, com um script temporário que foi apagado:
+
+  | Lista e termo | Antes | Depois |
+  |---|---:|---:|
+  | Fila (98.014), "notebook" | 0,17 s | 0,43 s |
+  | Fila, "PAT-123" | 0,25 s | 0,47 s |
+  | Fila, "529.982.247-25" | 0,36 s | 0,71 s |
+  | Minhas (35.005), "PAT-123" | 0,13 s | 0,39 s |
+  | Minhas, "529.982.247-25" | 0,13 s | 0,50 s |
+
+  O pior caso fica abaixo de 1 s (CA-CMP-06), então nenhum índice foi criado. O "antes" foi medido trocando temporariamente só o repositório pela versão do `HEAD`, e o arquivo novo foi restaurado e conferido.
+- **Defeito achado pelo E2E:** a página de abertura aceitava só uma lista fixa de códigos de erro vindos do endereço, sem os 7 códigos novos. O servidor recusava, mas a tela não dizia por quê. A lista virou um registro tipado com todos os códigos, e uma verificação de tipos exige que os códigos da tela sejam iguais aos do domínio. A SF-161 não tinha esse E2E; o problema existia desde ela.
+- **Resultados:** typecheck, lint e build OK; unitários 1241/1241; integração 459/459; E2E 32/32.
+- **Linhas:** 237 `added` (aplicação 25, testes 212). Parte A inteira (SF-161 a SF-163): 1.342.

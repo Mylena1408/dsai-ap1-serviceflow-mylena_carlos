@@ -8,6 +8,8 @@ import { recordOutboxEvent } from "@/modules/events";
 import { decimalLimitText } from "@/modules/service-fields";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import {
+  DIGIT_ANSWER_TYPES,
+  digitsSearchTerm,
   escapeLikePattern,
   pageWindow,
   type SearchCriteria,
@@ -146,10 +148,19 @@ function searchWhere(
     // Prisma passes `contains` to ILIKE without escaping % and _ (checked in
     // request-search.test.ts), so the term is escaped here.
     const pattern = escapeLikePattern(criteria.term);
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.5: also the field answers. The
+    // requester only searches what the requester sees: answers without an attendance author
+    // (SPEC 2026-11-03-campos-condicionais-atendimento, CA-CND-08).
+    const visibleAnswers: Prisma.RequestFieldValueWhereInput = "requesterId" in scope ? { updatedById: null } : {};
+    const digits = digitsSearchTerm(criteria.term);
     and.push({
       OR: [
         { description: { contains: pattern, mode: "insensitive" } },
         { serviceNameSnapshot: { contains: pattern, mode: "insensitive" } },
+        { fieldValues: { some: { ...visibleAnswers, value: { contains: pattern, mode: "insensitive" } } } },
+        ...(digits
+          ? [{ fieldValues: { some: { ...visibleAnswers, typeSnapshot: { in: [...DIGIT_ANSWER_TYPES] }, value: { contains: digits } } } }]
+          : []),
       ],
     });
   }

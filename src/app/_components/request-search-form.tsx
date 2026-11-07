@@ -38,7 +38,8 @@ export function RequestSearchForm({ basePath, params, showAssignee, showSla = fa
           type="search"
           defaultValue={first(params.q)}
           maxLength={MAX_SEARCH_TERM}
-          placeholder="Descrição ou serviço"
+          // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.5: the answers are searched too.
+          placeholder="Descrição, serviço ou respostas"
         />
       </div>
       <fieldset className="search-statuses">

@@ -40,3 +40,7 @@
 > pode iniciar a SF-162
 
 10. SF-162: editor, ações, auditoria, caminhos públicos de validação, API e OpenAPI dos tipos novos, com integração da configuração, abertura, atendimento e API. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> pode iniciar a SF-163
+
+11. SF-163: busca pelas respostas nas duas listas com busca (correção da SPEC sobre "Aprovações"), medição no `serviceflow_perf` com respostas geradas, E2E da parte A e correção da lista de códigos de erro da abertura. Todas as suítes aprovadas (ver `NOTES.md`).

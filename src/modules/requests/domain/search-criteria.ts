@@ -149,6 +149,19 @@ export function pageWindow(total: number, requestedPage: number, pageSize: numbe
   return { page, pageCount, skip: (page - 1) * pageSize, take: pageSize };
 }
 
+/** Answer types stored as digits only (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.2). */
+export const DIGIT_ANSWER_TYPES = ["PHONE", "CPF", "CNPJ", "CEP"] as const;
+
+/**
+ * The digits of a term written only with digits and the usual punctuation ("123.456", "(91)
+ * 98765"), so it also finds answers stored as digits (3.3.5). Null for any other term, and for
+ * fewer than 2 digits, the minimum of the search.
+ */
+export function digitsSearchTerm(term: string): string | null {
+  const digits = term.replace(/[\s.\-/()]/g, "");
+  return /^\d{2,}$/.test(digits) ? digits : null;
+}
+
 /** Escapes LIKE wildcards so `%` and `_` in the term are plain text (section 5.2). */
 export function escapeLikePattern(term: string): string {
   return term.replace(/[\\%_]/g, (character) => `\\${character}`);
