@@ -83,6 +83,13 @@ function transaction(store: Store): ServiceTransaction {
         ? { id: found.id, isActive: found.isActive, categoryId: found.categoryId, sectorId: found.sectorId }
         : null;
     },
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3: covered by the integration tests.
+    async activeSectorIds(ids) {
+      return new Set(ids.filter((id) => store.sectors[id]?.isActive));
+    },
+    async findConditionField() {
+      return null;
+    },
     async loadRelationships(category, sector) {
       return {
         categoryExists: category in store.categories,

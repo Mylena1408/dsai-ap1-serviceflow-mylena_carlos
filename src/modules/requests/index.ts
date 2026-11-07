@@ -40,6 +40,7 @@ export { buildAttachmentContentDisposition } from "./domain/attachment";
 export type { AttachmentDownload, RequestAttachmentSummary } from "./domain/attachment";
 export type { RequestFieldAnswer } from "./domain/field-answer";
 export { effectiveAssigneeId, REOPEN_WINDOW_MS } from "./domain/lifecycle";
+export { pendingApprovalLevel, pendingApprovalSector, requestApprovalSectors } from "./domain/approval";
 export {
   MAX_SEARCH_TERM,
   MIN_SEARCH_TERM,

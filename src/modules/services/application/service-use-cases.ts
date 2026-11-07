@@ -3,7 +3,9 @@ import { NotFoundError } from "@/server/errors";
 import { activeStateAction } from "@/modules/audit";
 import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
-import { serviceInputSchema, type ServiceInput } from "./service-schemas";
+import { serviceApprovalInputSchema, serviceInputSchema, type ServiceInput } from "./service-schemas";
+import { assertApprovalLevels } from "../domain/approval-config";
+import { assertConditionTarget } from "@/modules/service-fields";
 import { assertServiceRelationships } from "../domain/relationships";
 import type { ServiceData, ServiceRecord } from "../domain/service";
 import { parseSlaHours } from "../domain/sla-config";
@@ -103,6 +105,47 @@ export async function setServiceActive(
     return transaction.audited(
       { actor: editor.actor, action: activeStateAction(active), entityType: "SERVICE", entityId: serviceId },
       () => transaction.update(serviceId, { isActive: active }),
+    );
+  });
+}
+
+/**
+ * Approval levels and condition of a service (SPEC 2026-11-06-aprofundamento-configurabilidade,
+ * 4.3.1 and 4.3.7). Whoever configures the service does it (decision G19); any active sector may
+ * be a level, because a level only says who approves. The condition follows the rules of the
+ * conditional fields (decision G18): an active requester field of this service, with choices,
+ * without its own condition, and one of its values. Recorded in the audit as a service update.
+ */
+export async function configureServiceApproval(
+  id: unknown,
+  input: unknown,
+  transactions: ServiceTransactionRunner,
+): Promise<ServiceRecord> {
+  const editor = await requireCatalogEditor();
+  const serviceId = validateInput(entityIdSchema, id);
+  const parsed = validateInput(serviceApprovalInputSchema, input);
+
+  return transactions.run(async (transaction) => {
+    const current = await transaction.findState(serviceId);
+
+    if (!current) {
+      throw new NotFoundError();
+    }
+
+    assertCatalogSector(editor, current.sectorId);
+    assertApprovalLevels(parsed.sectorIds, await transaction.activeSectorIds(parsed.sectorIds));
+
+    if (parsed.conditionFieldId !== null) {
+      const controller = await transaction.findConditionField(parsed.conditionFieldId, serviceId);
+      assertConditionTarget({ id: null, audience: "REQUESTER" }, controller, parsed.conditionValue ?? "");
+    }
+
+    return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE", entityId: serviceId }, () =>
+      transaction.update(serviceId, {
+        approvalSectorIds: parsed.sectorIds,
+        approvalConditionFieldId: parsed.conditionFieldId,
+        approvalConditionValue: parsed.conditionValue,
+      }),
     );
   });
 }

@@ -18,3 +18,28 @@ export const serviceInputSchema = z
   .strict();
 
 export type ServiceInput = z.output<typeof serviceInputSchema>;
+
+/**
+ * Approval levels and condition (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 and
+ * 4.3.7). An empty list keeps one level, the service's sector; a condition has a field and a value,
+ * or neither.
+ */
+export const serviceApprovalInputSchema = z
+  .object({
+    sectorIds: z.array(entityIdSchema).max(3),
+    conditionFieldId: entityIdSchema.nullable(),
+    conditionValue: z
+      .string()
+      .trim()
+      .max(80)
+      .nullable()
+      .transform((value) => (value === "" ? null : value)),
+  })
+  .strict()
+  .superRefine((input, context) => {
+    if ((input.conditionFieldId === null) !== (input.conditionValue === null)) {
+      context.addIssue({ code: "custom", path: ["conditionValue"], message: "A condition needs a field and a value." });
+    }
+  });
+
+export type ServiceApprovalInput = z.output<typeof serviceApprovalInputSchema>;

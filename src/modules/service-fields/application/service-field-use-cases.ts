@@ -116,16 +116,18 @@ export async function updateServiceField(
     const conditionFieldId = requestedController === undefined ? current.conditionFieldId : requestedController;
     const conditionValue = requestedController === undefined ? current.conditionValue : (requestedValue ?? null);
     const dependents = others.filter((field) => field.conditionFieldId === id);
-    assertNotControllerOfActiveFields(dependents.length, conditionFieldId);
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7 (decision G18): the service's approval
+    // condition counts as one more dependent, which must stay a requester field.
+    const approvalValue = (await transaction.findApprovalConditionValue?.(id)) ?? null;
+    assertNotControllerOfActiveFields(dependents.length + (approvalValue === null ? 0 : 1), conditionFieldId);
     // Dependents share the controller's audience (5.2.2), so it does not change under them.
-    if (audience !== current.audience && dependents.length > 0) {
+    if (audience !== current.audience && (dependents.length > 0 || approvalValue !== null)) {
       throw new ConflictError();
     }
-    assertOptionsKeepConditions(
-      current.type,
-      definition.options,
-      dependents.map((field) => field.conditionValue ?? ""),
-    );
+    assertOptionsKeepConditions(current.type, definition.options, [
+      ...dependents.map((field) => field.conditionValue ?? ""),
+      ...(approvalValue === null ? [] : [approvalValue]),
+    ]);
     checkCondition({ id, audience }, conditionFieldId, conditionValue, existing);
 
     return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE_FIELD", entityId: id }, () =>
@@ -180,7 +182,11 @@ export async function deactivateServiceField(
     if (current.isActive) {
       // SPEC 2026-11-03-campos-condicionais-atendimento, 5.3.1.
       const existing = await transaction.listForService(current.serviceId);
-      assertCanDeactivateController(existing.filter((field) => field.isActive && field.conditionFieldId === id).length);
+      // The approval condition also keeps its field active (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7).
+      const usedByApproval = ((await transaction.findApprovalConditionValue?.(id)) ?? null) !== null;
+      assertCanDeactivateController(
+        existing.filter((field) => field.isActive && field.conditionFieldId === id).length + (usedByApproval ? 1 : 0),
+      );
     }
 
     return current.isActive

@@ -107,6 +107,10 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   defaultPriority: "Prioridade padrão",
   slaHours: "Prazo-base (horas)",
   requiresApproval: "Exige aprovação",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.
+  approvalSectorIds: "Níveis de aprovação",
+  approvalConditionFieldId: "Campo da condição de aprovação",
+  approvalConditionValue: "Valor da condição de aprovação",
   slaBusinessHours: "Prazo em horas úteis",
   escalateOverdue: "Escalar solicitações vencidas",
   title: "Título",
@@ -203,7 +207,21 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   // "escalateOverdue": SPEC 2026-11-06-escalonamento, 4.6.
   SECTOR: ["name", "isActive", "escalateOverdue"],
   CATEGORY: ["name", "isActive"],
-  SERVICE: ["name", "description", "categoryId", "sectorId", "defaultPriority", "slaHours", "requiresApproval", "slaBusinessHours", "isActive"],
+  SERVICE: [
+    "name",
+    "description",
+    "categoryId",
+    "sectorId",
+    "defaultPriority",
+    "slaHours",
+    "requiresApproval",
+    "slaBusinessHours",
+    "isActive",
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.
+    "approvalSectorIds",
+    "approvalConditionFieldId",
+    "approvalConditionValue",
+  ],
   DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],
   // "audience" and the condition: SPEC 2026-11-03-campos-condicionais-atendimento, 5.7.4.
   // The decimal configuration: SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1.

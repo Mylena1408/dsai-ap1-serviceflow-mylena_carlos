@@ -17,6 +17,8 @@ export interface NotificationRequestState {
   sectorId: string;
   status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   approvalState: "PENDING" | "APPROVED" | "REJECTED" | null;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4; optional for older doubles. */
+  approvalSectorIdsSnapshot?: string[];
   assignee: { id: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER"; isActive: boolean; sectorId: string | null } | null;
 }
 

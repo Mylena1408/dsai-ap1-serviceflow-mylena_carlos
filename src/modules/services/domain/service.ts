@@ -14,6 +14,13 @@ export interface ServiceRecord {
   requiresApproval: boolean;
   /** SPEC 2026-11-03-pausa-sla-calendario, 5.2: the SLA counts only business hours. */
   slaBusinessHours: boolean;
+  /**
+   * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 and 4.3.7: level sectors (empty = the
+   * service's sector) and the condition. Optional so older doubles stay valid.
+   */
+  approvalSectorIds?: string[];
+  approvalConditionFieldId?: string | null;
+  approvalConditionValue?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +37,10 @@ export interface ServiceData {
   requiresApproval?: boolean;
   /** Omitted keeps the current value (create: calendar hours). */
   slaBusinessHours?: boolean;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3: written only by the approval configuration. */
+  approvalSectorIds?: string[];
+  approvalConditionFieldId?: string | null;
+  approvalConditionValue?: string | null;
 }
 
 export interface PublishedService extends ServiceRecord {

@@ -38,6 +38,15 @@ export async function updateService(
   return useCases.updateService(id, input, createPrismaServiceTransactionRunner(database));
 }
 
+/** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 and 4.3.7. */
+export async function configureServiceApproval(
+  id: unknown,
+  input: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceRecord> {
+  return useCases.configureServiceApproval(id, input, createPrismaServiceTransactionRunner(database));
+}
+
 export async function setServiceActive(
   id: unknown,
   isActive: unknown,

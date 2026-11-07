@@ -247,7 +247,9 @@ export function normalizeFieldValue(field: AnswerableField, submitted: Submitted
  * (multiple choice). A field without condition is always shown; without an answer, not met.
  */
 export function conditionMet(
-  field: AnswerableField,
+  // Only the condition is read, so the approval condition can use it too
+  // (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7).
+  field: Pick<AnswerableField, "conditionFieldId" | "conditionValue">,
   controllerAnswer: { type: ServiceFieldRecord["type"]; value: string } | undefined,
 ): boolean {
   if (!field.conditionFieldId || field.conditionValue === null || field.conditionValue === undefined) {

@@ -34,6 +34,10 @@ export interface LifecycleRequest {
   stageIndex?: number | null;
   /** Approval situation (SPEC 2026-11-01-aprovacoes); optional like the SLA state. */
   approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4; optional like the SLA state. */
+  approvalSectorIdsSnapshot?: string[];
+  approvalLevel?: number | null;
+  approvalPendingSectorId?: string | null;
   /** SPEC 2026-11-03-pausa-sla-calendario; optional like the SLA state. */
   slaBusinessHours?: boolean;
   slaPausedAt?: Date | null;

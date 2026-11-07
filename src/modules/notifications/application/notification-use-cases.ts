@@ -49,9 +49,15 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         ...(event.type === "request.sla_breached" && (await store.escalatedAt(event.requestId, event.occurredAt))
           ? { escalationManagerIds: await store.sectorManagerIds(request.sectorId) }
           : {}),
-        // SPEC 2026-11-01-aprovacoes, 5.6.3: managers are loaded only when the opening needs them.
+        // SPEC 2026-11-01-aprovacoes, 5.6.3: managers are loaded only when the opening needs them,
+        // from the sector of the first level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3).
+        // An opening that required approval has the level copy; before levels, the request's sector.
         ...(event.type === "request.opened" && request.approvalState === "PENDING"
-          ? { approvalManagerIds: await store.sectorManagerIds(request.sectorId) }
+          ? { approvalManagerIds: await store.sectorManagerIds(request.approvalSectorIdsSnapshot?.[0] ?? request.sectorId) }
+          : {}),
+        // 4.3.3: an intermediate approval asks the managers of the next level, named by the event.
+        ...(event.type === "request.approval_decided" && typeof event.payload.nextSectorId === "string"
+          ? { approvalManagerIds: await store.sectorManagerIds(event.payload.nextSectorId) }
           : {}),
         // SPEC 2026-11-03-transferencia-entre-setores, 5.6: the team of the sector named by the event.
         ...(event.type === "request.sector_changed" && typeof event.payload.toSectorId === "string"

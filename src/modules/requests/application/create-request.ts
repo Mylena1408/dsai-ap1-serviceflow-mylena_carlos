@@ -10,14 +10,14 @@ import { NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { requestCreationInputSchema, type RequestCreationInput } from "./request-schemas";
 import { assertServiceCanReceiveRequests } from "@/modules/services";
-import { assertFieldAnswers, collectFieldAnswers, type FieldAnswer } from "@/modules/service-fields";
+import { assertFieldAnswers, collectFieldAnswers, conditionMet, type FieldAnswer } from "@/modules/service-fields";
 import {
   assertFormatStillAccepted,
   matchAttachmentsToRequirements,
   type ActiveDocumentRequirement,
 } from "../domain/attachment-requirements";
 import type { RequestWithHistory } from "../domain/request";
-import { approvalStateOnOpening } from "../domain/approval";
+import { approvalColumnsOnOpening, effectiveApprovalSectors } from "../domain/approval";
 import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
 import { buildRequestSnapshot } from "../domain/snapshot";
@@ -149,6 +149,23 @@ async function fieldAnswers(
   return assertFieldAnswers(collectFieldAnswers(fields, new Map(Object.entries(parsed.fieldValues ?? {}))));
 }
 
+/**
+ * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7 (decision G7): with a condition, the
+ * service requires approval only when the requester's answer meets it, with the same rule as the
+ * conditional fields; without one, always (as before).
+ */
+function requiresApprovalNow(service: ServiceForRequest, answers: readonly FieldAnswer[]): boolean {
+  if (!service.requiresApproval) return false;
+  const fieldId = service.approvalConditionFieldId ?? null;
+  const value = service.approvalConditionValue ?? null;
+  if (fieldId === null || value === null) return true;
+  const answer = answers.find((item) => item.fieldId === fieldId);
+  return conditionMet(
+    { conditionFieldId: fieldId, conditionValue: value },
+    answer ? { type: answer.typeSnapshot, value: answer.value } : undefined,
+  );
+}
+
 async function openRequest(
   transaction: RequestTransaction,
   actorId: string,
@@ -170,7 +187,11 @@ async function openRequest(
   }
 
   const openedAt = await transaction.currentTime();
-  const approvalState = approvalStateOnOpening(context.service.requiresApproval);
+  const approval = approvalColumnsOnOpening(
+    requiresApprovalNow(context.service, answers),
+    effectiveApprovalSectors(context.service.approvalSectorIds ?? [], context.service.sector.id),
+  );
+  const approvalState = approval.approvalState;
   // SPEC 2026-11-03-pausa-sla-calendario, 5.2: the service's clock is copied to the request; the
   // calendar is read only when a due date is computed in business hours.
   const businessHours = context.service.slaBusinessHours === true;
@@ -187,8 +208,9 @@ async function openRequest(
     // SPEC 2026-11-01, sections 5.1 to 5.3: default priority and SLA snapshot of the service.
     priority: context.service.defaultPriority,
     slaHoursSnapshot: context.service.slaHours,
-    // SPEC 2026-11-01-aprovacoes, 5.2 and 5.5: with approval, pending and without a due date.
-    approvalState,
+    // SPEC 2026-11-01-aprovacoes, 5.2 and 5.5: with approval, pending and without a due date;
+    // with levels, the copy, level 1 and its sector (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.2).
+    ...approval,
     ...scheduleColumns(schedule, businessHours),
     ...(businessHours ? { slaBusinessHours: true } : {}),
   });

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  pendingApprovalSector,
   getManagerRequest,
   getRequestSatisfaction,
   listRequestAttachments,
@@ -37,7 +38,7 @@ function feedback(error?: string, notice?: string): string | null {
 
 // Read-only detail with the decision forms (SPEC 2026-11-01-aprovacoes, 5.4 and 5.7).
 export default async function ApprovalPage({ params, searchParams }: ApprovalPageProps) {
-  await requireManagerPageAccess();
+  const manager = await requireManagerPageAccess();
   const [{ requestId }, { error, notice }] = await Promise.all([params, searchParams]);
   let request;
   let attachments;
@@ -57,7 +58,11 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   }
 
   const message = feedback(error, notice);
-  const pending = request.approvalState === "PENDING" && request.status === "OPEN";
+  const open = request.approvalState === "PENDING" && request.status === "OPEN";
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.4: only the pending level's managers
+  // decide; managers of the other levels see the request and wait.
+  const pending = open && pendingApprovalSector(request) === manager.sectorId;
+  const waitingOtherLevel = open && !pending;
 
   return (
     <main className="page-shell">
@@ -84,6 +89,11 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
         <h2>Descrição da solicitação</h2>
         <p className="request-description">{request.description}</p>
       </article>
+      {waitingOtherLevel ? (
+        <p className="feedback" role="status">
+          Esta solicitação aguarda a decisão de outro nível de aprovação.
+        </p>
+      ) : null}
       {pending ? (
         <section className="surface-card content-section" aria-labelledby="decision-heading">
           <p className="eyebrow">Decisão</p>

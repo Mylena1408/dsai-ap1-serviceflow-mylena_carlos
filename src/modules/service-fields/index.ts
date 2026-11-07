@@ -10,17 +10,19 @@ import {
 // Public API of the custom fields module (SPEC 2026-11-01-campos-personalizados).
 
 export {
+  assertConditionTarget,
   MAX_ACTIVE_SERVICE_FIELDS,
   SERVICE_FIELD_LIMITS,
   SERVICE_FIELD_TYPES,
   assertCanAddActiveField,
   assertFieldTypeUnchanged,
 } from "./domain/service-field";
-export type { ServiceFieldDefinition, ServiceFieldRecord, ServiceFieldType } from "./domain/service-field";
+export type { ConditionController, ServiceFieldDefinition, ServiceFieldRecord, ServiceFieldType } from "./domain/service-field";
 export {
   FieldAnswersError,
   assertFieldAnswers,
   collectFieldAnswers,
+  conditionMet,
   formatFieldAnswer,
   missingRequiredFields,
   multipleChoiceOptions,

@@ -66,7 +66,7 @@ describe("manager decision (SF-084)", () => {
     await decideApproval({ requestId: request.id, decision: "APPROVED" }, prisma);
 
     const approved = await stored(request.id);
-    const record = await prisma.requestApproval.findUniqueOrThrow({ where: { requestId: request.id } });
+    const record = await prisma.requestApproval.findFirstOrThrow({ where: { requestId: request.id } });
     expect(approved).toMatchObject({ status: "OPEN", approvalState: "APPROVED" });
     expect(approved.dueAt!.getTime() - record.decidedAt.getTime()).toBe(10 * HOUR);
     expect(approved.dueSoonAt).not.toBeNull();
@@ -103,7 +103,7 @@ describe("manager decision (SF-084)", () => {
     expect(results.filter(({ status }) => status === "fulfilled")).toHaveLength(1);
     await expect(prisma.requestApproval.count({ where: { requestId: request.id } })).resolves.toBe(1);
     const final = await stored(request.id);
-    const record = await prisma.requestApproval.findUniqueOrThrow({ where: { requestId: request.id } });
+    const record = await prisma.requestApproval.findFirstOrThrow({ where: { requestId: request.id } });
     expect(final.approvalState).toBe(record.decision);
   });
 

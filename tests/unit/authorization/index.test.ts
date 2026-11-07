@@ -58,6 +58,9 @@ function persistedRequest(requesterId: string, sectorId: string) {
     completedLate: null,
     slaBusinessHours: false,
     slaPausedAt: null,
+    approvalSectorIdsSnapshot: [],
+    approvalLevel: null,
+    approvalPendingSectorId: null,
   };
 }
 

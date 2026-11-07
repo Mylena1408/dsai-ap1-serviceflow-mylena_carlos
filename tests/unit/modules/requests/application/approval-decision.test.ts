@@ -55,7 +55,11 @@ describe("manager decision (SF-084)", () => {
       { requestId, deciderId: manager.id, decision: "APPROVED", note: "Dentro do orçamento", decidedAt: fixedNow },
     ]);
     expect(store.outbox).toEqual([
-      expect.objectContaining({ type: "request.approval_decided", payload: { decision: "APPROVED", actorId: manager.id } }),
+      // The level and the next level's sector joined the payload (SPEC 2026-11-06-aprofundamento-configurabilidade, G8).
+      expect.objectContaining({
+        type: "request.approval_decided",
+        payload: { decision: "APPROVED", actorId: manager.id, level: 1, nextSectorId: null },
+      }),
     ]);
     expect(store.events).toHaveLength(0);
   });

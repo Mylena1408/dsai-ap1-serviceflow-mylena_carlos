@@ -25,6 +25,11 @@ export interface ServiceFieldTransaction extends AuditScope {
   findServiceSector(serviceId: string): Promise<string | null>;
   listForService(serviceId: string): Promise<ServiceFieldSummary[]>;
   find(fieldId: string): Promise<ServiceFieldRecord | null>;
+  /**
+   * The value of the service's approval condition that uses this field, or null (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 4.3.7). Optional for older doubles: absent = none.
+   */
+  findApprovalConditionValue?(fieldId: string): Promise<string | null>;
   create(data: ServiceFieldDefinition & { serviceId: string; position: number }): Promise<ServiceFieldRecord>;
   update(
     fieldId: string,

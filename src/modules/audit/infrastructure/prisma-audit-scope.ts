@@ -45,6 +45,10 @@ async function loadState(
           requiresApproval: true,
           slaBusinessHours: true,
           isActive: true,
+          // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.
+          approvalSectorIds: true,
+          approvalConditionFieldId: true,
+          approvalConditionValue: true,
         },
       });
       return row && { label: row.name, state: row };

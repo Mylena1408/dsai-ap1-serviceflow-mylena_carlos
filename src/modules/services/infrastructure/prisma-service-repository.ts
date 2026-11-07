@@ -98,6 +98,17 @@ function createPrismaServiceTransaction(transaction: Prisma.TransactionClient): 
     async update(serviceId, data) {
       return toDomain(await transaction.service.update({ where: { id: serviceId }, data }));
     },
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 and 4.3.7.
+    async activeSectorIds(sectorIds) {
+      const rows = await transaction.sector.findMany({ where: { id: { in: [...sectorIds] }, isActive: true }, select: { id: true } });
+      return new Set(rows.map(({ id }) => id));
+    },
+    findConditionField(fieldId, serviceId) {
+      return transaction.serviceField.findFirst({
+        where: { id: fieldId, serviceId },
+        select: { id: true, type: true, options: true, audience: true, isActive: true, conditionFieldId: true },
+      });
+    },
   };
 }
 

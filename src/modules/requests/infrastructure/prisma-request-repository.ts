@@ -46,7 +46,9 @@ const requestWithHistory = {
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
     include: { actor: { select: { id: true, name: true } } },
   },
-  approval: {
+  // One decision per level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
+  approvals: {
+    orderBy: [{ level: "asc" }, { decidedAt: "asc" }],
     include: { decider: { select: { id: true, name: true } } },
   },
   assignmentEvents: {
@@ -80,11 +82,35 @@ const requestWithHistory = {
 
 const lifecycleUser = { id: true, role: true, isActive: true, sectorId: true } as const;
 
+/**
+ * Requests whose pending level this sector decides (SPEC 2026-11-06-aprofundamento-configurabilidade,
+ * 4.3.4). A request opened before levels has no pending sector: its own sector decides.
+ */
+function pendingForSector(sectorId: string): Prisma.RequestWhereInput {
+  return {
+    approvalState: "PENDING",
+    OR: [{ approvalPendingSectorId: sectorId }, { approvalPendingSectorId: null, sectorId }],
+  };
+}
+
+/** Requests with approval that the managers of a sector see: their sector's, or with one of their levels. */
+function approvalVisibleTo(sectorId: string): Prisma.RequestWhereInput {
+  return {
+    approvalState: { not: null },
+    OR: [{ sectorId }, { approvalSectorIdsSnapshot: { has: sectorId } }],
+  };
+}
+
 // Compile-time check that the Prisma row matches the domain type exactly.
 type RequestWithHistoryRow = Prisma.RequestGetPayload<{
   include: typeof requestWithHistory;
 }>;
-const toDomain = (row: RequestWithHistoryRow): RequestWithHistory => row;
+// The domain keeps the last decision as `approval`, as before levels, and the full list.
+const toDomain = ({ approvals, ...row }: RequestWithHistoryRow): RequestWithHistory => ({
+  ...row,
+  approvals,
+  approval: approvals.at(-1) ?? null,
+});
 
 /**
  * Prisma filter for one reader's list (SPEC 2026-10-31-busca-filtros-paginacao, section 5).
@@ -225,7 +251,7 @@ export function createPrismaRequestQueryRepository(
     },
     async listForApproval(sectorId, onlyPending) {
       const rows = await database.request.findMany({
-        where: { sectorId, approvalState: onlyPending ? "PENDING" : { not: null } },
+        where: onlyPending ? pendingForSector(sectorId) : approvalVisibleTo(sectorId),
         include: requestWithHistory,
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       });
@@ -236,7 +262,7 @@ export function createPrismaRequestQueryRepository(
     },
     async findForApproval(requestId, sectorId) {
       const row = await database.request.findFirst({
-        where: { id: requestId, sectorId, approvalState: { not: null } },
+        where: { id: requestId, ...approvalVisibleTo(sectorId) },
         include: requestWithHistory,
       });
       return row && toDomain(row);
@@ -442,10 +468,17 @@ export function createPrismaRequestTransaction(
     },
     async updateApprovalIfCurrent(update) {
       const result = await transaction.request.updateMany({
-        where: { id: update.requestId, status: "OPEN", approvalState: "PENDING" },
+        where: {
+          id: update.requestId,
+          status: "OPEN",
+          approvalState: "PENDING",
+          ...(update.expectedLevel !== undefined ? { approvalLevel: update.expectedLevel } : {}),
+        },
         data: {
           approvalState: update.approvalState,
           updatedAt: update.updatedAt,
+          ...(update.approvalLevel !== undefined ? { approvalLevel: update.approvalLevel } : {}),
+          ...(update.approvalPendingSectorId !== undefined ? { approvalPendingSectorId: update.approvalPendingSectorId } : {}),
           ...(update.dueAt !== undefined ? { dueAt: update.dueAt } : {}),
           ...(update.dueSoonAt !== undefined ? { dueSoonAt: update.dueSoonAt } : {}),
           ...(update.status ? { status: update.status, cancelledAt: update.cancelledAt } : {}),
@@ -498,6 +531,9 @@ export function createPrismaRequestTransaction(
           stageNamesSnapshot: true,
           stageIndex: true,
           approvalState: true,
+          approvalSectorIdsSnapshot: true,
+          approvalLevel: true,
+          approvalPendingSectorId: true,
           slaBusinessHours: true,
           slaPausedAt: true,
           assignee: { select: lifecycleUser },

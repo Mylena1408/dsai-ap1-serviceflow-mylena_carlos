@@ -29,6 +29,14 @@ export interface RequestRecord {
   stageIndex: number | null;
   /** SPEC 2026-11-01-aprovacoes: null when the service did not require approval. */
   approvalState: "PENDING" | "APPROVED" | "REJECTED" | null;
+  /**
+   * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4: level sectors copied at the opening
+   * (empty before levels: one level, the request's sector), current level and its sector while
+   * pending. Optional so older records stay valid.
+   */
+  approvalSectorIdsSnapshot?: string[];
+  approvalLevel?: number | null;
+  approvalPendingSectorId?: string | null;
   /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 5.3; optional so older records stay valid. */
   slaBusinessHours?: boolean;
   dueSoonAt?: Date | null;
@@ -124,6 +132,8 @@ export interface RequestApprovalRecord {
   note: string | null;
   decidedAt: Date;
   decider: { id: string; name: string };
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3: 1 for decisions made before levels. */
+  level?: number;
 }
 
 export interface RequestWithHistory extends RequestRecord {
@@ -132,8 +142,10 @@ export interface RequestWithHistory extends RequestRecord {
   priorityEvents: RequestPriorityEventRecord[];
   /** Stage entries and moves (SPEC 2026-11-01-fluxos-configuraveis, 5.5). */
   stageEvents: RequestStageEventRecord[];
-  /** Approval decision, when one was made (SPEC 2026-11-01-aprovacoes, 5.6). */
+  /** The last approval decision, when one was made (SPEC 2026-11-01-aprovacoes, 5.6). */
   approval: RequestApprovalRecord | null;
+  /** Every decision, by level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3). */
+  approvals?: RequestApprovalRecord[];
   /** Assume, release and transfer events (SPEC 2026-10-31, section 5.9). */
   assignmentEvents: RequestAssignmentEventRecord[];
   /**

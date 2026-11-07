@@ -127,19 +127,21 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
     note: event.note,
   }));
 
-  // SPEC 2026-11-01-aprovacoes, 5.6: the manager decision with its note.
-  const approvalEntries = request.approval
-    ? [
-        {
-          id: `approval-${request.approval.id}`,
-          occurredAt: request.approval.decidedAt,
-          title: `${request.approval.decision === "APPROVED" ? "Aprovada" : "Rejeitada"} por ${request.approval.decider.name}`,
-          actor: request.approval.decider.name,
-          note: request.approval.note,
-          noteLabel: "Observação",
-        },
-      ]
-    : [];
+  // SPEC 2026-11-01-aprovacoes, 5.6: the manager decisions with their notes. With more than one
+  // level, each decision names its level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3);
+  // with one level the text is the same as before.
+  const decisions = request.approvals ?? (request.approval ? [request.approval] : []);
+  const levelCount = request.approvalSectorIdsSnapshot?.length ?? 0;
+  const approvalEntries = decisions.map((decision) => ({
+    id: `approval-${decision.id}`,
+    occurredAt: decision.decidedAt,
+    title: `${decision.decision === "APPROVED" ? "Aprovada" : "Rejeitada"}${
+      levelCount > 1 ? ` no nível ${decision.level ?? 1} de ${levelCount}` : ""
+    } por ${decision.decider.name}`,
+    actor: decision.decider.name,
+    note: decision.note,
+    noteLabel: "Observação",
+  }));
 
   // Stable sort: on equal times, status events come first, then sector moves, assignments,
   // priorities, stages and the approval.

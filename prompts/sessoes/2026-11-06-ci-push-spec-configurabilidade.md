@@ -44,3 +44,7 @@
 > pode iniciar a SF-163
 
 11. SF-163: busca pelas respostas nas duas listas com busca (correção da SPEC sobre "Aprovações"), medição no `serviceflow_perf` com respostas geradas, E2E da parte A e correção da lista de códigos de erro da abertura. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> pode prosseguir
+
+12. SF-164: migration dos níveis e da condição, configuração no serviço, abertura com cópia dos níveis, decisão por nível, listas do gestor, notificação do próximo nível e integridade do campo da condição. Todas as suítes aprovadas (ver `NOTES.md`).

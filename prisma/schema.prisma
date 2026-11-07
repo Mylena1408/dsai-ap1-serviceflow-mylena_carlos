@@ -154,6 +154,8 @@ model Sector {
   requestsSentAway RequestSectorEvent[] @relation("RequestSectorEventFrom")
   requestsReceived RequestSectorEvent[] @relation("RequestSectorEventTo")
   cannedResponses  CannedResponse[]
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4: requests whose pending level is this sector.
+  pendingApprovals Request[]            @relation("RequestApprovalPendingSector")
 }
 
 model Category {
@@ -217,28 +219,34 @@ model User {
 }
 
 model Service {
-  id               String          @id @default(uuid()) @db.Uuid
-  name             String
-  description      String
-  categoryId       String          @db.Uuid
-  sectorId         String          @db.Uuid
-  isActive         Boolean         @default(true)
-  defaultPriority  RequestPriority @default(NORMAL)
-  slaHours         Int?
+  id                       String          @id @default(uuid()) @db.Uuid
+  name                     String
+  description              String
+  categoryId               String          @db.Uuid
+  sectorId                 String          @db.Uuid
+  isActive                 Boolean         @default(true)
+  defaultPriority          RequestPriority @default(NORMAL)
+  slaHours                 Int?
   /// SPEC 2026-11-01-aprovacoes, 5.2: a manager of the sector approves before the attendance.
-  requiresApproval Boolean         @default(false)
+  requiresApproval         Boolean         @default(false)
   /// SPEC 2026-11-03-pausa-sla-calendario, 5.2: count the SLA only in business hours.
-  slaBusinessHours Boolean         @default(false)
-  createdAt        DateTime        @default(now()) @db.Timestamptz
-  updatedAt        DateTime        @updatedAt @db.Timestamptz
+  slaBusinessHours         Boolean         @default(false)
+  createdAt                DateTime        @default(now()) @db.Timestamptz
+  updatedAt                DateTime        @updatedAt @db.Timestamptz
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3 and 4.4: sectors of the approval levels,
+  /// in order (empty = one level, the service's sector), and the condition that requires approval.
+  approvalSectorIds        String[]        @default([]) @db.Uuid
+  approvalConditionFieldId String?         @db.Uuid
+  approvalConditionValue   String?
 
-  category             Category                     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  sector               Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests             Request[]
-  documentRequirements ServiceDocumentRequirement[]
-  fields               ServiceField[]
-  stages               ServiceStage[]
-  knowledgeArticles    KnowledgeArticle[]
+  category               Category                     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  sector                 Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  approvalConditionField ServiceField?                @relation("ServiceApprovalCondition", fields: [approvalConditionFieldId], references: [id], onDelete: Restrict)
+  requests               Request[]
+  documentRequirements   ServiceDocumentRequirement[]
+  fields                 ServiceField[]
+  stages                 ServiceStage[]
+  knowledgeArticles      KnowledgeArticle[]
 }
 
 model Request {
@@ -277,28 +285,35 @@ model Request {
   slaBusinessHours           Boolean         @default(false)
   /// Start of the current SLA pause; null when not paused (5.3).
   slaPausedAt                DateTime?       @db.Timestamptz
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3 and 4.4: copy of the level sectors at the
+  /// opening, the current level (from 1) and the sector that decides it while pending. Requests
+  /// opened before levels keep the copy empty: one level, decided by the request's sector.
+  approvalSectorIdsSnapshot  String[]        @default([]) @db.Uuid
+  approvalLevel              Int?
+  approvalPendingSectorId    String?         @db.Uuid
 
-  requester          User                       @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
-  assignee           User?                      @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
-  service            Service                    @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  sector             Sector                     @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  events             RequestStatusEvent[]
-  attachments        RequestAttachment[]
-  assignmentEvents   RequestAssignmentEvent[]
-  priorityEvents     RequestPriorityEvent[]
-  fieldValues        RequestFieldValue[]
-  stageEvents        RequestStageEvent[]
-  sectorEvents       RequestSectorEvent[]
-  commentFiles       RequestCommentFile[]
-  slaPauses          RequestSlaPause[]
-  fieldUpdates       RequestFieldUpdateEvent[]
-  satisfaction       RequestSatisfaction?
-  escalations        RequestEscalation[]
-  satisfactionEvents RequestSatisfactionEvent[]
-  approval           RequestApproval?
-  comments           RequestComment[]
-  outboxEvents       OutboxEvent[]
-  notifications      RequestNotification[]
+  requester             User                       @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
+  assignee              User?                      @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  service               Service                    @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  sector                Sector                     @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  approvalPendingSector Sector?                    @relation("RequestApprovalPendingSector", fields: [approvalPendingSectorId], references: [id], onDelete: Restrict)
+  events                RequestStatusEvent[]
+  attachments           RequestAttachment[]
+  assignmentEvents      RequestAssignmentEvent[]
+  priorityEvents        RequestPriorityEvent[]
+  fieldValues           RequestFieldValue[]
+  stageEvents           RequestStageEvent[]
+  sectorEvents          RequestSectorEvent[]
+  commentFiles          RequestCommentFile[]
+  slaPauses             RequestSlaPause[]
+  fieldUpdates          RequestFieldUpdateEvent[]
+  satisfaction          RequestSatisfaction?
+  escalations           RequestEscalation[]
+  satisfactionEvents    RequestSatisfactionEvent[]
+  approvals             RequestApproval[]
+  comments              RequestComment[]
+  outboxEvents          OutboxEvent[]
+  notifications         RequestNotification[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -307,6 +322,7 @@ model Request {
   @@index([sectorId, createdAt, id])
   @@index([sectorId, dueAt])
   @@index([sectorId, dueSoonAt])
+  @@index([approvalPendingSectorId])
 }
 
 model RequestStatusEvent {
@@ -539,10 +555,12 @@ model ServiceField {
   conditionFieldId String?              @db.Uuid
   conditionValue   String?
 
-  service        Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  values         RequestFieldValue[]
-  conditionField ServiceField?       @relation("ServiceFieldCondition", fields: [conditionFieldId], references: [id], onDelete: Restrict)
-  dependents     ServiceField[]      @relation("ServiceFieldCondition")
+  service             Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  values              RequestFieldValue[]
+  conditionField      ServiceField?       @relation("ServiceFieldCondition", fields: [conditionFieldId], references: [id], onDelete: Restrict)
+  dependents          ServiceField[]      @relation("ServiceFieldCondition")
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7.
+  approvalConditionOf Service[]           @relation("ServiceApprovalCondition")
 
   @@unique([id, serviceId])
   @@index([serviceId])
@@ -783,7 +801,9 @@ model BusinessHoliday {
 /// Decision of a manager on a request that required approval (SPEC 2026-11-01-aprovacoes, 5.6).
 model RequestApproval {
   id        String           @id @default(uuid()) @db.Uuid
-  requestId String           @unique @db.Uuid
+  requestId String           @db.Uuid
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4: one decision per level; 1 before levels.
+  level     Int              @default(1)
   deciderId String           @db.Uuid
   decision  ApprovalDecision
   note      String?
@@ -792,6 +812,7 @@ model RequestApproval {
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   decider User    @relation("RequestApprovalDecider", fields: [deciderId], references: [id], onDelete: Restrict)
 
+  @@unique([requestId, level])
   @@index([deciderId])
 }
 

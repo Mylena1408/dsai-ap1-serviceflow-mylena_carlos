@@ -1741,7 +1741,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-164 — Aprovações em níveis e por condição: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. Migration `20261106700000_approval_levels`; níveis e condição no serviço (`configureServiceApproval`, com auditoria); cópia dos níveis, nível atual e setor pendente na solicitação; decisão por nível, com o SLA iniciado só na última aprovação; listas do gestor por nível; notificação do próximo nível; evento com o nível; linha do tempo por decisão; integridade do campo usado na condição. Solicitações de antes dos níveis continuam como antes (lista vazia). CA-APM-01, 03, 06 e 08 verificados; 02 e 07 parciais (telas, API e webhooks na SF-167).
 - **Objetivo:** Seção 4.3 (regras 1 a 4, 7 e 8), parte B.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/approvals/`, `src/modules/requests/`.
 - **Dependências:** SF-163.

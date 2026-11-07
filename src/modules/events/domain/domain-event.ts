@@ -49,7 +49,8 @@ export type DomainEvent =
       type: "request.approval_decided";
       requestId: string;
       occurredAt: Date;
-      payload: { decision: "APPROVED" | "REJECTED"; actorId: string };
+      // Level and next level's sector: SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.8.
+      payload: { decision: "APPROVED" | "REJECTED"; actorId: string; level: number; nextSectorId: string | null };
     }
   | {
       // Request sent to another sector (SPEC 2026-11-03-transferencia-entre-setores, 5.3.5); the
@@ -116,7 +117,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.sla_warning": [],
   "request.sla_breached": [],
   "request.stage_changed": ["stageEventId", "direction", "actorId"],
-  "request.approval_decided": ["decision", "actorId"],
+  "request.approval_decided": ["decision", "actorId", "level", "nextSectorId"],
   "request.sector_changed": ["fromSectorId", "toSectorId", "actorId"],
   "request.document_added": ["attachmentId", "actorId"],
   "request.sla_paused": ["pauseId", "actorId"],
@@ -127,7 +128,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
  * Copies only the declared payload keys, so a caller that passes a richer object (for
  * example a whole comment) cannot leak text into the outbox (section 6.1, CA-EVT-02).
  */
-export function outboxPayload(event: DomainEvent): Record<string, string | boolean | null> {
-  const source = event.payload as Record<string, string | boolean | null>;
+export function outboxPayload(event: DomainEvent): Record<string, string | number | boolean | null> {
+  const source = event.payload as Record<string, string | number | boolean | null>;
   return Object.fromEntries(PAYLOAD_KEYS[event.type].map((key) => [key, source[key] ?? null]));
 }

@@ -37,6 +37,7 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
           sectorId: true,
           status: true,
           approvalState: true,
+          approvalSectorIdsSnapshot: true,
           assignee: { select: { id: true, role: true, isActive: true, sectorId: true } },
         },
       });

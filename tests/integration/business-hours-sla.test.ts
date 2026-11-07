@@ -193,7 +193,7 @@ describe("business hours in the SLA calculations (SF-129)", () => {
     actAs(gabi);
     await decideApproval({ requestId: id, decision: "APPROVED" }, prisma);
     const approved = await stored(id);
-    const decision = await prisma.requestApproval.findUniqueOrThrow({ where: { requestId: id } });
+    const decision = await prisma.requestApproval.findFirstOrThrow({ where: { requestId: id } });
     expect(approved).toMatchObject(slaScheduleFrom(decision.decidedAt, 1, "NORMAL", await businessClock())!);
 
     actAs(ana);

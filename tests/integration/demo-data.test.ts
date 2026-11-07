@@ -65,7 +65,8 @@ describe("demonstration data", () => {
       include: {
         events: { orderBy: { occurredAt: "asc" } },
         assignmentEvents: true,
-        approval: true,
+        // One decision per level since SPEC 2026-11-06-aprofundamento-configurabilidade; the demo has one.
+        approvals: true,
       },
     });
     const expectedSteps: Record<string, string[]> = {
@@ -75,7 +76,8 @@ describe("demonstration data", () => {
       CANCELLED: ["OPEN", "CANCELLED"],
     };
 
-    for (const request of requests) {
+    for (const { approvals, ...request } of requests.map((row) => ({ ...row, approval: row.approvals[0] ?? null }))) {
+      void approvals;
       expect(request.events.map(({ toStatus }) => toStatus)).toEqual(expectedSteps[request.status]);
       expect(request.events[0]).toMatchObject({ fromStatus: null, actorId: request.requesterId });
       expect(request.completedAt !== null).toBe(request.status === "COMPLETED");

@@ -18,7 +18,10 @@ export interface NotificationContext {
   escalationManagerIds?: readonly string[];
   /** Approval state of the request now (SPEC 2026-11-01-aprovacoes). */
   approvalState?: "PENDING" | "APPROVED" | "REJECTED" | null;
-  /** Active managers of the sector, loaded only for an opening that requires approval. */
+  /**
+   * Active managers of the sector of the level to decide: the first level for an opening, the next
+   * level for an intermediate approval (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3).
+   */
   approvalManagerIds?: readonly string[];
   /**
    * Active attendants of the sector that received the request, loaded only for a move to another
@@ -36,7 +39,7 @@ export type NotifiableEvent =
   | { type: "request.sla_warning" }
   | { type: "request.sla_breached" }
   | { type: "request.stage_changed"; payload: { direction: string; actorId: string } }
-  | { type: "request.approval_decided"; payload: { decision: string; actorId: string } }
+  | { type: "request.approval_decided"; payload: { decision: string; actorId: string; nextSectorId?: string | null } }
   | { type: "request.sector_changed"; payload: { toSectorId: string; actorId: string } }
   | { type: "request.document_added"; payload: { actorId: string } }
   | { type: "request.sla_paused"; payload: { actorId: string } };
@@ -109,12 +112,20 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
       return planned;
     }
 
-    case "request.approval_decided":
+    case "request.approval_decided": {
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3: an approval with a next level is
+      // not the end; the managers of the next level are asked, and the requester waits for the end.
+      if (event.payload.decision === "APPROVED" && event.payload.nextSectorId) {
+        return (context.approvalManagerIds ?? [])
+          .filter((recipientId) => recipientId !== event.payload.actorId)
+          .map((recipientId): PlannedNotification => ({ recipientId, type: "approval.requested" }));
+      }
       return plan(
         context.requesterId,
         event.payload.decision === "APPROVED" ? "approval.approved" : "approval.rejected",
         event.payload.actorId,
       );
+    }
 
     case "request.sector_changed": {
       // SPEC 2026-11-03-transferencia-entre-setores, 5.6: the receiving team and the requester; the

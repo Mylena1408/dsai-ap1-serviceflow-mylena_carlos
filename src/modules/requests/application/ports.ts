@@ -64,6 +64,13 @@ export interface ServiceForRequest {
   slaHours: number | null;
   /** SPEC 2026-11-01 (aprovações): copied to the request on opening. */
   requiresApproval: boolean;
+  /**
+   * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 and 4.3.7: level sectors (empty = the
+   * service's sector) and the condition on a requester answer. Optional for older doubles.
+   */
+  approvalSectorIds?: string[];
+  approvalConditionFieldId?: string | null;
+  approvalConditionValue?: string | null;
   /** SPEC 2026-11-03-pausa-sla-calendario, 5.2: copied to the request on opening. */
   slaBusinessHours?: boolean;
   category: { id: string; name: string; isActive: boolean };
@@ -113,11 +120,20 @@ export interface StatusUpdate {
   stageIndex?: number | null;
 }
 
-/** Decides the approval only while the request is still open and pending (SPEC de aprovações, 5.4). */
+/**
+ * Decides the approval only while the request is still open, pending and at the level read (SPEC
+ * de aprovações, 5.4; SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3). Approving a level
+ * that is not the last keeps it pending and moves to the next level and its sector.
+ */
 export interface ApprovalUpdate {
   requestId: string;
-  approvalState: "APPROVED" | "REJECTED";
+  approvalState: "PENDING" | "APPROVED" | "REJECTED";
   updatedAt: Date;
+  /** The level read (null for requests opened before levels). */
+  expectedLevel?: number | null;
+  /** Next level and its sector, written only when approving a level that is not the last. */
+  approvalLevel?: number;
+  approvalPendingSectorId?: string | null;
   /** Due date from the approval (5.5). */
   dueAt?: Date | null;
   /** Start of "due soon", written only in business hours (SPEC 2026-11-03-pausa-sla-calendario, 6). */
@@ -129,6 +145,8 @@ export interface ApprovalUpdate {
 
 export interface NewApproval {
   requestId: string;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3; 1 when absent. */
+  level?: number;
   deciderId: string;
   decision: "APPROVED" | "REJECTED";
   note: string | null;
@@ -355,6 +373,10 @@ export interface RequestTransaction {
       slaHoursSnapshot: number | null;
       dueAt: Date | null;
       approvalState: ApprovalState | null;
+      /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.2: the levels copy, level 1 and its sector. */
+      approvalSectorIdsSnapshot?: string[];
+      approvalLevel?: number | null;
+      approvalPendingSectorId?: string | null;
       /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 6. */
       slaBusinessHours?: boolean;
       dueSoonAt?: Date | null;
