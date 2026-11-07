@@ -1,5 +1,7 @@
 import { ValidationError } from "@/server/errors";
 import { SERVICE_FIELD_LIMITS, type ServiceFieldRecord } from "./service-field";
+import { decimalWithinBound, formatDecimalForDisplay, formatScaledDecimal, parseDecimal } from "./decimal";
+import { formatFormattedValue, isFormattedFieldType, normalizeFormattedValue } from "./formatted-values";
 
 // SPEC 2026-11-01-campos-personalizados, sections 5.2 to 5.4: validation and normalization
 // of the answers given on opening. Lengths count characters (code points), like PostgreSQL.
@@ -12,7 +14,15 @@ export type FieldValueErrorCode =
   | "out_of_range"
   | "invalid_date"
   | "invalid_option"
-  | "invalid_choice";
+  | "invalid_choice"
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1 and 3.3.2.
+  | "not_decimal"
+  | "too_many_decimals"
+  | "invalid_email"
+  | "invalid_phone"
+  | "invalid_cpf"
+  | "invalid_cnpj"
+  | "invalid_cep";
 
 export type FieldValueResult =
   | { ok: true; value: string | null }
@@ -20,7 +30,17 @@ export type FieldValueResult =
 
 export type AnswerableField = Pick<
   ServiceFieldRecord,
-  "id" | "label" | "type" | "isRequired" | "options" | "minValue" | "maxValue" | "position"
+  | "id"
+  | "label"
+  | "type"
+  | "isRequired"
+  | "options"
+  | "minValue"
+  | "maxValue"
+  | "decimalPlaces"
+  | "minDecimal"
+  | "maxDecimal"
+  | "position"
 > &
   // SPEC 2026-11-03-campos-condicionais-atendimento, 5.2; optional so callers without conditions stay valid.
   Partial<Pick<ServiceFieldRecord, "conditionFieldId" | "conditionValue">>;
@@ -91,6 +111,43 @@ function integerValue(field: AnswerableField, text: string): FieldValueResult {
   // Base 10 without leading zeros; String(-0) is "0".
   return valid(String(number));
 }
+
+/**
+ * Section 3.3.1 of SPEC 2026-11-06-aprofundamento-configurabilidade: comma or dot, at most the
+ * configured places (never rounded), within the limits; stored with exactly those places.
+ */
+function decimalValue(field: AnswerableField, text: string): FieldValueResult {
+  const parsed = parseDecimal(text);
+
+  if (!parsed || field.decimalPlaces === null) {
+    return invalid("not_decimal");
+  }
+
+  if (parsed.places > field.decimalPlaces) {
+    return invalid("too_many_decimals");
+  }
+
+  const lowest = field.minDecimal === null ? null : parseDecimal(field.minDecimal);
+  const highest = field.maxDecimal === null ? null : parseDecimal(field.maxDecimal);
+
+  if (
+    !decimalWithinBound(parsed.scaled) ||
+    (lowest !== null && parsed.scaled < lowest.scaled) ||
+    (highest !== null && parsed.scaled > highest.scaled)
+  ) {
+    return invalid("out_of_range");
+  }
+
+  return valid(formatScaledDecimal(parsed.scaled, field.decimalPlaces));
+}
+
+const FORMAT_ERRORS = {
+  EMAIL: "invalid_email",
+  PHONE: "invalid_phone",
+  CPF: "invalid_cpf",
+  CNPJ: "invalid_cnpj",
+  CEP: "invalid_cep",
+} as const satisfies Record<string, FieldValueErrorCode>;
 
 function dateValue(text: string): FieldValueResult {
   if (!isCalendarDate(text)) {
@@ -172,6 +229,16 @@ export function normalizeFieldValue(field: AnswerableField, submitted: Submitted
       return field.options.includes(text) ? valid(text) : invalid("invalid_option");
     case "YES_NO":
       return text === "true" || text === "false" ? valid(text) : invalid("invalid_choice");
+    case "DECIMAL":
+      return decimalValue(field, text);
+    case "EMAIL":
+    case "PHONE":
+    case "CPF":
+    case "CNPJ":
+    case "CEP": {
+      const normalized = normalizeFormattedValue(field.type, text);
+      return normalized === null ? invalid(FORMAT_ERRORS[field.type]) : valid(normalized);
+    }
   }
 }
 
@@ -292,7 +359,8 @@ export function assertFieldAnswers(result: FieldAnswersResult): FieldAnswer[] {
 }
 
 // How an answer is shown in the request details (section 5.4.3): dates as DD/MM/AAAA, yes/no
-// as "Sim"/"Não", integers with Brazilian digit grouping; text as typed.
+// as "Sim"/"Não", integers and decimals with Brazilian digit grouping, formatted types with their
+// punctuation (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3); text as typed.
 export function formatFieldAnswer(type: ServiceFieldRecord["type"], value: string): string {
   switch (type) {
     case "DATE": {
@@ -307,7 +375,9 @@ export function formatFieldAnswer(type: ServiceFieldRecord["type"], value: strin
       const options = multipleChoiceOptions(value);
       return options.length > 0 ? options.join(", ") : value;
     }
+    case "DECIMAL":
+      return formatDecimalForDisplay(value);
     default:
-      return value;
+      return isFormattedFieldType(type) ? formatFormattedValue(type, value) : value;
   }
 }

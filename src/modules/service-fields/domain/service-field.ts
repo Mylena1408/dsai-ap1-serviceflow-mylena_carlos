@@ -2,8 +2,23 @@ import { ConflictError, ValidationError } from "@/server/errors";
 
 // SPEC 2026-11-01-campos-personalizados, sections 5.1, 5.2 and 6.
 
-// "MULTI_SELECT" added by SPEC 2026-11-03-campos-condicionais-atendimento, 5.1.
-export const SERVICE_FIELD_TYPES = ["SHORT_TEXT", "LONG_TEXT", "INTEGER", "DATE", "SELECT", "YES_NO", "MULTI_SELECT"] as const;
+// "MULTI_SELECT" added by SPEC 2026-11-03-campos-condicionais-atendimento, 5.1; "DECIMAL" and the
+// formatted types by SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.
+export const SERVICE_FIELD_TYPES = [
+  "SHORT_TEXT",
+  "LONG_TEXT",
+  "INTEGER",
+  "DATE",
+  "SELECT",
+  "YES_NO",
+  "MULTI_SELECT",
+  "DECIMAL",
+  "EMAIL",
+  "PHONE",
+  "CPF",
+  "CNPJ",
+  "CEP",
+] as const;
 
 export type ServiceFieldType = (typeof SERVICE_FIELD_TYPES)[number];
 
@@ -45,6 +60,13 @@ export interface ServiceFieldDefinition {
   options: string[];
   minValue: number | null;
   maxValue: number | null;
+  /**
+   * Only decimal fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1): 1 to 4 places,
+   * required on them; the limits are text with exactly those places ("10.50"), or null.
+   */
+  decimalPlaces: number | null;
+  minDecimal: string | null;
+  maxDecimal: string | null;
   /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.4. */
   audience: ServiceFieldAudience;
   conditionFieldId: string | null;

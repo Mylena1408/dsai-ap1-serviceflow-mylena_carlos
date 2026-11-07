@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AdminCreateForm } from "./create-form";
 import { useAdminSection } from "./section-context";
 import type { AdminUpdateState } from "./actions";
-import { FIELD_TYPE_LABELS as SHARED_FIELD_TYPE_LABELS } from "@/shared/admin-labels";
+import { FIELD_TYPE_LABELS as SHARED_FIELD_TYPE_LABELS, type FieldTypeCode } from "@/shared/admin-labels";
 import { keepValuesOnSubmit } from "@/app/_components/keep-values-on-submit";
 
 // Custom fields of a service (SPEC 2026-11-01-campos-personalizados, 5.1 and 5.2).
@@ -17,7 +17,11 @@ type FormAction = (
 
 type RedirectAction = (formData: FormData) => Promise<never>;
 
-type FieldType = "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO" | "MULTI_SELECT";
+type FieldType = FieldTypeCode;
+
+// Types offered on creation. The decimal and formatted types (SPEC
+// 2026-11-06-aprofundamento-configurabilidade, 3.3) join the list with their configuration (SF-162).
+const CREATABLE_FIELD_TYPES: readonly FieldType[] = ["SHORT_TEXT", "LONG_TEXT", "INTEGER", "DATE", "SELECT", "YES_NO", "MULTI_SELECT"];
 
 export type AdminServiceField = {
   id: string;
@@ -126,8 +130,8 @@ function FieldInputs({ field, fields = [] }: { field?: AdminServiceField; fields
             onChange={(event) => setType(event.target.value as FieldType)}
             ref={typeSelect}
           >
-            {Object.entries(FIELD_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            {CREATABLE_FIELD_TYPES.map((value) => (
+              <option key={value} value={value}>{FIELD_TYPE_LABELS[value]}</option>
             ))}
           </select>
         </label>

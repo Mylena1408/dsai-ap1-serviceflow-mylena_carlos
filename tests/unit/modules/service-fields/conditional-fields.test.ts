@@ -31,6 +31,9 @@ function field(overrides: Partial<AnswerableField> = {}): AnswerableField {
     options: [],
     minValue: null,
     maxValue: null,
+    decimalPlaces: null,
+    minDecimal: null,
+    maxDecimal: null,
     position: 0,
     ...overrides,
   };

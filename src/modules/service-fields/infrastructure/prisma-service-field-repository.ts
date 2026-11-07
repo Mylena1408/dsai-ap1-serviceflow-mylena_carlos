@@ -2,10 +2,16 @@ import type { Prisma, PrismaClient, ServiceField } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import { createPrismaAuditScope } from "@/modules/audit";
 import type { ServiceFieldRecord } from "../domain/service-field";
+import { decimalLimitText } from "./decimal-limit";
 import type { ServiceFieldRepository, ServiceFieldTransaction, ServiceFieldTransactionRunner } from "../application/ports";
 
-// Compile-time check that the Prisma row matches the domain type.
-const toDomain = (row: ServiceField): ServiceFieldRecord => row;
+// Decimal limits come from the database as Prisma decimals and become text with the field's places
+// (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1); the rest of the row is the domain type.
+const toDomain = ({ minDecimal, maxDecimal, ...row }: ServiceField): ServiceFieldRecord => ({
+  ...row,
+  minDecimal: decimalLimitText(minDecimal, row.decimalPlaces),
+  maxDecimal: decimalLimitText(maxDecimal, row.decimalPlaces),
+});
 
 export function createPrismaServiceFieldRepository(database: PrismaClient): ServiceFieldRepository {
   return {

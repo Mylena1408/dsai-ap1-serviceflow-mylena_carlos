@@ -1711,7 +1711,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-161 — Campos decimal e com formato: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. Migrations `20261106600000_field_type_formats` e `20261106600100_decimal_field_limits`; `service-fields/domain/decimal.ts` (aritmética exata com BigInt) e `formatted-values.ts` (e-mail, telefone, CPF, CNPJ, CEP); regras das respostas, exibição e validação da configuração decimal; limites lidos do banco como texto; abertura e atendimento mostram e validam os tipos novos, com mensagens fixas. O editor da administração ainda só oferece os tipos antigos (a configuração dos novos é da SF-162). CA-CMP-01 a 04 e 06 parciais.
 - **Objetivo:** Seção 3.3 (regras 1 a 3), parte A.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/service-fields/`, `src/modules/requests/domain/`.
 - **Dependências:** SPEC aprovada.

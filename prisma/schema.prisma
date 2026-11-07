@@ -124,6 +124,13 @@ enum ServiceFieldType {
   YES_NO
   /// SPEC 2026-11-03-campos-condicionais-atendimento, 5.1.
   MULTI_SELECT
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.
+  DECIMAL
+  EMAIL
+  PHONE
+  CPF
+  CNPJ
+  CEP
 }
 
 /// Who fills a custom field (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4).
@@ -518,6 +525,10 @@ model ServiceField {
   options          String[]
   minValue         Int?
   maxValue         Int?
+  /// Decimal fields only (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1 and 3.4).
+  decimalPlaces    Int?
+  minDecimal       Decimal?             @db.Decimal(14, 4)
+  maxDecimal       Decimal?             @db.Decimal(14, 4)
   position         Int
   isActive         Boolean              @default(true)
   createdAt        DateTime             @default(now()) @db.Timestamptz

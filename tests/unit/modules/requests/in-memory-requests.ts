@@ -269,7 +269,7 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       return store.fields
         .filter((field) => field.serviceId === serviceId && field.isActive && (field.audience ?? "REQUESTER") === "REQUESTER")
         .sort((left, right) => left.position - right.position)
-        .map(({ id, label, type, isRequired, options, minValue, maxValue, position }) => ({
+        .map(({ id, label, type, isRequired, options, minValue, maxValue, decimalPlaces, minDecimal, maxDecimal, position }) => ({
           id,
           label,
           type,
@@ -277,6 +277,9 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
           options,
           minValue,
           maxValue,
+          decimalPlaces,
+          minDecimal,
+          maxDecimal,
           position,
         }));
     },
@@ -373,10 +376,13 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
       return store.fields
         .filter((field) => field.serviceId === serviceId && field.isActive && field.audience === "ATTENDANT")
         .sort((left, right) => left.position - right.position)
-        .map(({ id, label, type, isRequired, options, minValue, maxValue, position, conditionFieldId, conditionValue }) => ({
+        .map(({ id, label, type, isRequired, options, minValue, maxValue, decimalPlaces, minDecimal, maxDecimal, position, conditionFieldId, conditionValue }) => ({
           id,
           label,
           type,
+          decimalPlaces,
+          minDecimal,
+          maxDecimal,
           isRequired,
           options,
           minValue,

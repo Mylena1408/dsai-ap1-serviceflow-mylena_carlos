@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { DocumentFields, type DocumentFieldRequirement } from "./document-fields";
+import type { FieldTypeCode } from "@/shared/admin-labels";
 
 // Opening form (SPEC 2026-09-30, section 7; SPEC 2026-11-01-campos-personalizados, 5.3). After
 // a refused submission the server redirects back here; the typed text is kept in this
@@ -16,17 +17,29 @@ export type FieldErrorCode =
   | "out_of_range"
   | "invalid_date"
   | "invalid_option"
-  | "invalid_choice";
+  | "invalid_choice"
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1 and 3.3.2.
+  | "not_decimal"
+  | "too_many_decimals"
+  | "invalid_email"
+  | "invalid_phone"
+  | "invalid_cpf"
+  | "invalid_cnpj"
+  | "invalid_cep";
 
 export interface OpeningField {
   id: string;
   label: string;
   helpText: string | null;
-  type: "SHORT_TEXT" | "LONG_TEXT" | "INTEGER" | "DATE" | "SELECT" | "YES_NO" | "MULTI_SELECT";
+  type: FieldTypeCode;
   isRequired: boolean;
   options: string[];
   minValue: number | null;
   maxValue: number | null;
+  /** Decimal fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1); limits with a dot. */
+  decimalPlaces?: number | null;
+  minDecimal?: string | null;
+  maxDecimal?: string | null;
   /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.2. */
   conditionFieldId?: string | null;
   conditionValue?: string | null;
@@ -83,8 +96,25 @@ const LONG_TEXT_LIMIT = 2_000;
 const FIRST_DATE = "1900-01-01";
 const LAST_DATE = "2100-12-31";
 
+/** "1234.50" as "1.234,50" (the module's display rule, repeated here for the client bundle). */
+function decimalText(value: string): string {
+  const [integer, fraction] = value.split(".");
+  const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return fraction === undefined ? grouped : `${grouped},${fraction}`;
+}
+
+function decimalRangeMessage(field: OpeningField): string {
+  const lowest = field.minDecimal ?? null;
+  const highest = field.maxDecimal ?? null;
+  if (lowest !== null && highest !== null) return `Informe um número de ${decimalText(lowest)} a ${decimalText(highest)}.`;
+  if (lowest !== null) return `Informe um número a partir de ${decimalText(lowest)}.`;
+  if (highest !== null) return `Informe um número até ${decimalText(highest)}.`;
+  return "Informe um número entre -1.000.000.000 e 1.000.000.000.";
+}
+
 function rangeMessage(field: OpeningField): string {
   if (field.type === "DATE") return "Informe uma data entre 01/01/1900 e 31/12/2100.";
+  if (field.type === "DECIMAL") return decimalRangeMessage(field);
   if (field.minValue !== null && field.maxValue !== null) {
     return `Informe um número de ${field.minValue} a ${field.maxValue}.`;
   }
@@ -111,6 +141,22 @@ export function fieldErrorMessage(field: OpeningField, code: FieldErrorCode): st
       return "Escolha uma das opções da lista.";
     case "invalid_choice":
       return "Escolha Sim ou Não.";
+    case "not_decimal":
+      return "Informe um número, com vírgula para os decimais e sem ponto de milhar.";
+    case "too_many_decimals": {
+      const places = field.decimalPlaces ?? 4;
+      return `Use no máximo ${places} ${places === 1 ? "casa decimal" : "casas decimais"}.`;
+    }
+    case "invalid_email":
+      return "Informe um e-mail válido, como nome@exemplo.com.br.";
+    case "invalid_phone":
+      return "Informe o telefone com DDD, com 10 ou 11 dígitos.";
+    case "invalid_cpf":
+      return "Informe um CPF válido.";
+    case "invalid_cnpj":
+      return "Informe um CNPJ válido.";
+    case "invalid_cep":
+      return "Informe um CEP com 8 dígitos.";
   }
 }
 
@@ -184,6 +230,20 @@ function FieldInput({ field, value, invalid, describedBy, disabled, required }: 
           <option value="false">Não</option>
         </select>
       );
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3: text boxes, because the server accepts
+    // a comma and punctuation that a number box would refuse.
+    case "DECIMAL":
+      return <input {...common} inputMode="decimal" maxLength={16} />;
+    case "EMAIL":
+      return <input {...common} autoComplete="off" maxLength={254} type="email" />;
+    case "PHONE":
+      return <input {...common} autoComplete="off" inputMode="tel" maxLength={20} type="tel" />;
+    case "CPF":
+      return <input {...common} autoComplete="off" inputMode="numeric" maxLength={14} />;
+    case "CNPJ":
+      return <input {...common} autoComplete="off" inputMode="numeric" maxLength={18} />;
+    case "CEP":
+      return <input {...common} autoComplete="off" inputMode="numeric" maxLength={9} />;
   }
 }
 

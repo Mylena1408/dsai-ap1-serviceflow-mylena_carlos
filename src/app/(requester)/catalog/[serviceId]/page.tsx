@@ -108,7 +108,7 @@ export default async function ServicePage({
         <RequestForm
           action={createRequestAction}
           fieldErrors={fieldErrors}
-          fields={fields.map(({ id, label, helpText, type, isRequired, options, minValue, maxValue, conditionFieldId, conditionValue }) => ({
+          fields={fields.map(({ id, label, helpText, type, isRequired, options, minValue, maxValue, decimalPlaces, minDecimal, maxDecimal, conditionFieldId, conditionValue }) => ({
             id,
             label,
             helpText,
@@ -117,6 +117,9 @@ export default async function ServicePage({
             options,
             minValue,
             maxValue,
+            decimalPlaces,
+            minDecimal,
+            maxDecimal,
             conditionFieldId,
             conditionValue,
           }))}

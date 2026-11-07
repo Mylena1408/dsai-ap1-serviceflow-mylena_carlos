@@ -34,6 +34,10 @@ export type {
   FieldValueErrorCode,
   FieldValueResult,
 } from "./domain/field-value";
+export { decimalLimitText } from "./infrastructure/decimal-limit";
+export { formatDecimalForDisplay } from "./domain/decimal";
+export { FORMATTED_FIELD_TYPES, formatFormattedValue } from "./domain/formatted-values";
+export type { FormattedFieldType } from "./domain/formatted-values";
 export { serviceFieldInputSchema } from "./application/service-field-schemas";
 export type { ServiceFieldInput } from "./application/service-field-schemas";
 

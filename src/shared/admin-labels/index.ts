@@ -17,4 +17,13 @@ export const FIELD_TYPE_LABELS = {
   YES_NO: "Sim ou não",
   // SPEC 2026-11-03-campos-condicionais-atendimento, 5.1.
   MULTI_SELECT: "Seleção múltipla",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.
+  DECIMAL: "Número decimal",
+  EMAIL: "E-mail",
+  PHONE: "Telefone",
+  CPF: "CPF",
+  CNPJ: "CNPJ",
+  CEP: "CEP",
 } as const;
+
+export type FieldTypeCode = keyof typeof FIELD_TYPE_LABELS;

@@ -5,6 +5,7 @@ import {
   type PersistenceErrorPolicy,
 } from "@/server/db/serializable-transaction";
 import { recordOutboxEvent } from "@/modules/events";
+import { decimalLimitText } from "@/modules/service-fields";
 import type { RequestStatus, RequestWithHistory } from "../domain/request";
 import {
   escapeLikePattern,
@@ -301,8 +302,8 @@ export function createPrismaRequestTransaction(
         select: { id: true, name: true, isRequired: true, acceptedFormats: true },
       });
     },
-    listActiveFields(serviceId) {
-      return transaction.serviceField.findMany({
+    async listActiveFields(serviceId) {
+      const rows = await transaction.serviceField.findMany({
         // The opening form has only the requester's fields (SPEC 2026-11-03-campos-condicionais-atendimento, 5.4).
         where: { serviceId, isActive: true, audience: "REQUESTER" },
         orderBy: [{ position: "asc" }, { id: "asc" }],
@@ -314,11 +315,15 @@ export function createPrismaRequestTransaction(
           options: true,
           minValue: true,
           maxValue: true,
+          decimalPlaces: true,
+          minDecimal: true,
+          maxDecimal: true,
           position: true,
           conditionFieldId: true,
           conditionValue: true,
         },
       });
+      return rows.map(withDecimalLimitsAsText);
     },
     insertRequest({ openedAt, ...data }) {
       return transaction.request.create({
@@ -336,8 +341,8 @@ export function createPrismaRequestTransaction(
       await transaction.requestFieldValue.createMany({ data: values });
     },
     // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.
-    listActiveAttendanceFields(serviceId) {
-      return transaction.serviceField.findMany({
+    async listActiveAttendanceFields(serviceId) {
+      const rows = await transaction.serviceField.findMany({
         where: { serviceId, isActive: true, audience: "ATTENDANT" },
         orderBy: [{ position: "asc" }, { id: "asc" }],
         select: {
@@ -349,11 +354,15 @@ export function createPrismaRequestTransaction(
           options: true,
           minValue: true,
           maxValue: true,
+          decimalPlaces: true,
+          minDecimal: true,
+          maxDecimal: true,
           position: true,
           conditionFieldId: true,
           conditionValue: true,
         },
       });
+      return rows.map(withDecimalLimitsAsText);
     },
     async listAttendanceAnswers(requestId) {
       const rows = await transaction.requestFieldValue.findMany({
@@ -620,5 +629,16 @@ export function createPrismaRequestTransactionRunner(
         { timeoutMs: REQUEST_TRANSACTION_TIMEOUT_MS },
       );
     },
+  };
+}
+
+/** Decimal limits as text with the field's places (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1). */
+function withDecimalLimitsAsText<T extends { decimalPlaces: number | null; minDecimal: Prisma.Decimal | null; maxDecimal: Prisma.Decimal | null }>(
+  row: T,
+): Omit<T, "minDecimal" | "maxDecimal"> & { minDecimal: string | null; maxDecimal: string | null } {
+  return {
+    ...row,
+    minDecimal: decimalLimitText(row.minDecimal, row.decimalPlaces),
+    maxDecimal: decimalLimitText(row.maxDecimal, row.decimalPlaces),
   };
 }

@@ -44,6 +44,9 @@ function field(overrides: Partial<StoredField> & Pick<StoredField, "id" | "label
     options: [],
     minValue: null,
     maxValue: null,
+    decimalPlaces: null,
+    minDecimal: null,
+    maxDecimal: null,
     isActive: true,
     ...overrides,
   };

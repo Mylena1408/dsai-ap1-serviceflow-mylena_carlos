@@ -32,3 +32,7 @@
 6. Lembrete na memória do agente: conexão direta x pooling do Neon quando as linhas `added` chegarem a 99.000.
 7. Investigação das candidatas (fora de escopo das SPECs e rendimento medido por leva).
 8. SPEC `2026-11-06-aprofundamento-configurabilidade.md` e tarefas SF-161 a SF-174.
+
+> pode iniciar a SF-161
+
+9. SF-161: migrations, domínio dos tipos decimal e com formato, validação da configuração, leitura dos limites como texto e formulários de abertura e atendimento. Todas as suítes aprovadas (ver `NOTES.md`).
