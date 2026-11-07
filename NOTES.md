@@ -2247,3 +2247,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Backup:** `serviceflow-2026-11-07-pre-deploy-2.dump`, conferido por restauração local (40 tabelas iguais), cifrado pelo EFS. Detalhes na seção 11 da SPEC de backup.
 - **Migrations no Neon:** `prisma migrate deploy` aplicou `20261107300000_stage_assignee_target_condition`, `20261107400000_stage_entry_overdue`, `20261107500000_current_stage_name`, `20261107600000_access_roles`, `20261107700000_escalation_rules` e `20261107800000_escalation_rule_application`; `prisma migrate status` confirmou o banco em dia (43).
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+## SPEC "Operação e automação do atendimento" (2026-11-07)
+
+- **Origem:** levantamento de funcionalidades para a meta (60.870 linhas pelo `cloc` em 2026-11-07, cerca de 39.100 faltando); a responsável escolheu os itens 2, 3, 4, 6 e 7: vínculos e pacotes, distribuição automática, recorrência, configuração portátil, visões salvas e lote.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`, partes A a E, decisões H1 a H22, tarefas SF-175 a SF-193.
+- **Pontos de atenção registrados na SPEC:** pacote "tudo ou nada" e sem serviços com documentos exigidos (H5); distribuição só na entrada da fila sem responsável, com o sistema como autor e motivo no histórico (H7, H19); ausência de atendente afeta só a distribuição (H8); recorrência sem recuperar dias perdidos (H10); importação com prévia obrigatória, sem apagar nada e sem dados pessoais (H12, H13); lote item a item, com resultado por item (H18).
+- **Estimativa:** 16.000 a 21.000 linhas; o projeto ficaria entre 77.000 e 82.000, e a meta pedirá mais uma SPEC depois desta.
+- **Fora do levantamento aprovado:** múltiplas organizações (risco alto), calendário por setor, recuperação de senha e relatórios agendados ficam para decisão futura.

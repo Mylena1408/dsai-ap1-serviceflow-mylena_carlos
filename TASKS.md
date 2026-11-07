@@ -1848,3 +1848,193 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-ESR-03 a 06; revisão de CA-ESR-01 a 07.
 - **Testes relacionados:** Unitários, integração e E2E.
 - **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-175 — Vínculos entre solicitações: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 1), parte A.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-VNC-02 (regras e histórico) e CA-VNC-07.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-176 — Vínculos nas telas, API e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 1), parte A.
+- **Arquivos/módulos esperados:** Detalhe do atendente e do solicitante, `src/modules/public-api/`.
+- **Dependências:** SF-175.
+- **Critérios de conclusão:** CA-VNC-01 a 03.
+- **Testes relacionados:** Unitários, integração e E2E.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-177 — Pacotes: migrations, domínio e configuração
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 2), parte A.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/services/` (ou módulo novo de pacotes), administração, auditoria.
+- **Dependências:** SF-175.
+- **Critérios de conclusão:** CA-VNC-04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-178 — Abertura do pacote
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 3), parte A.
+- **Arquivos/módulos esperados:** Catálogo do solicitante, `src/modules/requests/application/`.
+- **Dependências:** SF-177.
+- **Critérios de conclusão:** CA-VNC-05.
+- **Testes relacionados:** Unitários, integração (tudo ou nada) e E2E parcial.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-179 — Acompanhamento do grupo, cancelamento do pacote e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 4), parte A.
+- **Arquivos/módulos esperados:** Lista e detalhe do solicitante, detalhe do atendente e do gestor, API.
+- **Dependências:** SF-178.
+- **Critérios de conclusão:** CA-VNC-06; revisão de CA-VNC-01 a 07.
+- **Testes relacionados:** Unitários, integração e E2E.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-180 — Distribuição: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regras 1, 3, 4 e 7), parte B.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/sectors/`, `src/modules/requests/domain/`.
+- **Dependências:** Parte A concluída.
+- **Critérios de conclusão:** CA-DST-02 (domínio) e CA-DST-07.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-181 — Distribuição na entrada da fila
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regras 2, 5 e 6), parte B.
+- **Arquivos/módulos esperados:** `src/modules/requests/application/` (abertura, aprovação, encaminhamento, liberação).
+- **Dependências:** SF-180.
+- **Critérios de conclusão:** CA-DST-01, 03 e 04.
+- **Testes relacionados:** Unitários e integração com concorrência.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-182 — Ausência de atendente e passagem pelo job
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 7), parte B.
+- **Arquivos/módulos esperados:** `src/modules/absences/`, job diário, notificações.
+- **Dependências:** SF-181.
+- **Critérios de conclusão:** CA-DST-05.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-183 — Configuração, carga da equipe, análises e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regras 1 e 8), parte B.
+- **Arquivos/módulos esperados:** Seção "Setores", fila, `src/modules/reports/`.
+- **Dependências:** SF-182.
+- **Critérios de conclusão:** CA-DST-02 e 06; revisão de CA-DST-01 a 07.
+- **Testes relacionados:** Unitários, integração, medição com volume e E2E.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-184 — Agendas de recorrência: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regra 2), parte C.
+- **Arquivos/módulos esperados:** `prisma/`, módulo novo de recorrência.
+- **Dependências:** Parte B concluída.
+- **Critérios de conclusão:** CA-REC-02 (regras) e CA-REC-06.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-185 — Casos de uso e telas das agendas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regras 1, 2 e 4), parte C.
+- **Arquivos/módulos esperados:** Administração e área do gestor, auditoria.
+- **Dependências:** SF-184.
+- **Critérios de conclusão:** CA-REC-02 e 05.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-186 — Execução das agendas pelo job e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regra 3), parte C.
+- **Arquivos/módulos esperados:** Job diário, abertura, notificações.
+- **Dependências:** SF-185.
+- **Critérios de conclusão:** CA-REC-01, 03 e 04; revisão de CA-REC-01 a 06.
+- **Testes relacionados:** Unitários, integração com concorrência e E2E pela rota do job.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-187 — Formato e exportação da configuração
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3 (regras 1 a 3), parte D.
+- **Arquivos/módulos esperados:** Módulo novo de configuração, auditoria.
+- **Dependências:** Parte C concluída.
+- **Critérios de conclusão:** CA-CFG-01 (exportação) e CA-CFG-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-188 — Validação e prévia da importação
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3 (regra 4), parte D.
+- **Arquivos/módulos esperados:** Módulo de configuração.
+- **Dependências:** SF-187.
+- **Critérios de conclusão:** CA-CFG-03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-189 — Aplicação da importação
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3 (regras 5 e 6), parte D.
+- **Arquivos/módulos esperados:** Módulo de configuração, casos de uso de cada configuração, auditoria.
+- **Dependências:** SF-188.
+- **Critérios de conclusão:** CA-CFG-04 e 05.
+- **Testes relacionados:** Unitários e integração (tudo ou nada, ida e volta, banco vazio).
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-190 — Telas da configuração portátil e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3, parte D.
+- **Arquivos/módulos esperados:** Administração.
+- **Dependências:** SF-189.
+- **Critérios de conclusão:** Revisão de CA-CFG-01 a 05.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-191 — Visões salvas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7.3 (regra 1), parte E.
+- **Arquivos/módulos esperados:** `prisma/`, fila e "Minhas solicitações".
+- **Dependências:** Parte D concluída.
+- **Critérios de conclusão:** CA-LOT-01, 02 e 05 (visões).
+- **Testes relacionados:** Unitários, integração e E2E parcial.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-192 — Ações em lote: domínio e casos de uso
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7.3 (regra 2), parte E.
+- **Arquivos/módulos esperados:** `src/modules/requests/application/`.
+- **Dependências:** SF-191.
+- **Critérios de conclusão:** CA-LOT-03 e 04.
+- **Testes relacionados:** Unitários e integração com concorrência.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-193 — Telas do lote e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7.3 (regra 2), parte E.
+- **Arquivos/módulos esperados:** Fila do atendente.
+- **Dependências:** SF-192.
+- **Critérios de conclusão:** Revisão de CA-LOT-01 a 05.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.

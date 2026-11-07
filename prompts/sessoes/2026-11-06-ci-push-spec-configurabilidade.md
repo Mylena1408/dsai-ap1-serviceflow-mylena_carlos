@@ -102,3 +102,15 @@
 > siga com backup, migrations e push nesta ordem
 
 25. Backup do Neon verificado, 6 migrations aplicadas (SF-168 a SF-174) e push, nesta ordem (ver `NOTES.md`).
+
+> faça a contagem de linhas com o cloc --diff
+
+26. Contagem pelo `scripts/cloc-diff.sh`: 60.870 linhas `added` (src 29.582, tests 31.067, scripts 221), separadas da base `baseline-ap2`.
+
+> vamos investigar quais funcionalidades acrescentar para alcançar a meta
+
+27. Levantamento de 9 candidatas, com tarefas, linhas estimadas e risco.
+
+> faça a SPEC com os itens 2, 3, 4, 6 e 7
+
+28. SPEC `SPEC/2026-11-07-operacao-e-automacao.md` (partes A a E, decisões H1 a H22, tarefas SF-175 a SF-193), com as tarefas registradas em `TASKS.md`.
