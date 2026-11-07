@@ -155,7 +155,7 @@ export default async function QueueRequestPage({
         <h1>{request.serviceNameSnapshot}</h1>
         <p>
           <span className="status-pill">{statusLabels[request.status]}</span>{" "}
-          <RequestStageLabel request={request} />{" "}
+          <RequestStageLabel request={request} showDelay />{" "}
           <RequestApprovalLabel request={request} />
         </p>
         <RequestSla request={request} now={new Date()} />

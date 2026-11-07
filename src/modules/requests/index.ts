@@ -10,6 +10,7 @@ import * as priorityUseCase from "./application/priority";
 import * as queries from "./application/request-queries";
 import * as slaAlerts from "./application/sla-alerts";
 import * as approvalDeadlines from "./application/approval-deadline-alerts";
+import * as stageDeadlines from "./application/stage-deadline-alerts";
 import * as stageUseCase from "./application/stages";
 import * as sectorTransfer from "./application/sector-transfer";
 import * as lateDocument from "./application/late-document";
@@ -32,6 +33,7 @@ import * as escalations from "./application/escalations";
 import { createPrismaSatisfactionStore } from "./infrastructure/prisma-satisfaction";
 import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import { createPrismaApprovalDeadlineStore } from "./infrastructure/prisma-approval-deadline-alerts";
+import { createPrismaStageDeadlineStore } from "./infrastructure/prisma-stage-deadline-alerts";
 import {
   createPrismaRequestQueryRepository,
   createPrismaRequestTransaction,
@@ -271,6 +273,12 @@ export async function cleanOrphanAttachmentObjects(
 
 export type { SlaAlertSummary } from "./application/sla-alerts";
 export type { ApprovalDeadlineSummary } from "./application/approval-deadline-alerts";
+export type { StageDeadlineSummary } from "./application/stage-deadline-alerts";
+
+/** Daily job step: announces the late stages (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2). */
+export async function recordStageDeadlineAlerts(now: Date, database: PrismaClient = prisma): Promise<stageDeadlines.StageDeadlineSummary> {
+  return stageDeadlines.recordStageDeadlineAlerts(now, createPrismaStageDeadlineStore(database));
+}
 export { approvalOverdue } from "./domain/approval";
 
 /** Daily job step: announces the late approval levels (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6). */

@@ -40,6 +40,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.sla_resumed",
       // Added by SPEC 2026-11-06 (aprofundamento da configurabilidade), 4.3.6.
       "request.approval_overdue",
+      // 5.3.2.
+      "request.stage_overdue",
     ]);
     expect(
       outboxPayload({

@@ -4,6 +4,7 @@ import { validateInput } from "@/server/validation";
 import { assertCanMoveStage } from "../domain/lifecycle";
 import { planStageMove } from "../domain/stages";
 import { requestStageMoveInputSchema } from "./request-schemas";
+import { assignStageAttendant, stageEntryDue } from "./stage-entry";
 import type { RequestTransactionRunner } from "./ports";
 
 /**
@@ -41,18 +42,31 @@ export async function moveRequestStage(input: unknown, transactions: RequestTran
       parsed.note,
     );
     const occurredAt = await transaction.currentTime();
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3: the stage entered has its own due date
+    // and, when it has an attendant, the request goes to them.
+    const details = { stageAssigneeIdsSnapshot: request.stageAssigneeIdsSnapshot, stageTargetDaysSnapshot: request.stageTargetDaysSnapshot };
     const changed = await transaction.updateStageIfCurrent({
       requestId: parsed.requestId,
       expectedAssigneeId: request.assignee?.id ?? null,
       expectedStageIndex: move.fromIndex,
       stageIndex: move.toIndex,
       updatedAt: occurredAt,
+      ...stageEntryDue(details, move.toIndex, occurredAt),
     });
 
     if (changed !== 1) {
       throw new ConflictError();
     }
 
+    const entry = await assignStageAttendant(transaction, {
+      requestId: parsed.requestId,
+      requestSectorId: request.sectorId,
+      details,
+      stageIndex: move.toIndex,
+      currentAssigneeId: request.assignee?.id ?? null,
+      actorId: actor.id,
+      at: occurredAt,
+    });
     const stageEventId = await transaction.insertStageEvent({
       requestId: parsed.requestId,
       actorId: actor.id,
@@ -60,6 +74,7 @@ export async function moveRequestStage(input: unknown, transactions: RequestTran
       toStage: move.toStage,
       note: move.note,
       occurredAt,
+      ...(entry.unavailable ? { assigneeUnavailable: true } : {}),
     });
     await transaction.recordEvent({
       type: "request.stage_changed",

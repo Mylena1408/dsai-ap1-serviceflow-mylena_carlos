@@ -14,6 +14,7 @@ import {
   type StageDetails,
 } from "../domain/stages";
 import { assertCanStartWithApproval } from "../domain/approval";
+import { assignStageAttendant } from "./stage-entry";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
 import { closePause, resumeColumns } from "./sla-pause";
@@ -129,6 +130,16 @@ export async function transitionRequestStatus(
     }
 
     if (stageCopy && stageCopy.stageIndex !== null) {
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1: the first stage's attendant receives it.
+      const entry = await assignStageAttendant(transaction, {
+        requestId: parsed.requestId,
+        requestSectorId: currentRequest.sectorId,
+        details: stageCopy as Partial<StageDetails>,
+        stageIndex: 0,
+        currentAssigneeId: currentRequest.assignee?.id ?? null,
+        actorId: currentActor.id,
+        at: occurredAt,
+      });
       const stageEventId = await transaction.insertStageEvent({
         requestId: parsed.requestId,
         actorId: currentActor.id,
@@ -136,6 +147,7 @@ export async function transitionRequestStatus(
         toStage: stageCopy.stageNamesSnapshot[0],
         note: null,
         occurredAt,
+        ...(entry.unavailable ? { assigneeUnavailable: true } : {}),
       });
       await transaction.recordEvent({
         type: "request.stage_changed",

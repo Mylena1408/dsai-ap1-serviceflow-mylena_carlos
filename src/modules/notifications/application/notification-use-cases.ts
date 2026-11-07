@@ -9,7 +9,8 @@ import type { NotificationRecord, NotificationRequestState, NotificationStore } 
 
 export const RECENT_NOTIFICATIONS = 50;
 
-const SLA_EVENTS = new Set(["request.sla_warning", "request.sla_breached"]);
+// The late stage reaches the same people as the SLA alerts (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2).
+const SLA_EVENTS = new Set(["request.sla_warning", "request.sla_breached", "request.stage_overdue"]);
 
 /** SPEC 2026-11-01, section 5.5: the sector team is loaded only when nobody holds the request. */
 async function slaRecipients(store: NotificationStore, request: NotificationRequestState, assigneeId: string | null) {

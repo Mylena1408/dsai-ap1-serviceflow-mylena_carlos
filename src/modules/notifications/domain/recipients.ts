@@ -43,7 +43,8 @@ export type NotifiableEvent =
   | { type: "request.sector_changed"; payload: { toSectorId: string; actorId: string } }
   | { type: "request.document_added"; payload: { actorId: string } }
   | { type: "request.sla_paused"; payload: { actorId: string } }
-  | { type: "request.approval_overdue"; payload: { sectorId: string } };
+  | { type: "request.approval_overdue"; payload: { sectorId: string } }
+  | { type: "request.stage_overdue" };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -126,6 +127,15 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
         event.payload.decision === "APPROVED" ? "approval.approved" : "approval.rejected",
         event.payload.actorId,
       );
+    }
+
+    case "request.stage_overdue": {
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2: the stage's holder or, without one,
+      // the sector's team, while the request is still in the attendance (the SLA alert rule).
+      const team = context.slaRecipients;
+      if (!team?.requestActive) return [];
+      const recipients = context.effectiveAssigneeId ? [context.effectiveAssigneeId] : team.sectorAttendantIds;
+      return recipients.map((recipientId): PlannedNotification => ({ recipientId, type: "stage.overdue" }));
     }
 
     case "request.approval_overdue":

@@ -122,7 +122,10 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
   const stageEntries = request.stageEvents.map((event) => ({
     id: `stage-${event.id}`,
     occurredAt: event.occurredAt,
-    title: event.fromStage ? `Etapa: ${event.fromStage} → ${event.toStage}` : `Etapa: ${event.toStage}`,
+    title: `${event.fromStage ? `Etapa: ${event.fromStage} → ${event.toStage}` : `Etapa: ${event.toStage}`}${
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1.
+      event.assigneeUnavailable ? " (responsável da etapa indisponível)" : ""
+    }`,
     actor: event.actor.name,
     note: event.note,
   }));

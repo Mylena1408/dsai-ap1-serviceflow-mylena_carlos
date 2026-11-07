@@ -15,6 +15,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "sla.breached": "Prazo vencido",
   "sla.escalated": "Solicitação vencida escalada",
   "stage.changed": "Mudança de etapa",
+  "stage.overdue": "Etapa atrasada",
   "approval.requested": "Aprovação pendente",
   "approval.approved": "Solicitação aprovada",
   "approval.rejected": "Solicitação rejeitada",

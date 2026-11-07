@@ -2182,3 +2182,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes de schema:** a primeira versão gravava etapa com a solicitação "Aberta", que a restrição antiga já proíbe; as recusas passavam pelo motivo errado. Agora o teste grava "Em atendimento" e confere o nome da restrição em cada recusa.
 - **Resultados:** typecheck, lint e build OK; unitários 1278/1278; integração 491/491; E2E 34/34.
 - **Linhas:** 483 `added` (aplicação 208, testes 274, scripts 1).
+
+## SF-169 — Responsável e prazo ao entrar na etapa (2026-11-07)
+
+- **Entrada na etapa:** `application/stage-entry.ts` decide, para o início, o avanço e o retorno, o vencimento da etapa e a passagem ao responsável dela. A transferência usa as mesmas operações da transferência manual (atualização condicional, linha no histórico, `request.assignment_changed`), então a notificação ao novo responsável vem de graça. Responsável indisponível (inativo, de outro perfil ou de outro setor) não muda nada e marca o histórico da etapa.
+- **Prazo:** o vencimento nasce na entrada e é limpo ao entrar numa etapa sem prazo; o aviso é por entrada (a marca volta a nulo a cada entrada). A pausa do SLA não pausa a etapa (decisão G12), e o SLA não muda.
+- **Aviso:** evento `request.stage_overdue` (índice da etapa) gravado pelo job junto com a marca, como os outros alertas. O consumo usa a mesma regra dos alertas de SLA: o responsável efetivo ou, sem ele, a equipe do setor, enquanto a solicitação estiver ativa. Duas listas exatas que a SPEC amplia foram atualizadas (tipos de evento e categorias de e-mail).
+- **Telas:** "Etapa atrasada" ao lado da etapa, na fila e no detalhe do atendente (o solicitante não vê o atraso interno); a linha do tempo mostra "(responsável da etapa indisponível)".
+- **Erro meu no teste, corrigido:** pausei o SLA de uma solicitação sem SLA, que a restrição da pausa não admite. O teste agora dá um SLA à solicitação antes da pausa.
+- **Resultados:** typecheck, lint e build OK; unitários 1284/1284; integração 497/497; E2E 34/34.
+- **Linhas:** 453 `added` (aplicação 215, testes 238).

@@ -655,13 +655,16 @@ model ServiceStage {
 
 /// Entry into a stage of the request's flow copy; fromStage is null on the first stage.
 model RequestStageEvent {
-  id         String   @id @default(uuid()) @db.Uuid
-  requestId  String   @db.Uuid
-  actorId    String   @db.Uuid
-  fromStage  String?
-  toStage    String
-  note       String?
-  occurredAt DateTime @db.Timestamptz
+  id                  String   @id @default(uuid()) @db.Uuid
+  requestId           String   @db.Uuid
+  actorId             String   @db.Uuid
+  fromStage           String?
+  toStage             String
+  note                String?
+  occurredAt          DateTime @db.Timestamptz
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1: the stage's attendant was not an active
+  /// attendant of the request's sector on entering, so the assignee did not change.
+  assigneeUnavailable Boolean  @default(false)
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor   User    @relation("RequestStageEventActor", fields: [actorId], references: [id], onDelete: Restrict)

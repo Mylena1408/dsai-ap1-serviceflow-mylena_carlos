@@ -74,3 +74,7 @@
 > faça o push e pode iniciar a SF-168
 
 18. Push de `99dd82a` (SF-167), sem migration; CI e Vercel com sucesso. SF-168: configuração das etapas, cópia condicional com responsável e prazo, integridade do campo e limpezas. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> pode iniciar a SF-169
+
+19. SF-169: entrada na etapa com responsável e vencimento, evento e aviso de etapa atrasada, telas da equipe. Todas as suítes aprovadas (ver `NOTES.md`).

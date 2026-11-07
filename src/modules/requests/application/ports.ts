@@ -183,6 +183,9 @@ export interface StageUpdate {
   expectedStageIndex: number;
   stageIndex: number;
   updatedAt: Date;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2: the due date of the stage entered. */
+  stageDueAt?: Date | null;
+  stageOverdueNotifiedAt?: null;
 }
 
 export interface NewStageEvent {
@@ -192,6 +195,8 @@ export interface NewStageEvent {
   toStage: string;
   note: string | null;
   occurredAt: Date;
+  /** 5.3.1: the stage's attendant could not receive the request. */
+  assigneeUnavailable?: boolean;
 }
 
 /** Changes the assignee only while status and assignee still equal the values read. */

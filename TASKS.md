@@ -1791,7 +1791,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-169 — Movimento com responsável da etapa, prazo e avisos
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107400000_stage_entry_overdue` (marca no histórico da etapa e evento `request.stage_overdue`); `stage-entry.ts` (vencimento ao entrar e transferência ao responsável da etapa, ou a marca de indisponível) no início, ao avançar e ao voltar; passo do job diário que anuncia a etapa atrasada; notificação `stage.overdue`; "Etapa atrasada" na fila e no detalhe do atendente. CA-ETP-03 e 04 verificados.
 - **Objetivo:** Seção 5.3 (regras 1, 2 e 5), parte C.
 - **Arquivos/módulos esperados:** Casos de uso de etapas, job diário, notificações.
 - **Dependências:** SF-168.

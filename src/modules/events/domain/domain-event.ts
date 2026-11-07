@@ -82,6 +82,14 @@ export type DomainEvent =
       payload: { pauseId: string; actorId: string; cause: "manual" | "requester_reply" | "attendance_ended" };
     }
   | {
+      // The current stage passed its target (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2).
+      // Written by the daily job, once per stage entry; the index identifies the stage of the copy.
+      type: "request.stage_overdue";
+      requestId: string;
+      occurredAt: Date;
+      payload: { stageIndex: number };
+    }
+  | {
       // A pending approval level passed its deadline (SPEC 2026-11-06-aprofundamento-configurabilidade,
       // 4.3.6). Written by the daily job, once per level; the sector names who decides it.
       type: "request.approval_overdue";
@@ -115,6 +123,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.sla_paused",
   "request.sla_resumed",
   "request.approval_overdue",
+  "request.stage_overdue",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -132,6 +141,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.sla_paused": ["pauseId", "actorId"],
   "request.sla_resumed": ["pauseId", "actorId", "cause"],
   "request.approval_overdue": ["level", "sectorId"],
+  "request.stage_overdue": ["stageIndex"],
 };
 
 /**

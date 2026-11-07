@@ -13,7 +13,9 @@ import {
   cleanOrphanAttachmentObjects,
   recordApprovalDeadlineAlerts,
   recordSlaAlerts,
+  recordStageDeadlineAlerts,
   type ApprovalDeadlineSummary,
+  type StageDeadlineSummary,
   type OrphanCleanupSummary,
   type SlaAlertSummary,
 } from "@/modules/requests";
@@ -57,6 +59,8 @@ export interface DailyJobSummary {
   slaAlerts: DailyStep<SlaAlertSummary>;
   /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
   approvalDeadlines: DailyStep<ApprovalDeadlineSummary>;
+  /** 5.3.2. */
+  stageDeadlines: DailyStep<StageDeadlineSummary>;
   events: DailyStep<OutboxRunSummary>;
   emails: DailyStep<EmailRunSummary>;
   purgedEvents: DailyStep<number>;
@@ -106,6 +110,8 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   const slaAlerts = await step(() => recordSlaAlerts(now));
   // Late approval levels, also before the events (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6).
   const approvalDeadlines = await step(() => recordApprovalDeadlineAlerts(now));
+  // Late stages too (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2).
+  const stageDeadlines = await step(() => recordStageDeadlineAlerts(now));
   const events = await step(() => runOutbox(consumers, { maxBatches: 20 }));
   // After the events, so the emails they record go out in the same run.
   const emails = await step(() => runEmailDeliveries({ maxBatches: 20 }));
@@ -126,6 +132,7 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   return {
     slaAlerts,
     approvalDeadlines,
+    stageDeadlines,
     events,
     emails,
     purgedEvents,

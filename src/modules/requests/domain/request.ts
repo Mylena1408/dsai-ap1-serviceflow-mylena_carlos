@@ -41,6 +41,11 @@ export interface RequestRecord {
   approvalDeadlineDaysSnapshot?: number | null;
   approvalDueAt?: Date | null;
   approvalOverdueNotifiedAt?: Date | null;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3 and 5.4. */
+  stageAssigneeIdsSnapshot?: string[];
+  stageTargetDaysSnapshot?: number[];
+  stageDueAt?: Date | null;
+  stageOverdueNotifiedAt?: Date | null;
   /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 5.3; optional so older records stay valid. */
   slaBusinessHours?: boolean;
   dueSoonAt?: Date | null;
@@ -96,6 +101,8 @@ export interface RequestStageEventRecord {
   note: string | null;
   occurredAt: Date;
   actor: { id: string; name: string };
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1. */
+  assigneeUnavailable?: boolean;
 }
 
 /** Request sent to another sector (SPEC 2026-11-03-transferencia-entre-setores, 5.3 and 5.5). */

@@ -23,6 +23,7 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   "sla.breached": "SLA",
   "sla.escalated": "SLA",
   "stage.changed": "STAGES",
+  "stage.overdue": "STAGES",
   "approval.requested": "APPROVALS",
   "approval.approved": "APPROVALS",
   "approval.rejected": "APPROVALS",

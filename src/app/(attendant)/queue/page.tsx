@@ -73,7 +73,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
               </h2>
               <p>
                 <span className="status-pill">{statusLabels[request.status]}</span>{" "}
-                <RequestStageLabel request={request} />{" "}
+                <RequestStageLabel request={request} showDelay />{" "}
                 <RequestApprovalLabel request={request} />
               </p>
               <RequestSla request={request} now={now} />

@@ -41,6 +41,9 @@ export interface LifecycleRequest {
   /** 4.3.6; optional like the SLA state. */
   approvalDeadlineDaysSnapshot?: number | null;
   approvalDueAt?: Date | null;
+  /** 5.4; optional like the SLA state. */
+  stageAssigneeIdsSnapshot?: string[];
+  stageTargetDaysSnapshot?: number[];
   /** SPEC 2026-11-03-pausa-sla-calendario; optional like the SLA state. */
   slaBusinessHours?: boolean;
   slaPausedAt?: Date | null;

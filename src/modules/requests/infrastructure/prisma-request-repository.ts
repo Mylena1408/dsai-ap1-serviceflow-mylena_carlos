@@ -541,7 +541,12 @@ export function createPrismaRequestTransaction(
           assigneeId: update.expectedAssigneeId,
           stageIndex: update.expectedStageIndex,
         },
-        data: { stageIndex: update.stageIndex, updatedAt: update.updatedAt },
+        data: {
+          stageIndex: update.stageIndex,
+          updatedAt: update.updatedAt,
+          // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2.
+          ...(update.stageDueAt !== undefined ? { stageDueAt: update.stageDueAt, stageOverdueNotifiedAt: null } : {}),
+        },
       });
       return result.count;
     },
@@ -572,6 +577,8 @@ export function createPrismaRequestTransaction(
           approvalPendingSectorId: true,
           approvalDeadlineDaysSnapshot: true,
           approvalDueAt: true,
+          stageAssigneeIdsSnapshot: true,
+          stageTargetDaysSnapshot: true,
           slaBusinessHours: true,
           slaPausedAt: true,
           assignee: { select: lifecycleUser },

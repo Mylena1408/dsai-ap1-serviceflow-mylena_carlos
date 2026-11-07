@@ -24,7 +24,8 @@ describe("notification categories (SF-092)", () => {
       COMMENTS: ["comment.public", "comment.internal", "document.added"],
       // "sla.escalated" added by SPEC 2026-11-06-escalonamento, 4.5.
       SLA: ["sla.warning", "sla.breached", "sla.escalated"],
-      STAGES: ["stage.changed"],
+      // "stage.overdue" added by SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2.
+      STAGES: ["stage.changed", "stage.overdue"],
       // "approval.overdue" added by SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6.
       APPROVALS: ["approval.requested", "approval.approved", "approval.rejected", "approval.overdue"],
     });
