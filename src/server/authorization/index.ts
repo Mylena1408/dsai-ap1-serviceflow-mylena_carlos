@@ -4,6 +4,7 @@ import { prisma } from "@/server/db";
 import { entityIdSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 import { hasPermissionInSector, type Permission } from "@/shared/permissions";
+import { loadEffectivePermissions } from "./effective-permissions";
 import {
   assertActiveActor,
   assertCatalogSector,
@@ -15,6 +16,7 @@ import {
   type RequestAuthorizationScope,
 } from "./policy";
 
+export { loadEffectivePermissions };
 export {
   assertActiveActor,
   assertCatalogSector,
@@ -39,20 +41,15 @@ export async function requireConfigurationAdministrator(): Promise<Authorization
 
 /**
  * Whether the actor may use `permission` now (SPEC 2026-11-01-permissoes-configuraveis, 5.2.4):
- * grants are read from the database on every check, so a revocation counts at once.
+ * grants are read from the database on every check, so a revocation counts at once. The grants
+ * include the active roles and leave out what has ended (SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3).
  */
 export async function actorHasPermission(actor: AuthorizationActor, permission: Permission): Promise<boolean> {
   if (actor.sectorId === null) {
     return false;
   }
 
-  const grants = await prisma.userPermission.findMany({ where: { userId: actor.id }, select: { permission: true } });
-  return hasPermissionInSector(
-    actor,
-    grants.map((grant) => grant.permission),
-    permission,
-    actor.sectorId,
-  );
+  return hasPermissionInSector(actor, await loadEffectivePermissions(prisma, actor.id), permission, actor.sectorId);
 }
 
 /** Administrator (every sector) or holder of "Gerir serviços do setor" (own sector only). */

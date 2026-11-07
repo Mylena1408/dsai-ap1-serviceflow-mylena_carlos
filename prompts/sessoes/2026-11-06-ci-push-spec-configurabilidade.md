@@ -82,3 +82,7 @@
 > pode iniciar a SF-170
 
 20. SF-170: coluna calculada da etapa atual, filtro "Etapa" da fila, "Ajustes" das etapas na tela, medição com volume e E2E da parte C (ver `NOTES.md`).
+
+> pode iniciar a SF-171
+
+21. SF-171: migration dos papéis e da validade, consulta única das permissões efetivas, casos de uso de papéis e de concessão com data de fim, anonimização (ver `NOTES.md`).

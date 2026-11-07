@@ -74,16 +74,25 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
       await transaction.notificationPreference.deleteMany({ where: { userId } });
     },
     async revokePermissions(userId, actorId, occurredAt) {
-      const grants = await transaction.userPermission.findMany({ where: { userId }, select: { permission: true } });
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: the roles go too, with their history.
+      const [grants, roles] = await Promise.all([
+        transaction.userPermission.findMany({ where: { userId }, select: { permission: true } }),
+        transaction.userAccessRole.findMany({ where: { userId }, select: { roleId: true } }),
+      ]);
 
-      if (grants.length === 0) {
-        return;
+      if (grants.length > 0) {
+        await transaction.userPermission.deleteMany({ where: { userId } });
+        await transaction.userPermissionEvent.createMany({
+          data: grants.map(({ permission }) => ({ userId, permission, action: "REVOKED" as const, actorId, occurredAt })),
+        });
       }
 
-      await transaction.userPermission.deleteMany({ where: { userId } });
-      await transaction.userPermissionEvent.createMany({
-        data: grants.map(({ permission }) => ({ userId, permission, action: "REVOKED" as const, actorId, occurredAt })),
-      });
+      if (roles.length > 0) {
+        await transaction.userAccessRole.deleteMany({ where: { userId } });
+        await transaction.userAccessRoleEvent.createMany({
+          data: roles.map(({ roleId }) => ({ userId, roleId, action: "REVOKED" as const, actorId, occurredAt })),
+        });
+      }
     },
     async revokeApiTokens(userId, actorId, revokedAt) {
       await transaction.apiToken.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt, revokedById: actorId } });

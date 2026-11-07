@@ -31,6 +31,8 @@ export const AUDIT_ENTITY_TYPES = [
   "HOLIDAY",
   // SPEC 2026-11-06-base-conhecimento, 4.5.
   "KNOWLEDGE_ARTICLE",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.3.
+  "ACCESS_ROLE",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -62,6 +64,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   HOLIDAY: [],
   // The text can be long: the record says it changed, without copying it.
   KNOWLEDGE_ARTICLE: ["body"],
+  ACCESS_ROLE: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -93,6 +96,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   BUSINESS_CALENDAR: "Calendário",
   HOLIDAY: "Feriado",
   KNOWLEDGE_ARTICLE: "Artigo da base de conhecimento",
+  ACCESS_ROLE: "Papel de acesso",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -134,6 +138,8 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   position: "Posição",
   scope: "Escopo",
   expiresAt: "Válido até",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.1.
+  permissions: "Permissões",
   revokedAt: "Revogado em",
   url: "Endereço",
   eventTypes: "Eventos",
@@ -255,6 +261,7 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   BUSINESS_CALENDAR: ["weekdays", "startTime", "endTime", "timeZone"],
   HOLIDAY: ["day", "name", "yearly"],
   KNOWLEDGE_ARTICLE: ["serviceId", "title", "body", "isPublished", "position"],
+  ACCESS_ROLE: ["name", "description", "permissions", "isActive"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

@@ -1811,7 +1811,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-171 — Papéis e validade: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107600000_access_roles`; consulta única das permissões efetivas (concessões + papéis ativos, com data de fim no fuso da organização) usada pela autorização e pelas transações das solicitações; casos de uso de papéis (criar, editar, desativar, reativar com auditoria; atribuir e retirar com histórico) e concessão com data de fim; anonimização retira os papéis. Telas na SF-172.
 - **Objetivo:** Seção 6.3, parte D.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/users/` (permissões), `src/modules/audit/`.
 - **Dependências:** SF-170.

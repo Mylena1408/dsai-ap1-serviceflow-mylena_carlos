@@ -2201,3 +2201,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Medição:** o `serviceflow_perf` não tinha nenhuma solicitação com etapa. Dei às 28.004 solicitações em atendimento desse banco local um fluxo de três etapas, com a etapa atual distribuída, e medi pelo repositório da aplicação (script temporário, apagado): filtro por etapa ~13 ms, "Sem etapa" ~38 ms, lista de etapas ~55 ms, sem filtro ~25 ms; com busca por termo, ~0,37 s (o termo domina, como na SF-163).
 - **Resultados:** typecheck, lint e build OK; unitários 1290/1290; integração 501/501; E2E 35/35.
 - **Linhas:** 535 `added` (aplicação 266, testes 269). Parte C inteira (SF-168 a SF-170): 1.471.
+
+## SF-171 — Papéis e validade: banco e domínio (2026-11-07)
+
+- **Permissões efetivas:** `loadEffectivePermissions` (`src/server/authorization/effective-permissions.ts`) faz uma consulta só: concessões individuais `UNION` permissões dos papéis ativos atribuídos, cada uma com `expiresOn` nula ou maior ou igual ao dia atual no fuso do `BusinessCalendar` (ou o fuso padrão sem calendário). É usada por `actorHasPermission` e por `findPermissions` das transações das solicitações, os dois únicos lugares que liam `UserPermission` para decidir. As regras de perfil e setor continuam em `@/shared/permissions`.
+- **Dia, não instante:** a SPEC falava em `expiresAt`; gravei `expiresOn` (`DATE`), porque a regra é "até o fim do dia no fuso da organização". O dia atual vem do relógio do banco (`organizationToday`), como nas ausências.
+- **Banco:** `AccessRole` com `CHECK` do nome (1 a 60, sem espaços nas pontas), da descrição (nula ou 1 a 200) e das permissões (função `IMMUTABLE` `access_role_permissions_valid`: de 1 a 3, sem nulo nem repetição) e índice único parcial do nome entre os ativos (citext). `UserAccessRole` única por usuário e papel; `UserAccessRoleEvent` reaproveita `PermissionAction`.
+- **Regras:** atribuir exige papel e usuário ativos e perfil que receba algo do papel; mesma data não muda nada, outra data renova; desativar o papel tira o efeito de todos sem apagar as atribuições. A auditoria registra o papel (`ACCESS_ROLE`, campos nome, descrição, permissões e ativo).
+- **Resultados:** typecheck, lint e build OK; unitários 1306/1306; integração 514/514; E2E 35/35.
+- **Linhas:** 1.201 `added` (aplicação 659, testes 542).

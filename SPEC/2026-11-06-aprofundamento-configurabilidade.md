@@ -261,15 +261,22 @@ Cada item estava explicitamente fora de escopo de uma SPEC anterior (ver referê
 - Nova tabela `UserAccessRoleEvent` (atribuído ou retirado, com a validade).
 - `UserPermission` ganha `expiresAt` (opcional); `UserPermissionEvent` ganha `expiresAt` (opcional).
 - Enum da auditoria ganha `ACCESS_ROLE`.
+- *Esclarecimentos registrados em 2026-11-07 (SF-171):*
+  - a data de fim é um dia (`expiresOn`, tipo `DATE`) e não um instante (`expiresAt`): a regra 6.3.2 conta até o fim do dia no fuso da organização, e o dia é comparado com o dia atual desse fuso;
+  - o histórico das atribuições reaproveita o enum `PermissionAction` (`GRANTED` = atribuído, `REVOKED` = retirado);
+  - atribuir um papel exige usuário ativo, papel ativo e perfil que receba ao menos uma das permissões do papel (um papel sem efeito para o perfil é recusado, como a concessão individual);
+  - atribuir de novo com a mesma data não muda nada; com outra data, renova (a linha fica, com a nova data, quem atribuiu e quando) e o histórico registra;
+  - reativar um papel cujo nome outro papel ativo já usa é recusado pelo índice único dos nomes ativos;
+  - a anonimização retira também os papéis, com o histórico.
 
 ### 6.5 Critérios de aceitação
 
-- [ ] **CA-PAP-01** — Sem papéis e sem validade, as permissões funcionam como hoje.
+- [x] **CA-PAP-01** — Sem papéis e sem validade, as permissões funcionam como hoje. *Verificado em 2026-11-07 (SF-171): sem papéis e sem data de fim, as permissões efetivas são as concessões individuais, como antes; as suítes anteriores passaram sem mudança (integração `access-roles.test.ts`).*
 - [ ] **CA-PAP-02** — Só o administrador cria, edita, desativa e reativa papéis; a configuração recusa nome vazio, longo ou repetido e papel sem permissão; as mudanças entram na auditoria.
-- [ ] **CA-PAP-03** — Atribuir um papel dá as suas permissões na operação seguinte (respeitando o perfil e o setor); retirar ou desativar o papel tira na operação seguinte.
-- [ ] **CA-PAP-04** — Permissão e papel com data de fim deixam de valer depois dela, sem novo login; a tela mostra a validade; data no passado ou além de 365 dias é recusada.
+- [x] **CA-PAP-03** — Atribuir um papel dá as suas permissões na operação seguinte (respeitando o perfil e o setor); retirar ou desativar o papel tira na operação seguinte. *Verificado em 2026-11-07 (SF-171): a consulta única `loadEffectivePermissions` (autorização e transações das solicitações) une as concessões e os papéis ativos atribuídos; o gestor com um papel que inclui "Supervisionar a fila" continua sem esse efeito; desativar, reativar e retirar valem na operação seguinte (integração).*
+- [ ] **CA-PAP-04** — Permissão e papel com data de fim deixam de valer depois dela, sem novo login; a tela mostra a validade; data no passado ou além de 365 dias é recusada. *Parcial em 2026-11-07 (SF-171): a permissão e o papel valem até o fim do último dia no fuso do calendário da organização e deixam de valer depois, sem job (conferido com fusos UTC+14 e UTC−11); fim no passado ou além de 365 dias é recusado; "vence em …"/"vencida em …" prontos no domínio. Falta a tela (SF-172).*
 - [ ] **CA-PAP-05** — O histórico do usuário mostra atribuições e retiradas de papéis com a validade.
-- [ ] **CA-PAP-06** — Migration aditiva; nenhuma dependência nova.
+- [x] **CA-PAP-06** — Migration aditiva; nenhuma dependência nova. *Verificado em 2026-11-07 (SF-171): migration `20261107600000_access_roles` só acrescenta tabelas, colunas opcionais e um valor de enum; cada recusa do banco conferida pelo nome da restrição; nenhuma dependência nova.*
 
 ## 7. Parte E — Escalonamento
 

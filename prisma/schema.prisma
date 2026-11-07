@@ -79,6 +79,8 @@ enum AuditEntityType {
   BUSINESS_CALENDAR
   HOLIDAY
   KNOWLEDGE_ARTICLE
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.3.
+  ACCESS_ROLE
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -223,6 +225,11 @@ model User {
   approvalsOnBehalf      RequestApproval[]          @relation("RequestApprovalOnBehalfOf")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1.
   stagesAssigned         ServiceStage[]             @relation("ServiceStageAssignee")
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.
+  accessRoles            UserAccessRole[]           @relation("UserAccessRoleHolder")
+  accessRolesAssigned    UserAccessRole[]           @relation("UserAccessRoleAssigner")
+  accessRoleEvents       UserAccessRoleEvent[]      @relation("UserAccessRoleEventUser")
+  accessRoleEventsActed  UserAccessRoleEvent[]      @relation("UserAccessRoleEventActor")
 }
 
 model Service {
@@ -888,6 +895,9 @@ model UserPermission {
   permission  Permission
   grantedById String     @db.Uuid
   grantedAt   DateTime   @db.Timestamptz
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.2: last day it counts (organization's
+  /// calendar day), or null without an end.
+  expiresOn   DateTime?  @db.Date
 
   user      User @relation("UserPermissionHolder", fields: [userId], references: [id], onDelete: Restrict)
   grantedBy User @relation("UserPermissionGrantor", fields: [grantedById], references: [id], onDelete: Restrict)
@@ -903,9 +913,60 @@ model UserPermissionEvent {
   action     PermissionAction
   actorId    String           @db.Uuid
   occurredAt DateTime         @db.Timestamptz
+  /// 6.3.2: the end given with the grant.
+  expiresOn  DateTime?        @db.Date
 
   user  User @relation("UserPermissionEventUser", fields: [userId], references: [id], onDelete: Restrict)
   actor User @relation("UserPermissionEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([userId, occurredAt])
+}
+
+/// A set of the existing permissions created by the administrator (SPEC
+/// 2026-11-06-aprofundamento-configurabilidade, 6.3.1 and 6.4). Deactivated, never deleted.
+model AccessRole {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @db.Citext
+  description String?
+  permissions Permission[]
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now()) @db.Timestamptz
+  updatedAt   DateTime     @updatedAt @db.Timestamptz
+
+  assignments UserAccessRole[]
+  events      UserAccessRoleEvent[]
+}
+
+/// A role given to a user, optionally until a day (6.3.1 and 6.3.2).
+model UserAccessRole {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  roleId       String    @db.Uuid
+  assignedById String    @db.Uuid
+  assignedAt   DateTime  @db.Timestamptz
+  expiresOn    DateTime? @db.Date
+
+  user       User       @relation("UserAccessRoleHolder", fields: [userId], references: [id], onDelete: Restrict)
+  role       AccessRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  assignedBy User       @relation("UserAccessRoleAssigner", fields: [assignedById], references: [id], onDelete: Restrict)
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+}
+
+/// Assignment or removal of a role (6.3.3), with the end given.
+model UserAccessRoleEvent {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @db.Uuid
+  roleId     String           @db.Uuid
+  action     PermissionAction
+  actorId    String           @db.Uuid
+  occurredAt DateTime         @db.Timestamptz
+  expiresOn  DateTime?        @db.Date
+
+  user  User       @relation("UserAccessRoleEventUser", fields: [userId], references: [id], onDelete: Restrict)
+  role  AccessRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  actor User       @relation("UserAccessRoleEventActor", fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([userId, occurredAt])
 }

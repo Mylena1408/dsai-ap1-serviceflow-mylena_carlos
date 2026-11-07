@@ -145,6 +145,8 @@ describe("texts (section 5.2)", () => {
       HOLIDAY: true,
       // Added by SPEC 2026-11-06-base-conhecimento, 4.5.
       KNOWLEDGE_ARTICLE: true,
+      // Added by SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.3.
+      ACCESS_ROLE: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

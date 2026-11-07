@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { loadBusinessCalendar } from "@/modules/calendar";
+import { loadEffectivePermissions } from "@/server/authorization/effective-permissions";
 import {
   runSerializableTransaction,
   type PersistenceErrorPolicy,
@@ -600,9 +601,9 @@ export function createPrismaRequestTransaction(
         },
       });
     },
-    async findPermissions(userId) {
-      const grants = await transaction.userPermission.findMany({ where: { userId }, select: { permission: true } });
-      return grants.map(({ permission }) => permission);
+    findPermissions(userId) {
+      // Individual grants and active roles still in force (SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3).
+      return loadEffectivePermissions(transaction, userId);
     },
     findUserForAssignment(userId) {
       return transaction.user.findUnique({ where: { id: userId }, select: lifecycleUser });
