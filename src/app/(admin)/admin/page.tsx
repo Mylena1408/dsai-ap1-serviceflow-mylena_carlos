@@ -12,7 +12,8 @@ import { listUsers } from "@/modules/users";
 import { listDocumentRequirements } from "@/modules/document-requirements";
 import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
-import { listPermissionOverview } from "@/modules/permissions";
+import { listAccessRoleOverview, listPermissionOverview } from "@/modules/permissions";
+import { RolesSection } from "./_sections/roles/roles-section";
 import { getEmailOverview } from "@/modules/notifications";
 import { getAnalytics, getDashboard } from "@/modules/reports";
 import { listAuditTrail } from "@/modules/audit";
@@ -59,6 +60,8 @@ type AdminPageProps = {
 const adminSections = [
   { id: "overview", label: "Visão geral" },
   { id: "users", label: "Usuários" },
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.1.
+  { id: "roles", label: "Papéis" },
   { id: "sectors", label: "Setores" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
@@ -132,6 +135,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const webhookOverview = selectedSection === "webhooks" ? await getWebhookOverview() : null;
   // SPEC 2026-11-03-pausa-sla-calendario, 5.7: read only when the section is open.
   const calendarOverview = selectedSection === "calendar" ? await getCalendarOverview() : null;
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: read only where roles are shown.
+  const roleOverview = selectedSection === "users" || selectedSection === "roles" ? await listAccessRoleOverview() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: read only when the section is open.
   const absencesOverview: AbsencesOverview | null =
     selectedSection === "absences"
@@ -199,9 +204,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         <CategoriesSection categories={categories} section={selectedSection} />
       ) : null}
 
-      {selectedSection === "users" ? (
-        <UsersSection permissions={permissions} section={selectedSection} sectors={sectors} users={users} />
+      {selectedSection === "users" && roleOverview ? (
+        <UsersSection permissions={permissions} roles={roleOverview} section={selectedSection} sectors={sectors} users={users} />
       ) : null}
+
+      {selectedSection === "roles" && roleOverview ? <RolesSection roles={roleOverview.roles} /> : null}
 
       {selectedSection === "services" ? (
         <ServicesSection

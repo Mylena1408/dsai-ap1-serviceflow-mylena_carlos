@@ -12,13 +12,13 @@ const TRAIL = Prisma.sql`
   SELECT
     a."id", a."occurredAt", a."actorId", 'change' AS "kind", a."actorRole"::text AS "recordedRole",
     a."action"::text AS "action", a."entityType"::text AS "entityType", a."entityId"::text AS "entityId",
-    a."entityLabel", a."changes", NULL::text AS "permission"
+    a."entityLabel", a."changes", NULL::text AS "permission", NULL::text AS "expiresOn"
   FROM "AuditEntry" a
   UNION ALL
   SELECT
     e."id", e."occurredAt", e."actorId"::text, 'permission', NULL,
     e."action"::text, 'PERMISSION', e."userId"::text,
-    u."name", '[]'::jsonb, e."permission"::text
+    u."name", '[]'::jsonb, e."permission"::text, to_char(e."expiresOn", 'YYYY-MM-DD')
   FROM "UserPermissionEvent" e
   JOIN "User" u ON u."id" = e."userId"`;
 
@@ -43,6 +43,7 @@ interface TrailRow {
   entityLabel: string;
   changes: AuditChange[];
   permission: string | null;
+  expiresOn: string | null;
 }
 
 function toItem(row: TrailRow): AuditTrailItem {
@@ -61,6 +62,8 @@ function toItem(row: TrailRow): AuditTrailItem {
       action: row.action as "GRANTED" | "REVOKED",
       permission: row.permission as "SECTOR_SERVICES" | "SECTOR_REQUESTS_READ" | "QUEUE_SUPERVISION",
       userName: row.entityLabel,
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.2: the end given with the grant.
+      expiresOn: row.expiresOn,
     };
   }
 

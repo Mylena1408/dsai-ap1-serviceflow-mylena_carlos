@@ -86,3 +86,7 @@
 > pode iniciar a SF-171
 
 21. SF-171: migration dos papéis e da validade, consulta única das permissões efetivas, casos de uso de papéis e de concessão com data de fim, anonimização (ver `NOTES.md`).
+
+> pode iniciar a SF-172
+
+22. SF-172: seção "Papéis", painel de papéis do usuário, data de fim nas permissões, auditoria e E2E da parte D (ver `NOTES.md`).

@@ -6,9 +6,11 @@ import { ApplicationError, ValidationError } from "@/server/errors";
 import { activeStateInputSchema } from "@/shared/validation";
 import { validateInput } from "@/server/validation";
 
-export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions" | "anonymization" | "apiTokens" | "webhooks" | "webhookDeliveries" | "calendar" | "holidays";
+export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions" | "anonymization" | "apiTokens" | "webhooks" | "webhookDeliveries" | "calendar" | "holidays"
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.
+  | "roles" | "roleAssignments" | "permissionValidity" | "roleValidity";
 // "sector-services" is the page of a "Gerir serviços do setor" holder (SPEC de permissões, 5.3.1).
-export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services" | "api-tokens" | "webhooks" | "calendar";
+export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services" | "api-tokens" | "webhooks" | "calendar" | "roles";
 
 function pageFor(section: AdminSection): string {
   return section === "sector-services" ? "/sector-services?" : `/admin?section=${section}&`;
@@ -189,6 +191,11 @@ export function activeState(formData: FormData): boolean {
   return validateInput(activeStateInputSchema, field(formData, "isActive"));
 }
 
+/** A refused end (SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.2) has its own message. */
+export function isValidityFailure(error: unknown): boolean {
+  return error instanceof ValidationError && error.issues.some(({ path }) => path.includes("expiresOn"));
+}
+
 export function selectedSection(formData: FormData): AdminSection {
   const section = field(formData, "section");
   return section === "users" ||
@@ -198,7 +205,8 @@ export function selectedSection(formData: FormData): AdminSection {
     section === "sector-services" ||
     section === "api-tokens" ||
     section === "webhooks" ||
-    section === "calendar"
+    section === "calendar" ||
+    section === "roles"
     ? section
     : "overview";
 }

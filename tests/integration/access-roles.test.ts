@@ -30,6 +30,7 @@ import {
   updateAccessRole,
 } from "@/modules/permissions";
 import { anonymizeUser, setUserActive } from "@/modules/users";
+import { listAuditTrail } from "@/modules/audit";
 
 type Actor = { id: string; name: string; role: Role; sectorId: string | null; isActive: boolean };
 
@@ -259,6 +260,23 @@ describe("history of the roles (6.3.3)", () => {
       ["GRANTED", null, admin.id, "Catálogo"],
       ["GRANTED", shiftDay(today, 10), admin.id, "Catálogo"],
     ]);
+  });
+
+  it("the audit trail shows the end of a grant and the role changes (SF-172)", async () => {
+    const { ana } = await scenario();
+    const today = await organizationToday(prisma);
+    await grantPermission({ userId: ana.id, permission: "QUEUE_SUPERVISION", expiresOn: shiftDay(today, 5) }, prisma);
+    const role = await createAccessRole({ name: "Catálogo", permissions: ["SECTOR_SERVICES"] }, prisma);
+
+    const trail = await listAuditTrail({}, prisma);
+    expect(trail.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "permission", permission: "QUEUE_SUPERVISION", expiresOn: shiftDay(today, 5) }),
+        expect.objectContaining({ kind: "change", entityType: "ACCESS_ROLE", entityId: role.id, entityLabel: "Catálogo" }),
+      ]),
+    );
+    const onlyRoles = await listAuditTrail({ entity: "ACCESS_ROLE" }, prisma);
+    expect(onlyRoles.items.map((item) => item.kind)).toEqual(["change"]);
   });
 
   it("anonymization removes the roles too, with the history", async () => {

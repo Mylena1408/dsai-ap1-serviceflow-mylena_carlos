@@ -62,6 +62,7 @@ const trail: AuditTrail = {
       action: "GRANTED",
       permission: "SECTOR_SERVICES",
       userName: "Diego Rocha",
+      expiresOn: null,
     },
   ],
   total: 2,

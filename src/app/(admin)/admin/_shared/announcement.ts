@@ -12,6 +12,22 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "dependency" && entity === "permissions") {
     return "Usuários inativos não recebem permissões.";
   }
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: roles and ends.
+  if (error === "validation" && (entity === "permissionValidity" || entity === "roleValidity")) {
+    return "Informe uma data de fim entre hoje e 365 dias à frente, ou deixe em branco para não ter fim.";
+  }
+  if (error === "validation" && entity === "roles") {
+    return "Confira o papel: nome de 1 a 60 caracteres, descrição de até 200 e de 1 a 3 permissões.";
+  }
+  if (error === "dependency" && entity === "roles") {
+    return "Já existe um papel ativo com esse nome.";
+  }
+  if (error === "validation" && entity === "roleAssignments") {
+    return "Este perfil não recebe nenhuma permissão desse papel.";
+  }
+  if (error === "dependency" && entity === "roleAssignments") {
+    return "Só papéis ativos são atribuídos, e só a usuários ativos.";
+  }
   // SPEC 2026-11-02-auditoria-lgpd, 5.5.1 and 5.5.2: conditions and explicit confirmation.
   // SPEC 2026-11-03-api-acoes-webhooks-setor, 5.3: only failed or cancelled deliveries of active webhooks.
   if (error === "dependency" && entity === "webhookDeliveries") {
@@ -63,6 +79,8 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (notice === "updated" && entity === "calendar") return "Expediente salvo. Vale para os próximos cálculos de prazo.";
   if (notice === "created" && entity === "holidays") return "Feriado cadastrado.";
   if (notice === "deleted" && entity === "holidays") return "Feriado removido.";
+  if (notice === "created" && entity === "roles") return "Papel criado.";
+  if (notice === "updated" && entity === "roleAssignments") return "Papéis do usuário atualizados. Valem na próxima operação da pessoa.";
   if (notice === "created") return "Registro criado.";
   if (notice === "updated") return "Alterações salvas.";
   if (notice === "status") return "Estado atualizado.";

@@ -49,6 +49,8 @@ export interface PermissionItem extends AuditTrailItemBase {
   action: "GRANTED" | "REVOKED";
   permission: "SECTOR_SERVICES" | "SECTOR_REQUESTS_READ" | "QUEUE_SUPERVISION";
   userName: string;
+  /** Last day of a grant with an end (SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.2). */
+  expiresOn: string | null;
 }
 
 export type AuditTrailItem = AuditChangeItem | PermissionItem;

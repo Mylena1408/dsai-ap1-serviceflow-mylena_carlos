@@ -6,7 +6,7 @@ import {
   setUserActive,
   updateUser,
 } from "@/modules/users";
-import { grantPermission, revokePermission } from "@/modules/permissions";
+import { assignAccessRole, grantPermission, removeAccessRole, revokePermission } from "@/modules/permissions";
 import {
   activeState,
   createFailure,
@@ -14,6 +14,7 @@ import {
   finish,
   finishCreate,
   finishUpdate,
+  isValidityFailure,
   reportFailure,
   selectedSection,
   updateFailure,
@@ -69,16 +70,44 @@ export async function toggleUserAction(formData: FormData): Promise<never> {
   return finish("users", "status", section);
 }
 
-// SPEC 2026-11-01-permissoes-configuraveis, 5.2: the administrator grants and revokes.
+// SPEC 2026-11-01-permissoes-configuraveis, 5.2: the administrator grants and revokes; a grant may
+// have an end (SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.2).
 async function changePermission(formData: FormData, grant: boolean): Promise<never> {
   const section = selectedSection(formData);
   const input = { userId: field(formData, "userId"), permission: field(formData, "permission") };
   try {
-    await (grant ? grantPermission(input) : revokePermission(input));
+    // The end only when the form has the field (blank = no end).
+    const end = formData.has("expiresOn") ? { expiresOn: field(formData, "expiresOn") } : {};
+    await (grant ? grantPermission({ ...input, ...end }) : revokePermission(input));
   } catch (error) {
-    reportFailure("permissions", section, error);
+    reportFailure(isValidityFailure(error) ? "permissionValidity" : "permissions", section, error);
   }
   return finish("permissions", "updated", section);
+}
+
+// SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.1: roles given to a user, optionally up to a day.
+export async function assignRoleAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await assignAccessRole({
+      userId: field(formData, "userId"),
+      roleId: field(formData, "roleId"),
+      expiresOn: field(formData, "expiresOn"),
+    });
+  } catch (error) {
+    reportFailure(isValidityFailure(error) ? "roleValidity" : "roleAssignments", section, error);
+  }
+  return finish("roleAssignments", "updated", section);
+}
+
+export async function removeRoleAction(formData: FormData): Promise<never> {
+  const section = selectedSection(formData);
+  try {
+    await removeAccessRole({ userId: field(formData, "userId"), roleId: field(formData, "roleId") });
+  } catch (error) {
+    reportFailure("roleAssignments", section, error);
+  }
+  return finish("roleAssignments", "updated", section);
 }
 
 export async function grantPermissionAction(formData: FormData): Promise<never> {

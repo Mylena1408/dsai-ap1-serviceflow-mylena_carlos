@@ -1821,7 +1821,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-172 — Telas de papéis e validade, histórico e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Seção "Papéis" da administração; painel "Papéis" de cada usuário (atribuir com data de fim, renovar, retirar, histórico); data de fim e "vence em/vencida em" nas permissões adicionais; auditoria com as permissões do papel pelos nomes e a data de fim das concessões; E2E `access-roles.spec.ts`. Parte D concluída (CA-PAP-01 a 06).
 - **Objetivo:** Seção 6.3, parte D.
 - **Arquivos/módulos esperados:** Administração de usuários e papéis.
 - **Dependências:** SF-171.

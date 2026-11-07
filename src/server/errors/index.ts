@@ -93,6 +93,10 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.
   "assigneeId",
   "targetDays",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.
+  "expiresOn",
+  "roleId",
+  "permissions",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

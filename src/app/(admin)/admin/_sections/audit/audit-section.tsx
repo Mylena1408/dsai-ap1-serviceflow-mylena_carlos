@@ -46,6 +46,10 @@ export function auditValueFormatter(names: Record<string, string>) {
     if (field === "sectorIds" && Array.isArray(value)) {
       return value.length === 0 ? "Todos os setores" : value.map((id) => names[id] ?? "(removido)").join(", ");
     }
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.1: the permissions of a role by their names.
+    if (field === "permissions" && Array.isArray(value)) {
+      return value.map((permission) => (PERMISSION_LABELS as Record<string, string>)[permission] ?? permission).join(", ");
+    }
     if (typeof value !== "string") return undefined;
     if (field === "sectorId" || field === "categoryId") return names[value] ?? "(removido)";
     if (field === "role") return ROLE_LABELS[value as keyof typeof ROLE_LABELS];
@@ -62,7 +66,8 @@ export function auditValueFormatter(names: Record<string, string>) {
 export function auditItemTitle(item: AuditTrailItem): string {
   if (item.kind === "permission") {
     const action = item.action === "GRANTED" ? "Concedeu" : "Revogou";
-    return `${action} · Permissão · ${PERMISSION_LABELS[item.permission]} para ${item.userName}`;
+    const until = item.action === "GRANTED" && item.expiresOn ? ` até ${day(item.expiresOn)}` : "";
+    return `${action} · Permissão · ${PERMISSION_LABELS[item.permission]} para ${item.userName}${until}`;
   }
 
   return `${AUDIT_ACTION_LABELS[item.action]} · ${AUDIT_ENTITY_LABELS[item.entityType]} · ${item.entityLabel}`;

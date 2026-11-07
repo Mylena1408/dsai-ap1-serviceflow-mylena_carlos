@@ -2210,3 +2210,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Regras:** atribuir exige papel e usuário ativos e perfil que receba algo do papel; mesma data não muda nada, outra data renova; desativar o papel tira o efeito de todos sem apagar as atribuições. A auditoria registra o papel (`ACCESS_ROLE`, campos nome, descrição, permissões e ativo).
 - **Resultados:** typecheck, lint e build OK; unitários 1306/1306; integração 514/514; E2E 35/35.
 - **Linhas:** 1.201 `added` (aplicação 659, testes 542).
+
+## SF-172 — Telas de papéis e validade; fim da parte D (2026-11-07)
+
+- **Telas:** nova seção "Papéis" (criar, editar com caixas de seleção das permissões e quem pode recebê-las, desativar e reativar, quantos usuários têm o papel). Em "Usuários", o painel "Papéis" lista as atribuições com o que dão à pessoa e a validade, oferece só papéis ativos úteis ao perfil, renova e retira, e mostra o histórico. O painel de permissões ganhou o campo de data de fim (de hoje a 365 dias) e "Renovar".
+- **Mensagens:** uma data de fim recusada tem mensagem própria (entidades `permissionValidity` e `roleValidity`, decididas por `isValidityFailure`); papel repetido, perfil sem efeito e papel inativo também. `expiresOn`, `roleId` e `permissions` entraram nos caminhos públicos de validação.
+- **Concessão sem o campo de data:** a ação só envia `expiresOn` quando o formulário tem o campo, para manter o comportamento anterior de quem não o envia (o teste das ações de permissão da SF-088 continua igual).
+- **Auditoria:** o leitor da trilha passou a trazer o `expiresOn` dos eventos de permissão ("Concedeu · Permissão · … até 01/12/2026"); as permissões do papel aparecem pelos nomes.
+- **Resultados:** typecheck, lint e build OK; unitários 1322/1322; integração 515/515; E2E 36/36.
+- **Linhas:** 949 `added` (aplicação 478, testes 471). Parte D inteira (SF-171 e SF-172): 2.150.

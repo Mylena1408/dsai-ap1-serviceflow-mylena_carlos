@@ -1,14 +1,17 @@
 import type { SectorRecord } from "@/modules/sectors";
 import type { ManagedUser } from "@/modules/users";
-import type { Permission, PermissionOverview } from "@/modules/permissions";
+import type { AccessRoleOverview, PermissionOverview } from "@/modules/permissions";
 import { UserPermissionsPanel } from "../../user-permissions-panel";
+import { UserRolesPanel } from "../../user-roles-panel";
 import { AnonymizedUserItem, UserAnonymizationPanel } from "../../user-anonymization-panel";
 import { AdminCreateForm } from "../../create-form";
 import { AdminRecordEditor } from "../../record-editor";
 import {
   anonymizeUserAction,
+  assignRoleAction,
   createUserAction,
   grantPermissionAction,
+  removeRoleAction,
   revokePermissionAction,
   toggleUserAction,
   updateUserAction,
@@ -19,9 +22,11 @@ type UsersSectionProps = {
   users: ManagedUser[];
   sectors: SectorRecord[];
   permissions: PermissionOverview;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3. */
+  roles: AccessRoleOverview;
 };
 
-export function UsersSection({ section, users, sectors, permissions }: UsersSectionProps) {
+export function UsersSection({ section, users, sectors, permissions, roles }: UsersSectionProps) {
   return (
     <section className="admin-section" aria-labelledby="users-heading">
         <div className="section-heading">
@@ -71,11 +76,19 @@ export function UsersSection({ section, users, sectors, permissions }: UsersSect
             >
               <UserPermissionsPanel
                 grantAction={grantPermissionAction}
-                granted={permissions.grants
-                  .filter((grant) => grant.userId === user.id)
-                  .map((grant): Permission => grant.permission)}
+                grants={permissions.grants.filter((grant) => grant.userId === user.id)}
                 history={permissions.events.filter((event) => event.userId === user.id).slice(0, 10)}
                 revokeAction={revokePermissionAction}
+                today={permissions.today}
+                user={user}
+              />
+              <UserRolesPanel
+                assignAction={assignRoleAction}
+                assignments={roles.assignments.filter((assignment) => assignment.userId === user.id)}
+                history={roles.events.filter((event) => event.userId === user.id).slice(0, 10)}
+                removeAction={removeRoleAction}
+                roles={roles.roles}
+                today={roles.today}
                 user={user}
               />
               <UserAnonymizationPanel action={anonymizeUserAction} user={user} />
