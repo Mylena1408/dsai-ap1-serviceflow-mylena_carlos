@@ -18,6 +18,8 @@ export default function AttendantLayout({
           <Link href="/queue">Fila do meu setor</Link>
           <Link href="/queue/dashboard">Meu painel</Link>
           <Link href="/queue/responses">Respostas prontas</Link>
+          {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7. */}
+          <Link href="/queue/absences">Minhas ausências</Link>
           <NotificationsLink href="/queue/notifications" />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>

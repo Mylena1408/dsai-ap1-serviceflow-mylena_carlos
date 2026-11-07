@@ -146,3 +146,7 @@
 > pode continuar
 
 36. SF-181: distribuição na entrada da fila (abertura, aprovação final, encaminhamento, liberação), trava do setor, motivo no histórico e na API (ver `NOTES.md`).
+
+> pode continuar
+
+37. SF-182: casos de uso e telas das ausências de atendente, passagem das solicitações pelo job diário (ver `NOTES.md`).

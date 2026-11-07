@@ -2317,3 +2317,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Histórico:** a linha do tempo diz "Distribuída automaticamente a …" (autor "Sistema (distribuição automática)") e a API traz `reason` no histórico de atribuição; as atribuições das regras de escalonamento continuam lendo como antes.
 - **Resultados:** typecheck, lint e build OK; unitários 1405/1405; integração 569/569; E2E 40/40.
 - **Linhas:** 449 `added` (aplicação 152, testes 297).
+
+## SF-182 — Ausência de atendente e passagem pelo job (2026-11-07)
+
+- **Cadastro:** módulo `absences` ganhou os casos de uso das ausências de atendente, com o escopo de cada perfil (administrador: todos; gestor: o próprio setor; atendente: a si). O bloco "Ausências de atendentes" é um componente só, em três páginas próprias: a seção "Afastamentos de atendentes" da administração, "Afastamentos da equipe" do gestor e "Minhas ausências" do atendente; as ações voltam a uma dessas páginas, nunca a um endereço vindo do formulário.
+- **Regressão encontrada e corrigida:** a primeira versão pôs o bloco dentro da página de ausências do gestor e da seção "Ausências" da administração. A suíte completa pegou o E2E `manager-absences.spec.ts` (dois campos `startsOn` na mesma página e, depois, um link de menu que também se chamava "Ausências…"); a tabela nova também tinha o mesmo título da antiga. Pela garantia 7.4, em vez de mudar o teste, o bloco foi para páginas próprias com nomes que não se confundem, e a página do gestor voltou a ser idêntica à anterior. O mesmo E2E passou de novo, e a suíte completa rodou outra vez.
+- **Job:** passo `absenceHandover`, depois das regras de escalonamento e antes do outbox. As ausências do dia ainda não passadas, de setores com a opção e a distribuição ligadas, são marcadas primeiro e então cada solicitação aberta ou em atendimento da pessoa vai para um colega pelo modo do setor, numa transação própria (`handOverOnAbsence`, que divide o código com a distribuição da entrada).
+- **Resultados:** typecheck, lint e build OK; unitários 1412/1412; integração 573/573; E2E 40/40 (na segunda rodada, depois da correção; a primeira teve 39/40).
+- **Linhas:** 916 `added` (aplicação 628, testes 288).

@@ -36,7 +36,8 @@ import { WebhooksSection } from "./_sections/webhooks/webhooks-section";
 import { getWebhookOverview } from "@/modules/webhooks";
 import { listAllApiTokens } from "@/modules/api-tokens";
 import { getCalendarOverview } from "@/modules/calendar";
-import { listAbsences, listSubstituteCandidates } from "@/modules/absences";
+import { listAbsences, listAttendantAbsences, listSubstituteCandidates } from "@/modules/absences";
+import { AttendantAbsences } from "@/app/_components/attendant-absences";
 import { AbsencesSection, type AbsencesOverview } from "./_sections/absences/absences-section";
 import { CalendarSection } from "./_sections/calendar/calendar-section";
 
@@ -73,6 +74,8 @@ const adminSections = [
   { id: "calendar", label: "Calendário" },
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5.
   { id: "absences", label: "Ausências" },
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7.
+  { id: "attendant-absences", label: "Afastamentos de atendentes" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
   { id: "analytics", label: "Análises" },
@@ -146,6 +149,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: read only where roles are shown.
   const roleOverview = selectedSection === "users" || selectedSection === "roles" ? await listAccessRoleOverview() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: read only when the section is open.
+  const attendantAbsences = selectedSection === "attendant-absences" ? await listAttendantAbsences() : null;
   const absencesOverview: AbsencesOverview | null =
     selectedSection === "absences"
       ? { ...(await listAbsences()), managers: await listSubstituteCandidates() }
@@ -280,6 +284,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {calendarOverview ? <CalendarSection overview={calendarOverview} /> : null}
 
       {absencesOverview ? <AbsencesSection message={absence} overview={absencesOverview} /> : null}
+      {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7: a section of its own. */}
+      {attendantAbsences ? <AttendantAbsences area="admin" message={absence} overview={attendantAbsences} /> : null}
         </div>
       ) : null}
     </main>

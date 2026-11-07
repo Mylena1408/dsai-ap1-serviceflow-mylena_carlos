@@ -1921,7 +1921,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-182 — Ausência de atendente e passagem pelo job
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Casos de uso das ausências de atendente (administrador, gestor do setor, o próprio atendente); bloco compartilhado nas três áreas ("Ausências" da administração, área do gestor e "Minhas ausências"); passo `absenceHandover` do job diário, uma vez por ausência, com o motivo `ABSENCE`.
 - **Objetivo:** Seção 4.3 (regra 7), parte B.
 - **Arquivos/módulos esperados:** `src/modules/absences/`, job diário, notificações.
 - **Dependências:** SF-181.

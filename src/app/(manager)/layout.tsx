@@ -21,6 +21,8 @@ export default function ManagerLayout({
           <Link href="/approvals/analytics">Análises</Link>
           {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5. */}
           <Link href="/approvals/absences">Ausências</Link>
+          {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7. */}
+          <Link href="/approvals/team-absences">Afastamentos da equipe</Link>
           <NotificationsLink href="/approvals/notifications" />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>

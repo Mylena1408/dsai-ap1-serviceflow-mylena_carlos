@@ -38,6 +38,8 @@ import * as ruleRuns from "./application/escalation-rule-runs";
 import * as links from "./application/links";
 import * as bundleOpening from "./application/open-bundle";
 import * as groups from "./application/groups";
+import * as absenceHandover from "./application/absence-handover";
+import { createPrismaAbsenceHandoverStore } from "./infrastructure/prisma-absence-handover";
 import { createPrismaGroupReader } from "./infrastructure/prisma-request-groups";
 import { createPrismaLinkReader, createPrismaLinkStore } from "./infrastructure/prisma-request-links";
 import { createPrismaEscalationRuleRunStore } from "./infrastructure/prisma-escalation-rule-runs";
@@ -470,4 +472,17 @@ export async function listRequesterGroupLabels(requestIds: readonly string[], da
 
 export async function getRequestGroupBlock(requestId: unknown, database: PrismaClient = prisma): Promise<groups.GroupBlock | null> {
   return groups.getRequestGroupBlock(requestId, createPrismaAttachmentQueryRepository(database), createPrismaGroupReader(database));
+}
+
+// SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7.
+export type { AbsenceHandoverSummary } from "./application/absence-handover";
+
+/** Daily job step: hands absent attendants' requests to colleagues, once per absence. */
+export async function handOverAbsentAttendants(database: PrismaClient = prisma): Promise<absenceHandover.AbsenceHandoverSummary> {
+  return absenceHandover.handOverAbsentAttendants(
+    createPrismaAbsenceHandoverStore(
+      database,
+      createPrismaRequestTransactionRunner(database, { translate: ["P2025"], fallbackMessage: "Absence handover failed." }),
+    ),
+  );
 }

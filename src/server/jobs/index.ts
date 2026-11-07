@@ -11,12 +11,14 @@ import {
 } from "@/modules/notifications";
 import {
   applyEscalationRules,
+  handOverAbsentAttendants,
   cleanOrphanAttachmentObjects,
   recordApprovalDeadlineAlerts,
   recordSlaAlerts,
   recordStageDeadlineAlerts,
   type ApprovalDeadlineSummary,
   type EscalationRuleSummary,
+  type AbsenceHandoverSummary,
   type StageDeadlineSummary,
   type OrphanCleanupSummary,
   type SlaAlertSummary,
@@ -61,6 +63,8 @@ export interface DailyJobSummary {
   slaAlerts: DailyStep<SlaAlertSummary>;
   /** SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3. */
   escalationRules: DailyStep<EscalationRuleSummary>;
+  /** SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7. */
+  absenceHandover: DailyStep<AbsenceHandoverSummary>;
   /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
   approvalDeadlines: DailyStep<ApprovalDeadlineSummary>;
   /** 5.3.2. */
@@ -115,6 +119,9 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   // The sectors' escalation rules, after the option's breach escalation and before the events, so
   // their warnings go out in the same run (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3).
   const escalationRules = await step(() => applyEscalationRules(now));
+  // Absent attendants' requests go to colleagues, before the events so the warnings go out in this run
+  // (SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7).
+  const absenceHandover = await step(() => handOverAbsentAttendants());
   // Late approval levels, also before the events (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6).
   const approvalDeadlines = await step(() => recordApprovalDeadlineAlerts(now));
   // Late stages too (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2).
@@ -139,6 +146,7 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   return {
     slaAlerts,
     escalationRules,
+    absenceHandover,
     approvalDeadlines,
     stageDeadlines,
     events,

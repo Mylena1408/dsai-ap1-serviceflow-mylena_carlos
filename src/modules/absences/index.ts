@@ -2,6 +2,8 @@ import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import * as useCases from "./application/absences";
 import { createPrismaAbsenceStore } from "./infrastructure/prisma-absences";
+import * as attendantUseCases from "./application/attendant-absences";
+import * as attendantAbsences from "./infrastructure/prisma-attendant-absences";
 
 // Managers' absences with a substitute (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5).
 export { MAX_ABSENCE_DAYS, absenceDays, absenceInForce, canCancelAbsence } from "./domain/absence";
@@ -23,4 +25,22 @@ export function registerAbsence(input: unknown, database: PrismaClient = prisma)
 
 export function cancelAbsence(absenceId: unknown, database: PrismaClient = prisma) {
   return useCases.cancelAbsence(absenceId, store(database));
+}
+
+// Attendants' absences (SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7).
+export { absentOn, canRegisterFor } from "./domain/attendant-absence";
+export type { AttendantAbsenceOverview, AttendantAbsenceRecord } from "./application/attendant-absences";
+
+const attendantStore = (database: PrismaClient) => attendantAbsences.createPrismaAttendantAbsenceStore(database);
+
+export function listAttendantAbsences(database: PrismaClient = prisma) {
+  return attendantUseCases.listAttendantAbsences(attendantStore(database));
+}
+
+export function registerAttendantAbsence(input: unknown, database: PrismaClient = prisma) {
+  return attendantUseCases.registerAttendantAbsence(input, attendantStore(database));
+}
+
+export function cancelAttendantAbsence(absenceId: unknown, database: PrismaClient = prisma) {
+  return attendantUseCases.cancelAttendantAbsence(absenceId, attendantStore(database));
 }
