@@ -10,6 +10,7 @@ import {
   getAttendantRequest,
   getManagerRequest,
   getRequesterRequest,
+  listRequestLinks,
   listManagerApprovals,
   listSectorDestinations,
   listTransferCandidates,
@@ -172,13 +173,15 @@ async function loadDetail(caller: ApiCaller, requestId: string, now: Date) {
       : caller.user.role === "ATTENDANT"
         ? await getAttendantRequest(requestId)
         : await getManagerRequest(requestId);
-  const [answers, attachments, comments] = await Promise.all([
+  const [answers, attachments, comments, links] = await Promise.all([
     listRequestFieldAnswers(request.id),
     listRequestAttachments(request.id),
     // The manager screen has no conversation (SPEC 2026-10-31-comentarios, 5.1).
     caller.user.role === "MANAGER" ? Promise.resolve([]) : listComments(request.id),
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: filtered as on the screens.
+    listRequestLinks(request.id),
   ]);
-  return requestDetailRepresentation(request, context(request, now), { answers, attachments, comments });
+  return requestDetailRepresentation(request, context(request, now), { answers, attachments, comments, links: links.links });
 }
 
 export async function getRequest(caller: ApiCaller, requestId: string, now: Date): Promise<ApiResult> {

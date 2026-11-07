@@ -7,6 +7,7 @@ import {
   requestApprovalSectors,
   type RequestAttachmentSummary,
   type RequestFieldAnswer,
+  type RequestLinkView,
   type RequestWithHistory,
   type SlaSituation,
 } from "@/modules/requests";
@@ -156,6 +157,26 @@ export function commentRepresentation(comment: CommentRecord) {
   };
 }
 
+/**
+ * A link of the request (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1): relation as read from
+ * this request ("related", "duplicate_of", "original_of"), and the other request's code, service,
+ * sector and status; `accessible` says whether the caller may read it.
+ */
+export function linkRepresentation(link: RequestLinkView) {
+  return {
+    id: link.id,
+    relation: link.role,
+    request: {
+      id: link.other.id,
+      code: link.other.id.slice(0, 8).toUpperCase(),
+      service: link.other.serviceName,
+      sector: link.other.sectorName,
+      status: link.other.status,
+      accessible: link.other.readable,
+    },
+  };
+}
+
 export function requestDetailRepresentation(
   request: RequestWithHistory,
   context: ApiRequestContext,
@@ -163,6 +184,8 @@ export function requestDetailRepresentation(
     answers: readonly RequestFieldAnswer[];
     attachments: readonly RequestAttachmentSummary[];
     comments: readonly CommentRecord[];
+    /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1; optional for callers without links. */
+    links?: readonly RequestLinkView[];
   },
 ) {
   return {
@@ -185,6 +208,7 @@ export function requestDetailRepresentation(
       removed: attachment.removedAt !== undefined,
     })),
     comments: extra.comments.map(commentRepresentation),
+    links: (extra.links ?? []).map(linkRepresentation),
     history: {
       status: request.events.map((event) => ({
         from: event.fromStatus,

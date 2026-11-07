@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  listRequestLinks,
   effectiveAssigneeId,
   getAttendanceFields,
   getAttendantRequest,
@@ -36,6 +37,8 @@ import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { listResponsesForRequest } from "@/modules/canned-responses";
 import { RequestEscalations } from "@/app/_components/request-escalations";
+import { RequestLinks } from "@/app/_components/request-links";
+import { linkRequestAction, unlinkRequestAction } from "../link-actions";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 
 type QueueRequestPageProps = {
@@ -75,6 +78,13 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "note") return "Informe a justificativa do cancelamento, com até 1.000 caracteres.";
   if (error === "sector-note") return "Informe a justificativa do encaminhamento, com até 1.000 caracteres.";
   if (error === "sector") return "Escolha um setor ativo, diferente do atual e com atendente ativo.";
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1.
+  if (notice === "linked") return "Solicitação vinculada.";
+  if (notice === "unlinked") return "Vínculo removido.";
+  if (error === "link-code") return "Informe o código de 8 caracteres de outra solicitação, diferente desta.";
+  if (error === "link-missing") return "Não há solicitação com esse código que você possa ver.";
+  if (error === "link-conflict")
+    return "Não foi possível vincular: as duas já estão vinculadas, uma delas já tem 10 vínculos, ou a duplicada já é duplicada ou original de outra.";
   return null;
 }
 
@@ -93,6 +103,7 @@ export default async function QueueRequestPage({
   let comments;
   let satisfaction;
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
+  let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
   let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
@@ -109,6 +120,7 @@ export default async function QueueRequestPage({
     // SPEC 2026-11-06-respostas-prontas, 4.4: rendered with what the attendant already sees.
     cannedResponses = await listResponsesForRequest(request.id);
     escalations = await listRequestEscalations(request.id);
+    links = await listRequestLinks(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -210,6 +222,12 @@ export default async function QueueRequestPage({
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <TeamSatisfaction view={satisfaction} />
       <RequestEscalations escalations={escalations} />
+      <RequestLinks
+        edit={{ linkAction: linkRequestAction, unlinkAction: unlinkRequestAction }}
+        hrefFor={(id) => `/queue/${id}`}
+        links={links.links}
+        requestId={request.id}
+      />
       <RequestConversation
         requestId={request.id}
         comments={comments}
@@ -218,7 +236,7 @@ export default async function QueueRequestPage({
         action={addCommentAction}
         cannedResponses={cannedResponses}
       />
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} />
     </main>
   );
 }

@@ -1861,7 +1861,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-176 — Vínculos nas telas, API e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Bloco "Vínculos" (`request-links.tsx`) no detalhe do atendente (com formulário e "Remover"), do solicitante e do gestor (só leitura); eventos de vínculo na linha do tempo; ações `link-actions.ts` com mensagens fixas; `links` no detalhe da API e na OpenAPI; E2E `request-links.spec.ts`. Também rodou o E2E pendente da SF-175.
 - **Objetivo:** Seção 3.3 (regra 1), parte A.
 - **Arquivos/módulos esperados:** Detalhe do atendente e do solicitante, `src/modules/public-api/`.
 - **Dependências:** SF-175.

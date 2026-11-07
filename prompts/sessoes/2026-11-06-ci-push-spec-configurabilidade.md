@@ -118,3 +118,7 @@
 > pode iniciar a SF-175
 
 29. SF-175: migration dos vínculos, regras, casos de uso com histórico e leitura por perfil (ver `NOTES.md`).
+
+> pode iniciar a SF-176 / pode seguir com a SF-176
+
+30. SF-175 com o E2E interrompido (registrado) para seguir; SF-176: bloco "Vínculos", linha do tempo, ações, API, OpenAPI e E2E (ver `NOTES.md`).

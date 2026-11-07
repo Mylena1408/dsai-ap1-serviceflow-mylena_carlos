@@ -1,4 +1,5 @@
-import type { RequestWithHistory } from "@/modules/requests";
+import { LINK_ROLE_LABELS, type RequestLinkEventView, type RequestWithHistory } from "@/modules/requests";
+import { requestShortCode } from "@/shared/requests";
 import { PRIORITY_LABELS } from "./request-priority";
 import { REQUEST_STATUS_LABELS } from "./request-status";
 
@@ -16,6 +17,8 @@ type RequestTimelineProps = {
   request: RequestWithHistory;
   /** Label before the actor's name, e.g. "Atendente" in the queue. */
   actorLabel: string;
+  /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: the history of the links the reader sees. */
+  linkEvents?: readonly RequestLinkEventView[];
 };
 
 /** Who made an assignment change: a person or, for a rule's handover, the system (decision G17). */
@@ -42,7 +45,13 @@ function assignmentTitle(event: RequestWithHistory["assignmentEvents"][number]):
  * One chronological history with status changes, assignments and reasons (SPEC 2026-10-31,
  * section 5.9). Status events keep the texts used before this change.
  */
-export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
+/** "Vinculada como duplicada de #AB12CD34" or "Vínculo removido: relacionada a #…". */
+export function linkEventTitle(event: Pick<RequestLinkEventView, "role" | "action" | "otherRequestId">): string {
+  const target = `${LINK_ROLE_LABELS[event.role].toLowerCase()} #${requestShortCode(event.otherRequestId)}`;
+  return event.action === "LINKED" ? `Vinculada como ${target}` : `Vínculo removido: ${target}`;
+}
+
+export function buildTimeline(request: RequestWithHistory, linkEvents: readonly RequestLinkEventView[] = []): TimelineEntry[] {
   // A rejection cancels the request with the same note (SPEC 2026-11-01-aprovacoes, 5.3.4); the
   // note is shown once, on the decision.
   const rejection = request.approval?.decision === "REJECTED" ? request.approval : null;
@@ -157,13 +166,22 @@ export function buildTimeline(request: RequestWithHistory): TimelineEntry[] {
 
   // Stable sort: on equal times, status events come first, then sector moves, assignments,
   // priorities, stages and the approval.
-  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries, ...fieldEntries].sort(
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: links and removals, on both requests.
+  const linkEntries = linkEvents.map((event) => ({
+    id: `link-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: linkEventTitle(event),
+    actor: event.actor.name,
+    note: null,
+  }));
+
+  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries, ...fieldEntries, ...linkEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }
 
-export function RequestTimeline({ request, actorLabel }: RequestTimelineProps) {
-  const entries = buildTimeline(request);
+export function RequestTimeline({ request, actorLabel, linkEvents = [] }: RequestTimelineProps) {
+  const entries = buildTimeline(request, linkEvents);
 
   return (
     <section className="surface-card content-section" aria-labelledby="history-heading">

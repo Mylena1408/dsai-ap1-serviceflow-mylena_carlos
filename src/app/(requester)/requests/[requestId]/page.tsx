@@ -7,8 +7,10 @@ import {
   listMissingDocuments,
   listRequestAttachments,
   listRequestFieldAnswers,
+  listRequestLinks,
   getApprovalLevels,
 } from "@/modules/requests";
+import { RequestLinks } from "@/app/_components/request-links";
 import { LateDocumentForm } from "./late-document-form";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
@@ -70,6 +72,7 @@ export default async function RequestPage({
   let comments;
   let missingDocuments;
   let satisfaction;
+  let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
 
   try {
     request = await getRequesterRequest(requestId);
@@ -78,6 +81,8 @@ export default async function RequestPage({
     comments = await listComments(request.id);
     missingDocuments = await listMissingDocuments(request.id);
     satisfaction = await getRequestSatisfaction(request.id);
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: only links between the requester's own requests.
+    links = await listRequestLinks(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
     throw error;
@@ -132,6 +137,7 @@ export default async function RequestPage({
       <ApprovalLevels view={await getApprovalLevels(request)} />
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
+      <RequestLinks hrefFor={(id) => `/requests/${id}`} links={links.links} requestId={request.id} />
       {missingDocuments.length > 0 ? <LateDocumentForm requestId={request.id} requirements={missingDocuments} /> : null}
       <LifecyclePanel request={request} now={new Date()} />
       <RequesterSatisfaction requestId={request.id} view={satisfaction} action={rateOwnRequestAction} />
@@ -142,7 +148,7 @@ export default async function RequestPage({
         allowInternal={false}
         action={addOwnCommentAction}
       />
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" />
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} />
     </main>
   );
 }

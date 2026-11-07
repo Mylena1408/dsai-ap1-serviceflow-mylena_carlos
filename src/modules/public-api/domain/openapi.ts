@@ -434,6 +434,29 @@ export const OPENAPI_DOCUMENT = {
                 },
               },
               comments: { type: "array", items: ref("Comment") },
+              // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1.
+              links: {
+                type: "array",
+                description: "Vínculos com outras solicitações; o solicitante vê só os vínculos entre solicitações dele.",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string", format: "uuid" },
+                    relation: { type: "string", enum: ["related", "duplicate_of", "original_of"] },
+                    request: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", format: "uuid" },
+                        code: { type: "string" },
+                        service: { type: "string" },
+                        sector: { type: "string" },
+                        status: { type: "string", enum: ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"] },
+                        accessible: { type: "boolean", description: "Se quem chama pode ler a outra solicitação." },
+                      },
+                    },
+                  },
+                },
+              },
               history: {
                 type: "object",
                 description:

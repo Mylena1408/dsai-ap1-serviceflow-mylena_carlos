@@ -2264,3 +2264,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Leitura:** o solicitante vê só vínculos entre solicitações dele; quem atende vê todos, com `readable` dizendo se pode abrir a outra (por exemplo, depois de ela ir para outro setor).
 - **Resultados:** typecheck, lint e build OK; unitários 1359/1359; integração 539/539; E2E pendente: interrompido para seguir com a SF-176; roda junto com o da SF-176.
 - **Linhas:** 812 `added` (aplicação 432, testes 380).
+
+## SF-176 — Vínculos nas telas, API e E2E (2026-11-07)
+
+- **Telas:** bloco "Vínculos" no detalhe: o atendente vincula pelo código e remove; o solicitante e o gestor só leem. O link para a outra solicitação só aparece quando quem lê pode abri-la. A linha do tempo recebeu os eventos de vínculo por um parâmetro opcional (`linkEvents`), então quem não tem vínculos vê o histórico de antes.
+- **Ações:** num arquivo próprio (`queue/link-actions.ts`), com códigos de erro só deles (`link-code`, `link-missing`, `link-conflict`). As ações existentes da fila tratam conflito como "o estado mudou", o que não serve para um vínculo recusado.
+- **API:** o detalhe ganhou `links` (`relation`, e da outra solicitação `id`, `code`, `service`, `sector`, `status`, `accessible`). No teste de integração da API, simular a sessão (`@/server/auth`) quebrava a identificação pelo token (erro 500); os vínculos do teste passaram a ser criados direto no banco, e as regras deles continuam cobertas em `request-links.test.ts`.
+- **E2E da SF-175:** interrompido na SF-175 para seguir; rodou nesta tarefa, com a suíte completa.
+- **Resultados:** typecheck, lint e build OK; unitários 1366/1366; integração 541/541; E2E 38/38.
+- **Linhas:** 521 `added` (aplicação 220, testes 301).
