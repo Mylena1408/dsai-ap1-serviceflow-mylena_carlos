@@ -1,4 +1,5 @@
 import type { SlaResumeCause } from "../domain/sla-pause";
+import type { OpeningAnswer, StageSettings } from "../domain/stages";
 import type { BusinessCalendar } from "@/shared/business-clock";
 import type { DetectedDocumentFormat } from "@/modules/attachments";
 import type { DomainEvent } from "@/modules/events";
@@ -128,6 +129,11 @@ export interface StatusUpdate {
   /** Flow copy set on start and cleared on reopening (SPEC de fluxos, 5.2 and 5.4). */
   stageNamesSnapshot?: string[];
   stageIndex?: number | null;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.4: per stage details and the stage due date. */
+  stageAssigneeIdsSnapshot?: string[];
+  stageTargetDaysSnapshot?: number[];
+  stageDueAt?: Date | null;
+  stageOverdueNotifiedAt?: null;
 }
 
 /**
@@ -386,6 +392,13 @@ export interface RequestTransaction {
   insertApproval(approval: NewApproval): Promise<void>;
   /** Names of the active stages of the service, in flow order (SPEC de fluxos, 5.2). */
   listActiveStageNames(serviceId: string): Promise<string[]>;
+  /**
+   * The active stages with their settings, in flow order (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 5.3). Optional for older doubles: absent = names only.
+   */
+  listActiveStages?(serviceId: string): Promise<StageSettings[]>;
+  /** The requester's answers given at the opening (5.3.3). */
+  listOpeningAnswers?(requestId: string): Promise<OpeningAnswer[]>;
   /** Returns the number of rows changed (0 when the request changed meanwhile). */
   updateStageIfCurrent(update: StageUpdate): Promise<number>;
   /** Returns the id of the history row. */

@@ -116,17 +116,18 @@ export async function updateServiceField(
     const conditionFieldId = requestedController === undefined ? current.conditionFieldId : requestedController;
     const conditionValue = requestedController === undefined ? current.conditionValue : (requestedValue ?? null);
     const dependents = others.filter((field) => field.conditionFieldId === id);
-    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7 (decision G18): the service's approval
-    // condition counts as one more dependent, which must stay a requester field.
-    const approvalValue = (await transaction.findApprovalConditionValue?.(id)) ?? null;
-    assertNotControllerOfActiveFields(dependents.length + (approvalValue === null ? 0 : 1), conditionFieldId);
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7 and 5.3.3 (decision G18): the service's
+    // approval condition and the stages' conditions count as more dependents, which must stay
+    // requester fields.
+    const outsideValues = await conditionValuesOutsideFields(transaction, id);
+    assertNotControllerOfActiveFields(dependents.length + outsideValues.length, conditionFieldId);
     // Dependents share the controller's audience (5.2.2), so it does not change under them.
-    if (audience !== current.audience && (dependents.length > 0 || approvalValue !== null)) {
+    if (audience !== current.audience && (dependents.length > 0 || outsideValues.length > 0)) {
       throw new ConflictError();
     }
     assertOptionsKeepConditions(current.type, definition.options, [
       ...dependents.map((field) => field.conditionValue ?? ""),
-      ...(approvalValue === null ? [] : [approvalValue]),
+      ...outsideValues,
     ]);
     checkCondition({ id, audience }, conditionFieldId, conditionValue, existing);
 
@@ -182,10 +183,11 @@ export async function deactivateServiceField(
     if (current.isActive) {
       // SPEC 2026-11-03-campos-condicionais-atendimento, 5.3.1.
       const existing = await transaction.listForService(current.serviceId);
-      // The approval condition also keeps its field active (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7).
-      const usedByApproval = ((await transaction.findApprovalConditionValue?.(id)) ?? null) !== null;
+      // The approval and stage conditions also keep their field active (SPEC
+      // 2026-11-06-aprofundamento-configurabilidade, 4.3.7 and 5.3.3).
+      const outsideValues = await conditionValuesOutsideFields(transaction, id);
       assertCanDeactivateController(
-        existing.filter((field) => field.isActive && field.conditionFieldId === id).length + (usedByApproval ? 1 : 0),
+        existing.filter((field) => field.isActive && field.conditionFieldId === id).length + outsideValues.length,
       );
     }
 
@@ -227,6 +229,16 @@ export async function reactivateServiceField(
       transaction.update(id, { isActive: true, position: nextPosition(existing) }),
     );
   });
+}
+
+/**
+ * Values of the conditions outside the fields that use this field: the service's approval condition
+ * and the active stages' conditions (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7 and 5.3.3).
+ */
+async function conditionValuesOutsideFields(transaction: ServiceFieldTransaction, fieldId: string): Promise<string[]> {
+  const approvalValue = (await transaction.findApprovalConditionValue?.(fieldId)) ?? null;
+  const stageValues = (await transaction.findStageConditionValues?.(fieldId)) ?? [];
+  return [...(approvalValue === null ? [] : [approvalValue]), ...stageValues];
 }
 
 /** Section 5.2 of SPEC 2026-11-03-campos-condicionais-atendimento, against the fields of the same service. */

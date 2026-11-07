@@ -68,6 +68,13 @@ function createPrismaServiceFieldTransaction(transaction: Prisma.TransactionClie
       });
       return service?.approvalConditionValue ?? null;
     },
+    async findStageConditionValues(fieldId) {
+      const stages = await transaction.serviceStage.findMany({
+        where: { conditionFieldId: fieldId, isActive: true },
+        select: { conditionValue: true },
+      });
+      return stages.flatMap(({ conditionValue }) => (conditionValue === null ? [] : [conditionValue]));
+    },
     async find(fieldId) {
       const row = await transaction.serviceField.findUnique({ where: { id: fieldId } });
       return row && toDomain(row);

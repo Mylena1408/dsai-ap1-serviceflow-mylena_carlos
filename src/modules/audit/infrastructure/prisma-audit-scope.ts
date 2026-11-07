@@ -97,7 +97,16 @@ async function loadState(
     case "SERVICE_STAGE": {
       const row = await transaction.serviceStage.findUnique({
         where: { id },
-        select: { name: true, position: true, isActive: true },
+        select: {
+          name: true,
+          position: true,
+          isActive: true,
+          // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.
+          assigneeId: true,
+          targetDays: true,
+          conditionFieldId: true,
+          conditionValue: true,
+        },
       });
       return row && { label: row.name, state: row };
     }

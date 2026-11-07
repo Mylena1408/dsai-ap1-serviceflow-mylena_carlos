@@ -472,6 +472,11 @@ export function createPrismaRequestTransaction(
           ...(update.resetSlaAlerts ? { slaWarningNotifiedAt: null, slaBreachNotifiedAt: null } : {}),
           ...(update.stageNamesSnapshot !== undefined ? { stageNamesSnapshot: update.stageNamesSnapshot } : {}),
           ...(update.stageIndex !== undefined ? { stageIndex: update.stageIndex } : {}),
+          // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.4.
+          ...(update.stageAssigneeIdsSnapshot !== undefined ? { stageAssigneeIdsSnapshot: update.stageAssigneeIdsSnapshot } : {}),
+          ...(update.stageTargetDaysSnapshot !== undefined ? { stageTargetDaysSnapshot: update.stageTargetDaysSnapshot } : {}),
+          ...(update.stageDueAt !== undefined ? { stageDueAt: update.stageDueAt } : {}),
+          ...(update.stageOverdueNotifiedAt !== undefined ? { stageOverdueNotifiedAt: update.stageOverdueNotifiedAt } : {}),
         },
       });
       return result.count;
@@ -503,6 +508,22 @@ export function createPrismaRequestTransaction(
     },
     approvalCoverage(managerId) {
       return approvalCoverage(transaction, managerId);
+    },
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3 and 5.4.
+    listActiveStages(serviceId) {
+      return transaction.serviceStage.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: { name: true, assigneeId: true, targetDays: true, conditionFieldId: true, conditionValue: true },
+      });
+    },
+    async listOpeningAnswers(requestId) {
+      // The requester's answers: those without an attendance author (as CA-CND-08).
+      const rows = await transaction.requestFieldValue.findMany({
+        where: { requestId, updatedById: null },
+        select: { fieldId: true, typeSnapshot: true, value: true },
+      });
+      return rows.map((row) => ({ fieldId: row.fieldId, type: row.typeSnapshot, value: row.value }));
     },
     async listActiveStageNames(serviceId) {
       const stages = await transaction.serviceStage.findMany({

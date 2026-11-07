@@ -2170,3 +2170,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **E2E da parte B:** sem login por senha nos E2E, o segundo nível foi decidido pelo gestor de demonstração como substituto de um gestor ausente criado no banco, cobrindo níveis, condição, prazo, ausência e "substituindo" num mesmo percurso.
 - **Resultados:** typecheck, lint e build OK; unitários 1272/1272; integração 485/485; E2E 34/34.
 - **Linhas:** 1.100 `added` (aplicação 600, testes 500). Parte B inteira (SF-164 a SF-167): 3.080.
+
+## SF-168 — Etapas com responsável, prazo e condição (2026-11-07)
+
+- **Modelo:** a etapa ganha `assigneeId`, `targetDays` (1 a 30) e a condição (chave composta para um campo do mesmo serviço). A solicitação ganha as listas paralelas à cópia dos nomes (`stageAssigneeIdsSnapshot` com `""` para nenhum, `stageTargetDaysSnapshot` com `0` para nenhum), o vencimento da etapa atual e a marca do aviso. O Prisma não guarda nulos dentro de listas, daí `""` e `0`; registrei o esclarecimento na SPEC.
+- **Compatibilidade:** o tipo da cópia (`StageCopy`) e `stageCopyOnStart` não mudaram, então a asserção exata existente continua igual; os detalhes novos viajam ao lado (`StageDetails`) e a reabertura limpa os dois (`NO_STAGE_DETAILS`). Sem os métodos novos no dublê, o início usa o caminho antigo, só com os nomes.
+- **Cópia condicional:** no início, as respostas da abertura (sem autor do atendimento) decidem quais etapas entram, com a mesma regra dos campos condicionais. Sem nenhuma etapa, a solicitação fica sem fluxo. O prazo da primeira etapa começa com o atendimento; o efeito do responsável e os avisos de atraso são da SF-169.
+- **Integridade:** o campo usado na condição de uma etapa ativa conta como mais um dependente, como o da condição de aprovação; a função `conditionValuesOutsideFields` reúne os dois.
+- **Limpezas do banco de teste e do E2E:** a condição da etapa aponta para um campo, então as duas limpezas também zeram as condições das etapas antes de apagar os campos (o mesmo problema que achei na SF-165 para a aprovação).
+- **Erro meu repetido, corrigido antes de aplicar:** o comentário da migration usava "copy" e o teste das migrations reprovou de novo. Desta vez a migration ainda não estava em nenhum banco. Registrei o cuidado na memória do agente.
+- **Testes de schema:** a primeira versão gravava etapa com a solicitação "Aberta", que a restrição antiga já proíbe; as recusas passavam pelo motivo errado. Agora o teste grava "Em atendimento" e confere o nome da restrição em cada recusa.
+- **Resultados:** typecheck, lint e build OK; unitários 1278/1278; integração 491/491; E2E 34/34.
+- **Linhas:** 483 `added` (aplicação 208, testes 274, scripts 1).

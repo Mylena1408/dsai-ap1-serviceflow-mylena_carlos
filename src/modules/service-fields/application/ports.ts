@@ -30,6 +30,11 @@ export interface ServiceFieldTransaction extends AuditScope {
    * 2026-11-06-aprofundamento-configurabilidade, 4.3.7). Optional for older doubles: absent = none.
    */
   findApprovalConditionValue?(fieldId: string): Promise<string | null>;
+  /**
+   * Values of the active stages' conditions that use this field (SPEC
+   * 2026-11-06-aprofundamento-configurabilidade, 5.3.3). Optional for older doubles: absent = none.
+   */
+  findStageConditionValues?(fieldId: string): Promise<string[]>;
   create(data: ServiceFieldDefinition & { serviceId: string; position: number }): Promise<ServiceFieldRecord>;
   update(
     fieldId: string,

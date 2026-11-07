@@ -213,17 +213,18 @@ Cada item estava explicitamente fora de escopo de uma SPEC anterior (ver referê
 
 - `ServiceStage`: `assigneeId` (opcional), `targetDays` (opcional, 1 a 30), `conditionFieldId` e `conditionValue` (opcionais, campo do mesmo serviço).
 - `Request`: `stageAssigneeIdsSnapshot` e `stageTargetDaysSnapshot` (listas paralelas à cópia dos nomes, com o mesmo tamanho, verificado por `CHECK`), `stageDueAt` e `stageOverdueNotifiedAt` (opcionais).
+  - *Esclarecimento registrado em 2026-11-07 (SF-168):* as listas paralelas usam `""` (sem responsável) e `0` (sem prazo), porque o Prisma não guarda nulos dentro de listas; cópias tiradas antes desta SPEC ficam com as listas vazias, o que vale como "sem responsável e sem prazo". A cópia considera as respostas do solicitante (sem autor de gravação do atendimento).
 - Índice para o filtro por etapa, se a medição com volume mostrar necessidade.
 
 ### 5.5 Critérios de aceitação
 
-- [ ] **CA-ETP-01** — Etapas sem responsável, prazo ou condição funcionam como hoje.
-- [ ] **CA-ETP-02** — A configuração aceita responsável (atendente ativo do setor), prazo (1 a 30) e condição válida, e recusa os demais; quem tem `SECTOR_SERVICES` configura como o administrador.
+- [x] **CA-ETP-01** — Etapas sem responsável, prazo ou condição funcionam como hoje. *Verificado em 2026-11-07 (SF-168): etapas sem responsável, prazo ou condição são copiadas como antes, com as listas novas vazias de efeito ("" e 0); quando nenhuma etapa condicional é atendida, a solicitação fica sem fluxo, como um serviço sem etapas; todas as suítes anteriores passam sem alteração de asserções (integração `stage-settings.test.ts` e unitário).*
+- [ ] **CA-ETP-02** — A configuração aceita responsável (atendente ativo do setor), prazo (1 a 30) e condição válida, e recusa os demais; quem tem `SECTOR_SERVICES` configura como o administrador. *Parcial em 2026-11-07 (SF-168): o caso de uso recusa responsável de outro setor, inativo ou que não é atendente, prazo fora de 1 a 30, condição sobre campo de texto ou com valor fora das opções e condição incompleta; aceita os válidos, grava na auditoria e só configura etapas ativas; quem não configura o catálogo é recusado (integração). Falta a tela de configuração (SF-170).*
 - [ ] **CA-ETP-03** — Ao entrar numa etapa com responsável, a solicitação passa para ele, com histórico, evento e notificação; com o responsável indisponível, nada muda e o histórico registra.
 - [ ] **CA-ETP-04** — Com prazo, a etapa ganha vencimento ao entrar; vencido, as telas mostram o atraso e o job avisa uma vez por entrada; o SLA não muda.
-- [ ] **CA-ETP-05** — A cópia inclui só as etapas com condição atendida; sem nenhuma, a solicitação fica sem fluxo; as regras de integridade protegem o campo usado.
+- [x] **CA-ETP-05** — A cópia inclui só as etapas com condição atendida; sem nenhuma, a solicitação fica sem fluxo; as regras de integridade protegem o campo usado. *Verificado em 2026-11-07 (SF-168): "Bancada" só para "Tipo = Hardware" entra na cópia de quem respondeu Hardware e fica fora para Software; sem nenhuma etapa atendida, nenhum fluxo; enquanto a condição existe, o campo não é desativado, não perde a opção usada e não muda de público, e uma etapa desativada libera o campo (integração e unitário).*
 - [ ] **CA-ETP-06** — O filtro por etapa (incluindo "Sem etapa") funciona com a busca e os outros filtros e fica na URL.
-- [ ] **CA-ETP-07** — Migrations aditivas; solicitações existentes ficam com listas paralelas coerentes com a cópia.
+- [x] **CA-ETP-07** — Migrations aditivas; solicitações existentes ficam com listas paralelas coerentes com a cópia. *Verificado em 2026-11-07 (SF-168): migration `20261107300000_stage_assignee_target_condition` só acrescenta colunas, listas vazias e restrições; as listas acompanham a cópia dos nomes ou ficam vazias (cópias anteriores), e a reabertura limpa tudo; cada recusa do banco conferida pelo nome da restrição (integração).*
 
 ## 6. Parte D — Permissões
 

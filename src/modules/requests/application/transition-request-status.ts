@@ -5,7 +5,14 @@ import { requestStatusTransitionInputSchema } from "./request-schemas";
 import type { RequestWithHistory } from "../domain/request";
 import { assertCanChangeStatusWithAssignee } from "../domain/lifecycle";
 import { completedLateAt } from "../domain/sla";
-import { assertCanCompleteAtStage, stageCopyOnStart } from "../domain/stages";
+import {
+  assertCanCompleteAtStage,
+  stageCopyFromSettings,
+  stageCopyOnStart,
+  stageDueAtFrom,
+  stageTargetDaysAt,
+  type StageDetails,
+} from "../domain/stages";
 import { assertCanStartWithApproval } from "../domain/approval";
 import { assertRequestStatusTransition } from "../domain/status-transition";
 import type { RequestTransactionRunner } from "./ports";
@@ -60,11 +67,23 @@ export async function transitionRequestStatus(
     if (parsed.toStatus === "IN_PROGRESS") {
       assertCanStartWithApproval(currentRequest.approvalState ?? null);
     }
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3 and 5.4: with the settings, only the stages
+    // whose condition the opening answers meet, with their attendant and target.
     const stageCopy =
       parsed.toStatus === "IN_PROGRESS" && currentRequest.serviceId
-        ? stageCopyOnStart(await transaction.listActiveStageNames(currentRequest.serviceId))
+        ? transaction.listActiveStages && transaction.listOpeningAnswers
+          ? stageCopyFromSettings(
+              await transaction.listActiveStages(currentRequest.serviceId),
+              await transaction.listOpeningAnswers(parsed.requestId),
+            )
+          : stageCopyOnStart(await transaction.listActiveStageNames(currentRequest.serviceId))
         : null;
     const occurredAt = await transaction.currentTime();
+    // 5.3.2: the first stage's target starts with the attendance.
+    const firstStageDue =
+      stageCopy && stageCopy.stageIndex !== null
+        ? stageDueAtFrom(occurredAt, stageTargetDaysAt(stageCopy as Partial<StageDetails>, 0))
+        : null;
     // SPEC 2026-11-03-pausa-sla-calendario, 5.4.3: completing ends a running pause first, so the
     // paused time does not make the completion late.
     const ending = parsed.toStatus === "COMPLETED" ? await resumeColumns(transaction, currentRequest, occurredAt) : null;
@@ -83,6 +102,7 @@ export async function transitionRequestStatus(
           }
         : {}),
       ...(stageCopy && stageCopy.stageIndex !== null ? stageCopy : {}),
+      ...(firstStageDue ? { stageDueAt: firstStageDue, stageOverdueNotifiedAt: null } : {}),
       ...(ending ? { ...ending, expectedSlaPausedAt: currentRequest.slaPausedAt ?? null } : {}),
     });
 

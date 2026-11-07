@@ -48,6 +48,16 @@ function createPrismaServiceStageTransaction(transaction: Prisma.TransactionClie
     async update(stageId, data) {
       return toDomain(await transaction.serviceStage.update({ where: { id: stageId }, data }));
     },
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1 and 5.3.3.
+    findUser(userId) {
+      return transaction.user.findUnique({ where: { id: userId }, select: { role: true, isActive: true, sectorId: true } });
+    },
+    findConditionField(fieldId, serviceId) {
+      return transaction.serviceField.findFirst({
+        where: { id: fieldId, serviceId },
+        select: { id: true, type: true, options: true, audience: true, isActive: true, conditionFieldId: true },
+      });
+    },
   };
 }
 

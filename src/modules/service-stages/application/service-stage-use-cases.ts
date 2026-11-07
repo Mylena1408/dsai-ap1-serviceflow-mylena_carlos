@@ -3,9 +3,11 @@ import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { nextPosition, planPositionMove } from "@/shared/ordering";
 import { entityIdSchema } from "@/shared/validation";
-import { serviceStageInputSchema, serviceStageMoveSchema } from "./service-stage-schemas";
+import { serviceStageInputSchema, serviceStageMoveSchema, serviceStageSettingsSchema } from "./service-stage-schemas";
+import { assertConditionTarget } from "@/modules/service-fields";
 import {
   assertCanAddActiveStage,
+  assertStageAssignee,
   assertStageNameAvailable,
   type ServiceStageRecord,
 } from "../domain/service-stage";
@@ -166,4 +168,42 @@ async function loadStage(
   assertCatalogSector(editor, (await transaction.findServiceSector(stage.serviceId)) ?? "");
 
   return stage;
+}
+
+/**
+ * The attendant, target days and condition of an active stage (SPEC
+ * 2026-11-06-aprofundamento-configurabilidade, 5.3.1 to 5.3.3; decisions G9 to G11 and G18). Whoever
+ * configures the service does it. Requests already in progress keep the copy taken at the start.
+ */
+export async function configureServiceStage(
+  stageId: unknown,
+  input: unknown,
+  transactions: ServiceStageTransactionRunner,
+): Promise<ServiceStageRecord> {
+  const editor = await requireCatalogEditor();
+  const id = validateInput(entityIdSchema, stageId);
+  const settings = validateInput(serviceStageSettingsSchema, input);
+
+  return transactions.run(async (transaction) => {
+    const current = await loadStage(transaction, id, editor);
+
+    if (!current.isActive) {
+      throw new ConflictError();
+    }
+
+    const serviceSectorId = (await transaction.findServiceSector(current.serviceId)) ?? "";
+
+    if (settings.assigneeId !== null) {
+      assertStageAssignee((await transaction.findUser?.(settings.assigneeId)) ?? null, serviceSectorId);
+    }
+
+    if (settings.conditionFieldId !== null) {
+      const controller = (await transaction.findConditionField?.(settings.conditionFieldId, current.serviceId)) ?? null;
+      assertConditionTarget({ id: null, audience: "REQUESTER" }, controller, settings.conditionValue ?? "");
+    }
+
+    return transaction.audited({ actor: editor.actor, action: "UPDATED", entityType: "SERVICE_STAGE", entityId: id }, () =>
+      transaction.update(id, settings),
+    );
+  });
 }

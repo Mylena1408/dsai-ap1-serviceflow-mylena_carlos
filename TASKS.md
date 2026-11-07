@@ -1781,7 +1781,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-168 — Etapas com responsável, prazo e condição: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107300000_stage_assignee_target_condition`; `configureServiceStage` (responsável, prazo e condição, com auditoria); cópia no início só com as etapas cuja condição é atendida, com o responsável e o prazo de cada uma, e o vencimento da primeira etapa; reabertura limpa os detalhes; integridade do campo usado na condição de uma etapa; limpezas do banco de teste e do E2E. CA-ETP-01, 05 e 07 verificados; 02 parcial (tela na SF-170).
 - **Objetivo:** Seção 5.3 (regras 1 a 3), parte C.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/` de fluxos e solicitações.
 - **Dependências:** SF-167.

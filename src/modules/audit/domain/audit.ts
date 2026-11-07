@@ -112,6 +112,8 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   approvalConditionFieldId: "Campo da condição de aprovação",
   approvalConditionValue: "Valor da condição de aprovação",
   approvalDeadlineDays: "Prazo para aprovar (dias)",
+  assigneeId: "Responsável da etapa",
+  targetDays: "Prazo da etapa (dias)",
   slaBusinessHours: "Prazo em horas úteis",
   escalateOverdue: "Escalar solicitações vencidas",
   title: "Título",
@@ -244,7 +246,8 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "conditionFieldId",
     "conditionValue",
   ],
-  SERVICE_STAGE: ["name", "position", "isActive"],
+  // The attendant, target and condition: SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.
+  SERVICE_STAGE: ["name", "position", "isActive", "assigneeId", "targetDays", "conditionFieldId", "conditionValue"],
   // Never the token value, its hash or the webhook secret (SPEC 2026-11-02-api-externa-webhooks, 5.7).
   API_TOKEN: ["name", "scope", "expiresAt", "revokedAt"],
   WEBHOOK: ["name", "url", "eventTypes", "sectorIds", "isActive"],

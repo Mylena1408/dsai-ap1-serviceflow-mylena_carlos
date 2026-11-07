@@ -16,7 +16,7 @@ export {
   assertStageNameAvailable,
 } from "./domain/service-stage";
 export type { ServiceStageRecord } from "./domain/service-stage";
-export { serviceStageInputSchema } from "./application/service-stage-schemas";
+export { serviceStageInputSchema, serviceStageSettingsSchema } from "./application/service-stage-schemas";
 export type { ServiceStageInput } from "./application/service-stage-schemas";
 
 export async function listServiceStages(database: PrismaClient = prisma): Promise<ServiceStageRecord[]> {
@@ -37,6 +37,15 @@ export async function renameServiceStage(
   database: PrismaClient = prisma,
 ): Promise<ServiceStageRecord> {
   return useCases.renameServiceStage(stageId, input, createPrismaServiceStageTransactionRunner(database));
+}
+
+/** SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1 to 5.3.3. */
+export async function configureServiceStage(
+  stageId: unknown,
+  input: unknown,
+  database: PrismaClient = prisma,
+): Promise<ServiceStageRecord> {
+  return useCases.configureServiceStage(stageId, input, createPrismaServiceStageTransactionRunner(database));
 }
 
 export async function moveServiceStage(

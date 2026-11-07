@@ -70,3 +70,7 @@
 > pode iniciar a SF-167
 
 17. Deploy de `720f37b` conferido (CI e Vercel com sucesso). SF-167: configuração da aprovação na tela, ausências na administração, níveis nas telas de acompanhamento, API, OpenAPI e E2E da parte B. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> faça o push e pode iniciar a SF-168
+
+18. Push de `99dd82a` (SF-167), sem migration; CI e Vercel com sucesso. SF-168: configuração das etapas, cópia condicional com responsável e prazo, integridade do campo e limpezas. Todas as suítes aprovadas (ver `NOTES.md`).

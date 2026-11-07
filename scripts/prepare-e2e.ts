@@ -61,6 +61,8 @@ async function prepareDatabase(): Promise<void> {
       database.serviceDocumentRequirement.deleteMany(),
       // A service's approval condition points to one of its fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
       database.service.updateMany({ data: { approvalConditionFieldId: null, approvalConditionValue: null } }),
+      // A stage's condition points to a field too (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.4).
+      database.serviceStage.updateMany({ data: { conditionFieldId: null, conditionValue: null } }),
       database.serviceField.deleteMany(),
       database.serviceStage.deleteMany(),
       database.service.deleteMany(),

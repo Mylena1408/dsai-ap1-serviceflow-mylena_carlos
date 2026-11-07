@@ -13,7 +13,7 @@ import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
 import { closePause, resumeColumns } from "./sla-pause";
 import type { SlaClock } from "@/shared/business-clock";
-import { NO_STAGE } from "../domain/stages";
+import { NO_STAGE, NO_STAGE_DETAILS } from "../domain/stages";
 import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
 import type { RequestTransactionRunner, StatusUpdate } from "./ports";
 
@@ -145,6 +145,8 @@ export async function reopenRequest(
       resetSlaAlerts: true,
       // SPEC 2026-11-01-fluxos-configuraveis, 5.4: no stage until the attendance starts again.
       ...NO_STAGE,
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.4: nor the stage details.
+      ...NO_STAGE_DETAILS,
     }),
   });
 }
