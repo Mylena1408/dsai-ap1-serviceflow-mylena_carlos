@@ -14,6 +14,8 @@ export interface NotificationContext {
    * progress, and the active attendants of its sector, used when nobody holds it.
    */
   slaRecipients?: { requestActive: boolean; sectorAttendantIds: readonly string[] };
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 4: the people a rule warned. */
+  ruleRecipientIds?: readonly string[];
   /** SPEC 2026-11-06-escalonamento, 4.5: active managers of the sector when the breach escalated it. */
   escalationManagerIds?: readonly string[];
   /** Approval state of the request now (SPEC 2026-11-01-aprovacoes). */
@@ -33,7 +35,7 @@ export interface NotificationContext {
 export type NotifiableEvent =
   | { type: "request.opened" }
   | { type: "request.status_changed"; payload: { toStatus: string; actorId: string } }
-  | { type: "request.assignment_changed"; payload: { toAssigneeId: string | null; actorId: string } }
+  | { type: "request.assignment_changed"; payload: { toAssigneeId: string | null; actorId: string | null } }
   | { type: "request.comment_added"; payload: { authorId: string; isInternal: boolean } }
   | { type: "request.priority_changed" }
   | { type: "request.sla_warning" }
@@ -44,7 +46,8 @@ export type NotifiableEvent =
   | { type: "request.document_added"; payload: { actorId: string } }
   | { type: "request.sla_paused"; payload: { actorId: string } }
   | { type: "request.approval_overdue"; payload: { sectorId: string } }
-  | { type: "request.stage_overdue" };
+  | { type: "request.stage_overdue" }
+  | { type: "request.escalated" };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -58,7 +61,7 @@ const STATUS_TYPES: Record<string, NotificationType> = {
   OPEN: "status.OPEN",
 };
 
-function plan(recipientId: string | null, type: NotificationType, actorId: string): PlannedNotification[] {
+function plan(recipientId: string | null, type: NotificationType, actorId: string | null): PlannedNotification[] {
   // The author of an action is never notified of it.
   return recipientId && recipientId !== actorId ? [{ recipientId, type }] : [];
 }
@@ -128,6 +131,12 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
         event.payload.actorId,
       );
     }
+
+    case "request.escalated":
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 4: the people the rule warned,
+      // chosen by the job (each once per run), while the request is still in the attendance.
+      if (!context.slaRecipients?.requestActive) return [];
+      return [...new Set(context.ruleRecipientIds ?? [])].map((recipientId): PlannedNotification => ({ recipientId, type: "sla.escalated" }));
 
     case "request.stage_overdue": {
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2: the stage's holder or, without one,

@@ -28,6 +28,28 @@ export async function stageNamesOf(database: PrismaClient, rows: StageSource[]):
   return ids.map((id) => (id ? names.get(id) : undefined));
 }
 
+function escalationIdOf({ type, event }: StageSource): string | null {
+  const id = type === "sla.escalated" ? (event?.payload as { escalationId?: unknown } | null)?.escalationId : null;
+  return typeof id === "string" ? id : null;
+}
+
+/**
+ * Rule applied by each rule's "sla.escalated" notification, from the escalation named by its event
+ * (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 4). The option's warning has none.
+ */
+export async function ruleNamesOf(database: PrismaClient, rows: StageSource[]): Promise<Array<string | undefined>> {
+  const ids = rows.map(escalationIdOf);
+  const wanted = ids.filter((id): id is string => id !== null);
+  const names = new Map(
+    wanted.length === 0
+      ? []
+      : (await database.requestEscalation.findMany({ where: { id: { in: wanted } }, select: { id: true, ruleName: true } })).map(
+          ({ id, ruleName }) => [id, ruleName ?? undefined],
+        ),
+  );
+  return ids.map((id) => (id ? names.get(id) : undefined));
+}
+
 export function createPrismaNotificationStore(database: PrismaClient): NotificationStore {
   return {
     findRequestState(requestId) {
@@ -44,8 +66,13 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
       });
     },
     async escalatedAt(requestId, occurredAt) {
-      // SPEC 2026-11-06-escalonamento, 4.5: the escalation is written with the breach's instant.
-      return (await database.requestEscalation.count({ where: { requestId, occurredAt } })) > 0;
+      // SPEC 2026-11-06-escalonamento, 4.5: the escalation is written with the breach's instant. Only
+      // the option's: a rule applied in the same run has its own warning (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3).
+      return (await database.requestEscalation.count({ where: { requestId, occurredAt, trigger: "OVERDUE" } })) > 0;
+    },
+    async escalationRecipientIds(escalationId) {
+      const row = await database.requestEscalation.findUnique({ where: { id: escalationId }, select: { notifiedUserIds: true } });
+      return row?.notifiedUserIds ?? [];
     },
     async approvalDeciderIds(sectorId) {
       const managers = await database.user.findMany({
@@ -134,9 +161,10 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
           event: { select: { payload: true } },
         },
       });
-      const stageNames = await stageNamesOf(database, rows);
+      const [stageNames, ruleNames] = await Promise.all([stageNamesOf(database, rows), ruleNamesOf(database, rows)]);
       return rows.map((row, index) => {
         const stageName = stageNames[index];
+        const ruleName = ruleNames[index];
         return {
           id: row.id,
           requestId: row.requestId,
@@ -145,6 +173,7 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
           readAt: row.readAt,
           serviceName: row.request.serviceNameSnapshot,
           ...(stageName ? { stageName } : {}),
+          ...(ruleName ? { ruleName } : {}),
         };
       });
     },

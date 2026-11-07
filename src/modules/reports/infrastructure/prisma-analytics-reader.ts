@@ -298,8 +298,22 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
         SELECT count(DISTINCT e."requestId")::int AS "count"
         FROM "RequestEscalation" e
         JOIN "Request" r ON r."id" = e."requestId"
-        WHERE e."occurredAt" >= ${range.from} AND e."occurredAt" < ${range.before} ${scopeSql(scope)}`;
+        WHERE e."trigger" = 'OVERDUE'
+          AND e."occurredAt" >= ${range.from} AND e."occurredAt" < ${range.before} ${scopeSql(scope)}`;
       return row?.count ?? 0;
+    },
+
+    async ruleEscalations(scope, range) {
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: requests, per trigger.
+      const [row] = await database.$queryRaw<Array<{ dueSoon: number; overdueDays: number }>>`
+        SELECT
+          count(DISTINCT e."requestId") FILTER (WHERE e."trigger" = 'DUE_SOON')::int AS "dueSoon",
+          count(DISTINCT e."requestId") FILTER (WHERE e."trigger" = 'OVERDUE_DAYS')::int AS "overdueDays"
+        FROM "RequestEscalation" e
+        JOIN "Request" r ON r."id" = e."requestId"
+        WHERE e."trigger" <> 'OVERDUE'
+          AND e."occurredAt" >= ${range.from} AND e."occurredAt" < ${range.before} ${scopeSql(scope)}`;
+      return { dueSoon: row?.dueSoon ?? 0, overdueDays: row?.overdueDays ?? 0 };
     },
 
     async overdueApprovals(scope, range, now) {

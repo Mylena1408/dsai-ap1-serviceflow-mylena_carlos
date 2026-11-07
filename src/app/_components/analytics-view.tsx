@@ -228,6 +228,14 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
             value={String(sla.escalated)}
             detail="setores com escalonamento ligado"
           />
+          {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: only once a rule escalated. */}
+          {sla.escalatedByRule.dueSoon + sla.escalatedByRule.overdueDays > 0 ? (
+            <Indicator
+              label="Escaladas por regra"
+              value={String(sla.escalatedByRule.dueSoon + sla.escalatedByRule.overdueDays)}
+              detail={`${sla.escalatedByRule.dueSoon} próximas do vencimento · ${sla.escalatedByRule.overdueDays} vencidas há N dias`}
+            />
+          ) : null}
           {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */}
           <Indicator
             label="Aprovações atrasadas"

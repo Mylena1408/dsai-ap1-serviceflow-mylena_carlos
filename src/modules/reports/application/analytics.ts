@@ -22,7 +22,7 @@ import {
 import type { CompletionTimes } from "../domain/metrics";
 import { onTimePercentage } from "../domain/metrics";
 import { parseReportPeriod, type ReportPeriod, type ReportPeriodError } from "../domain/period";
-import type { AnalyticsReader, AttendantQueueCounts, WorkTotals } from "./analytics-ports";
+import type { AnalyticsReader, AttendantQueueCounts, RuleEscalationCounts, WorkTotals } from "./analytics-ports";
 import { resolveScope, type DashboardAudience, type SectorFilterError } from "./dashboard";
 import type { ReportSector } from "./ports";
 
@@ -77,8 +77,10 @@ export interface Analytics {
     onTimeByService: OnTimeGroup[];
     onTimeByPriority: OnTimeGroup[];
     arrivals: ArrivalGrid;
-    /** SPEC 2026-11-06-escalonamento, 2.4. */
+    /** SPEC 2026-11-06-escalonamento, 2.4: by the sector's option. */
     escalated: number;
+    /** SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: by the rules, per trigger. */
+    escalatedByRule: RuleEscalationCounts;
     /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
     overdueApprovals: number;
   };
@@ -161,6 +163,7 @@ const EMPTY_ANALYTICS_SLA: Analytics["sla"] = {
   onTimeByPriority: [],
   arrivals: arrivalGrid([]),
   escalated: 0,
+  escalatedByRule: { dueSoon: 0, overdueDays: 0 },
   overdueApprovals: 0,
 };
 
@@ -194,7 +197,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
   const range = { from: period.from, before: period.before };
   // The pending count of an interval that has not ended yet is the count now.
   const ends = intervals.map((item) => (item.end.getTime() > now.getTime() ? now : item.end));
-  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings, escalated, overdueApprovals] = await Promise.all([
+  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings, escalated, overdueApprovals, escalatedByRule] = await Promise.all([
     reader.dailyCounts(scope, range),
     reader.pendingAt(scope, ends),
     reader.firstResponse(scope, range),
@@ -207,6 +210,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.satisfaction(scope, range),
     reader.escalations(scope, range),
     reader.overdueApprovals ? reader.overdueApprovals(scope, range, now) : Promise.resolve(0),
+    reader.ruleEscalations ? reader.ruleEscalations(scope, range) : Promise.resolve({ dueSoon: 0, overdueDays: 0 }),
   ]);
 
   return {
@@ -231,6 +235,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
       ),
       arrivals: arrivalGrid(arrivals),
       escalated,
+      escalatedByRule,
       overdueApprovals,
     },
     team: teamTable(team),

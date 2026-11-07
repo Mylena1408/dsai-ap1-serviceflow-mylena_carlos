@@ -10,7 +10,8 @@ import type { NotificationRecord, NotificationRequestState, NotificationStore } 
 export const RECENT_NOTIFICATIONS = 50;
 
 // The late stage reaches the same people as the SLA alerts (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2).
-const SLA_EVENTS = new Set(["request.sla_warning", "request.sla_breached", "request.stage_overdue"]);
+// The rule's warning checks the same "still in the attendance" (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3).
+const SLA_EVENTS = new Set(["request.sla_warning", "request.sla_breached", "request.stage_overdue", "request.escalated"]);
 
 /** SPEC 2026-11-01, section 5.5: the sector team is loaded only when nobody holds the request. */
 async function slaRecipients(store: NotificationStore, request: NotificationRequestState, assigneeId: string | null) {
@@ -46,6 +47,10 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         effectiveAssigneeId: assigneeId,
         ...(SLA_EVENTS.has(event.type) ? { slaRecipients: await slaRecipients(store, request, assigneeId) } : {}),
         approvalState: request.approvalState,
+        // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 4: the people the rule warned.
+        ...(event.type === "request.escalated" && typeof event.payload.escalationId === "string"
+          ? { ruleRecipientIds: (await store.escalationRecipientIds?.(event.payload.escalationId)) ?? [] }
+          : {}),
         // SPEC 2026-11-06-escalonamento, 4.5: managers only when this breach escalated the request.
         ...(event.type === "request.sla_breached" && (await store.escalatedAt(event.requestId, event.occurredAt))
           ? { escalationManagerIds: await store.sectorManagerIds(request.sectorId) }

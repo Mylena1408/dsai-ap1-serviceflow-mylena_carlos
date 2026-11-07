@@ -385,13 +385,15 @@ model RequestStatusEvent {
 model RequestAssignmentEvent {
   id             String   @id @default(uuid()) @db.Uuid
   requestId      String   @db.Uuid
-  actorId        String   @db.Uuid
+  /// Null when the system made the change: an escalation rule's handover (SPEC
+  /// 2026-11-06-aprofundamento-configurabilidade, 7.3 item 3, decision G17).
+  actorId        String?  @db.Uuid
   fromAssigneeId String?  @db.Uuid
   toAssigneeId   String?  @db.Uuid
   occurredAt     DateTime @default(now()) @db.Timestamptz
 
   request      Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  actor        User    @relation("RequestAssignmentEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+  actor        User?   @relation("RequestAssignmentEventActor", fields: [actorId], references: [id], onDelete: Restrict)
   fromAssignee User?   @relation("RequestAssignmentEventFrom", fields: [fromAssigneeId], references: [id], onDelete: Restrict)
   toAssignee   User?   @relation("RequestAssignmentEventTo", fields: [toAssigneeId], references: [id], onDelete: Restrict)
 
@@ -806,6 +808,8 @@ model RequestEscalation {
   assignedToId      String?           @db.Uuid
   /// The rule had an attendant who was not available, so the handover was skipped (7.3 item 3).
   assignmentSkipped Boolean           @default(false)
+  /// Whom the rule warned (7.3 item 4); the notification consumer reads them from here.
+  notifiedUserIds   String[]          @default([]) @db.Uuid
 
   request    Request               @relation(fields: [requestId], references: [id], onDelete: Restrict)
   rule       SectorEscalationRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)

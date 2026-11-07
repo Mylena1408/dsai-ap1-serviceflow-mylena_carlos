@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import type { NotificationType } from "../domain/recipients";
 import type { EmailDeliveryLog, EmailDeliveryStore } from "../application/ports";
-import { stageNamesOf } from "./prisma-notification-store";
+import { ruleNamesOf, stageNamesOf } from "./prisma-notification-store";
 
 export function createPrismaEmailStore(database: PrismaClient): EmailDeliveryStore {
   return {
@@ -54,7 +54,8 @@ export function createPrismaEmailStore(database: PrismaClient): EmailDeliverySto
           },
         },
       });
-      const stageNames = await stageNamesOf(database, rows.map(({ notification }) => notification));
+      const sources = rows.map(({ notification }) => notification);
+      const [stageNames, ruleNames] = await Promise.all([stageNamesOf(database, sources), ruleNamesOf(database, sources)]);
 
       return {
         now,
@@ -65,6 +66,7 @@ export function createPrismaEmailStore(database: PrismaClient): EmailDeliverySto
             requestId: notification.requestId,
             serviceName: notification.request.serviceNameSnapshot,
             ...(stageNames[index] ? { stageName: stageNames[index] } : {}),
+            ...(ruleNames[index] ? { ruleName: ruleNames[index] } : {}),
           },
         })),
       };

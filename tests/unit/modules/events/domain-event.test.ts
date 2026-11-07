@@ -42,6 +42,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.approval_overdue",
       // 5.3.2.
       "request.stage_overdue",
+      // 7.3.
+      "request.escalated",
     ]);
     expect(
       outboxPayload({

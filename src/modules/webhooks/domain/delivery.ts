@@ -31,6 +31,8 @@ export const WEBHOOK_EVENT_LABELS: Record<DomainEventType, string> = {
   "request.approval_overdue": "Aprovação atrasada",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2.
   "request.stage_overdue": "Etapa atrasada",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3.
+  "request.escalated": "Regra de escalonamento aplicada",
 };
 
 export function normalizeWebhookName(raw: string): string | null {

@@ -34,6 +34,8 @@ import { createPrismaSatisfactionStore } from "./infrastructure/prisma-satisfact
 import { createPrismaSlaAlertStore } from "./infrastructure/prisma-sla-alerts";
 import { createPrismaApprovalDeadlineStore } from "./infrastructure/prisma-approval-deadline-alerts";
 import { createPrismaStageDeadlineStore } from "./infrastructure/prisma-stage-deadline-alerts";
+import * as ruleRuns from "./application/escalation-rule-runs";
+import { createPrismaEscalationRuleRunStore } from "./infrastructure/prisma-escalation-rule-runs";
 import {
   createPrismaRequestQueryRepository,
   createPrismaRequestTransaction,
@@ -280,6 +282,12 @@ export async function cleanOrphanAttachmentObjects(
 export type { SlaAlertSummary } from "./application/sla-alerts";
 export type { ApprovalDeadlineSummary } from "./application/approval-deadline-alerts";
 export type { StageDeadlineSummary } from "./application/stage-deadline-alerts";
+export type { EscalationRuleSummary } from "./application/escalation-rule-runs";
+
+/** Daily job step: applies the sectors' escalation rules (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3). */
+export async function applyEscalationRules(now: Date, database: PrismaClient = prisma): Promise<ruleRuns.EscalationRuleSummary> {
+  return ruleRuns.applyEscalationRules(now, createPrismaEscalationRuleRunStore(database));
+}
 
 /** Daily job step: announces the late stages (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2). */
 export async function recordStageDeadlineAlerts(now: Date, database: PrismaClient = prisma): Promise<stageDeadlines.StageDeadlineSummary> {
@@ -391,8 +399,22 @@ export async function listRequestEscalations(
     listForRequest: (id) =>
       database.requestEscalation.findMany({
         where: { requestId: id },
-        orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
-        select: { fromPriority: true, toPriority: true, occurredAt: true },
-      }),
+        // The option and the rules of one run share the instant: the option first, then by trigger
+        // (enum order), so the block reads the same every time.
+        orderBy: [{ occurredAt: "asc" }, { trigger: "asc" }, { overdueDays: "asc" }, { id: "asc" }],
+        // The trigger and the rule's actions (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5).
+        select: {
+          id: true,
+          fromPriority: true,
+          toPriority: true,
+          occurredAt: true,
+          trigger: true,
+          overdueDays: true,
+          ruleName: true,
+          assignmentSkipped: true,
+          notifiedUserIds: true,
+          assignedTo: { select: { id: true, name: true } },
+        },
+      }).then((rows) => rows.map(({ notifiedUserIds, ...row }) => ({ ...row, notifiedCount: notifiedUserIds.length }))),
   });
 }

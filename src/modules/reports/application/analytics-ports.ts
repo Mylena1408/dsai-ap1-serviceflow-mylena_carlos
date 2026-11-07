@@ -82,11 +82,22 @@ export interface AnalyticsReader {
   team(scope: DashboardScope, range: DashboardRange): Promise<TeamMemberRow[]>;
   /** SPEC 2026-11-06-pesquisa-satisfacao, 4.7: numbers only, never a comment. */
   satisfaction(scope: DashboardScope, range: DashboardRange): Promise<SatisfactionRows>;
-  /** SPEC 2026-11-06-escalonamento, 2.4: requests escalated in the range. */
+  /**
+   * SPEC 2026-11-06-escalonamento, 2.4: requests escalated in the range by the sector's option
+   * (the rules are counted apart, SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5).
+   */
   escalations(scope: DashboardScope, range: DashboardRange): Promise<number>;
+  /** 7.3 item 5: requests escalated by a rule in the range, per trigger. Optional for older doubles. */
+  ruleEscalations?(scope: DashboardScope, range: DashboardRange): Promise<RuleEscalationCounts>;
   /**
    * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: approval levels whose deadline fell in
    * the range and that were decided after it or are still pending past it. Optional for older doubles.
    */
   overdueApprovals?(scope: DashboardScope, range: DashboardRange, now: Date): Promise<number>;
+}
+
+/** Requests escalated by a rule, per trigger (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5). */
+export interface RuleEscalationCounts {
+  dueSoon: number;
+  overdueDays: number;
 }

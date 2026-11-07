@@ -71,11 +71,12 @@ export interface RequestStatusEventRecord {
 export interface RequestAssignmentEventRecord {
   id: string;
   requestId: string;
-  actorId: string;
+  /** Null when an escalation rule made the handover (SPEC 2026-11-06-aprofundamento-configurabilidade, decision G17). */
+  actorId: string | null;
   fromAssigneeId: string | null;
   toAssigneeId: string | null;
   occurredAt: Date;
-  actor: { id: string; name: string };
+  actor: { id: string; name: string } | null;
   fromAssignee: { id: string; name: string } | null;
   toAssignee: { id: string; name: string } | null;
 }

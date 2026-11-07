@@ -60,9 +60,15 @@ export interface MessageSource {
   type: NotificationType;
   serviceName: string;
   stageName?: string;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 4: the rule that warned. */
+  ruleName?: string;
 }
 
 export function notificationMessage(notification: MessageSource): string {
+  // A rule's warning names the rule; the option's keeps its text (SPEC de escalonamento, 4.5).
+  if (notification.type === "sla.escalated" && notification.ruleName) {
+    return `Escalonamento "${notification.ruleName}": ${notification.serviceName}`;
+  }
   return (MESSAGES[notification.type] ?? ((service: string) => `Novidade em ${service}`))(
     notification.serviceName,
     notification.stageName,

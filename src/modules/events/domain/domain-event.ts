@@ -22,7 +22,8 @@ export type DomainEvent =
       type: "request.assignment_changed";
       requestId: string;
       occurredAt: Date;
-      payload: { fromAssigneeId: string | null; toAssigneeId: string | null; actorId: string };
+      // actorId is null for an escalation rule's handover (SPEC 2026-11-06-aprofundamento-configurabilidade, G17).
+      payload: { fromAssigneeId: string | null; toAssigneeId: string | null; actorId: string | null };
     }
   | {
       type: "request.comment_added";
@@ -90,6 +91,14 @@ export type DomainEvent =
       payload: { stageIndex: number };
     }
   | {
+      // An escalation rule applied to the request (SPEC 2026-11-06-aprofundamento-configurabilidade,
+      // 7.3); the consumer reloads the escalation row for the people to warn.
+      type: "request.escalated";
+      requestId: string;
+      occurredAt: Date;
+      payload: { escalationId: string };
+    }
+  | {
       // A pending approval level passed its deadline (SPEC 2026-11-06-aprofundamento-configurabilidade,
       // 4.3.6). Written by the daily job, once per level; the sector names who decides it.
       type: "request.approval_overdue";
@@ -124,6 +133,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.sla_resumed",
   "request.approval_overdue",
   "request.stage_overdue",
+  "request.escalated",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -142,6 +152,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.sla_resumed": ["pauseId", "actorId", "cause"],
   "request.approval_overdue": ["level", "sectorId"],
   "request.stage_overdue": ["stageIndex"],
+  "request.escalated": ["escalationId"],
 };
 
 /**

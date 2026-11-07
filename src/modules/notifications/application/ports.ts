@@ -10,6 +10,8 @@ export interface NotificationRecord {
   serviceName: string;
   /** Stage entered, for "stage.changed" while its event is still kept (SPEC de fluxos, 5.5). */
   stageName?: string;
+  /** Rule applied, for a rule's "sla.escalated" (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3). */
+  ruleName?: string;
 }
 
 export interface NotificationRequestState {
@@ -32,8 +34,13 @@ export interface NotificationStore {
    * older doubles: absent = the managers only.
    */
   approvalDeciderIds?(sectorId: string): Promise<string[]>;
-  /** Whether the request was escalated at that instant (SPEC 2026-11-06-escalonamento, 4.5). */
+  /** Whether the sector's option escalated the request at that instant (SPEC 2026-11-06-escalonamento, 4.5). */
   escalatedAt(requestId: string, occurredAt: Date): Promise<boolean>;
+  /**
+   * The people an escalation rule warned (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 4).
+   * Optional for older doubles: absent = nobody.
+   */
+  escalationRecipientIds?(escalationId: string): Promise<string[]>;
   /** Active attendants of a sector (SLA alerts without an assignee). */
   sectorAttendantIds(sectorId: string): Promise<string[]>;
   /** The subset of `userIds` that are active. */
@@ -86,7 +93,7 @@ export interface PendingEmailDelivery extends EmailDeliveryState {
   id: string;
   /** Read at sending time: the current address, state and profile (5.3.4). */
   recipient: { email: string; isActive: boolean; role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER" };
-  notification: { type: NotificationType; requestId: string; serviceName: string; stageName?: string };
+  notification: { type: NotificationType; requestId: string; serviceName: string; stageName?: string; ruleName?: string };
 }
 
 export interface EmailDeliveryStore {
