@@ -1831,7 +1831,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-173 — Regras de escalonamento: migrations, domínio e configuração
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107700000_escalation_rules`; regras do domínio (gatilho e N, efeito, pessoas do setor, limite de 5 ativas, textos); casos de uso com auditoria (criar, editar, desativar, reativar, apagar); "Regras de escalonamento" em "Setores"; auditoria com o gatilho e as pessoas pelos nomes. A aplicação pelo job fica na SF-174.
 - **Objetivo:** Seção 7.3 (regras 1 e 6), parte E.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/` (escalonamento), administração de setores, auditoria.
 - **Dependências:** SF-172.

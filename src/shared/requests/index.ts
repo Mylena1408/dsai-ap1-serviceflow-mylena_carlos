@@ -28,6 +28,16 @@ export const PRIORITY_LABELS: Record<PriorityValue, string> = {
   URGENT: "Urgente",
 };
 
+/** What escalated a request (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.1). */
+export const ESCALATION_TRIGGERS = ["OVERDUE", "DUE_SOON", "OVERDUE_DAYS"] as const;
+export type EscalationTriggerValue = (typeof ESCALATION_TRIGGERS)[number];
+
+export const ESCALATION_TRIGGER_LABELS: Record<EscalationTriggerValue, string> = {
+  OVERDUE: "Vencida (opção do setor)",
+  DUE_SOON: "Próxima do vencimento",
+  OVERDUE_DAYS: "Vencida há N dias",
+};
+
 /** SPEC 2026-11-01-aprovacoes, 5.7. */
 export const APPROVAL_LABELS = {
   PENDING: "Aguardando aprovação",

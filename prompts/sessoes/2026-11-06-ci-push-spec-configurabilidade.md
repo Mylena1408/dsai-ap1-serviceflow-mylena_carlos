@@ -90,3 +90,7 @@
 > pode iniciar a SF-172
 
 22. SF-172: seção "Papéis", painel de papéis do usuário, data de fim nas permissões, auditoria e E2E da parte D (ver `NOTES.md`).
+
+> pode iniciar a SF-173
+
+23. SF-173: migration das regras de escalonamento, domínio, casos de uso com auditoria e tela em "Setores" (ver `NOTES.md`).

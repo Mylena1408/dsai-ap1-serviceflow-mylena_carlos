@@ -33,6 +33,8 @@ export const AUDIT_ENTITY_TYPES = [
   "KNOWLEDGE_ARTICLE",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.3.
   "ACCESS_ROLE",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4.
+  "ESCALATION_RULE",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -65,6 +67,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   // The text can be long: the record says it changed, without copying it.
   KNOWLEDGE_ARTICLE: ["body"],
   ACCESS_ROLE: [],
+  ESCALATION_RULE: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -97,6 +100,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   HOLIDAY: "Feriado",
   KNOWLEDGE_ARTICLE: "Artigo da base de conhecimento",
   ACCESS_ROLE: "Papel de acesso",
+  ESCALATION_RULE: "Regra de escalonamento",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -140,6 +144,14 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   expiresAt: "Válido até",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.1.
   permissions: "Permissões",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3.
+  trigger: "Gatilho",
+  overdueDays: "Dias de atraso",
+  raisePriority: "Subir a prioridade",
+  assignToId: "Atribuir a",
+  notifyManagers: "Avisar os gestores do setor",
+  notifyTeam: "Avisar a equipe do setor",
+  notifyUserIds: "Avisar as pessoas",
   revokedAt: "Revogado em",
   url: "Endereço",
   eventTypes: "Eventos",
@@ -262,6 +274,18 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   HOLIDAY: ["day", "name", "yearly"],
   KNOWLEDGE_ARTICLE: ["serviceId", "title", "body", "isPublished", "position"],
   ACCESS_ROLE: ["name", "description", "permissions", "isActive"],
+  ESCALATION_RULE: [
+    "sectorId",
+    "name",
+    "trigger",
+    "overdueDays",
+    "raisePriority",
+    "assignToId",
+    "notifyManagers",
+    "notifyTeam",
+    "notifyUserIds",
+    "isActive",
+  ],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

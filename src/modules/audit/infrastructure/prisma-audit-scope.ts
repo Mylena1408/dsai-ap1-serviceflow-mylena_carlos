@@ -158,6 +158,25 @@ async function loadState(
       });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4. A deleted rule leaves no row (DELETED).
+    case "ESCALATION_RULE": {
+      const row = await transaction.sectorEscalationRule.findUnique({
+        where: { id },
+        select: {
+          sectorId: true,
+          name: true,
+          trigger: true,
+          overdueDays: true,
+          raisePriority: true,
+          assignToId: true,
+          notifyManagers: true,
+          notifyTeam: true,
+          notifyUserIds: true,
+          isActive: true,
+        },
+      });
+      return row && { label: row.name, state: row };
+    }
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };

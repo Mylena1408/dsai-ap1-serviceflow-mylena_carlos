@@ -12,6 +12,22 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "dependency" && entity === "permissions") {
     return "Usuários inativos não recebem permissões.";
   }
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3: escalation rules.
+  if (error === "validation" && entity === "escalationRuleDays") {
+    return "Em “vencida há N dias”, informe N de 1 a 30; em “próxima do vencimento”, deixe N em branco.";
+  }
+  if (error === "validation" && entity === "escalationRuleEmpty") {
+    return "Escolha pelo menos uma ação ou uma pessoa para avisar.";
+  }
+  if (error === "validation" && entity === "escalationRulePeople") {
+    return "Escolha atendentes e gestores ativos do próprio setor.";
+  }
+  if (error === "validation" && entity === "escalationRules") {
+    return "Confira a regra: nome de 1 a 60 caracteres e um gatilho válido.";
+  }
+  if (error === "dependency" && entity === "escalationRules") {
+    return "Não foi possível: o setor já tem 5 regras ativas, ou outra regra ativa usa o mesmo nome ou o mesmo gatilho.";
+  }
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: roles and ends.
   if (error === "validation" && (entity === "permissionValidity" || entity === "roleValidity")) {
     return "Informe uma data de fim entre hoje e 365 dias à frente, ou deixe em branco para não ter fim.";
@@ -80,6 +96,8 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (notice === "created" && entity === "holidays") return "Feriado cadastrado.";
   if (notice === "deleted" && entity === "holidays") return "Feriado removido.";
   if (notice === "created" && entity === "roles") return "Papel criado.";
+  if (notice === "created" && entity === "escalationRules") return "Regra de escalonamento criada.";
+  if (notice === "deleted" && entity === "escalationRules") return "Regra apagada. Os escalonamentos já feitos continuam no histórico.";
   if (notice === "updated" && entity === "roleAssignments") return "Papéis do usuário atualizados. Valem na próxima operação da pessoa.";
   if (notice === "created") return "Registro criado.";
   if (notice === "updated") return "Alterações salvas.";

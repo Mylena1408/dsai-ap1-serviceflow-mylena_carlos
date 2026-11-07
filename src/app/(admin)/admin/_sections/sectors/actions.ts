@@ -1,7 +1,11 @@
 "use server";
 
 import {
+  createEscalationRule,
   createSector,
+  deleteEscalationRule,
+  setEscalationRuleActive,
+  updateEscalationRule,
   setSectorActive,
   setSectorEscalation,
   updateSector,
@@ -9,6 +13,7 @@ import {
 import {
   activeState,
   createFailure,
+  escalationRuleFailureEntity,
   field,
   finish,
   finishCreate,
@@ -67,4 +72,54 @@ export async function setSectorEscalationAction(formData: FormData): Promise<nev
     reportFailure("sectors", section, error);
   }
   return finish("sectors", "status", section);
+}
+
+// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3: the escalation rules of a sector.
+function ruleSettings(formData: FormData) {
+  return {
+    name: field(formData, "name"),
+    trigger: field(formData, "trigger"),
+    overdueDays: field(formData, "overdueDays"),
+    raisePriority: field(formData, "raisePriority") === "true",
+    assignToId: field(formData, "assignToId"),
+    notifyManagers: field(formData, "notifyManagers") === "true",
+    notifyTeam: field(formData, "notifyTeam") === "true",
+    notifyUserIds: formData.getAll("notifyUserIds").filter((value): value is string => typeof value === "string"),
+  };
+}
+
+export async function createEscalationRuleAction(formData: FormData): Promise<never> {
+  try {
+    await createEscalationRule({ sectorId: field(formData, "sectorId"), ...ruleSettings(formData) });
+  } catch (error) {
+    reportFailure(escalationRuleFailureEntity(error), "sectors", error);
+  }
+  return finish("escalationRules", "created", "sectors");
+}
+
+export async function updateEscalationRuleAction(formData: FormData): Promise<never> {
+  try {
+    await updateEscalationRule(field(formData, "id"), ruleSettings(formData));
+  } catch (error) {
+    reportFailure(escalationRuleFailureEntity(error), "sectors", error);
+  }
+  return finish("escalationRules", "updated", "sectors");
+}
+
+export async function toggleEscalationRuleAction(formData: FormData): Promise<never> {
+  try {
+    await setEscalationRuleActive(field(formData, "id"), activeState(formData));
+  } catch (error) {
+    reportFailure("escalationRules", "sectors", error);
+  }
+  return finish("escalationRules", "status", "sectors");
+}
+
+export async function deleteEscalationRuleAction(formData: FormData): Promise<never> {
+  try {
+    await deleteEscalationRule(field(formData, "id"));
+  } catch (error) {
+    reportFailure("escalationRules", "sectors", error);
+  }
+  return finish("escalationRules", "deleted", "sectors");
 }

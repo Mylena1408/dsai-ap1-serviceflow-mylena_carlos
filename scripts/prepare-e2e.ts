@@ -68,6 +68,7 @@ async function prepareDatabase(): Promise<void> {
       database.service.deleteMany(),
       database.auditEntry.deleteMany(),
       database.managerAbsence.deleteMany(),
+      database.sectorEscalationRule.deleteMany(),
       database.userAccessRoleEvent.deleteMany(),
       database.userAccessRole.deleteMany(),
       database.accessRole.deleteMany(),

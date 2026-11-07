@@ -81,6 +81,8 @@ enum AuditEntityType {
   KNOWLEDGE_ARTICLE
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.3.
   ACCESS_ROLE
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4.
+  ESCALATION_RULE
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -158,6 +160,8 @@ model Sector {
   cannedResponses  CannedResponse[]
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4: requests whose pending level is this sector.
   pendingApprovals Request[]            @relation("RequestApprovalPendingSector")
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.
+  escalationRules  SectorEscalationRule[]
 }
 
 model Category {
@@ -230,6 +234,9 @@ model User {
   accessRolesAssigned    UserAccessRole[]           @relation("UserAccessRoleAssigner")
   accessRoleEvents       UserAccessRoleEvent[]      @relation("UserAccessRoleEventUser")
   accessRoleEventsActed  UserAccessRoleEvent[]      @relation("UserAccessRoleEventActor")
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.
+  escalationRulesAssigned SectorEscalationRule[]    @relation("SectorEscalationRuleAssignee")
+  escalationsAssigned     RequestEscalation[]       @relation("RequestEscalationAssignee")
 }
 
 model Service {
@@ -785,11 +792,53 @@ model RequestEscalation {
   fromPriority RequestPriority
   toPriority   RequestPriority
   occurredAt   DateTime        @db.Timestamptz
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4: the existing rows came from the option.
+  trigger           EscalationTrigger @default(OVERDUE)
+  /// The N of "vencida há N dias", copied from the rule.
+  overdueDays       Int?
+  /// The rule applied; null for the option or after the rule was deleted (7.3 item 6).
+  ruleId            String?           @db.Uuid
+  /// The rule's name when applied, so the detail keeps it after edits and deletion.
+  ruleName          String?
+  /// The request's due date when applied: a rule applies once per request and due date (7.3 item 2).
+  dueAt             DateTime?         @db.Timestamptz
+  /// Whom the rule handed the request to, or null.
+  assignedToId      String?           @db.Uuid
+  /// The rule had an attendant who was not available, so the handover was skipped (7.3 item 3).
+  assignmentSkipped Boolean           @default(false)
 
-  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  request    Request               @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  rule       SectorEscalationRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  assignedTo User?                 @relation("RequestEscalationAssignee", fields: [assignedToId], references: [id], onDelete: Restrict)
 
   @@index([requestId])
   @@index([occurredAt])
+}
+
+/// An escalation rule of a sector (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.1 to 7.4),
+/// besides the "Escalar solicitações vencidas" option. The shape is checked in SQL.
+model SectorEscalationRule {
+  id             String            @id @default(uuid()) @db.Uuid
+  sectorId       String            @db.Uuid
+  name           String            @db.Citext
+  /// DUE_SOON or OVERDUE_DAYS; OVERDUE belongs to the option only.
+  trigger        EscalationTrigger
+  /// 1 to 30, only with OVERDUE_DAYS.
+  overdueDays    Int?
+  raisePriority  Boolean           @default(false)
+  assignToId     String?           @db.Uuid
+  notifyManagers Boolean           @default(false)
+  notifyTeam     Boolean           @default(false)
+  notifyUserIds  String[]          @default([]) @db.Uuid
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now()) @db.Timestamptz
+  updatedAt      DateTime          @updatedAt @db.Timestamptz
+
+  sector      Sector              @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  assignTo    User?               @relation("SectorEscalationRuleAssignee", fields: [assignToId], references: [id], onDelete: Restrict)
+  escalations RequestEscalation[]
+
+  @@index([sectorId])
 }
 
 /// A knowledge base article of a service (SPEC 2026-11-06-base-conhecimento, 4 and 5). Limits and
@@ -811,6 +860,14 @@ model KnowledgeArticle {
   updatedBy User    @relation("KnowledgeArticleUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
 
   @@unique([serviceId, title])
+}
+
+/// What escalated a request (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4): the sector's
+/// "Escalar solicitações vencidas" option (OVERDUE) or a rule of the sector.
+enum EscalationTrigger {
+  OVERDUE
+  DUE_SOON
+  OVERDUE_DAYS
 }
 
 enum SlaResumeCause {

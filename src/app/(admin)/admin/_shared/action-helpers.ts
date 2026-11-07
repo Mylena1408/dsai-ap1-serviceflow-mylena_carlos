@@ -8,7 +8,9 @@ import { validateInput } from "@/server/validation";
 
 export type Entity = "sectors" | "categories" | "users" | "services" | "documentRequirements" | "serviceFields" | "serviceStages" | "permissions" | "anonymization" | "apiTokens" | "webhooks" | "webhookDeliveries" | "calendar" | "holidays"
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.
-  | "roles" | "roleAssignments" | "permissionValidity" | "roleValidity";
+  | "roles" | "roleAssignments" | "permissionValidity" | "roleValidity"
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3.
+  | "escalationRules" | "escalationRuleDays" | "escalationRuleEmpty" | "escalationRulePeople";
 // "sector-services" is the page of a "Gerir serviços do setor" holder (SPEC de permissões, 5.3.1).
 export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services" | "api-tokens" | "webhooks" | "calendar" | "roles";
 
@@ -194,6 +196,16 @@ export function activeState(formData: FormData): boolean {
 /** A refused end (SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.2) has its own message. */
 export function isValidityFailure(error: unknown): boolean {
   return error instanceof ValidationError && error.issues.some(({ path }) => path.includes("expiresOn"));
+}
+
+/** Which message a refused escalation rule gets (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3). */
+export function escalationRuleFailureEntity(error: unknown): Entity {
+  if (!(error instanceof ValidationError)) return "escalationRules";
+  const paths = error.issues.map(({ path }) => String(path[0]));
+  if (paths.includes("overdueDays")) return "escalationRuleDays";
+  if (paths.includes("actions")) return "escalationRuleEmpty";
+  if (paths.includes("assignToId") || paths.includes("notifyUserIds")) return "escalationRulePeople";
+  return "escalationRules";
 }
 
 export function selectedSection(formData: FormData): AdminSection {

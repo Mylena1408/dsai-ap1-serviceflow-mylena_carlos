@@ -97,6 +97,12 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "expiresOn",
   "roleId",
   "permissions",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3.
+  "trigger",
+  "overdueDays",
+  "assignToId",
+  "notifyUserIds",
+  "actions",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

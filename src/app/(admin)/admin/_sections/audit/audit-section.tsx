@@ -12,7 +12,7 @@ import {
 import { API_TOKEN_SCOPE_LABELS } from "@/modules/api-tokens";
 import { WEBHOOK_EVENT_LABELS } from "@/modules/webhooks";
 import { FIELD_TYPE_LABELS, ROLE_LABELS } from "@/shared/admin-labels";
-import { PRIORITY_LABELS } from "@/shared/requests";
+import { ESCALATION_TRIGGER_LABELS, PRIORITY_LABELS } from "@/shared/requests";
 import { PERIOD_ERRORS } from "@/app/_components/dashboard-view";
 import { PERMISSION_LABELS } from "../../user-permissions-panel";
 
@@ -50,6 +50,14 @@ export function auditValueFormatter(names: Record<string, string>) {
     if (field === "permissions" && Array.isArray(value)) {
       return value.map((permission) => (PERMISSION_LABELS as Record<string, string>)[permission] ?? permission).join(", ");
     }
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4: the people an escalation rule warns.
+    if (field === "notifyUserIds" && Array.isArray(value)) {
+      return value.length === 0 ? "Ninguém" : value.map((id) => names[id] ?? "(removido)").join(", ");
+    }
+    if (field === "trigger" && typeof value === "string") {
+      return ESCALATION_TRIGGER_LABELS[value as keyof typeof ESCALATION_TRIGGER_LABELS] ?? value;
+    }
+    if (field === "assignToId" && typeof value === "string") return names[value] ?? "(removido)";
     if (typeof value !== "string") return undefined;
     if (field === "sectorId" || field === "categoryId") return names[value] ?? "(removido)";
     if (field === "role") return ROLE_LABELS[value as keyof typeof ROLE_LABELS];

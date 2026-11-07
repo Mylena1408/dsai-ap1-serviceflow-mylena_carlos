@@ -2219,3 +2219,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** o leitor da trilha passou a trazer o `expiresOn` dos eventos de permissão ("Concedeu · Permissão · … até 01/12/2026"); as permissões do papel aparecem pelos nomes.
 - **Resultados:** typecheck, lint e build OK; unitários 1322/1322; integração 515/515; E2E 36/36.
 - **Linhas:** 949 `added` (aplicação 478, testes 471). Parte D inteira (SF-171 e SF-172): 2.150.
+
+## SF-173 — Regras de escalonamento: banco, domínio e configuração (2026-11-07)
+
+- **Banco:** enum `EscalationTrigger` (`OVERDUE` = a opção "Escalar solicitações vencidas"; `DUE_SOON` e `OVERDUE_DAYS` = regras). `SectorEscalationRule` com `CHECK` do nome, da combinação gatilho/N (N de 1 a 30 só em "vencida há N dias"), das pessoas (função `escalation_rule_people_valid`: até 10, sem nulo nem repetição) e de "pelo menos uma ação ou destinatário"; índices únicos parciais do nome e de (gatilho, N) entre as ativas do setor. `RequestEscalation` ganhou gatilho (padrão `OVERDUE`), N, regra (`SET NULL` ao apagar), cópia do nome, `dueAt`, atendente e `assignmentSkipped`, com `CHECK` que separa as linhas da opção das linhas de regra e índice único (`requestId`, `ruleId`, `dueAt`).
+- **Nome da regra:** a SPEC não listava um nome em 7.4, mas o aviso da regra 4 o usa; acrescentei, com cópia no escalonamento para sobreviver a edições e à exclusão (registrado na SPEC).
+- **Configuração:** módulo `sectors` (domínio, casos de uso, Prisma); só o administrador; limite de 5 ativas, combinação e nome conferidos na transação serializável e pelos índices; atendente para atribuir só ativo do setor; pessoas a avisar só atendentes e gestores ativos do setor. Tela em "Setores", abaixo da opção existente, com mensagens fixas para N, regra sem efeito, pessoas e limite.
+- **Auditoria:** entidade `ESCALATION_RULE`; o leitor dos nomes da trilha passou a incluir pessoas, para mostrar "Atribuir a" e "Avisar as pessoas" pelos nomes atuais.
+- **Resultados:** typecheck, lint e build OK; unitários 1336/1336; integração 523/523; E2E 36/36.
+- **Linhas:** 1.288 `added` (aplicação 773, testes 515).

@@ -315,16 +315,24 @@ Regras de escalonamento por setor, **além** da opção "Escalar solicitações 
 - Nova tabela `SectorEscalationRule` (`sectorId`, `trigger` `DUE_SOON` ou `OVERDUE_DAYS`, `overdueDays` opcional, `raisePriority`, `assignToId` opcional, `notifyManagers`, `notifyTeam`, `notifyUserIds uuid[]`, `isActive`, datas), com `CHECK`s da combinação.
 - `RequestEscalation` ganha `trigger` (padrão `OVERDUE` para as linhas existentes), `ruleId` opcional, `assignedToId` opcional e a chave do vencimento (`dueAt` da solicitação no momento), com índice único para não repetir a regra no mesmo vencimento.
 - Mudanças das regras entram na auditoria administrativa.
+- *Esclarecimentos registrados em 2026-11-07 (SF-173):*
+  - a regra tem um **nome** (de 1 a 60 caracteres, único entre as ativas do setor), porque o aviso da regra 4 leva o nome da regra; o escalonamento guarda uma cópia do nome (`ruleName`), para o detalhe continuar mostrando-o depois de a regra mudar ou ser apagada;
+  - o gatilho usa um enum só, `EscalationTrigger`, com `OVERDUE` para a opção do setor (e para as linhas existentes) e `DUE_SOON`/`OVERDUE_DAYS` para as regras; a regra não aceita `OVERDUE`;
+  - a chave do vencimento é a coluna `dueAt` do escalonamento, e o índice único é (`requestId`, `ruleId`, `dueAt`) para as linhas com regra; apagar a regra deixa `ruleId` nulo (`ON DELETE SET NULL`);
+  - o limite de 5 vale para as regras **ativas**, como os limites de campos e etapas; uma regra desativada não conta e só volta se couber;
+  - a atribuição ignorada fica registrada em `assignmentSkipped`;
+  - até 10 pessoas escolhidas por regra;
+  - as pessoas escolhidas são conferidas ao criar e editar; ao reativar, só o limite e as repetições, e o job (SF-174) confere de novo as pessoas a cada aplicação.
 
 ### 7.5 Critérios de aceitação
 
 - [ ] **CA-ESR-01** — Setor sem regras se comporta como hoje, com ou sem a opção de vencidas ligada.
-- [ ] **CA-ESR-02** — O administrador cria, edita, desativa e apaga regras; a configuração recusa mais de 5, combinação repetida, N fora de 1 a 30, regra sem ação nem destinatário e destinatário de outro setor; outros perfis são recusados; as mudanças entram na auditoria.
+- [x] **CA-ESR-02** — O administrador cria, edita, desativa e apaga regras; a configuração recusa mais de 5, combinação repetida, N fora de 1 a 30, regra sem ação nem destinatário e destinatário de outro setor; outros perfis são recusados; as mudanças entram na auditoria. *Verificado em 2026-11-07 (SF-173): só o administrador cria, edita, desativa, reativa e apaga, em "Setores" ("Regras de escalonamento" de cada setor ativo); recusa a sexta regra ativa (também na reativação), gatilho e N repetidos entre as ativas, nome repetido, N fora de 1 a 30, regra sem ação nem destinatário e atendente ou pessoa de outro setor ou com outro perfil, com mensagens fixas; gestor recusado; as mudanças entram na auditoria como "Regra de escalonamento", com o gatilho e as pessoas pelos nomes (integração e unitário).*
 - [ ] **CA-ESR-03** — O job aplica "próximo do vencimento" e "vencida há N dias" uma vez por solicitação e vencimento; não aplica durante a pausa; aplica de novo depois de reabertura com novo prazo; duas execuções simultâneas não duplicam.
 - [ ] **CA-ESR-04** — As ações sobem a prioridade e atribuem ao atendente ativo do setor; atendente indisponível é ignorado e registrado.
 - [ ] **CA-ESR-05** — Os destinatários escolhidos recebem um aviso cada, conforme a preferência de e-mail.
 - [ ] **CA-ESR-06** — O detalhe mostra cada aplicação com gatilho e ações; "Análises" separa por gatilho.
-- [ ] **CA-ESR-07** — Migration aditiva; escalonamentos existentes ficam com gatilho "vencida".
+- [x] **CA-ESR-07** — Migration aditiva; escalonamentos existentes ficam com gatilho "vencida". *Verificado em 2026-11-07 (SF-173): migration `20261107700000_escalation_rules` só acrescenta (enum, tabela, colunas com padrão ou opcionais, valor de enum da auditoria, restrições); os escalonamentos existentes ficam com gatilho `OVERDUE` ("vencida", a opção do setor) e sem dados de regra; cada recusa do banco conferida pelo nome da restrição (integração).*
 
 ## 8. Testes
 
