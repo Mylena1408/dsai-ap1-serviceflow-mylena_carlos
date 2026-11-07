@@ -177,7 +177,7 @@ export async function openRequest(
   parsed: RequestCreationInput,
   requestId: string,
   prepared: readonly PreparedAttachment[],
-  groupId: string | null = null,
+  group: { id: string; position: number } | null = null,
 ): Promise<void> {
   const context = await loadOpeningContext(transaction, actorId, parsed.serviceId);
   const answers = await fieldAnswers(transaction, context.service.id, parsed);
@@ -209,7 +209,7 @@ export async function openRequest(
     ...buildRequestSnapshot(context.actorId, context.service),
     id: requestId,
     description: parsed.description,
-    ...(groupId ? { groupId } : {}),
+    ...(group ? { groupId: group.id, groupPosition: group.position } : {}),
     status: "OPEN",
     openedAt,
     // SPEC 2026-11-01, sections 5.1 to 5.3: default priority and SLA snapshot of the service.

@@ -9,6 +9,8 @@ import {
   listRequestFieldAnswers,
   listRequestLinks,
   getApprovalLevels,
+  getRequestGroupBlock,
+  groupProgressText,
 } from "@/modules/requests";
 import { RequestLinks } from "@/app/_components/request-links";
 import { LateDocumentForm } from "./late-document-form";
@@ -73,6 +75,7 @@ export default async function RequestPage({
   let missingDocuments;
   let satisfaction;
   let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
+  let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
 
   try {
     request = await getRequesterRequest(requestId);
@@ -83,6 +86,8 @@ export default async function RequestPage({
     satisfaction = await getRequestSatisfaction(request.id);
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: only links between the requester's own requests.
     links = await listRequestLinks(request.id);
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
+    group = await getRequestGroupBlock(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
     throw error;
@@ -138,6 +143,11 @@ export default async function RequestPage({
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <RequestLinks hrefFor={(id) => `/requests/${id}`} links={links.links} requestId={request.id} />
+      {group ? (
+        <p className="content-section">
+          Parte do pacote <Link href={`/requests/groups/${group.groupId}`}>{group.bundleName}</Link> ({groupProgressText(group.progress)}).
+        </p>
+      ) : null}
       {missingDocuments.length > 0 ? <LateDocumentForm requestId={request.id} requirements={missingDocuments} /> : null}
       <LifecyclePanel request={request} now={new Date()} />
       <RequesterSatisfaction requestId={request.id} view={satisfaction} action={rateOwnRequestAction} />

@@ -10,8 +10,10 @@ import {
   listRequestEscalations,
   listRequestFieldAnswers,
   listRequestLinks,
+  getRequestGroupBlock,
 } from "@/modules/requests";
 import { RequestLinks } from "@/app/_components/request-links";
+import { RequestGroupBlock } from "@/app/_components/request-group";
 import { RequestEscalations } from "@/app/_components/request-escalations";
 import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { NotFoundError } from "@/server/errors";
@@ -51,6 +53,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   let satisfaction;
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
   let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
+  let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
   let actingSectors: string[] = [];
   let levels: Awaited<ReturnType<typeof getApprovalLevels>> = null;
 
@@ -62,6 +65,8 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
     escalations = await listRequestEscalations(request.id);
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: read only.
     links = await listRequestLinks(request.id);
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
+    group = await getRequestGroupBlock(request.id);
     actingSectors = await getApprovalActingSectors();
     // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6.
     levels = await getApprovalLevels(request);
@@ -137,6 +142,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       <TeamSatisfaction view={satisfaction} />
       <RequestEscalations escalations={escalations} />
       <RequestLinks hrefFor={(id) => `/approvals/${id}`} links={links.links} requestId={request.id} />
+      <RequestGroupBlock block={group} hrefFor={(id) => `/approvals/${id}`} />
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} />
     </main>
   );

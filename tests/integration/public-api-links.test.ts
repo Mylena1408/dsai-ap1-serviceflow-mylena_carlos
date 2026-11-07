@@ -28,7 +28,13 @@ async function detail(requestId: string, token: string) {
     new Request(`https://serviceflow.test/api/v1/requests/${requestId}`, { headers: { authorization: `Bearer ${token}` } }),
     { params: Promise.resolve({ requestId }) },
   );
-  return { status: response.status, body: (await response.json()) as { links: Array<{ relation: string; request: { id: string; accessible: boolean } }> } };
+  return {
+    status: response.status,
+    body: (await response.json()) as {
+      links: Array<{ relation: string; request: { id: string; accessible: boolean } }>;
+      group: { name: string; total: number; otherRequests: Array<{ id: string; accessible: boolean }> } | null;
+    },
+  };
 }
 
 describe("links in the API detail (SF-176)", () => {
@@ -69,5 +75,19 @@ describe("links in the API detail (SF-176)", () => {
     const request = await prisma.request.findFirstOrThrow({ where: { sectorId: diego.sectorId! } });
     const response = await detail(request.id, await tokenFor("diego.rocha@exemplo.test"));
     expect(response.body.links).toEqual([]);
+  });
+
+  it("carries the bundle and its other requests, and null outside bundles (SF-179)", async () => {
+    const diego = await prisma.user.findUniqueOrThrow({ where: { email: "diego.rocha@exemplo.test" } });
+    const [first, second] = await prisma.request.findMany({ where: { sectorId: diego.sectorId! }, orderBy: { id: "asc" }, take: 2 });
+    await prisma.request.update({ where: { id: second.id }, data: { requesterId: first.requesterId } });
+    const group = await prisma.requestGroup.create({ data: { bundleNameSnapshot: "Admissão", requesterId: first.requesterId, createdAt: new Date() } });
+    await prisma.request.update({ where: { id: first.id }, data: { groupId: group.id, groupPosition: 1 } });
+    await prisma.request.update({ where: { id: second.id }, data: { groupId: group.id, groupPosition: 2 } });
+
+    const response = await detail(first.id, await tokenFor("diego.rocha@exemplo.test"));
+    expect(response.body.group).toMatchObject({ name: "Admissão", total: 2, otherRequests: [{ id: second.id, accessible: true }] });
+    const outside = await prisma.request.findFirstOrThrow({ where: { sectorId: diego.sectorId!, groupId: null } });
+    expect((await detail(outside.id, await tokenFor("diego.rocha@exemplo.test"))).body.group).toBeNull();
   });
 });

@@ -8,6 +8,7 @@ import {
   type RequestAttachmentSummary,
   type RequestFieldAnswer,
   type RequestLinkView,
+  type GroupBlock,
   type RequestWithHistory,
   type SlaSituation,
 } from "@/modules/requests";
@@ -177,6 +178,29 @@ export function linkRepresentation(link: RequestLinkView) {
   };
 }
 
+/**
+ * The bundle of the request (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4, decision H4): its name,
+ * the progress and the other requests with code, service, sector and status.
+ */
+export function groupRepresentation(group: GroupBlock) {
+  return {
+    id: group.groupId,
+    name: group.bundleName,
+    completed: group.progress.completed,
+    cancelled: group.progress.cancelled,
+    total: group.progress.total,
+    closed: group.progress.closed,
+    otherRequests: group.others.map((other) => ({
+      id: other.id,
+      code: other.id.slice(0, 8).toUpperCase(),
+      service: other.serviceName,
+      sector: other.sectorName,
+      status: other.status,
+      accessible: other.readable,
+    })),
+  };
+}
+
 export function requestDetailRepresentation(
   request: RequestWithHistory,
   context: ApiRequestContext,
@@ -186,6 +210,8 @@ export function requestDetailRepresentation(
     comments: readonly CommentRecord[];
     /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1; optional for callers without links. */
     links?: readonly RequestLinkView[];
+    /** 3.3 item 4; optional for callers without groups. */
+    group?: GroupBlock | null;
   },
 ) {
   return {
@@ -209,6 +235,7 @@ export function requestDetailRepresentation(
     })),
     comments: extra.comments.map(commentRepresentation),
     links: (extra.links ?? []).map(linkRepresentation),
+    group: extra.group ? groupRepresentation(extra.group) : null,
     history: {
       status: request.events.map((event) => ({
         from: event.fromStatus,

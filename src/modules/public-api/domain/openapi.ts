@@ -457,6 +457,33 @@ export const OPENAPI_DOCUMENT = {
                   },
                 },
               },
+              // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
+              group: {
+                type: ["object", "null"],
+                description: "Pacote de serviços de que a solicitação faz parte, com o andamento e as outras solicitações (sem o conteúdo delas); null fora de pacote.",
+                properties: {
+                  id: { type: "string", format: "uuid" },
+                  name: { type: "string" },
+                  completed: { type: "integer" },
+                  cancelled: { type: "integer" },
+                  total: { type: "integer" },
+                  closed: { type: "boolean" },
+                  otherRequests: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", format: "uuid" },
+                        code: { type: "string" },
+                        service: { type: "string" },
+                        sector: { type: "string" },
+                        status: { type: "string", enum: ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"] },
+                        accessible: { type: "boolean" },
+                      },
+                    },
+                  },
+                },
+              },
               history: {
                 type: "object",
                 description:

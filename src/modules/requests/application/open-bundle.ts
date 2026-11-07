@@ -63,7 +63,7 @@ export async function openBundle(input: unknown, transactions: RequestTransactio
       createdAt: await transaction.currentTime(),
     });
     const ids: string[] = [];
-    for (const section of sections) {
+    for (const [index, section] of sections.entries()) {
       const requestId = randomUUID();
       const fieldValues = answersOf(values, section.fieldIds);
       await openRequest(
@@ -72,7 +72,7 @@ export async function openBundle(input: unknown, transactions: RequestTransactio
         { serviceId: section.serviceId, description: parsed.description, ...(Object.keys(fieldValues).length > 0 ? { fieldValues } : {}) },
         requestId,
         [],
-        groupId,
+        { id: groupId, position: index + 1 },
       );
       ids.push(requestId);
     }

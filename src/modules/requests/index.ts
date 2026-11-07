@@ -37,6 +37,8 @@ import { createPrismaStageDeadlineStore } from "./infrastructure/prisma-stage-de
 import * as ruleRuns from "./application/escalation-rule-runs";
 import * as links from "./application/links";
 import * as bundleOpening from "./application/open-bundle";
+import * as groups from "./application/groups";
+import { createPrismaGroupReader } from "./infrastructure/prisma-request-groups";
 import { createPrismaLinkReader, createPrismaLinkStore } from "./infrastructure/prisma-request-links";
 import { createPrismaEscalationRuleRunStore } from "./infrastructure/prisma-escalation-rule-runs";
 import {
@@ -447,4 +449,25 @@ export async function openBundle(input: unknown, database: PrismaClient = prisma
     input,
     createPrismaRequestTransactionRunner(database, { translate: ["P2003", "P2025"], fallbackMessage: "Bundle opening failed." }),
   );
+}
+
+// Following a bundle (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4).
+export { groupProgress, groupProgressText, groupStateLabel, type GroupCancellation, type GroupProgress } from "./domain/request-group";
+export type { GroupBlock, RequesterGroupView } from "./application/groups";
+
+export async function getRequesterGroup(groupId: unknown, database: PrismaClient = prisma): Promise<groups.RequesterGroupView> {
+  return groups.getRequesterGroup(groupId, createPrismaGroupReader(database));
+}
+
+/** Each open request cancelled by the same rule as alone, in its own transaction. */
+export async function cancelGroup(input: unknown, database: PrismaClient = prisma) {
+  return groups.cancelGroup(input, createPrismaGroupReader(database), (requestId, note) => cancelRequest({ requestId, ...(note ? { note } : {}) }, database));
+}
+
+export async function listRequesterGroupLabels(requestIds: readonly string[], database: PrismaClient = prisma) {
+  return groups.listRequesterGroupLabels(requestIds, createPrismaGroupReader(database));
+}
+
+export async function getRequestGroupBlock(requestId: unknown, database: PrismaClient = prisma): Promise<groups.GroupBlock | null> {
+  return groups.getRequestGroupBlock(requestId, createPrismaAttachmentQueryRepository(database), createPrismaGroupReader(database));
 }

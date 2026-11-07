@@ -2,7 +2,7 @@ import Link from "next/link";
 import { RequestStageLabel } from "@/app/_components/request-stage";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { countComments } from "@/modules/comments";
-import { searchRequesterRequests, type RequestSearchResult } from "@/modules/requests";
+import { listRequesterGroupLabels, searchRequesterRequests, type RequestSearchResult } from "@/modules/requests";
 import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
@@ -31,6 +31,9 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
 
   const requests = result?.items ?? [];
   const commentCounts = await countComments(requests.map(({ id }) => id));
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4: "Pacote: nome" on the requests of a bundle.
+  const groupLabels = await listRequesterGroupLabels(requests.map(({ id }) => id));
+  const openedGroup = typeof params.group === "string" && /^[0-9a-f-]{36}$/i.test(params.group) ? params.group : null;
   const now = new Date();
 
   return (
@@ -46,6 +49,12 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
       {params.notice === "bundle-opened" ? (
         <p className="feedback" role="status">
           Seu pacote foi aberto: cada serviço virou uma solicitação, listada abaixo.
+          {openedGroup ? (
+            <>
+              {" "}
+              <Link href={`/requests/groups/${openedGroup}`}>Acompanhar o pacote</Link>
+            </>
+          ) : null}
         </p>
       ) : null}
       <RequestSearchForm basePath="/requests" params={params} showAssignee={false} defaultOrder="newest" />
@@ -74,6 +83,12 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
                 <RequestApprovalLabel request={request} />
               </p>
               <RequestSla request={request} now={now} />
+              {groupLabels.get(request.id) ? (
+                <p className="metadata">
+                  Pacote:{" "}
+                  <Link href={`/requests/groups/${groupLabels.get(request.id)!.groupId}`}>{groupLabels.get(request.id)!.bundleName}</Link>
+                </p>
+              ) : null}
               <p className="metadata">
                 {(commentCounts.get(request.id) ?? 0) === 1
                   ? "1 comentário"

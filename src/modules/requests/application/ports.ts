@@ -437,6 +437,8 @@ export interface RequestTransaction {
       dueSoonAt?: Date | null;
       /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3: the bundle opening it belongs to. */
       groupId?: string;
+      /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4: the position in the bundle's order. */
+      groupPosition?: number;
     },
   ): Promise<{ id: string }>;
   /** A bundle as stored now, for its opening (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3). */

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  getRequestGroupBlock,
   listRequestLinks,
   effectiveAssigneeId,
   getAttendanceFields,
@@ -38,6 +39,7 @@ import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { listResponsesForRequest } from "@/modules/canned-responses";
 import { RequestEscalations } from "@/app/_components/request-escalations";
 import { RequestLinks } from "@/app/_components/request-links";
+import { RequestGroupBlock } from "@/app/_components/request-group";
 import { linkRequestAction, unlinkRequestAction } from "../link-actions";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 
@@ -104,6 +106,7 @@ export default async function QueueRequestPage({
   let satisfaction;
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
   let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
+  let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
   let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
@@ -121,6 +124,8 @@ export default async function QueueRequestPage({
     cannedResponses = await listResponsesForRequest(request.id);
     escalations = await listRequestEscalations(request.id);
     links = await listRequestLinks(request.id);
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
+    group = await getRequestGroupBlock(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -228,6 +233,7 @@ export default async function QueueRequestPage({
         links={links.links}
         requestId={request.id}
       />
+      <RequestGroupBlock block={group} hrefFor={(id) => `/queue/${id}`} />
       <RequestConversation
         requestId={request.id}
         comments={comments}

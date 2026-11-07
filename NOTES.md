@@ -2292,3 +2292,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Commit da SF-177:** dois arquivos (`service-bundles/index.ts` e `prisma-bundles.ts`) já tinham acréscimos desta tarefa; o commit da SF-177 levou a versão sem eles (montada a partir do arquivo, sem reescrever histórico), e esta tarefa traz os acréscimos.
 - **Resultados:** typecheck, lint e build OK; unitários 1383/1383; integração 549/549; E2E 39/39.
 - **Linhas:** 908 `added` (aplicação 561, testes 347).
+
+## SF-179 — Acompanhamento do pacote; fim da parte A (2026-11-07)
+
+- **Ordem do pacote:** percebi que as solicitações de um pacote nascem no mesmo instante (o relógio da transação), então ordenar por data e id deixaria a ordem aleatória. Acrescentei `Request.groupPosition` (migration aditiva, com `CHECK` e índice único por grupo), gravada pela abertura.
+- **Migration que falhou no banco de teste:** a primeira versão criava a restrição sem preencher as solicitações de pacote que já existiam (sobras de execuções anteriores dos testes), e o PostgreSQL recusou (23514), desfazendo tudo. Corrigi a migration para preencher a posição pela ordem de criação antes da restrição e marquei a tentativa falha como desfeita **só no banco de teste local** (`prisma migrate resolve --rolled-back`). No Neon, a migration ainda não foi aplicada.
+- **Cancelar o pacote:** cada solicitação aberta passa pelo `cancelRequest` de sempre, numa transação própria, com a mesma justificativa; as outras ficam e a página diz quantas.
+- **Bloco "Pacote":** atendente e gestor veem as outras solicitações com código, serviço, setor e status (decisão H4), com link só para as que podem ler; o solicitante vê "Parte do pacote …" e a página do grupo.
+- **Resultados:** typecheck, lint e build OK; unitários 1390/1390; integração 555/555; E2E 40/40.
+- **Linhas:** 1015 `added` (aplicação 598, testes 417). Parte A inteira (SF-175 a SF-179): 4131.

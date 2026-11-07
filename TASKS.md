@@ -1891,7 +1891,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-179 — Acompanhamento do grupo, cancelamento do pacote e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261108100000_request_group_position`; página do grupo (`/requests/groups/[groupId]`) com andamento e cancelamento do pacote; "Pacote: nome" na lista e no detalhe do solicitante; bloco "Pacote" no atendente e no gestor; `group` na API e na OpenAPI; E2E `request-groups.spec.ts`. Parte A concluída (CA-VNC-01 a 07).
 - **Objetivo:** Seção 3.3 (regra 4), parte A.
 - **Arquivos/módulos esperados:** Lista e detalhe do solicitante, detalhe do atendente e do gestor, API.
 - **Dependências:** SF-178.

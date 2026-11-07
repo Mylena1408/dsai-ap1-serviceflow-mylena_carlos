@@ -361,6 +361,8 @@ model Request {
   linkEventsTo          RequestLinkEvent[]         @relation("RequestLinkEventTo")
   /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3: the bundle opening this request belongs to.
   groupId               String?                    @db.Uuid
+  /// Position in the bundle's order (1 to 5), only with a group: the requests share the opening instant.
+  groupPosition         Int?
   group                 RequestGroup?              @relation(fields: [groupId], references: [id], onDelete: Restrict)
   satisfactionEvents    RequestSatisfactionEvent[]
   approvals             RequestApproval[]
