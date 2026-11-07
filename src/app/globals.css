@@ -1381,6 +1381,13 @@ p {
   color: var(--danger);
 }
 
+/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
+.approval-overdue {
+  border-color: #efc4c1;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .filter-links {
   display: flex;
   gap: 16px;

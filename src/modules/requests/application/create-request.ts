@@ -17,7 +17,7 @@ import {
   type ActiveDocumentRequirement,
 } from "../domain/attachment-requirements";
 import type { RequestWithHistory } from "../domain/request";
-import { approvalColumnsOnOpening, effectiveApprovalSectors } from "../domain/approval";
+import { approvalColumnsOnOpening, approvalDueAtFrom, effectiveApprovalSectors } from "../domain/approval";
 import { slaScheduleFrom } from "../domain/sla";
 import { requestClock, scheduleColumns } from "./sla-clock";
 import { buildRequestSnapshot } from "../domain/snapshot";
@@ -211,6 +211,13 @@ async function openRequest(
     // SPEC 2026-11-01-aprovacoes, 5.2 and 5.5: with approval, pending and without a due date;
     // with levels, the copy, level 1 and its sector (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.2).
     ...approval,
+    // 4.3.6: the first level's deadline starts at the opening.
+    ...(approval.approvalState === "PENDING" && context.service.approvalDeadlineDays
+      ? {
+          approvalDeadlineDaysSnapshot: context.service.approvalDeadlineDays,
+          approvalDueAt: approvalDueAtFrom(openedAt, context.service.approvalDeadlineDays),
+        }
+      : {}),
     ...scheduleColumns(schedule, businessHours),
     ...(businessHours ? { slaBusinessHours: true } : {}),
   });

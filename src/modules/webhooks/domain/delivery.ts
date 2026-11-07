@@ -27,6 +27,8 @@ export const WEBHOOK_EVENT_LABELS: Record<DomainEventType, string> = {
   "request.document_added": "Documento enviado",
   "request.sla_paused": "Prazo pausado",
   "request.sla_resumed": "Prazo retomado",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6.
+  "request.approval_overdue": "Aprovação atrasada",
 };
 
 export function normalizeWebhookName(raw: string): string | null {

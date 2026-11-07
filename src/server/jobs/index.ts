@@ -11,7 +11,9 @@ import {
 } from "@/modules/notifications";
 import {
   cleanOrphanAttachmentObjects,
+  recordApprovalDeadlineAlerts,
   recordSlaAlerts,
+  type ApprovalDeadlineSummary,
   type OrphanCleanupSummary,
   type SlaAlertSummary,
 } from "@/modules/requests";
@@ -53,6 +55,8 @@ export type DailyStep<T> = { status: "ok"; result: T } | { status: "skipped" } |
 
 export interface DailyJobSummary {
   slaAlerts: DailyStep<SlaAlertSummary>;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
+  approvalDeadlines: DailyStep<ApprovalDeadlineSummary>;
   events: DailyStep<OutboxRunSummary>;
   emails: DailyStep<EmailRunSummary>;
   purgedEvents: DailyStep<number>;
@@ -100,6 +104,8 @@ async function orphanStep(now: Date): Promise<DailyStep<OrphanCleanupSummary>> {
 export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSummary> {
   // SLA alerts first, so their notifications go out in the same run (SPEC 2026-11-01, 5.5).
   const slaAlerts = await step(() => recordSlaAlerts(now));
+  // Late approval levels, also before the events (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6).
+  const approvalDeadlines = await step(() => recordApprovalDeadlineAlerts(now));
   const events = await step(() => runOutbox(consumers, { maxBatches: 20 }));
   // After the events, so the emails they record go out in the same run.
   const emails = await step(() => runEmailDeliveries({ maxBatches: 20 }));
@@ -119,6 +125,7 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
 
   return {
     slaAlerts,
+    approvalDeadlines,
     events,
     emails,
     purgedEvents,

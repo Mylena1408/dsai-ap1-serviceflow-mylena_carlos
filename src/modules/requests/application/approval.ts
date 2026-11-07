@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import {
   approvalAfterDecision,
+  approvalDueAtFrom,
   assertCanDecideApproval,
   decisionNote,
   decisionOnBehalfOf,
@@ -61,11 +62,20 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
       updatedAt: decidedAt,
       ...(next
         ? // 4.3.3: the next level waits for its sector; the SLA has not started.
-          { approvalState: "PENDING", approvalLevel: next.level, approvalPendingSectorId: next.sectorId }
+          {
+            approvalState: "PENDING",
+            approvalLevel: next.level,
+            approvalPendingSectorId: next.sectorId,
+            // 4.3.6: the next level's deadline starts now; its delay was not announced yet.
+            ...(request.approvalDeadlineDaysSnapshot
+              ? { approvalDueAt: approvalDueAtFrom(decidedAt, request.approvalDeadlineDaysSnapshot), approvalOverdueNotifiedAt: null }
+              : {}),
+          }
         : finalApproval
           ? {
               approvalState: "APPROVED",
               ...(approvalRequest.approvalLevel === null ? {} : { approvalPendingSectorId: null }),
+              ...(request.approvalDueAt ? { approvalDueAt: null, approvalOverdueNotifiedAt: null } : {}),
               ...scheduleColumns(
                 // Section 5.5 (decision A3): from the last approval, on the request's clock
                 // (SPEC 2026-11-03-pausa-sla-calendario, 5.2.5).
@@ -78,6 +88,7 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
           : {
               approvalState: "REJECTED",
               ...(approvalRequest.approvalLevel === null ? {} : { approvalPendingSectorId: null }),
+              ...(request.approvalDueAt ? { approvalDueAt: null, approvalOverdueNotifiedAt: null } : {}),
               status: "CANCELLED",
               cancelledAt: decidedAt,
             }),
@@ -92,6 +103,7 @@ export async function decideApproval(input: unknown, transactions: RequestTransa
       // Requests opened before levels take the column default, level 1.
       ...(approvalRequest.approvalLevel === null ? {} : { level }),
       ...(onBehalfOfId === null ? {} : { onBehalfOfId }),
+      ...(request.approvalDueAt ? { dueAt: request.approvalDueAt } : {}),
       deciderId: actor.id,
       decision: parsed.decision,
       note,

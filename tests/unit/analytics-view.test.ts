@@ -53,6 +53,7 @@ const analytics: Analytics = {
     onTimeByPriority: [{ label: "Urgente", withDueDate: 1, onTime: 0, percentage: 0, fewData: true }],
     arrivals: arrivalGrid([{ isoWeekday: 4, hour: 10, count: 2 }]),
     escalated: 3,
+    overdueApprovals: 2,
   },
   team: [
     { userId: "a", name: "Ana Souza", isActive: true, sectorName: "Central", completed: 3, completion: { averageHours: 2, medianHours: 2 }, onTimePercentage: 100, pendingNow: 1 },

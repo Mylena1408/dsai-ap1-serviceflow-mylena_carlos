@@ -42,7 +42,8 @@ export type NotifiableEvent =
   | { type: "request.approval_decided"; payload: { decision: string; actorId: string; nextSectorId?: string | null } }
   | { type: "request.sector_changed"; payload: { toSectorId: string; actorId: string } }
   | { type: "request.document_added"; payload: { actorId: string } }
-  | { type: "request.sla_paused"; payload: { actorId: string } };
+  | { type: "request.sla_paused"; payload: { actorId: string } }
+  | { type: "request.approval_overdue"; payload: { sectorId: string } };
 
 export interface PlannedNotification {
   recipientId: string;
@@ -126,6 +127,11 @@ export function plannedNotifications(event: NotifiableEvent, context: Notificati
         event.payload.actorId,
       );
     }
+
+    case "request.approval_overdue":
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: who decides the late level (its
+      // managers and today's substitutes), loaded by the consumer; the job has no author.
+      return (context.approvalManagerIds ?? []).map((recipientId) => ({ recipientId, type: "approval.overdue" }));
 
     case "request.sector_changed": {
       // SPEC 2026-11-03-transferencia-entre-setores, 5.6: the receiving team and the requester; the

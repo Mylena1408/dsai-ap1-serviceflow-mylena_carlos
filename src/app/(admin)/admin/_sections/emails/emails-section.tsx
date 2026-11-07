@@ -18,6 +18,7 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "approval.requested": "Aprovação pendente",
   "approval.approved": "Solicitação aprovada",
   "approval.rejected": "Solicitação rejeitada",
+  "approval.overdue": "Aprovação atrasada",
   "sector.received": "Encaminhada ao setor",
   "sector.changed": "Encaminhada a outro setor",
   "document.added": "Novo documento",

@@ -61,6 +61,9 @@ function persistedRequest(requesterId: string, sectorId: string) {
     approvalSectorIdsSnapshot: [],
     approvalLevel: null,
     approvalPendingSectorId: null,
+    approvalDeadlineDaysSnapshot: null,
+    approvalDueAt: null,
+    approvalOverdueNotifiedAt: null,
   };
 }
 

@@ -15,6 +15,8 @@ export type NotificationType =
   | "approval.requested"
   | "approval.approved"
   | "approval.rejected"
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6.
+  | "approval.overdue"
   | "sector.received"
   | "sector.changed"
   | "document.added"
@@ -38,6 +40,7 @@ const MESSAGES: Record<NotificationType, (service: string, stage?: string) => st
   "approval.requested": (service) => `Aprovação pendente: ${service}`,
   "approval.approved": (service) => `Solicitação aprovada: ${service}`,
   "approval.rejected": (service) => `Solicitação rejeitada: ${service}`,
+  "approval.overdue": (service) => `Aprovação atrasada: ${service}`,
   // SPEC 2026-11-03-transferencia-entre-setores, 5.6.
   "sector.received": (service) => `Solicitação encaminhada ao seu setor: ${service}`,
   "sector.changed": (service) => `Solicitação encaminhada a outro setor: ${service}`,

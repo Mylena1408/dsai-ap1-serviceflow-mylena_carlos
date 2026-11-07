@@ -1761,7 +1761,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-166 — Prazo para aprovar
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107200000_approval_deadline`; prazo em dias na configuração da aprovação (com auditoria); vencimento por nível na abertura e a cada aprovação intermediária; job diário que anuncia uma vez por nível (`request.approval_overdue`, também nos webhooks) aos gestores e substitutos; "Aprovação atrasada" nas telas; contagem em "Análises". CA-APM-05 verificado; CA-APM-07 parcial (API e webhooks documentados na SF-167).
 - **Objetivo:** Seção 4.3 (regra 6), parte B.
 - **Arquivos/módulos esperados:** `src/modules/approvals/`, job diário, `src/modules/reports/`.
 - **Dependências:** SF-164.

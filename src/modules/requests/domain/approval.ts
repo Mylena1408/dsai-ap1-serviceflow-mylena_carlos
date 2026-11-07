@@ -53,6 +53,26 @@ export function pendingApprovalSector(
   return request.approvalState === "PENDING" ? (request.approvalPendingSectorId ?? request.sectorId) : null;
 }
 
+// Deadline to decide each level (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6, decision
+// G6): calendar days from the moment the level becomes pending; nothing is decided automatically.
+
+export const MIN_APPROVAL_DEADLINE_DAYS = 1;
+export const MAX_APPROVAL_DEADLINE_DAYS = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Due date of a level that became pending at `pendingSince`, or null without a deadline. */
+export function approvalDueAtFrom(pendingSince: Date, deadlineDays: number | null | undefined): Date | null {
+  return deadlineDays ? new Date(pendingSince.getTime() + deadlineDays * DAY_MS) : null;
+}
+
+/** Whether the pending level is late at `now` (the screens compute it at reading time). */
+export function approvalOverdue(
+  request: { approvalState: ApprovalState | null; approvalDueAt?: Date | null },
+  now: Date,
+): boolean {
+  return request.approvalState === "PENDING" && !!request.approvalDueAt && request.approvalDueAt.getTime() <= now.getTime();
+}
+
 /** Columns of an opening: nothing without approval; otherwise the copy, level 1 and its sector. */
 export function approvalColumnsOnOpening(
   requiresApproval: boolean,

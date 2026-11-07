@@ -38,6 +38,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       // Added by SPEC 2026-11-03 (pausa do prazo e calendário).
       "request.sla_paused",
       "request.sla_resumed",
+      // Added by SPEC 2026-11-06 (aprofundamento da configurabilidade), 4.3.6.
+      "request.approval_overdue",
     ]);
     expect(
       outboxPayload({

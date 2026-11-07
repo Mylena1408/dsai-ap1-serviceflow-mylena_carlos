@@ -84,4 +84,9 @@ export interface AnalyticsReader {
   satisfaction(scope: DashboardScope, range: DashboardRange): Promise<SatisfactionRows>;
   /** SPEC 2026-11-06-escalonamento, 2.4: requests escalated in the range. */
   escalations(scope: DashboardScope, range: DashboardRange): Promise<number>;
+  /**
+   * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: approval levels whose deadline fell in
+   * the range and that were decided after it or are still pending past it. Optional for older doubles.
+   */
+  overdueApprovals?(scope: DashboardScope, range: DashboardRange, now: Date): Promise<number>;
 }

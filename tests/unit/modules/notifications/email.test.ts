@@ -25,7 +25,8 @@ describe("notification categories (SF-092)", () => {
       // "sla.escalated" added by SPEC 2026-11-06-escalonamento, 4.5.
       SLA: ["sla.warning", "sla.breached", "sla.escalated"],
       STAGES: ["stage.changed"],
-      APPROVALS: ["approval.requested", "approval.approved", "approval.rejected"],
+      // "approval.overdue" added by SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6.
+      APPROVALS: ["approval.requested", "approval.approved", "approval.rejected", "approval.overdue"],
     });
     const listed = NOTIFICATION_CATEGORIES.flatMap(typesOfCategory);
     expect(listed).toHaveLength(NOTIFICATION_TYPES.length);

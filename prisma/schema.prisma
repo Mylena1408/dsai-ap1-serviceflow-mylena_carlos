@@ -243,6 +243,8 @@ model Service {
   approvalSectorIds        String[]        @default([]) @db.Uuid
   approvalConditionFieldId String?         @db.Uuid
   approvalConditionValue   String?
+  /// 4.3.6: days to decide each level (1 to 30), or null without a deadline.
+  approvalDeadlineDays     Int?
 
   category               Category                     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   sector                 Sector                       @relation(fields: [sectorId], references: [id], onDelete: Restrict)
@@ -255,47 +257,52 @@ model Service {
 }
 
 model Request {
-  id                         String          @id @default(uuid()) @db.Uuid
-  requesterId                String          @db.Uuid
-  serviceId                  String          @db.Uuid
-  sectorId                   String          @db.Uuid
-  serviceNameSnapshot        String
-  serviceDescriptionSnapshot String
-  categoryIdSnapshot         String          @db.Uuid
-  categoryNameSnapshot       String
-  sectorNameSnapshot         String
-  description                String
-  status                     RequestStatus   @default(OPEN)
-  createdAt                  DateTime        @default(now()) @db.Timestamptz
-  updatedAt                  DateTime        @updatedAt @db.Timestamptz
-  completedAt                DateTime?       @db.Timestamptz
-  assigneeId                 String?         @db.Uuid
-  cancelledAt                DateTime?       @db.Timestamptz
-  priority                   RequestPriority @default(NORMAL)
-  slaHoursSnapshot           Int?
-  dueAt                      DateTime?       @db.Timestamptz
+  id                           String          @id @default(uuid()) @db.Uuid
+  requesterId                  String          @db.Uuid
+  serviceId                    String          @db.Uuid
+  sectorId                     String          @db.Uuid
+  serviceNameSnapshot          String
+  serviceDescriptionSnapshot   String
+  categoryIdSnapshot           String          @db.Uuid
+  categoryNameSnapshot         String
+  sectorNameSnapshot           String
+  description                  String
+  status                       RequestStatus   @default(OPEN)
+  createdAt                    DateTime        @default(now()) @db.Timestamptz
+  updatedAt                    DateTime        @updatedAt @db.Timestamptz
+  completedAt                  DateTime?       @db.Timestamptz
+  assigneeId                   String?         @db.Uuid
+  cancelledAt                  DateTime?       @db.Timestamptz
+  priority                     RequestPriority @default(NORMAL)
+  slaHoursSnapshot             Int?
+  dueAt                        DateTime?       @db.Timestamptz
   /// Start of "próximo do vencimento". A database trigger fills it in calendar hours; in business
   /// hours the application writes it (SPEC 2026-11-03-pausa-sla-calendario, 6).
-  dueSoonAt                  DateTime?       @db.Timestamptz
-  slaWarningNotifiedAt       DateTime?       @db.Timestamptz
-  slaBreachNotifiedAt        DateTime?       @db.Timestamptz
-  completedLate              Boolean?
+  dueSoonAt                    DateTime?       @db.Timestamptz
+  slaWarningNotifiedAt         DateTime?       @db.Timestamptz
+  slaBreachNotifiedAt          DateTime?       @db.Timestamptz
+  completedLate                Boolean?
   /// Stage names copied when the attendance starts (SPEC de fluxos, 5.2); empty without a flow.
-  stageNamesSnapshot         String[]        @default([])
+  stageNamesSnapshot           String[]        @default([])
   /// Current position in stageNamesSnapshot; null exactly when the copy is empty.
-  stageIndex                 Int?
+  stageIndex                   Int?
   /// Approval situation (SPEC 2026-11-01-aprovacoes, 5.3); null when the service did not require it.
-  approvalState              ApprovalState?
+  approvalState                ApprovalState?
   /// Copy of Service.slaBusinessHours at the opening (SPEC 2026-11-03-pausa-sla-calendario, 5.2).
-  slaBusinessHours           Boolean         @default(false)
+  slaBusinessHours             Boolean         @default(false)
   /// Start of the current SLA pause; null when not paused (5.3).
-  slaPausedAt                DateTime?       @db.Timestamptz
+  slaPausedAt                  DateTime?       @db.Timestamptz
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3 and 4.4: copy of the level sectors at the
   /// opening, the current level (from 1) and the sector that decides it while pending. Requests
   /// opened before levels keep the copy empty: one level, decided by the request's sector.
-  approvalSectorIdsSnapshot  String[]        @default([]) @db.Uuid
-  approvalLevel              Int?
-  approvalPendingSectorId    String?         @db.Uuid
+  approvalSectorIdsSnapshot    String[]        @default([]) @db.Uuid
+  approvalLevel                Int?
+  approvalPendingSectorId      String?         @db.Uuid
+  /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: days per level copied at the opening,
+  /// due date of the pending level and when its delay was announced.
+  approvalDeadlineDaysSnapshot Int?
+  approvalDueAt                DateTime?       @db.Timestamptz
+  approvalOverdueNotifiedAt    DateTime?       @db.Timestamptz
 
   requester             User                       @relation("UserRequests", fields: [requesterId], references: [id], onDelete: Restrict)
   assignee              User?                      @relation("RequestAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
@@ -328,6 +335,7 @@ model Request {
   @@index([sectorId, dueAt])
   @@index([sectorId, dueSoonAt])
   @@index([approvalPendingSectorId])
+  @@index([approvalDueAt])
 }
 
 model RequestStatusEvent {
@@ -811,6 +819,8 @@ model RequestApproval {
   level        Int              @default(1)
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: the absent manager the decider replaced.
   onBehalfOfId String?          @db.Uuid
+  /// 4.3.6: due date the level had when it was decided, for "Análises".
+  dueAt        DateTime?        @db.Timestamptz
   deciderId    String           @db.Uuid
   decision     ApprovalDecision
   note         String?

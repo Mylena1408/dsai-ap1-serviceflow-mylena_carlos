@@ -55,6 +55,10 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         ...(event.type === "request.opened" && request.approvalState === "PENDING"
           ? { approvalManagerIds: await approvalDeciders(store, request.approvalSectorIdsSnapshot?.[0] ?? request.sectorId) }
           : {}),
+        // 4.3.6: a late level reaches who decides it, named by the event, while still pending.
+        ...(event.type === "request.approval_overdue" && typeof event.payload.sectorId === "string" && request.approvalState === "PENDING"
+          ? { approvalManagerIds: await approvalDeciders(store, event.payload.sectorId) }
+          : {}),
         // 4.3.3: an intermediate approval asks the managers of the next level, named by the event.
         ...(event.type === "request.approval_decided" && typeof event.payload.nextSectorId === "string"
           ? { approvalManagerIds: await approvalDeciders(store, event.payload.nextSectorId) }

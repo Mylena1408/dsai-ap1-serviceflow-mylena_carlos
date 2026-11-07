@@ -77,6 +77,8 @@ export interface ServiceForRequest {
   approvalSectorIds?: string[];
   approvalConditionFieldId?: string | null;
   approvalConditionValue?: string | null;
+  /** 4.3.6: days to decide each level, copied at the opening. */
+  approvalDeadlineDays?: number | null;
   /** SPEC 2026-11-03-pausa-sla-calendario, 5.2: copied to the request on opening. */
   slaBusinessHours?: boolean;
   category: { id: string; name: string; isActive: boolean };
@@ -140,6 +142,9 @@ export interface ApprovalUpdate {
   /** Next level and its sector, written only when approving a level that is not the last. */
   approvalLevel?: number;
   approvalPendingSectorId?: string | null;
+  /** 4.3.6: due date of the next level (null at the end), and the delay announcement cleared. */
+  approvalDueAt?: Date | null;
+  approvalOverdueNotifiedAt?: null;
   /** Due date from the approval (5.5). */
   dueAt?: Date | null;
   /** Start of "due soon", written only in business hours (SPEC 2026-11-03-pausa-sla-calendario, 6). */
@@ -155,6 +160,8 @@ export interface NewApproval {
   level?: number;
   /** 4.3.5: the absent manager the decider replaced. */
   onBehalfOfId?: string;
+  /** 4.3.6: the due date the level had. */
+  dueAt?: Date;
   deciderId: string;
   decision: "APPROVED" | "REJECTED";
   note: string | null;
@@ -397,6 +404,9 @@ export interface RequestTransaction {
       approvalSectorIdsSnapshot?: string[];
       approvalLevel?: number | null;
       approvalPendingSectorId?: string | null;
+      /** 4.3.6: days per level and the first level's due date. */
+      approvalDeadlineDaysSnapshot?: number | null;
+      approvalDueAt?: Date | null;
       /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 6. */
       slaBusinessHours?: boolean;
       dueSoonAt?: Date | null;

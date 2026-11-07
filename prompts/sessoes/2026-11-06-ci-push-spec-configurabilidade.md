@@ -52,3 +52,10 @@
 > pode prosseguir (2026-11-07)
 
 13. SF-165: tabela de ausências, módulo `absences`, cobertura do substituto nas listas, leitura, decisão e notificações, tela "Ausências" do gestor; correção da leitura pelo gestor de outro nível (lacuna da SF-164) e das limpezas do banco de teste. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> quantas linhas de codigo somam esses 5  migrations?
+> vamos priorizar a produção de funções que contem para a contagem da linha de codigo para a meta
+> pode continuar
+
+14. Contagem das migrations pendentes (111 linhas de SQL, fora da meta); prioridade registrada na memória do agente.
+15. SF-166: prazo para aprovar, evento `request.approval_overdue`, passo do job diário, notificação, telas e análises. Todas as suítes aprovadas (ver `NOTES.md`).

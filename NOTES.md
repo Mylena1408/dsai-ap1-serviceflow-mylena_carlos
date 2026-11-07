@@ -2141,3 +2141,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Tela:** "Ausências" na área do gestor, com cadastro, "Minhas ausências" (situação e cancelamento) e "Substituições". A tela do administrador fica na SF-167.
 - **Resultados:** typecheck, lint e build OK; unitários 1254/1254; integração 477/477; E2E 33/33 (um novo).
 - **Linhas:** 864 `added` (aplicação 556, testes 306, scripts 2).
+
+## SF-166 — Prazo para aprovar (2026-11-07)
+
+- **Modelo:** `Service.approvalDeadlineDays` (1 a 30); na solicitação, a cópia dos dias, o vencimento do nível pendente e a marca do aviso; na decisão, o vencimento que o nível tinha. As restrições impedem vencimento fora de um nível pendente e aviso sem vencimento. A cópia dos dias não estava na SPEC; registrei o esclarecimento.
+- **Evento e job:** `request.approval_overdue` (nível e setor), gravado na mesma transação da marca, com as condições repetindo o que foi lido; duas execuções ao mesmo tempo avisam uma vez. As restrições de tipo do outbox e dos webhooks foram recriadas mais amplas, como nas SPECs anteriores. O passo roda no job diário logo depois dos alertas de SLA, antes do processamento dos eventos.
+- **Notificação:** `approval.overdue` na categoria "Aprovações", para os gestores do setor do nível e os substitutos em vigor, só se ainda estiver pendente quando o evento for processado. Nada é decidido sozinho (decisão G6).
+- **Telas e análises:** o componente da situação da aprovação mostra "Aprovação atrasada" na hora da leitura; "Análises" conta os níveis vencidos no período (decididos depois do prazo ou ainda pendentes).
+- **Testes existentes:** duas listas exatas que a SPEC amplia foram atualizadas (tipos de evento e tabela de categorias de e-mail); o teste da tela de análises só ganhou o campo novo nos dados de montagem.
+- **Erro meu no teste, corrigido:** a primeira versão rodava o job com um "agora" artificial um dia no futuro. O outbox só entrega eventos cujo horário já chegou, então o aviso do segundo nível não era processado. O teste passou a levar o vencimento para o passado e usar a hora real, como no job.
+- **Resultados:** typecheck, lint e build OK; unitários 1260/1260; integração 481/481; E2E 33/33.
+- **Linhas:** 430 `added` (aplicação 208, testes 222).

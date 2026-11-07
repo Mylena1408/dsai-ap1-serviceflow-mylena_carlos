@@ -21,6 +21,8 @@ export interface ServiceRecord {
   approvalSectorIds?: string[];
   approvalConditionFieldId?: string | null;
   approvalConditionValue?: string | null;
+  /** 4.3.6: days to decide each level. */
+  approvalDeadlineDays?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +43,8 @@ export interface ServiceData {
   approvalSectorIds?: string[];
   approvalConditionFieldId?: string | null;
   approvalConditionValue?: string | null;
+  /** 4.3.6: days to decide each level. */
+  approvalDeadlineDays?: number | null;
 }
 
 export interface PublishedService extends ServiceRecord {

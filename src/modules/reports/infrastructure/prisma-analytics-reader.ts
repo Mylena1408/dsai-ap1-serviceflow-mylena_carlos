@@ -302,6 +302,26 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
       return row?.count ?? 0;
     },
 
+    async overdueApprovals(scope, range, now) {
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: one per late level. A decided level
+      // keeps the due date it had; a pending one counts while its due date has passed.
+      const [row] = await database.$queryRaw<Array<{ count: number }>>`
+        SELECT (
+          (SELECT count(*)
+           FROM "RequestApproval" a
+           JOIN "Request" r ON r."id" = a."requestId"
+           WHERE a."dueAt" IS NOT NULL AND a."decidedAt" > a."dueAt"
+             AND a."dueAt" >= ${range.from} AND a."dueAt" < ${range.before} ${scopeSql(scope)})
+          +
+          (SELECT count(*)
+           FROM "Request" r
+           WHERE r."approvalState" = 'PENDING' AND r."approvalDueAt" IS NOT NULL
+             AND r."approvalDueAt" >= ${range.from} AND r."approvalDueAt" < ${range.before}
+             AND r."approvalDueAt" <= ${now} ${scopeSql(scope)})
+        )::int AS "count"`;
+      return row?.count ?? 0;
+    },
+
     async satisfaction(scope, range) {
       // SPEC 2026-11-06-pesquisa-satisfacao, 4.7: ratings given in the period, and the share of
       // the requests completed in the period that were rated for that same completion.

@@ -145,6 +145,8 @@ export async function configureServiceApproval(
         approvalSectorIds: parsed.sectorIds,
         approvalConditionFieldId: parsed.conditionFieldId,
         approvalConditionValue: parsed.conditionValue,
+        // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6.
+        ...(parsed.deadlineDays !== undefined ? { approvalDeadlineDays: parsed.deadlineDays } : {}),
       }),
     );
   });

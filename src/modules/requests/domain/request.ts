@@ -37,6 +37,10 @@ export interface RequestRecord {
   approvalSectorIdsSnapshot?: string[];
   approvalLevel?: number | null;
   approvalPendingSectorId?: string | null;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
+  approvalDeadlineDaysSnapshot?: number | null;
+  approvalDueAt?: Date | null;
+  approvalOverdueNotifiedAt?: Date | null;
   /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 5.3; optional so older records stay valid. */
   slaBusinessHours?: boolean;
   dueSoonAt?: Date | null;

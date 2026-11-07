@@ -228,6 +228,12 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
             value={String(sla.escalated)}
             detail="setores com escalonamento ligado"
           />
+          {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */}
+          <Indicator
+            label="Aprovações atrasadas"
+            value={String(sla.overdueApprovals)}
+            detail="níveis com prazo vencido no período"
+          />
           <Indicator
             label="Concluídas com pausa"
             value={`${sla.pauses.withPause} de ${sla.pauses.completed}`}

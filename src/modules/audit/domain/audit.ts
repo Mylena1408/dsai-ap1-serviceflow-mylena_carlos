@@ -111,6 +111,7 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   approvalSectorIds: "Níveis de aprovação",
   approvalConditionFieldId: "Campo da condição de aprovação",
   approvalConditionValue: "Valor da condição de aprovação",
+  approvalDeadlineDays: "Prazo para aprovar (dias)",
   slaBusinessHours: "Prazo em horas úteis",
   escalateOverdue: "Escalar solicitações vencidas",
   title: "Título",
@@ -221,6 +222,7 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "approvalSectorIds",
     "approvalConditionFieldId",
     "approvalConditionValue",
+    "approvalDeadlineDays",
   ],
   DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],
   // "audience" and the condition: SPEC 2026-11-03-campos-condicionais-atendimento, 5.7.4.

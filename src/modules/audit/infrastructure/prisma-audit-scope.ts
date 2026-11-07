@@ -49,6 +49,7 @@ async function loadState(
           approvalSectorIds: true,
           approvalConditionFieldId: true,
           approvalConditionValue: true,
+          approvalDeadlineDays: true,
         },
       });
       return row && { label: row.name, state: row };

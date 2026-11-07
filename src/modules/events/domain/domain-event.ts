@@ -82,6 +82,14 @@ export type DomainEvent =
       payload: { pauseId: string; actorId: string; cause: "manual" | "requester_reply" | "attendance_ended" };
     }
   | {
+      // A pending approval level passed its deadline (SPEC 2026-11-06-aprofundamento-configurabilidade,
+      // 4.3.6). Written by the daily job, once per level; the sector names who decides it.
+      type: "request.approval_overdue";
+      requestId: string;
+      occurredAt: Date;
+      payload: { level: number; sectorId: string };
+    }
+  | {
       // SLA alerts of the daily job (SPEC 2026-11-01, section 5.5). No actor: the job
       // writes them, and the consumer reloads the request to find the recipients.
       type: "request.sla_warning" | "request.sla_breached";
@@ -106,6 +114,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.document_added",
   "request.sla_paused",
   "request.sla_resumed",
+  "request.approval_overdue",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -122,6 +131,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.document_added": ["attachmentId", "actorId"],
   "request.sla_paused": ["pauseId", "actorId"],
   "request.sla_resumed": ["pauseId", "actorId", "cause"],
+  "request.approval_overdue": ["level", "sectorId"],
 };
 
 /**

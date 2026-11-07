@@ -34,6 +34,8 @@ export const serviceApprovalInputSchema = z
       .max(80)
       .nullable()
       .transform((value) => (value === "" ? null : value)),
+    // 4.3.6: days to decide each level; omitted keeps the current value, null removes it.
+    deadlineDays: z.number().int().min(1).max(30).nullable().optional(),
   })
   .strict()
   .superRefine((input, context) => {
