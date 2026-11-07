@@ -1708,3 +1708,143 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-DVO-01 (análises), 02 e 03.
 - **Testes relacionados:** Integração `analytics-reader.test.ts`, todas as suítes e a medição com volume.
 - **SPEC:** `SPEC/2026-11-06-desempenho-volume.md`.
+
+### SF-161 — Campos decimal e com formato: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regras 1 a 3), parte A.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/service-fields/`, `src/modules/requests/domain/`.
+- **Dependências:** SPEC aprovada.
+- **Critérios de conclusão:** CA-CMP-01 a 03 (domínio).
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-162 — Tipos novos na configuração, abertura, atendimento e API
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regras 1 a 4), parte A.
+- **Arquivos/módulos esperados:** `src/app/`, `src/modules/service-fields/`, `src/modules/requests/`, `src/modules/public-api/`.
+- **Dependências:** SF-161.
+- **Critérios de conclusão:** CA-CMP-01 a 04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-163 — Busca pelas respostas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 5), parte A.
+- **Arquivos/módulos esperados:** `src/modules/requests/infrastructure/`, listas da fila, do solicitante e das aprovações.
+- **Dependências:** SF-162.
+- **Critérios de conclusão:** CA-CMP-05 e 06.
+- **Testes relacionados:** Integração, medição com volume e E2E.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-164 — Aprovações em níveis e por condição: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regras 1 a 4, 7 e 8), parte B.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/approvals/`, `src/modules/requests/`.
+- **Dependências:** SF-163.
+- **Critérios de conclusão:** CA-APM-01 a 03, 06 e 08.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-165 — Ausência do gestor e substituto
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 5), parte B.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/approvals/`, área do gestor.
+- **Dependências:** SF-164.
+- **Critérios de conclusão:** CA-APM-04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-166 — Prazo para aprovar
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 6), parte B.
+- **Arquivos/módulos esperados:** `src/modules/approvals/`, job diário, `src/modules/reports/`.
+- **Dependências:** SF-164.
+- **Critérios de conclusão:** CA-APM-05.
+- **Testes relacionados:** Unitários e integração do job.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-167 — Telas, API, webhooks e E2E das aprovações
+
+- **Estado:** Pendente.
+- **Objetivo:** Seções 4.3 e 4.5, parte B.
+- **Arquivos/módulos esperados:** `src/app/`, `src/modules/public-api/`, `src/modules/webhooks/`.
+- **Dependências:** SF-165 e SF-166.
+- **Critérios de conclusão:** CA-APM-07; revisão de CA-APM-01 a 08.
+- **Testes relacionados:** Integração e E2E.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-168 — Etapas com responsável, prazo e condição: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regras 1 a 3), parte C.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/` de fluxos e solicitações.
+- **Dependências:** SF-167.
+- **Critérios de conclusão:** CA-ETP-01, 02, 05 e 07.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-169 — Movimento com responsável da etapa, prazo e avisos
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regras 1, 2 e 5), parte C.
+- **Arquivos/módulos esperados:** Casos de uso de etapas, job diário, notificações.
+- **Dependências:** SF-168.
+- **Critérios de conclusão:** CA-ETP-03 e 04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-170 — Filtro da fila por etapa, telas e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regra 4), parte C.
+- **Arquivos/módulos esperados:** Fila, detalhe, editor de etapas.
+- **Dependências:** SF-169.
+- **Critérios de conclusão:** CA-ETP-06; revisão de CA-ETP-01 a 07.
+- **Testes relacionados:** Integração, medição com volume e E2E.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-171 — Papéis e validade: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3, parte D.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/users/` (permissões), `src/modules/audit/`.
+- **Dependências:** SF-170.
+- **Critérios de conclusão:** CA-PAP-01, 03, 04 e 06.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-172 — Telas de papéis e validade, histórico e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3, parte D.
+- **Arquivos/módulos esperados:** Administração de usuários e papéis.
+- **Dependências:** SF-171.
+- **Critérios de conclusão:** CA-PAP-02 e 05; revisão de CA-PAP-01 a 06.
+- **Testes relacionados:** Integração e E2E.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-173 — Regras de escalonamento: migrations, domínio e configuração
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7.3 (regras 1 e 6), parte E.
+- **Arquivos/módulos esperados:** `prisma/`, `src/modules/requests/` (escalonamento), administração de setores, auditoria.
+- **Dependências:** SF-172.
+- **Critérios de conclusão:** CA-ESR-01, 02 e 07.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
+
+### SF-174 — Aplicação das regras no job, telas, análises e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7.3 (regras 2 a 5), parte E.
+- **Arquivos/módulos esperados:** Job diário, notificações, detalhe, `src/modules/reports/`.
+- **Dependências:** SF-173.
+- **Critérios de conclusão:** CA-ESR-03 a 06; revisão de CA-ESR-01 a 07.
+- **Testes relacionados:** Unitários, integração e E2E.
+- **SPEC:** `SPEC/2026-11-06-aprofundamento-configurabilidade.md`.
