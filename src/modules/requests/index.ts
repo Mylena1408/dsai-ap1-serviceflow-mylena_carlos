@@ -125,6 +125,13 @@ export async function listManagerApprovals(
   return queries.listManagerApprovals(filter, createPrismaRequestQueryRepository(database));
 }
 
+/** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6. */
+export async function getApprovalLevels(request: Parameters<typeof queries.getApprovalLevels>[0], database: PrismaClient = prisma) {
+  return queries.getApprovalLevels(request, createPrismaRequestQueryRepository(database));
+}
+export { approvalLevelText } from "./domain/approval-levels-view";
+export type { ApprovalLevelLine, ApprovalLevelsView } from "./domain/approval-levels-view";
+
 /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5. */
 export async function getApprovalActingSectors(database: PrismaClient = prisma): Promise<string[]> {
   return queries.getApprovalActingSectors(createPrismaRequestQueryRepository(database));

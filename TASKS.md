@@ -1771,7 +1771,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-167 — Telas, API, webhooks e E2E das aprovações
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Bloco "Aprovação" no serviço (níveis, condição e prazo), também em "Serviços do setor", com setores ativos escolhíveis por quem configura o serviço; seção "Ausências" da administração; bloco "Níveis de aprovação" nos detalhes do gestor, do solicitante e do atendente e o nível na lista do gestor; API (`approval` no catálogo, `approvalProgress` e `history.approvals` no detalhe) e OpenAPI; E2E `approval-levels.spec.ts`. Parte B concluída (CA-APM-01 a 08).
 - **Objetivo:** Seções 4.3 e 4.5, parte B.
 - **Arquivos/módulos esperados:** `src/app/`, `src/modules/public-api/`, `src/modules/webhooks/`.
 - **Dependências:** SF-165 e SF-166.

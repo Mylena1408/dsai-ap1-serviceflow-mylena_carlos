@@ -5,7 +5,7 @@ import { listCategoriesForCatalog } from "@/modules/categories";
 import { listDocumentRequirements } from "@/modules/document-requirements";
 import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
-import { listSectorsForCatalog } from "@/modules/sectors";
+import { listApprovalSectorChoices, listSectorsForCatalog } from "@/modules/sectors";
 import { listServices } from "@/modules/services";
 import { requireCatalogEditor } from "@/server/authorization";
 import { listArticlesForEditor } from "@/modules/knowledge";
@@ -34,7 +34,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
     throw error;
   }
 
-  const [{ error, entity, notice, knowledge }, services, categories, sectors, documentRequirements, serviceFields, serviceStages, knowledgeServices] =
+  const [{ error, entity, notice, knowledge }, services, categories, sectors, documentRequirements, serviceFields, serviceStages, knowledgeServices, approvalSectors] =
     await Promise.all([
       searchParams,
       listServices(),
@@ -45,6 +45,8 @@ export default async function SectorServicesPage({ searchParams }: SectorService
       listServiceStages(),
       // SPEC 2026-11-06-base-conhecimento, 2.2: the sector's services only.
       listArticlesForEditor(),
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1 (decision G19).
+      listApprovalSectorChoices(),
     ]);
   const message = announcement(error, notice, entity);
 
@@ -82,6 +84,7 @@ export default async function SectorServicesPage({ searchParams }: SectorService
             documentRequirements={documentRequirements}
             section="sector-services"
             sectors={sectors}
+            approvalSectors={approvalSectors}
             serviceFields={serviceFields}
             serviceStages={serviceStages}
             services={services}

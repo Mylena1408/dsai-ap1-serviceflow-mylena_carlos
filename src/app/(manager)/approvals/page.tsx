@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listManagerApprovals } from "@/modules/requests";
+import { listManagerApprovals, pendingApprovalLevel, requestApprovalSectors } from "@/modules/requests";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { actorHasPermission } from "@/server/authorization";
@@ -56,6 +56,13 @@ export default async function ApprovalsPage({ searchParams }: ApprovalsPageProps
               <p>
                 <span className="status-pill">{REQUEST_STATUS_LABELS[request.status]}</span>{" "}
                 <RequestApprovalLabel request={request} />
+                {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3. */}
+                {request.approvalState === "PENDING" && requestApprovalSectors(request).length > 1 ? (
+                  <span className="metadata">
+                    {" "}
+                    Nível {pendingApprovalLevel(request)} de {requestApprovalSectors(request).length}
+                  </span>
+                ) : null}
               </p>
               <p>{request.description}</p>
               <p className="metadata">

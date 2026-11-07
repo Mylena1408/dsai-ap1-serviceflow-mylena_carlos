@@ -15,6 +15,11 @@ export async function listSectors(database: PrismaClient = prisma): Promise<Sect
   return useCases.listSectors(createPrismaSectorRepository(database));
 }
 
+/** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1. */
+export async function listApprovalSectorChoices(database: PrismaClient = prisma): Promise<Array<{ id: string; name: string }>> {
+  return useCases.listApprovalSectorChoices(createPrismaSectorRepository(database));
+}
+
 export async function listSectorsForCatalog(database: PrismaClient = prisma): Promise<SectorRecord[]> {
   return useCases.listSectorsForCatalog(createPrismaSectorRepository(database));
 }

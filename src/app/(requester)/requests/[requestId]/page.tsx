@@ -7,6 +7,7 @@ import {
   listMissingDocuments,
   listRequestAttachments,
   listRequestFieldAnswers,
+  getApprovalLevels,
 } from "@/modules/requests";
 import { LateDocumentForm } from "./late-document-form";
 import { RequestAttachments } from "@/app/_components/request-attachments";
@@ -18,6 +19,7 @@ import { requireRequesterPageAccess } from "../../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestSla } from "@/app/_components/request-sla";
 import { RequestTimeline } from "@/app/_components/request-timeline";
+import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
@@ -126,6 +128,8 @@ export default async function RequestPage({
         <h2>Sua descrição</h2>
         <p className="request-description">{request.description}</p>
       </article>
+      {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6. */}
+      <ApprovalLevels view={await getApprovalLevels(request)} />
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       {missingDocuments.length > 0 ? <LateDocumentForm requestId={request.id} requirements={missingDocuments} /> : null}

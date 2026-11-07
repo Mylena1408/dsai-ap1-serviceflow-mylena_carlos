@@ -1,6 +1,15 @@
 import type { CommentRecord } from "@/modules/comments";
 import type { DocumentRequirementRecord } from "@/modules/document-requirements";
-import type { RequestAttachmentSummary, RequestFieldAnswer, RequestWithHistory, SlaSituation } from "@/modules/requests";
+import {
+  approvalOverdue,
+  pendingApprovalLevel,
+  pendingApprovalSector,
+  requestApprovalSectors,
+  type RequestAttachmentSummary,
+  type RequestFieldAnswer,
+  type RequestWithHistory,
+  type SlaSituation,
+} from "@/modules/requests";
 import type { ServiceFieldRecord } from "@/modules/service-fields";
 import type { PublishedService } from "@/modules/services";
 
@@ -14,6 +23,55 @@ export interface ApiRequestContext {
   /** Effective assignee, as the screens show it. */
   assignee: { id: string; name: string } | null;
   slaSituation: SlaSituation;
+  /** The moment of the answer, for "late" (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6). */
+  now?: Date;
+}
+
+/**
+ * The approval of a service in the catalog (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3):
+ * the level sectors in order (the service's sector when none is configured), the days to decide
+ * each level and the condition on an answer; null when the service does not require approval.
+ */
+export function serviceApprovalRepresentation(service: PublishedService) {
+  if (!service.requiresApproval) return null;
+  const levels = service.approvalSectorIds?.length ? service.approvalSectorIds : [service.sectorId];
+  return {
+    levelSectorIds: [...levels],
+    deadlineDays: service.approvalDeadlineDays ?? null,
+    condition: service.approvalConditionFieldId
+      ? { fieldId: service.approvalConditionFieldId, value: service.approvalConditionValue ?? null }
+      : null,
+  };
+}
+
+/**
+ * Where the approval of a request stands (4.3.3 to 4.3.6): the pending level and its sector, the
+ * level sectors, the due date and whether it is late. Null without approval.
+ */
+export function approvalProgressRepresentation(request: RequestWithHistory, now: Date) {
+  if (request.approvalState === null) return null;
+  const sectors = requestApprovalSectors(request);
+  return {
+    state: request.approvalState,
+    level: pendingApprovalLevel(request) ?? request.approvalLevel ?? sectors.length,
+    levelCount: sectors.length,
+    levelSectorIds: sectors,
+    pendingSectorId: pendingApprovalSector(request),
+    dueAt: iso(request.approvalDueAt),
+    overdue: approvalOverdue(request, now),
+  };
+}
+
+/** Every decision, by level, with the absent manager the decider replaced (4.3.3 and 4.3.5). */
+export function approvalDecisionsRepresentation(request: RequestWithHistory) {
+  return (request.approvals ?? (request.approval ? [request.approval] : [])).map((decision) => ({
+    level: decision.level ?? 1,
+    decision: decision.decision,
+    decider: { id: decision.decider.id, name: decision.decider.name },
+    onBehalfOf: decision.onBehalfOf ? { id: decision.onBehalfOf.id, name: decision.onBehalfOf.name } : null,
+    note: decision.note,
+    decidedAt: iso(decision.decidedAt),
+  }));
 }
 
 export function serviceRepresentation(
@@ -30,6 +88,8 @@ export function serviceRepresentation(
     defaultPriority: service.defaultPriority,
     slaHours: service.slaHours,
     requiresApproval: service.requiresApproval,
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.
+    approval: serviceApprovalRepresentation(service),
     documents: requirements.map((requirement) => ({
       name: requirement.name,
       required: requirement.isRequired,
@@ -107,6 +167,8 @@ export function requestDetailRepresentation(
 ) {
   return {
     ...requestSummaryRepresentation(request, context),
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6.
+    approvalProgress: approvalProgressRepresentation(request, context.now ?? new Date()),
     // SPEC 2026-11-03-pausa-sla-calendario, 5.8.3.
     slaBusinessHours: request.slaBusinessHours ?? false,
     slaPausedAt: iso(request.slaPausedAt),
@@ -167,12 +229,14 @@ export function requestDetailRepresentation(
         note: event.note,
         occurredAt: iso(event.occurredAt),
       })),
+      // The last decision, as before levels; "approvals" has every level.
       approval: request.approval && {
         decision: request.approval.decision,
         decider: { id: request.approval.decider.id, name: request.approval.decider.name },
         note: request.approval.note,
         decidedAt: iso(request.approval.decidedAt),
       },
+      approvals: approvalDecisionsRepresentation(request),
     },
   };
 }

@@ -10,6 +10,7 @@ import {
   listRequestFieldAnswers,
   listSectorDestinations,
   listTransferCandidates,
+  getApprovalLevels,
 } from "@/modules/requests";
 import { RequestAttachments } from "@/app/_components/request-attachments";
 import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
@@ -31,6 +32,7 @@ import { listComments } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
+import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { listResponsesForRequest } from "@/modules/canned-responses";
 import { RequestEscalations } from "@/app/_components/request-escalations";
@@ -202,6 +204,8 @@ export default async function QueueRequestPage({
         <AttendanceFieldsForm fields={attendance.fields} requestId={request.id} values={attendance.values} />
       ) : null}
       {/* While the form shows the attendance's answers, the block keeps only the requester's. */}
+      {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6. */}
+      <ApprovalLevels view={await getApprovalLevels(request)} />
       <RequestFieldAnswers answers={attendanceFormShown ? answers.filter((answer) => answer.audience !== "ATTENDANT") : answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <TeamSatisfaction view={satisfaction} />

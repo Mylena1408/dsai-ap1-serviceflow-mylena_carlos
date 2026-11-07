@@ -322,6 +322,15 @@ export const OPENAPI_DOCUMENT = {
           defaultPriority: PRIORITY,
           slaHours: nullable("integer"),
           requiresApproval: { type: "boolean" },
+          approval: nullable("object", {
+            description:
+              "Aprovação do serviço: setores dos níveis, em ordem (o setor do serviço quando não há níveis configurados), dias para decidir cada nível e a condição sobre uma resposta (a solicitação só exige aprovação quando a resposta do campo fieldId for, ou na seleção múltipla contiver, value).",
+            properties: {
+              levelSectorIds: { type: "array", items: { type: "string", format: "uuid" } },
+              deadlineDays: nullable("integer"),
+              condition: nullable("object", { properties: { fieldId: { type: "string", format: "uuid" }, value: { type: "string" } } }),
+            },
+          }),
           documents: { type: "array", items: { type: "object", properties: { name: { type: "string" }, required: { type: "boolean" }, formats: { type: "array", items: { type: "string" } } } } },
           fields: {
             type: "array",
@@ -381,6 +390,19 @@ export const OPENAPI_DOCUMENT = {
           {
             type: "object",
             properties: {
+              approvalProgress: nullable("object", {
+                description:
+                  "Andamento da aprovação: o nível atual (ou o último decidido), o total de níveis, o setor que decide o nível pendente, o vencimento do nível pendente e se está atrasado. Nulo quando a solicitação não exige aprovação.",
+                properties: {
+                  state: { type: "string", enum: ["PENDING", "APPROVED", "REJECTED"] },
+                  level: { type: "integer" },
+                  levelCount: { type: "integer" },
+                  levelSectorIds: { type: "array", items: { type: "string", format: "uuid" } },
+                  pendingSectorId: nullable("string", { format: "uuid" }),
+                  dueAt: nullable("string", { format: "date-time" }),
+                  overdue: { type: "boolean" },
+                },
+              }),
               slaBusinessHours: { type: "boolean", description: "O prazo conta só horas úteis do calendário." },
               slaPausedAt: nullable("string", { format: "date-time" }),
               fieldAnswers: {
@@ -412,7 +434,11 @@ export const OPENAPI_DOCUMENT = {
                 },
               },
               comments: { type: "array", items: ref("Comment") },
-              history: { type: "object", description: "status, assignment, sectors (encaminhamentos), priority, pauses (pausas do prazo), stages e approval" },
+              history: {
+                type: "object",
+                description:
+                  "status, assignment, sectors (encaminhamentos), priority, pauses (pausas do prazo), stages, approval (a última decisão) e approvals (todas as decisões, por nível, com onBehalfOf quando um substituto decidiu na ausência do gestor)",
+              },
             },
           },
         ],

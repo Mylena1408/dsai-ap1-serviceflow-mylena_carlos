@@ -88,6 +88,8 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "startsOn",
   "endsOn",
   "substituteId",
+  "deadlineDays",
+  "managerId",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

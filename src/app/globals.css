@@ -544,7 +544,8 @@ p {
   margin-left: auto;
 }
 
-.entity-editor-form {
+.entity-editor-form,
+.approval-editor-form {
   display: grid;
   gap: 14px;
 }

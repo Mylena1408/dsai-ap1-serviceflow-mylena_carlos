@@ -30,6 +30,8 @@ export interface RequestQueryRepository {
   findForApproval(requestId: string, sectorId: string, coveredSectorIds?: readonly string[]): Promise<RequestWithHistory | null>;
   /** 4.3.5: sectors this manager replaces today. Optional for older doubles: absent = none. */
   approvalCoverage?(managerId: string): Promise<Array<{ sectorId: string; managerId: string }>>;
+  /** Names of sectors by id (the approval levels, 4.3.3). Optional for older doubles: absent = none. */
+  sectorNames?(sectorIds: readonly string[]): Promise<Map<string, string>>;
   /** Active attendants of a sector, by name, for the transfer form. */
   listSectorAttendants(sectorId: string): Promise<Array<{ id: string; name: string }>>;
   /**

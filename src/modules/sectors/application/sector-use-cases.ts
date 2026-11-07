@@ -24,6 +24,17 @@ export async function listSectorsForCatalog(repository: SectorRepository): Promi
   return editor.sectorId === null ? sectors : sectors.filter((sector) => sector.id === editor.sectorId);
 }
 
+/**
+ * Active sectors, by name, as choices for the approval levels of a service (SPEC
+ * 2026-11-06-aprofundamento-configurabilidade, 4.3.1, decision G19): whoever configures a service may
+ * pick any active sector as a level, because a level only says who approves. Only id and name.
+ */
+export async function listApprovalSectorChoices(repository: SectorRepository): Promise<Array<{ id: string; name: string }>> {
+  await requireCatalogEditor();
+  const sectors = await repository.listByName();
+  return sectors.filter((sector) => sector.isActive).map(({ id, name }) => ({ id, name }));
+}
+
 export async function createSector(
   input: unknown,
   transactions: SectorTransactionRunner,

@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  configureServiceApproval,
   createService,
   setServiceActive,
   updateService,
@@ -35,6 +36,8 @@ import {
   finishUpdate,
   reportFailure,
   selectedSection,
+  serviceApprovalFailure,
+  serviceApprovalFields,
   serviceFieldFields,
   serviceFieldFailure,
   updateFailure,
@@ -266,4 +269,17 @@ export async function reactivateServiceStageAction(formData: FormData): Promise<
     reportFailure("serviceStages", section, error);
   }
   return finish("serviceStages", "status", section);
+}
+
+// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1, 4.3.6 and 4.3.7.
+export async function configureServiceApprovalAction(
+  _previousState: AdminUpdateState,
+  formData: FormData,
+): Promise<AdminUpdateState> {
+  try {
+    await configureServiceApproval(field(formData, "serviceId"), serviceApprovalFields(formData));
+  } catch (error) {
+    return serviceApprovalFailure(error) ?? updateFailure(error);
+  }
+  return finishUpdate();
 }

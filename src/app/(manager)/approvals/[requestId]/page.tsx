@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getApprovalActingSectors,
+  getApprovalLevels,
   pendingApprovalSector,
   getManagerRequest,
   getRequestSatisfaction,
@@ -18,6 +19,7 @@ import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { RequestSla } from "@/app/_components/request-sla";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
+import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { requireManagerPageAccess } from "../../page-access";
 import { approveRequestAction, rejectRequestAction } from "../actions";
 
@@ -47,6 +49,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   let satisfaction;
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
   let actingSectors: string[] = [];
+  let levels: Awaited<ReturnType<typeof getApprovalLevels>> = null;
 
   try {
     request = await getManagerRequest(requestId);
@@ -55,6 +58,8 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
     satisfaction = await getRequestSatisfaction(request.id);
     escalations = await listRequestEscalations(request.id);
     actingSectors = await getApprovalActingSectors();
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6.
+    levels = await getApprovalLevels(request);
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
@@ -121,6 +126,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
           </details>
         </section>
       ) : null}
+      <ApprovalLevels view={levels} />
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <TeamSatisfaction view={satisfaction} />

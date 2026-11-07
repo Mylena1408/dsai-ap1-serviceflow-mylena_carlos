@@ -66,3 +66,7 @@
 > arquivo salvo, pode seguir
 
 16. Conferência de que era a produção, backup verificado, 6 migrations aplicadas no Neon e push (ver `NOTES.md` e a seção 10 da SPEC de backup).
+
+> pode iniciar a SF-167
+
+17. Deploy de `720f37b` conferido (CI e Vercel com sucesso). SF-167: configuração da aprovação na tela, ausências na administração, níveis nas telas de acompanhamento, API, OpenAPI e E2E da parte B. Todas as suítes aprovadas (ver `NOTES.md`).

@@ -1,4 +1,6 @@
 import { actorHasPermission, assertRole, requireCurrentActor } from "@/server/authorization";
+import { approvalLevelsView, type ApprovalLevelsView } from "../domain/approval-levels-view";
+import { requestApprovalSectors } from "../domain/approval";
 import { AuthorizationError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
@@ -183,4 +185,20 @@ export async function searchAttendantQueue(
   const page = await repository.search({ sectorId: actor.sectorId }, criteria, actor.id);
 
   return { ...page, criteria };
+}
+
+/**
+ * The approval levels of a request the caller already read (SPEC
+ * 2026-11-06-aprofundamento-configurabilidade, 4.3.3 to 4.3.6): only sector names are added, so
+ * nothing beyond the request itself is revealed. Null without approval.
+ */
+export async function getApprovalLevels(
+  request: Parameters<typeof approvalLevelsView>[0],
+  repository: Pick<RequestQueryRepository, "sectorNames">,
+  now: Date = new Date(),
+): Promise<ApprovalLevelsView | null> {
+  if (request.approvalState === null) return null;
+  const sectorIds = requestApprovalSectors(request);
+  const names = repository.sectorNames ? await repository.sectorNames(sectorIds) : new Map<string, string>();
+  return approvalLevelsView(request, names, now);
 }

@@ -12,12 +12,14 @@ import { DocumentRequirementsEditor } from "../../document-requirements-editor";
 import { AdminRecordEditor } from "../../record-editor";
 import { ServiceFieldsEditor } from "../../service-fields-editor";
 import { ServiceStagesEditor } from "../../service-stages-editor";
+import { ServiceApprovalEditor, type ApprovalConditionChoice } from "../../service-approval-editor";
 import { AdminSectionProvider } from "../../section-context";
 import { ServiceSlaFields } from "../../service-sla-fields";
 import {
   createDocumentRequirementAction,
   createServiceAction,
   createServiceFieldAction,
+  configureServiceApprovalAction,
   createServiceStageAction,
   deactivateDocumentRequirementAction,
   deactivateServiceFieldAction,
@@ -45,7 +47,27 @@ type ServicesSectionProps = {
   /** Active managers per sector id, to warn about services nobody can approve (SPEC de aprovações, 9). */
   /** Absent on the sector page, which does not read the users (SPEC de permissões, 5.3.1). */
   activeManagersBySector?: ReadonlyMap<string, number>;
+  /** Active sectors any catalog editor may pick as approval levels (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1). */
+  approvalSectors: Array<{ id: string; name: string }>;
 };
+
+/**
+ * Requester fields that may control the approval condition (SPEC
+ * 2026-11-06-aprofundamento-configurabilidade, 4.3.7): active, of the opening, with choices and
+ * without their own condition.
+ */
+function approvalConditionChoices(fields: readonly ServiceFieldRecord[], serviceId: string): ApprovalConditionChoice[] {
+  return fields
+    .filter(
+      (field) =>
+        field.serviceId === serviceId &&
+        field.isActive &&
+        field.audience === "REQUESTER" &&
+        !field.conditionFieldId &&
+        (field.type === "SELECT" || field.type === "YES_NO" || field.type === "MULTI_SELECT"),
+    )
+    .map((field) => ({ fieldId: field.id, label: field.label, type: field.type as ApprovalConditionChoice["type"], options: field.options }));
+}
 
 export function ServicesSection({
   section,
@@ -56,6 +78,7 @@ export function ServicesSection({
   serviceFields,
   serviceStages,
   activeManagersBySector,
+  approvalSectors,
 }: ServicesSectionProps) {
   return (
     <AdminSectionProvider section={section}>
@@ -165,6 +188,22 @@ export function ServicesSection({
                 serviceId={service.id}
                 updateAction={updateServiceFieldAction}
               />
+              {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3: only for services that require approval. */}
+              {service.requiresApproval ? (
+                <ServiceApprovalEditor
+                  action={configureServiceApprovalAction}
+                  conditionFields={approvalConditionChoices(serviceFields, service.id)}
+                  current={{
+                    sectorIds: service.approvalSectorIds ?? [],
+                    conditionFieldId: service.approvalConditionFieldId ?? null,
+                    conditionValue: service.approvalConditionValue ?? null,
+                    deadlineDays: service.approvalDeadlineDays ?? null,
+                  }}
+                  sectors={approvalSectors}
+                  serviceId={service.id}
+                  serviceSectorId={service.sectorId}
+                />
+              ) : null}
               <ServiceStagesEditor
                 createAction={createServiceStageAction}
                 deactivateAction={deactivateServiceStageAction}

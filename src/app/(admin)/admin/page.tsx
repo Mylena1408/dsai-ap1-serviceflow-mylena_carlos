@@ -33,6 +33,8 @@ import { WebhooksSection } from "./_sections/webhooks/webhooks-section";
 import { getWebhookOverview } from "@/modules/webhooks";
 import { listAllApiTokens } from "@/modules/api-tokens";
 import { getCalendarOverview } from "@/modules/calendar";
+import { listAbsences, listSubstituteCandidates } from "@/modules/absences";
+import { AbsencesSection, type AbsencesOverview } from "./_sections/absences/absences-section";
 import { CalendarSection } from "./_sections/calendar/calendar-section";
 
 type AdminPageProps = {
@@ -49,6 +51,8 @@ type AdminPageProps = {
     actor?: string;
     page?: string;
     knowledge?: string;
+    /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5. */
+    absence?: string;
   }>;
 };
 
@@ -60,6 +64,8 @@ const adminSections = [
   { id: "services", label: "Serviços" },
   { id: "knowledge", label: "Base de conhecimento" },
   { id: "calendar", label: "Calendário" },
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5.
+  { id: "absences", label: "Ausências" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
   { id: "analytics", label: "Análises" },
@@ -95,7 +101,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
+  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge, absence }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -126,6 +132,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const webhookOverview = selectedSection === "webhooks" ? await getWebhookOverview() : null;
   // SPEC 2026-11-03-pausa-sla-calendario, 5.7: read only when the section is open.
   const calendarOverview = selectedSection === "calendar" ? await getCalendarOverview() : null;
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: read only when the section is open.
+  const absencesOverview: AbsencesOverview | null =
+    selectedSection === "absences"
+      ? { ...(await listAbsences()), managers: await listSubstituteCandidates() }
+      : null;
 
   return (
     <main className="page-shell">
@@ -199,6 +210,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           serviceFields={serviceFields}
           serviceStages={serviceStages}
           activeManagersBySector={activeManagersBySector(users)}
+          approvalSectors={sectors.filter((item) => item.isActive).map(({ id, name }) => ({ id, name }))}
           section={selectedSection}
           sectors={sectors}
           services={services}
@@ -246,6 +258,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {webhookOverview ? <WebhooksSection overview={webhookOverview} /> : null}
 
       {calendarOverview ? <CalendarSection overview={calendarOverview} /> : null}
+
+      {absencesOverview ? <AbsencesSection message={absence} overview={absencesOverview} /> : null}
         </div>
       ) : null}
     </main>

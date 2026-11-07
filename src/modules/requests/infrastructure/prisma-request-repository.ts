@@ -266,6 +266,10 @@ export function createPrismaRequestQueryRepository(
     approvalCoverage(managerId) {
       return approvalCoverage(database, managerId);
     },
+    async sectorNames(sectorIds) {
+      const rows = await database.sector.findMany({ where: { id: { in: [...sectorIds] } }, select: { id: true, name: true } });
+      return new Map(rows.map(({ id, name }) => [id, name]));
+    },
     async findForApproval(requestId, sectorId, coveredSectorIds = []) {
       const row = await database.request.findFirst({
         where: { id: requestId, OR: [sectorId, ...coveredSectorIds].map(approvalVisibleTo) },

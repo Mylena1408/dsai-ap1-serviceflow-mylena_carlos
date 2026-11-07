@@ -108,6 +108,46 @@ export function serviceFieldFailure(error: unknown, kind: "create" | "update" = 
   return null;
 }
 
+/**
+ * Approval form of a service (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.1, 4.3.6 and
+ * 4.3.7). The chosen levels in order, without the empty ones; one level equal to the service's sector
+ * is sent as no level (the default). The condition is "<field id>::<value>" or empty. Blank days
+ * mean no deadline; other text goes on for the server to refuse.
+ */
+export function serviceApprovalFields(formData: FormData) {
+  const levels = ["level1", "level2", "level3"].map((name) => field(formData, name).trim()).filter((value) => value !== "");
+  const sectorIds = levels.length === 1 && levels[0] === field(formData, "serviceSectorId") ? [] : levels;
+  const condition = field(formData, "condition");
+  const separator = condition.indexOf("::");
+  const days = field(formData, "deadlineDays").trim();
+
+  return {
+    sectorIds,
+    conditionFieldId: condition === "" ? null : separator < 0 ? condition : condition.slice(0, separator),
+    conditionValue: separator < 0 ? null : condition.slice(separator + 2),
+    deadlineDays: days === "" ? null : /^\d+$/.test(days) ? Number(days) : days,
+  };
+}
+
+/** Fixed messages for the approval form (4.3.1, 4.3.6 and 4.3.7). */
+export function serviceApprovalFailure(error: unknown): AdminUpdateState | null {
+  if (!(error instanceof ValidationError)) return null;
+  const paths = error.issues.map(({ path }) => String(path[0]));
+  if (paths.includes("sectorIds")) {
+    return { status: "error", message: "Escolha de 1 a 3 setores ativos, sem repetir o mesmo setor em dois níveis seguidos." };
+  }
+  if (paths.includes("conditionFieldId") || paths.includes("conditionValue")) {
+    return {
+      status: "error",
+      message: "Escolha uma condição válida: um campo de escolha ativo da abertura, sem condição própria, e uma das suas opções.",
+    };
+  }
+  if (paths.includes("deadlineDays")) {
+    return { status: "error", message: "Informe de 1 a 30 dias para decidir cada nível, ou deixe em branco para não ter prazo." };
+  }
+  return null;
+}
+
 export function activeState(formData: FormData): boolean {
   return validateInput(activeStateInputSchema, field(formData, "isActive"));
 }
