@@ -1841,7 +1841,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-174 — Aplicação das regras no job, telas, análises e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261107800000_escalation_rule_application` (autor nulo na atribuição, pessoas avisadas, evento `request.escalated`); passo `escalationRules` do job diário (gatilhos, prioridade, atribuição pelo sistema, avisos uma vez por execução); bloco "Escalonamentos" com regra, gatilho e ações; "Análises" separando por gatilho; E2E `escalation-rules.spec.ts`. Parte E e SPEC concluídas (CA-ESR-01 a 07).
 - **Objetivo:** Seção 7.3 (regras 2 a 5), parte E.
 - **Arquivos/módulos esperados:** Job diário, notificações, detalhe, `src/modules/reports/`.
 - **Dependências:** SF-173.

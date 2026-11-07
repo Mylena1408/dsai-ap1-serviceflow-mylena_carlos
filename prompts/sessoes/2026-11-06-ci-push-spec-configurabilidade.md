@@ -94,3 +94,7 @@
 > pode iniciar a SF-173
 
 23. SF-173: migration das regras de escalonamento, domínio, casos de uso com auditoria e tela em "Setores" (ver `NOTES.md`).
+
+> pode iniciar a SF-174
+
+24. SF-174: aplicação das regras de escalonamento pelo job, autor sistema, avisos, detalhe, análises e E2E da parte E (ver `NOTES.md`).

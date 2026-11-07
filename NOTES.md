@@ -2228,3 +2228,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** entidade `ESCALATION_RULE`; o leitor dos nomes da trilha passou a incluir pessoas, para mostrar "Atribuir a" e "Avisar as pessoas" pelos nomes atuais.
 - **Resultados:** typecheck, lint e build OK; unitários 1336/1336; integração 523/523; E2E 36/36.
 - **Linhas:** 1.288 `added` (aplicação 773, testes 515).
+
+## SF-174 — Regras de escalonamento no job; fim da parte E e da SPEC (2026-11-07)
+
+- **Job:** passo `escalationRules`, logo depois dos alertas de prazo (a opção escala no vencido antes) e antes do outbox, para os avisos saírem na mesma execução. Uma consulta acha os pares (solicitação, regra) cujo gatilho vale e que não foram aplicados ao vencimento atual; cada aplicação relê a solicitação e a regra numa transação, sobe a prioridade, atribui pelo sistema, grava o escalonamento (com a cópia do nome, o vencimento, o atendente, `assignmentSkipped` e as pessoas avisadas) e o evento `request.escalated`. Duas execuções ao mesmo tempo: o índice único (solicitação, regra, vencimento) recusa a segunda, e a aplicação vira "não aplicada".
+- **Autor sistema (G17):** `RequestAssignmentEvent.actorId` passou a aceitar nulo (migration); a linha do tempo, a API (`actor: null`) e as notificações tratam o nulo.
+- **Correção encontrada no caminho:** o consumidor das notificações decidia avisar os gestores pela opção quando havia *qualquer* escalonamento no instante do vencido; com regras na mesma execução, isso avisaria os gestores sem a opção ligada. A consulta passou a olhar só o gatilho `OVERDUE`.
+- **Ordem do bloco:** a opção e as regras de uma mesma execução gravam o mesmo instante; a leitura desempatava pelo id (aleatório) e um teste de integração falhou de forma intermitente na suíte completa. A leitura passou a ordenar por instante, gatilho (a opção primeiro) e N; o teste passou 6 vezes seguidas e a suíte inteira depois da correção, e os dois E2E de escalonamento foram executados de novo.
+- **Registros:** o commit do código da SF-174 saiu sem estes registros (o script que os escreve falhou antes); eles vieram num commit seguinte, sem reescrever o histórico.
+- **Aviso:** `sla.escalated` às pessoas da regra, com o nome dela no texto da notificação e do e-mail (lido do escalonamento pelo evento, como o nome da etapa); "Meus dados" continua com o texto genérico do tipo, como já fazia com as etapas.
+- **Análises:** "Escaladas por vencimento" conta só a opção; "Escaladas por regra" (próximas do vencimento · vencidas há N dias) aparece quando houver.
+- **Resultados:** typecheck, lint e build OK; unitários 1348/1348; integração 531/531; E2E 37/37.
+- **Linhas:** 1.120 `added` (aplicação 560, testes 560).
