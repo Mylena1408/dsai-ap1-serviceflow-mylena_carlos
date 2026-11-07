@@ -101,3 +101,10 @@ Se o banco restaurado não tiver as extensões do original, criar antes `CREATE 
 - Verificação: restaurada num banco local isolado; as 39 tabelas com a mesma contagem de linhas da produção; o banco de verificação foi apagado.
 - **Ajustes na restauração de verificação:** a URL do banco local tem o parâmetro `schema` do Prisma, que o `pg_restore` não aceita (removido só para ele); e a cópia do Neon traz permissões padrão para papéis do próprio Neon (`neon_superuser`), que não existem no banco local, por isso a restauração usa `--no-acl`. A cópia em si continua completa, com as permissões.
 - Continua faltando a cópia fora da máquina, com cifra própria.
+
+## 11. Cópia antes do segundo deploy de 2026-11-07
+
+- Feita pelo agente, a pedido da responsável ("siga com backup, migrations e push nesta ordem"), antes de aplicar 6 migrations no Neon (SF-168 a SF-174). URL direta lida do arquivo da responsável fora do projeto, sem aparecer na saída.
+- Cópia `serviceflow-2026-11-07-pre-deploy-2.dump` (182.552 bytes) em `C:\Users\Mylena Reis\serviceflow-backups\`, com o atributo cifrado do EFS conferido.
+- Verificação: restaurada num banco local isolado, com os mesmos ajustes da seção 10; as 40 tabelas com a mesma contagem de linhas da produção (10 pessoas, 38 solicitações, 37 migrations); o banco de verificação foi apagado.
+- Continua faltando a cópia fora da máquina, com cifra própria.

@@ -2240,3 +2240,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Análises:** "Escaladas por vencimento" conta só a opção; "Escaladas por regra" (próximas do vencimento · vencidas há N dias) aparece quando houver.
 - **Resultados:** typecheck, lint e build OK; unitários 1348/1348; integração 531/531; E2E 37/37.
 - **Linhas:** 1.120 `added` (aplicação 560, testes 560).
+
+## Deploy de SF-168 a SF-174 (2026-11-07)
+
+- **Ordem seguida:** backup verificado → 6 migrations no Neon → push.
+- **Backup:** `serviceflow-2026-11-07-pre-deploy-2.dump`, conferido por restauração local (40 tabelas iguais), cifrado pelo EFS. Detalhes na seção 11 da SPEC de backup.
+- **Migrations no Neon:** `prisma migrate deploy` aplicou `20261107300000_stage_assignee_target_condition`, `20261107400000_stage_entry_overdue`, `20261107500000_current_stage_name`, `20261107600000_access_roles`, `20261107700000_escalation_rules` e `20261107800000_escalation_rule_application`; `prisma migrate status` confirmou o banco em dia (43).
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.

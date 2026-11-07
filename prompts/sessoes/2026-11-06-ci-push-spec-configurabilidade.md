@@ -98,3 +98,7 @@
 > pode iniciar a SF-174
 
 24. SF-174: aplicação das regras de escalonamento pelo job, autor sistema, avisos, detalhe, análises e E2E da parte E (ver `NOTES.md`).
+
+> siga com backup, migrations e push nesta ordem
+
+25. Backup do Neon verificado, 6 migrations aplicadas (SF-168 a SF-174) e push, nesta ordem (ver `NOTES.md`).
