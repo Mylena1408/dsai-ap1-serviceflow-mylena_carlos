@@ -2152,3 +2152,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Erro meu no teste, corrigido:** a primeira versão rodava o job com um "agora" artificial um dia no futuro. O outbox só entrega eventos cujo horário já chegou, então o aviso do segundo nível não era processado. O teste passou a levar o vencimento para o passado e usar a hora real, como no job.
 - **Resultados:** typecheck, lint e build OK; unitários 1260/1260; integração 481/481; E2E 33/33.
 - **Linhas:** 430 `added` (aplicação 208, testes 222).
+
+## Deploy de SF-161 a SF-166 (2026-11-07)
+
+- **Ordem seguida:** backup verificado → 6 migrations no Neon → push, como combinado depois do erro de 06/11 (push antes da migration).
+- **Backup:** `serviceflow-2026-11-07-pre-deploy.dump`, conferido por restauração local (39 tabelas iguais), cifrado pelo EFS. Detalhes na seção 10 da SPEC de backup.
+- **Migrations no Neon:** `prisma migrate deploy` aplicou `20261106500000_status_event_request_index`, `20261106600000_field_type_formats`, `20261106600100_decimal_field_limits`, `20261106700000_approval_levels`, `20261107100000_manager_absences` e `20261107200000_approval_deadline`; `prisma migrate status` confirmou o banco em dia (37). Depois: 10 pessoas e 38 solicitações, como antes.
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.

@@ -59,3 +59,10 @@
 
 14. Contagem das migrations pendentes (111 linhas de SQL, fora da meta); prioridade registrada na memória do agente.
 15. SF-166: prazo para aprovar, evento `request.approval_overdue`, passo do job diário, notificação, telas e análises. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> vamos resolver os 7 commits
+> (pasta da URL do Neon) agora virou C:\Users\Mylena Reis\Documents\neon_producao
+> me de o link do neon pra conseguir concluir
+> arquivo salvo, pode seguir
+
+16. Conferência de que era a produção, backup verificado, 6 migrations aplicadas no Neon e push (ver `NOTES.md` e a seção 10 da SPEC de backup).
