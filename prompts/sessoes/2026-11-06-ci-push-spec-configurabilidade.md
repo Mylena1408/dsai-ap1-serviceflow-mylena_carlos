@@ -134,3 +134,11 @@
 > pode iniciar a SF-179 / pode seguir com a SF-179
 
 33. SF-179: posição no grupo (migration), página do grupo e cancelamento do pacote, rótulos, bloco "Pacote", API e E2E; fim da parte A (ver `NOTES.md`).
+
+> pode prosseguir
+
+34. SF-180: migration da distribuição, das ausências de atendente e do motivo das atribuições; regras de escolha e configuração do setor com auditoria (ver `NOTES.md`).
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
+
+35. Contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-180.

@@ -158,6 +158,10 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   notifyUserIds: "Avisar as pessoas",
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
   serviceIds: "Serviços",
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
+  distributionMode: "Distribuição automática",
+  maxActivePerAttendant: "Limite por atendente",
+  redistributeOnAbsence: "Passar as solicitações de quem se ausenta",
   revokedAt: "Revogado em",
   url: "Endereço",
   eventTypes: "Eventos",
@@ -232,7 +236,8 @@ export function describeAuditChange(change: AuditChange, format?: AuditValueForm
 export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>> = {
   USER: ["name", "email", "role", "sectorId", "isActive"],
   // "escalateOverdue": SPEC 2026-11-06-escalonamento, 4.6.
-  SECTOR: ["name", "isActive", "escalateOverdue"],
+  // The distribution: SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
+  SECTOR: ["name", "isActive", "escalateOverdue", "distributionMode", "maxActivePerAttendant", "redistributeOnAbsence"],
   CATEGORY: ["name", "isActive"],
   SERVICE: [
     "name",

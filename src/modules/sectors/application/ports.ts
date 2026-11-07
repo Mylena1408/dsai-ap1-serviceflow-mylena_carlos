@@ -10,7 +10,18 @@ export interface SectorRepository {
 export interface SectorTransaction extends AuditScope {
   exists(sectorId: string): Promise<boolean>;
   create(name: string): Promise<SectorRecord>;
-  update(sectorId: string, data: { name?: string; isActive?: boolean; escalateOverdue?: boolean }): Promise<SectorRecord>;
+  update(
+    sectorId: string,
+    data: {
+      name?: string;
+      isActive?: boolean;
+      escalateOverdue?: boolean;
+      // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
+      distributionMode?: "NONE" | "ROUND_ROBIN" | "LEAST_LOAD";
+      maxActivePerAttendant?: number | null;
+      redistributeOnAbsence?: boolean;
+    },
+  ): Promise<SectorRecord>;
   findDeactivationDependencies(sectorId: string): Promise<SectorDeactivationDependencies>;
 }
 

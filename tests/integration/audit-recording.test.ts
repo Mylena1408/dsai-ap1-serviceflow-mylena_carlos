@@ -91,6 +91,9 @@ describe("audit of sectors and categories (SF-103)", () => {
         { field: "isActive", before: null, after: true },
         // Audited since SPEC 2026-11-06-escalonamento, 4.6 (off by default).
         { field: "escalateOverdue", before: null, after: false },
+        // Audited since SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1 (off by default; no limit is null).
+        { field: "distributionMode", before: null, after: "NONE" },
+        { field: "redistributeOnAbsence", before: null, after: false },
       ],
     });
     expect(recorded[1]).toMatchObject({

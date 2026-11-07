@@ -12,6 +12,15 @@ import {
 export { assertSectorCanBeDeactivated } from "./domain/deactivation";
 export type { SectorDeactivationDependencies } from "./domain/deactivation";
 export type { SectorRecord } from "./domain/sector";
+export {
+  DISTRIBUTION_MODE_LABELS,
+  MAX_ACTIVE_LIMIT,
+  MIN_ACTIVE_LIMIT,
+  SECTOR_DISTRIBUTION_MODES,
+  distributionSummary,
+  type DistributionSettingsInput,
+  type SectorDistributionMode,
+} from "./domain/distribution-config";
 
 export async function listSectors(database: PrismaClient = prisma): Promise<SectorRecord[]> {
   return useCases.listSectors(createPrismaSectorRepository(database));
@@ -47,6 +56,15 @@ export async function setSectorEscalation(
   database: PrismaClient = prisma,
 ): Promise<SectorRecord> {
   return useCases.setSectorEscalation(id, enabled, createPrismaSectorTransactionRunner(database));
+}
+
+/** SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1. */
+export async function setSectorDistribution(
+  id: unknown,
+  input: unknown,
+  database: PrismaClient = prisma,
+): Promise<SectorRecord> {
+  return useCases.setSectorDistribution(id, input, createPrismaSectorTransactionRunner(database));
 }
 
 export async function setSectorActive(

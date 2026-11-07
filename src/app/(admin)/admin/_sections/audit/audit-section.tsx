@@ -11,6 +11,7 @@ import {
 } from "@/modules/audit";
 import { API_TOKEN_SCOPE_LABELS } from "@/modules/api-tokens";
 import { WEBHOOK_EVENT_LABELS } from "@/modules/webhooks";
+import { DISTRIBUTION_MODE_LABELS } from "@/modules/sectors";
 import { FIELD_TYPE_LABELS, ROLE_LABELS } from "@/shared/admin-labels";
 import { ESCALATION_TRIGGER_LABELS, PRIORITY_LABELS } from "@/shared/requests";
 import { PERIOD_ERRORS } from "@/app/_components/dashboard-view";
@@ -58,6 +59,11 @@ export function auditValueFormatter(names: Record<string, string>) {
       return ESCALATION_TRIGGER_LABELS[value as keyof typeof ESCALATION_TRIGGER_LABELS] ?? value;
     }
     if (field === "assignToId" && typeof value === "string") return names[value] ?? "(removido)";
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
+    if (field === "distributionMode" && typeof value === "string") {
+      return DISTRIBUTION_MODE_LABELS[value as keyof typeof DISTRIBUTION_MODE_LABELS] ?? value;
+    }
+    if (field === "maxActivePerAttendant") return value === null ? "Sem limite" : undefined;
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2: the services of a bundle, in order.
     if (field === "serviceIds" && Array.isArray(value)) return value.map((id) => names[id] ?? "(removido)").join(" → ");
     if (typeof value !== "string") return undefined;

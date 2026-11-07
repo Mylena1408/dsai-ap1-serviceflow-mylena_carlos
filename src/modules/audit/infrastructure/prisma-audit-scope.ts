@@ -25,7 +25,18 @@ async function loadState(
       return row && { label: row.name, state: row };
     }
     case "SECTOR": {
-      const row = await transaction.sector.findUnique({ where: { id }, select: { name: true, isActive: true, escalateOverdue: true } });
+      const row = await transaction.sector.findUnique({
+        where: { id },
+        select: {
+          name: true,
+          isActive: true,
+          escalateOverdue: true,
+          // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
+          distributionMode: true,
+          maxActivePerAttendant: true,
+          redistributeOnAbsence: true,
+        },
+      });
       return row && { label: row.name, state: row };
     }
     case "CATEGORY": {

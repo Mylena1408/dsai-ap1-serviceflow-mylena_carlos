@@ -1901,7 +1901,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-180 — Distribuição: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261108200000_queue_distribution`; regras de quem pode receber e da escolha (rodízio e menor carga, `requests/domain/distribution.ts`); configuração do setor com auditoria (`setSectorDistribution`); regras da ausência de atendente (`absences/domain/attendant-absence.ts`); motivo das atribuições do sistema. A distribuição em si fica na SF-181.
 - **Objetivo:** Seção 4.3 (regras 1, 3, 4 e 7), parte B.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/sectors/`, `src/modules/requests/domain/`.
 - **Dependências:** Parte A concluída.

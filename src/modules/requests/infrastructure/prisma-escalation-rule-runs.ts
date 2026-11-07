@@ -98,7 +98,8 @@ export function createPrismaEscalationRuleRunStore(database: PrismaClient): Esca
             if (changed.count !== 1) return null;
             assignedToId = plan.assignTo;
             await transaction.requestAssignmentEvent.create({
-              data: { requestId: candidate.requestId, actorId: null, fromAssigneeId: request.assigneeId, toAssigneeId: plan.assignTo, occurredAt: now },
+              // The reason of a system change (SPEC 2026-11-07-operacao-e-automacao, 4.4, decision H19).
+              data: { requestId: candidate.requestId, actorId: null, reason: "ESCALATION_RULE", fromAssigneeId: request.assigneeId, toAssigneeId: plan.assignTo, occurredAt: now },
             });
             await recordOutboxEvent(transaction, {
               type: "request.assignment_changed",

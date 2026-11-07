@@ -151,6 +151,14 @@ model Sector {
   isActive        Boolean  @default(true)
   /// SPEC 2026-11-06-escalonamento, 2.1: overdue requests raise their priority and warn the managers.
   escalateOverdue Boolean  @default(false)
+  /// SPEC 2026-11-07-operacao-e-automacao, 4.3 (decision H6): how requests entering the queue are assigned.
+  distributionMode      DistributionMode @default(NONE)
+  /// 1 to 100 active requests per attendant, or no limit.
+  maxActivePerAttendant Int?
+  /// 4.3 item 7: hand an absent attendant's requests to colleagues when the absence starts.
+  redistributeOnAbsence Boolean          @default(false)
+  /// Last attendant who received by distribution (the round-robin's turn).
+  lastDistributedToId   String?          @db.Uuid
   createdAt       DateTime @default(now()) @db.Timestamptz
   updatedAt       DateTime @updatedAt @db.Timestamptz
 
@@ -164,6 +172,7 @@ model Sector {
   pendingApprovals Request[]            @relation("RequestApprovalPendingSector")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.
   escalationRules  SectorEscalationRule[]
+  lastDistributedTo User?                @relation("SectorLastDistributedTo", fields: [lastDistributedToId], references: [id], onDelete: SetNull)
 }
 
 model Category {
@@ -244,6 +253,10 @@ model User {
   requestLinkEvents       RequestLinkEvent[]        @relation("RequestLinkEventActor")
   /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3.
   requestGroups           RequestGroup[]
+  /// SPEC 2026-11-07-operacao-e-automacao, 4.
+  sectorsLastDistributed  Sector[]                  @relation("SectorLastDistributedTo")
+  attendantAbsences       AttendantAbsence[]        @relation("AttendantAbsenceUser")
+  attendantAbsencesCreated AttendantAbsence[]       @relation("AttendantAbsenceCreator")
 }
 
 model Service {
@@ -405,6 +418,8 @@ model RequestAssignmentEvent {
   /// Null when the system made the change: an escalation rule's handover (SPEC
   /// 2026-11-06-aprofundamento-configurabilidade, 7.3 item 3, decision G17).
   actorId        String?  @db.Uuid
+  /// Why the system made the change (SPEC 2026-11-07-operacao-e-automacao, 4.4, decision H19); null for people.
+  reason         AssignmentReason?
   fromAssigneeId String?  @db.Uuid
   toAssigneeId   String?  @db.Uuid
   occurredAt     DateTime @default(now()) @db.Timestamptz
@@ -959,6 +974,38 @@ model KnowledgeArticle {
   updatedBy User    @relation("KnowledgeArticleUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
 
   @@unique([serviceId, title])
+}
+
+/// How a sector assigns the requests entering its queue (SPEC 2026-11-07-operacao-e-automacao, 4.3).
+enum DistributionMode {
+  NONE
+  ROUND_ROBIN
+  LEAST_LOAD
+}
+
+/// Why the system changed an assignment (4.4, decision H19).
+enum AssignmentReason {
+  DISTRIBUTION
+  ABSENCE
+  ESCALATION_RULE
+}
+
+/// An attendant's absence (4.3 item 7): out of the distribution on these days, both included.
+model AttendantAbsence {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  startsOn        DateTime  @db.Date
+  endsOn          DateTime  @db.Date
+  createdById     String    @db.Uuid
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  cancelledAt     DateTime? @db.Timestamptz
+  /// When the job handed the attendant's requests to colleagues (once per absence).
+  redistributedAt DateTime? @db.Timestamptz
+
+  user      User @relation("AttendantAbsenceUser", fields: [userId], references: [id], onDelete: Restrict)
+  createdBy User @relation("AttendantAbsenceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([userId, startsOn])
 }
 
 /// What escalated a request (SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4): the sector's

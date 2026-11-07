@@ -152,15 +152,20 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 - Nova tabela `AttendantAbsence` (`userId`, `startsOn`, `endsOn` `DATE`, `createdById`, `createdAt`, `cancelledAt`, `redistributedAt`), com `CHECK` do período.
 - `RequestAssignmentEvent` ganha `reason` (`DISTRIBUTION`, `ABSENCE`, `ESCALATION_RULE` ou nulo para as mudanças feitas por pessoas; decisão H19), com `CHECK` de que o motivo só existe com o autor nulo; as linhas existentes ficam nulas e as atribuições das regras de escalonamento (SF-174) passam a gravar `ESCALATION_RULE`.
 
+- *Esclarecimentos registrados em 2026-11-07 (SF-180):*
+  - o rodízio segue a ordem dos nomes (e do id no empate) de todos os atendentes do setor, disponíveis ou não, a partir de quem recebeu por último; se essa pessoa saiu do setor, a vez recomeça do primeiro nome;
+  - a ausência de atendente usa as mesmas regras de período da ausência de gestor (até 90 dias, ainda não encerrada, sem sobreposição) e é registrada pelo administrador, pelo gestor do setor da pessoa ou pela própria pessoa;
+  - o motivo da atribuição feita pelo sistema (`reason`) é obrigatório quando não há autor, e só então; as atribuições das regras de escalonamento passaram a gravá-lo.
+
 ### 4.5 Critérios de aceitação
 
 - [ ] **CA-DST-01** — Setor com a distribuição desligada se comporta como hoje.
-- [ ] **CA-DST-02** — Só o administrador configura modo, limite e passagem na ausência; valores inválidos são recusados; a mudança entra na auditoria.
+- [ ] **CA-DST-02** — Só o administrador configura modo, limite e passagem na ausência; valores inválidos são recusados; a mudança entra na auditoria. *Parcial em 2026-11-07 (SF-180): `setSectorDistribution` só para o administrador, com a auditoria do setor (modo, limite e passagem na ausência, pelos nomes); recusa modo desconhecido e limite fora de 1 a 100 (integração e unitário). Falta a tela (SF-183).*
 - [ ] **CA-DST-03** — Abertura sem aprovação, aprovação final, encaminhamento e liberação distribuem segundo o modo, pulando quem está inativo, ausente ou no limite; reabertura e solicitação com responsável não distribuem; sem candidato, fica sem responsável.
 - [ ] **CA-DST-04** — Rodízio e menor carga escolhem como na regra 4; entradas simultâneas não ultrapassam o limite nem repetem a vez.
 - [ ] **CA-DST-05** — A ausência de atendente segue as regras de período; com a opção do setor, o job passa as solicitações da pessoa uma vez por ausência, com histórico, evento e aviso.
 - [ ] **CA-DST-06** — A carga da equipe aparece para gestor, supervisor e administrador como na regra 8; "Análises" mostra quantas solicitações foram distribuídas automaticamente.
-- [ ] **CA-DST-07** — Migrations aditivas; atribuições existentes ficam sem motivo.
+- [x] **CA-DST-07** — Migrations aditivas; atribuições existentes ficam sem motivo. *Verificado em 2026-11-07 (SF-180): migration `20261108200000_queue_distribution` só acrescenta (enums, colunas com padrão ou opcionais, tabela das ausências de atendente, restrições); todo setor começa com a distribuição desligada; as atribuições existentes feitas por pessoas ficam sem motivo, e as feitas pelas regras de escalonamento (SF-174) recebem `ESCALATION_RULE`; cada recusa do banco conferida pelo nome da restrição (integração).*
 
 ## 5. Parte C — Solicitações recorrentes
 

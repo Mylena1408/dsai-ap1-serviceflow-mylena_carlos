@@ -2301,3 +2301,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Bloco "Pacote":** atendente e gestor veem as outras solicitações com código, serviço, setor e status (decisão H4), com link só para as que podem ler; o solicitante vê "Parte do pacote …" e a página do grupo.
 - **Resultados:** typecheck, lint e build OK; unitários 1390/1390; integração 555/555; E2E 40/40.
 - **Linhas:** 1015 `added` (aplicação 598, testes 417). Parte A inteira (SF-175 a SF-179): 4131.
+
+## SF-180 — Distribuição automática: banco e domínio (2026-11-07)
+
+- **Banco:** `Sector` ganhou modo (`NONE` por padrão), limite (1 a 100 ou nenhum), passagem na ausência e a vez do rodízio (`lastDistributedToId`, `SET NULL` se a pessoa sair); `AttendantAbsence` (período de até 90 dias); `RequestAssignmentEvent.reason`, obrigatório exatamente quando não há autor. A migration preenche `ESCALATION_RULE` nas atribuições sem autor que já existiam (só as regras de escalonamento as criavam), e o código da SF-174 passou a gravar o motivo.
+- **Escolha:** `chooseAttendant` recebe todos os atendentes do setor, para o rodízio manter a ordem quando alguém é pulado (inativo, ausente, no limite, ou quem acabou de liberar); a menor carga desempata pela ordem do rodízio.
+- **Configuração:** `setSectorDistribution`, só do administrador, com a auditoria do setor; os nomes dos modos aparecem na auditoria.
+- **Resultados:** typecheck, lint e build OK; unitários 1401/1401; integração 559/559 (a asserção exata da auditoria do setor foi atualizada com os campos novos e rodada de novo); E2E 40/40.
+- **Linhas:** 512 `added` (aplicação 271, testes 241).

@@ -6,6 +6,7 @@ import { validateInput } from "@/server/validation";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
 import { sectorInputSchema } from "./sector-schemas";
 import { assertSectorCanBeDeactivated } from "../domain/deactivation";
+import { distributionSettingsSchema } from "../domain/distribution-config";
 import type { SectorRecord } from "../domain/sector";
 import type { SectorRepository, SectorTransactionRunner } from "./ports";
 
@@ -84,6 +85,31 @@ export async function setSectorEscalation(
 
     return transaction.audited({ actor, action: "UPDATED", entityType: "SECTOR", entityId: sectorId }, () =>
       transaction.update(sectorId, { escalateOverdue }),
+    );
+  });
+}
+
+/**
+ * SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1: the distribution of a sector (mode, limit and the
+ * handover when an attendant is absent), only by the administrator, with the sector's audit trail.
+ * The round-robin's turn is kept: turning the distribution off and on goes on from where it stopped.
+ */
+export async function setSectorDistribution(
+  id: unknown,
+  input: unknown,
+  transactions: SectorTransactionRunner,
+): Promise<SectorRecord> {
+  const actor = await requireConfigurationAdministrator();
+  const sectorId = validateInput(entityIdSchema, id);
+  const settings = validateInput(distributionSettingsSchema, input);
+
+  return transactions.run(async (transaction) => {
+    if (!(await transaction.exists(sectorId))) {
+      throw new NotFoundError();
+    }
+
+    return transaction.audited({ actor, action: "UPDATED", entityType: "SECTOR", entityId: sectorId }, () =>
+      transaction.update(sectorId, settings),
     );
   });
 }

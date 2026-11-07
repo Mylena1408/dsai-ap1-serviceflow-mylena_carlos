@@ -42,6 +42,7 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.service.deleteMany(),
     prisma.auditEntry.deleteMany(),
     prisma.managerAbsence.deleteMany(),
+    prisma.attendantAbsence.deleteMany(),
     prisma.sectorEscalationRule.deleteMany(),
     prisma.userAccessRoleEvent.deleteMany(),
     prisma.userAccessRole.deleteMany(),
