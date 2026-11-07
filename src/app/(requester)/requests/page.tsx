@@ -42,6 +42,12 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
         </div>
         <Link href="/catalog">Voltar ao catálogo</Link>
       </header>
+      {/* SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3. */}
+      {params.notice === "bundle-opened" ? (
+        <p className="feedback" role="status">
+          Seu pacote foi aberto: cada serviço virou uma solicitação, listada abaixo.
+        </p>
+      ) : null}
       <RequestSearchForm basePath="/requests" params={params} showAssignee={false} defaultOrder="newest" />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">

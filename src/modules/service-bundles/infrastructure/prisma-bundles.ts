@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { createPrismaAuditScope } from "@/modules/audit";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import type { BundleReader, BundleStore, BundleTransaction } from "../application/bundles";
+import type { CatalogBundleReader } from "../application/catalog";
 import type { BundleServiceState } from "../domain/bundle";
 
 // Bundles in PostgreSQL (SPEC 2026-11-07-operacao-e-automacao, 3.4). The shape and the unique active
@@ -72,3 +73,15 @@ export function createPrismaBundleStore(database: PrismaClient): BundleStore {
   };
 }
 
+/** The bundles of the requester's catalog (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2). */
+export function createPrismaCatalogBundleReader(database: PrismaClient): CatalogBundleReader {
+  return {
+    listActiveBundles() {
+      return database.serviceBundle.findMany({ where: { isActive: true }, select: bundleColumns, orderBy: [{ name: "asc" }, { id: "asc" }] });
+    },
+    findBundle(bundleId) {
+      return database.serviceBundle.findUnique({ where: { id: bundleId }, select: bundleColumns });
+    },
+    serviceStates: (serviceIds) => serviceStates(database, serviceIds),
+  };
+}

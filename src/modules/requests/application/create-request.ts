@@ -107,7 +107,8 @@ export async function createRequest(
   return readRequestAfterWrite(transactions, requestId);
 }
 
-async function loadOpeningContext(
+/** Also used by the opening of a bundle (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3). */
+export async function loadOpeningContext(
   transaction: RequestTransaction,
   actorId: string,
   serviceId: string,
@@ -166,12 +167,17 @@ function requiresApprovalNow(service: ServiceForRequest, answers: readonly Field
   );
 }
 
-async function openRequest(
+/**
+ * Opens one request in the caller's transaction. A bundle opens one per service with the group's id
+ * (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3); a single opening has no group.
+ */
+export async function openRequest(
   transaction: RequestTransaction,
   actorId: string,
   parsed: RequestCreationInput,
   requestId: string,
   prepared: readonly PreparedAttachment[],
+  groupId: string | null = null,
 ): Promise<void> {
   const context = await loadOpeningContext(transaction, actorId, parsed.serviceId);
   const answers = await fieldAnswers(transaction, context.service.id, parsed);
@@ -203,6 +209,7 @@ async function openRequest(
     ...buildRequestSnapshot(context.actorId, context.service),
     id: requestId,
     description: parsed.description,
+    ...(groupId ? { groupId } : {}),
     status: "OPEN",
     openedAt,
     // SPEC 2026-11-01, sections 5.1 to 5.3: default priority and SLA snapshot of the service.

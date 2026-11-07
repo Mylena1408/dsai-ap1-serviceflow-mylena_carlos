@@ -1881,7 +1881,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-178 — Abertura do pacote
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Caso de uso `openBundle` (tudo ou nada; erros de todas as seções juntos; cada solicitação pela mesma `openRequest` da abertura isolada, com o grupo); seção "Pacotes" no catálogo e página `/catalog/bundles/[bundleId]` com uma seção por serviço; aviso na lista de solicitações; leitura dos erros de campo compartilhada (`field-errors.ts`); E2E `service-bundles.spec.ts`.
 - **Objetivo:** Seção 3.3 (regra 3), parte A.
 - **Arquivos/módulos esperados:** Catálogo do solicitante, `src/modules/requests/application/`.
 - **Dependências:** SF-177.

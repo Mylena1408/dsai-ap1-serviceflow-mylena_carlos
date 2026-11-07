@@ -2282,3 +2282,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** entidade `SERVICE_BUNDLE`; o leitor dos nomes da trilha passou a incluir serviços, e "Serviços" aparece em ordem ("A → B").
 - **Resultados:** typecheck, lint e build OK; unitários 1377/1377; integração 545/545; E2E 37/38 — a falha (email-notifications.spec.ts, tempo esgotado em 3 min) veio de arquivos novos da SF-178 que criei com o servidor do E2E rodando; sozinho, o mesmo teste passou em 17 s.
 - **Linhas:** 875 `added` (aplicação 535, testes 340).
+
+## SF-178 — Abertura do pacote (2026-11-07)
+
+- **Tudo ou nada:** `openBundle` roda numa transação serializável: confere cada serviço (disponível, sem documento ativo), junta os erros de campo de todas as seções antes de recusar, cria o grupo e chama, para cada serviço, a mesma `openRequest` da abertura isolada, agora exportada e com o `groupId` opcional. Uma resposta a um campo que nenhum serviço do pacote tem é tratada como formulário desatualizado, como na abertura de um serviço.
+- **Formulário:** os campos usam o mesmo nome `field.<id>` da abertura isolada (os ids são únicos entre serviços), então a ação, a leitura dos erros e o "manter os dados" reaproveitam o que existe. A leitura dos erros de campo saiu da página do serviço para `field-errors.ts`, usada pelas duas páginas, sem mudar o comportamento.
+- **Catálogo:** seção "Pacotes" antes das categorias, só com pacotes que podem ser abertos; a página do pacote lista os serviços e os setores e tem uma seção por serviço.
+- **Erro meu, corrigido:** criei arquivos novos desta tarefa enquanto o E2E da SF-177 rodava; uma página nova importava funções que ainda não existiam, o servidor de desenvolvimento recompilou e um E2E sem relação (`email-notifications.spec.ts`) estourou o tempo. Sozinho, ele passou em 17 s; a SF-177 foi registrada com 37/38 e esta explicação. Daqui em diante, nenhum arquivo do projeto é criado ou editado com a suíte rodando.
+- **Commit da SF-177:** dois arquivos (`service-bundles/index.ts` e `prisma-bundles.ts`) já tinham acréscimos desta tarefa; o commit da SF-177 levou a versão sem eles (montada a partir do arquivo, sem reescrever histórico), e esta tarefa traz os acréscimos.
+- **Resultados:** typecheck, lint e build OK; unitários 1383/1383; integração 549/549; E2E 39/39.
+- **Linhas:** 908 `added` (aplicação 561, testes 347).

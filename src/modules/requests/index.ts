@@ -36,6 +36,7 @@ import { createPrismaApprovalDeadlineStore } from "./infrastructure/prisma-appro
 import { createPrismaStageDeadlineStore } from "./infrastructure/prisma-stage-deadline-alerts";
 import * as ruleRuns from "./application/escalation-rule-runs";
 import * as links from "./application/links";
+import * as bundleOpening from "./application/open-bundle";
 import { createPrismaLinkReader, createPrismaLinkStore } from "./infrastructure/prisma-request-links";
 import { createPrismaEscalationRuleRunStore } from "./infrastructure/prisma-escalation-rule-runs";
 import {
@@ -436,4 +437,14 @@ export async function unlinkRequests(input: unknown, database: PrismaClient = pr
 /** Links and their history, for whoever reads the request. */
 export async function listRequestLinks(requestId: unknown, database: PrismaClient = prisma) {
   return links.listRequestLinks(requestId, createPrismaAttachmentQueryRepository(database), createPrismaLinkReader(database));
+}
+
+// Opening a bundle (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3).
+export type { BundleOpening } from "./application/open-bundle";
+
+export async function openBundle(input: unknown, database: PrismaClient = prisma): Promise<bundleOpening.BundleOpening> {
+  return bundleOpening.openBundle(
+    input,
+    createPrismaRequestTransactionRunner(database, { translate: ["P2003", "P2025"], fallbackMessage: "Bundle opening failed." }),
+  );
 }

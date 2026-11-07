@@ -435,8 +435,13 @@ export interface RequestTransaction {
       /** SPEC 2026-11-03-pausa-sla-calendario, 5.2 and 6. */
       slaBusinessHours?: boolean;
       dueSoonAt?: Date | null;
+      /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3: the bundle opening it belongs to. */
+      groupId?: string;
     },
   ): Promise<{ id: string }>;
+  /** A bundle as stored now, for its opening (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3). */
+  findBundleForOpening(bundleId: string): Promise<{ id: string; name: string; isActive: boolean; serviceIds: string[] } | null>;
+  insertRequestGroup(group: { id: string; bundleId: string; bundleNameSnapshot: string; requesterId: string; createdAt: Date }): Promise<void>;
   insertAttachments(attachments: NewRequestAttachment[]): Promise<void>;
   /** Documents already in the request (SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.3). */
   listRequestDocuments(requestId: string): Promise<Array<{ requirementId: string; sizeBytes: number }>>;

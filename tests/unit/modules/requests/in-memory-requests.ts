@@ -283,6 +283,13 @@ function createInMemoryTransaction(store: InMemoryRequestStore): RequestTransact
           position,
         }));
     },
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3: bundles are covered by the integration tests.
+    async findBundleForOpening() {
+      return null;
+    },
+    async insertRequestGroup() {
+      throw new Error("Bundles are not part of the in-memory store.");
+    },
     async insertRequest({ openedAt, id, ...data }) {
       store.requests.push({
         completedLate: null,

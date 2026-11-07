@@ -126,3 +126,7 @@
 > pode iniciar a SF-177
 
 31. SF-177: migration dos pacotes e grupos, módulo `service-bundles`, seção "Pacotes" e auditoria (ver `NOTES.md`).
+
+> pode iniciar a SF-178 / pode seguir com a SF-178
+
+32. SF-177 registrada com o E2E 37/38 (falha causada por arquivos criados durante o teste; o teste passou sozinho). SF-178: abertura do pacote em transação única, catálogo, página e formulário do pacote, E2E (ver `NOTES.md`).

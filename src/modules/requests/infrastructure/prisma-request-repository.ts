@@ -397,6 +397,13 @@ export function createPrismaRequestTransaction(
     async insertAttachments(attachments) {
       await transaction.requestAttachment.createMany({ data: attachments });
     },
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3.
+    findBundleForOpening(bundleId) {
+      return transaction.serviceBundle.findUnique({ where: { id: bundleId }, select: { id: true, name: true, isActive: true, serviceIds: true } });
+    },
+    async insertRequestGroup(group) {
+      await transaction.requestGroup.create({ data: group });
+    },
     listRequestDocuments(requestId) {
       return transaction.requestAttachment.findMany({ where: { requestId }, select: { requirementId: true, sizeBytes: true } });
     },

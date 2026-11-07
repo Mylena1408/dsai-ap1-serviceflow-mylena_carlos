@@ -1,7 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import * as bundles from "./application/bundles";
-import { createPrismaBundleReader, createPrismaBundleStore } from "./infrastructure/prisma-bundles";
+import * as catalog from "./application/catalog";
+import { createPrismaBundleReader, createPrismaBundleStore, createPrismaCatalogBundleReader } from "./infrastructure/prisma-bundles";
 
 // Bundles of services (SPEC 2026-11-07-operacao-e-automacao, part A).
 export {
@@ -19,6 +20,16 @@ export {
   type BundleServiceState,
 } from "./domain/bundle";
 export type { BundleOverview, BundleView } from "./application/bundles";
+export type { CatalogBundle } from "./application/catalog";
+
+/** Openable bundles of the catalog, for the requester (3.3 item 2). */
+export function listCatalogBundles(database: PrismaClient = prisma): Promise<catalog.CatalogBundle[]> {
+  return catalog.listCatalogBundles(createPrismaCatalogBundleReader(database));
+}
+
+export function getCatalogBundle(bundleId: unknown, database: PrismaClient = prisma): Promise<catalog.CatalogBundle> {
+  return catalog.getCatalogBundle(bundleId, createPrismaCatalogBundleReader(database));
+}
 
 export function listBundleOverview(database: PrismaClient = prisma): Promise<bundles.BundleOverview> {
   return bundles.listBundleOverview(createPrismaBundleReader(database));
