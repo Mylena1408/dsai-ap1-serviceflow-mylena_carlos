@@ -14,6 +14,8 @@ import { listServiceFields } from "@/modules/service-fields";
 import { listServiceStages } from "@/modules/service-stages";
 import { listAccessRoleOverview, listPermissionOverview } from "@/modules/permissions";
 import { RolesSection } from "./_sections/roles/roles-section";
+import { listBundleOverview } from "@/modules/service-bundles";
+import { BundlesSection } from "./_sections/bundles/bundles-section";
 import { getEmailOverview } from "@/modules/notifications";
 import { getAnalytics, getDashboard } from "@/modules/reports";
 import { listAuditTrail } from "@/modules/audit";
@@ -65,6 +67,8 @@ const adminSections = [
   { id: "sectors", label: "Setores" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
+  { id: "bundles", label: "Pacotes" },
   { id: "knowledge", label: "Base de conhecimento" },
   { id: "calendar", label: "Calendário" },
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5.
@@ -135,6 +139,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const webhookOverview = selectedSection === "webhooks" ? await getWebhookOverview() : null;
   // SPEC 2026-11-03-pausa-sla-calendario, 5.7: read only when the section is open.
   const calendarOverview = selectedSection === "calendar" ? await getCalendarOverview() : null;
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2: read only when the section is open.
+  const bundleOverview = selectedSection === "bundles" ? await listBundleOverview() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3: read only when the section is open.
   const escalationRules = selectedSection === "sectors" ? await listEscalationRuleOverview() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: read only where roles are shown.
@@ -211,6 +217,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       ) : null}
 
       {selectedSection === "roles" && roleOverview ? <RolesSection roles={roleOverview.roles} /> : null}
+
+      {bundleOverview ? <BundlesSection overview={bundleOverview} /> : null}
 
       {selectedSection === "services" ? (
         <ServicesSection

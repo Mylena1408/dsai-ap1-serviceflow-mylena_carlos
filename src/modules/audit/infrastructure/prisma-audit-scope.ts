@@ -177,6 +177,14 @@ async function loadState(
       });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-07-operacao-e-automacao, 3.4.
+    case "SERVICE_BUNDLE": {
+      const row = await transaction.serviceBundle.findUnique({
+        where: { id },
+        select: { name: true, description: true, serviceIds: true, isActive: true },
+      });
+      return row && { label: row.name, state: row };
+    }
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };

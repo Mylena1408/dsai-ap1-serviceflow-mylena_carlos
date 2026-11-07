@@ -69,6 +69,8 @@ function persistedRequest(requesterId: string, sectorId: string) {
     stageDueAt: null,
     stageOverdueNotifiedAt: null,
     currentStageName: null,
+    // SPEC 2026-11-07-operacao-e-automacao, 3.4.
+    groupId: null,
   };
 }
 

@@ -83,6 +83,8 @@ enum AuditEntityType {
   ACCESS_ROLE
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4.
   ESCALATION_RULE
+  /// SPEC 2026-11-07-operacao-e-automacao, 3.4.
+  SERVICE_BUNDLE
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -240,6 +242,8 @@ model User {
   /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1.
   requestLinksCreated     RequestLink[]             @relation("RequestLinkCreator")
   requestLinkEvents       RequestLinkEvent[]        @relation("RequestLinkEventActor")
+  /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3.
+  requestGroups           RequestGroup[]
 }
 
 model Service {
@@ -355,6 +359,9 @@ model Request {
   linksTo               RequestLink[]              @relation("RequestLinkTo")
   linkEventsFrom        RequestLinkEvent[]         @relation("RequestLinkEventFrom")
   linkEventsTo          RequestLinkEvent[]         @relation("RequestLinkEventTo")
+  /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3: the bundle opening this request belongs to.
+  groupId               String?                    @db.Uuid
+  group                 RequestGroup?              @relation(fields: [groupId], references: [id], onDelete: Restrict)
   satisfactionEvents    RequestSatisfactionEvent[]
   approvals             RequestApproval[]
   comments              RequestComment[]
@@ -825,6 +832,35 @@ model RequestEscalation {
 
   @@index([requestId])
   @@index([occurredAt])
+}
+
+/// A bundle of services opened together (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2, decision H3).
+/// The services, in order, are checked in SQL (2 to 5, none repeated); deactivated, never deleted.
+model ServiceBundle {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.Citext
+  description String?
+  serviceIds  String[] @default([]) @db.Uuid
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  groups RequestGroup[]
+}
+
+/// The requests one bundle opening created (3.3 items 3 and 4), with the bundle's name then.
+model RequestGroup {
+  id                 String   @id @default(uuid()) @db.Uuid
+  bundleId           String?  @db.Uuid
+  bundleNameSnapshot String
+  requesterId        String   @db.Uuid
+  createdAt          DateTime @db.Timestamptz
+
+  bundle    ServiceBundle? @relation(fields: [bundleId], references: [id], onDelete: Restrict)
+  requester User           @relation(fields: [requesterId], references: [id], onDelete: Restrict)
+  requests  Request[]
+
+  @@index([requesterId, createdAt])
 }
 
 /// Kind of link between two requests (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1).

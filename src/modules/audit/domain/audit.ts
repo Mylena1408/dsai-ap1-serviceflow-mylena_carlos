@@ -35,6 +35,8 @@ export const AUDIT_ENTITY_TYPES = [
   "ACCESS_ROLE",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4.
   "ESCALATION_RULE",
+  // SPEC 2026-11-07-operacao-e-automacao, 3.4.
+  "SERVICE_BUNDLE",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -68,6 +70,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   KNOWLEDGE_ARTICLE: ["body"],
   ACCESS_ROLE: [],
   ESCALATION_RULE: [],
+  SERVICE_BUNDLE: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -101,6 +104,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   KNOWLEDGE_ARTICLE: "Artigo da base de conhecimento",
   ACCESS_ROLE: "Papel de acesso",
   ESCALATION_RULE: "Regra de escalonamento",
+  SERVICE_BUNDLE: "Pacote de serviços",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -152,6 +156,8 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   notifyManagers: "Avisar os gestores do setor",
   notifyTeam: "Avisar a equipe do setor",
   notifyUserIds: "Avisar as pessoas",
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
+  serviceIds: "Serviços",
   revokedAt: "Revogado em",
   url: "Endereço",
   eventTypes: "Eventos",
@@ -286,6 +292,7 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "notifyUserIds",
     "isActive",
   ],
+  SERVICE_BUNDLE: ["name", "description", "serviceIds", "isActive"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

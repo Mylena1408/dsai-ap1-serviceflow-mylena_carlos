@@ -12,6 +12,13 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "dependency" && entity === "permissions") {
     return "Usuários inativos não recebem permissões.";
   }
+  // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2: bundles.
+  if (error === "validation" && entity === "bundles") {
+    return "Confira o pacote: nome de 1 a 80 caracteres, descrição de até 500 e de 2 a 5 serviços diferentes, ativos e sem documentos exigidos.";
+  }
+  if (error === "dependency" && entity === "bundles") {
+    return "Já existe um pacote ativo com esse nome.";
+  }
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3: escalation rules.
   if (error === "validation" && entity === "escalationRuleDays") {
     return "Em “vencida há N dias”, informe N de 1 a 30; em “próxima do vencimento”, deixe N em branco.";
@@ -96,6 +103,7 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (notice === "created" && entity === "holidays") return "Feriado cadastrado.";
   if (notice === "deleted" && entity === "holidays") return "Feriado removido.";
   if (notice === "created" && entity === "roles") return "Papel criado.";
+  if (notice === "created" && entity === "bundles") return "Pacote criado.";
   if (notice === "created" && entity === "escalationRules") return "Regra de escalonamento criada.";
   if (notice === "deleted" && entity === "escalationRules") return "Regra apagada. Os escalonamentos já feitos continuam no histórico.";
   if (notice === "updated" && entity === "roleAssignments") return "Papéis do usuário atualizados. Valem na próxima operação da pessoa.";

@@ -58,6 +58,8 @@ export function auditValueFormatter(names: Record<string, string>) {
       return ESCALATION_TRIGGER_LABELS[value as keyof typeof ESCALATION_TRIGGER_LABELS] ?? value;
     }
     if (field === "assignToId" && typeof value === "string") return names[value] ?? "(removido)";
+    // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2: the services of a bundle, in order.
+    if (field === "serviceIds" && Array.isArray(value)) return value.map((id) => names[id] ?? "(removido)").join(" → ");
     if (typeof value !== "string") return undefined;
     if (field === "sectorId" || field === "categoryId") return names[value] ?? "(removido)";
     if (field === "role") return ROLE_LABELS[value as keyof typeof ROLE_LABELS];

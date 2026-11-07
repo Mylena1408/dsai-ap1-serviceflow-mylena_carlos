@@ -149,6 +149,8 @@ describe("texts (section 5.2)", () => {
       ACCESS_ROLE: true,
       // Added by SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4.
       ESCALATION_RULE: true,
+      // Added by SPEC 2026-11-07-operacao-e-automacao, 3.4.
+      SERVICE_BUNDLE: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

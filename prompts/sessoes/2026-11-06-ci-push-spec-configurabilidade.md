@@ -122,3 +122,7 @@
 > pode iniciar a SF-176 / pode seguir com a SF-176
 
 30. SF-175 com o E2E interrompido (registrado) para seguir; SF-176: bloco "Vínculos", linha do tempo, ações, API, OpenAPI e E2E (ver `NOTES.md`).
+
+> pode iniciar a SF-177
+
+31. SF-177: migration dos pacotes e grupos, módulo `service-bundles`, seção "Pacotes" e auditoria (ver `NOTES.md`).

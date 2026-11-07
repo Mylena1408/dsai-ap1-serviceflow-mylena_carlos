@@ -110,13 +110,15 @@ export function createPrismaAuditTrailReader(database: PrismaClient): AuditTrail
 
     async names(ids) {
       const valid = ids.filter((id) => UUID.test(id));
-      const [sectors, categories, people] = await Promise.all([
+      const [sectors, categories, people, services] = await Promise.all([
         database.sector.findMany({ where: { id: { in: valid } }, select: { id: true, name: true } }),
         database.category.findMany({ where: { id: { in: valid } }, select: { id: true, name: true } }),
         // The people of an escalation rule, by their current names (as the actors).
         database.user.findMany({ where: { id: { in: valid } }, select: { id: true, name: true } }),
+        // The services of a bundle (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2).
+        database.service.findMany({ where: { id: { in: valid } }, select: { id: true, name: true } }),
       ]);
-      return Object.fromEntries([...sectors, ...categories, ...people].map((row) => [row.id, row.name]));
+      return Object.fromEntries([...sectors, ...categories, ...people, ...services].map((row) => [row.id, row.name]));
     },
   };
 }

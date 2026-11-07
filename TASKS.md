@@ -1871,7 +1871,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-177 — Pacotes: migrations, domínio e configuração
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261108000000_service_bundles` (pacotes, grupos de solicitações, `Request.groupId`, entidade da auditoria); módulo `service-bundles` (regras dos serviços aceitos, disponibilidade no catálogo, casos de uso com auditoria); seção "Pacotes" da administração. A abertura e o catálogo ficam na SF-178.
 - **Objetivo:** Seção 3.3 (regra 2), parte A.
 - **Arquivos/módulos esperados:** `prisma/`, `src/modules/services/` (ou módulo novo de pacotes), administração, auditoria.
 - **Dependências:** SF-175.

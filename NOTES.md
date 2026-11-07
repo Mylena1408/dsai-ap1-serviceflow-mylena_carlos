@@ -2273,3 +2273,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **E2E da SF-175:** interrompido na SF-175 para seguir; rodou nesta tarefa, com a suíte completa.
 - **Resultados:** typecheck, lint e build OK; unitários 1366/1366; integração 541/541; E2E 38/38.
 - **Linhas:** 521 `added` (aplicação 220, testes 301).
+
+## SF-177 — Pacotes de serviços: banco, domínio e configuração (2026-11-07)
+
+- **Banco:** `ServiceBundle` (nome `citext`, descrição, `serviceIds` em ordem, ativo), com `CHECK` do nome, da descrição e da função `service_bundle_services_valid` (2 a 5, sem nulo nem repetição) e índice único do nome entre os ativos; `RequestGroup` (pacote, cópia do nome, solicitante) e `Request.groupId` com índice parcial. A migration é desta tarefa para que a SF-178 só use as tabelas.
+- **Serviços aceitos (H5):** ativo, com categoria e setor ativos e **sem nenhum documento ativo**, obrigatório ou opcional, porque a abertura do pacote não recebe arquivos. Registrado na SPEC.
+- **Disponibilidade:** `bundleAvailability` diz se o pacote pode ser aberto e, se não, quais serviços e por quê; a seção mostra "No catálogo" ou "Fora do catálogo por causa de: …". Mudar ou desativar um serviço continua livre.
+- **Auditoria:** entidade `SERVICE_BUNDLE`; o leitor dos nomes da trilha passou a incluir serviços, e "Serviços" aparece em ordem ("A → B").
+- **Resultados:** typecheck, lint e build OK; unitários 1377/1377; integração 545/545; E2E 37/38 — a falha (email-notifications.spec.ts, tempo esgotado em 3 min) veio de arquivos novos da SF-178 que criei com o servidor do E2E rodando; sozinho, o mesmo teste passou em 17 s.
+- **Linhas:** 875 `added` (aplicação 535, testes 340).
