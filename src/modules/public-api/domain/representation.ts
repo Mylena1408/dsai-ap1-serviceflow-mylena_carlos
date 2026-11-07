@@ -44,6 +44,10 @@ export function serviceRepresentation(
       options: [...field.options],
       minValue: field.minValue,
       maxValue: field.maxValue,
+      // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1: limits as text with a dot.
+      decimalPlaces: field.decimalPlaces,
+      minDecimal: field.minDecimal,
+      maxDecimal: field.maxDecimal,
       // SPEC 2026-11-03-campos-condicionais-atendimento, 5.2: shown only when the condition is met.
       condition: field.conditionFieldId ? { fieldId: field.conditionFieldId, value: field.conditionValue } : null,
     })),

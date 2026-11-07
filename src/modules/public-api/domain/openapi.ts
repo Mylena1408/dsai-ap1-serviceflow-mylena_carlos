@@ -1,3 +1,4 @@
+import { FIELD_TYPE_LABELS } from "@/shared/admin-labels";
 import { API_ERROR_CODES } from "./errors";
 
 // OpenAPI document of /api/v1 (SPEC 2026-11-02-api-externa-webhooks, 5.4; CA-API-09), served at
@@ -329,12 +330,20 @@ export const OPENAPI_DOCUMENT = {
               properties: {
                 id: { type: "string", format: "uuid" },
                 label: { type: "string" },
-                type: { type: "string" },
+                type: {
+                  type: "string",
+                  enum: Object.keys(FIELD_TYPE_LABELS),
+                  description:
+                    "DECIMAL aceita vírgula ou ponto, com até decimalPlaces casas; EMAIL, PHONE (DDD e 10 ou 11 dígitos), CPF, CNPJ e CEP aceitam pontuação e as respostas guardam só os dígitos (o e-mail, em minúsculas).",
+                },
                 required: { type: "boolean" },
                 helpText: nullable("string"),
                 options: { type: "array", items: { type: "string" } },
                 minValue: nullable("integer"),
                 maxValue: nullable("integer"),
+                decimalPlaces: nullable("integer", { description: "Só no DECIMAL: de 1 a 4." }),
+                minDecimal: nullable("string", { description: "Só no DECIMAL: limite com ponto e exatamente decimalPlaces casas, como \"10.50\"." }),
+                maxDecimal: nullable("string", { description: "Só no DECIMAL: limite com ponto e exatamente decimalPlaces casas." }),
                 condition: nullable("object", {
                   description: "Mostrar só quando o campo fieldId for (ou, na seleção múltipla, contiver) value; true/false para sim ou não.",
                   properties: { fieldId: { type: "string", format: "uuid" }, value: { type: "string" } },

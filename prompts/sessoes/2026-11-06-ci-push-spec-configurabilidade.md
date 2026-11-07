@@ -36,3 +36,7 @@
 > pode iniciar a SF-161
 
 9. SF-161: migrations, domínio dos tipos decimal e com formato, validação da configuração, leitura dos limites como texto e formulários de abertura e atendimento. Todas as suítes aprovadas (ver `NOTES.md`).
+
+> pode iniciar a SF-162
+
+10. SF-162: editor, ações, auditoria, caminhos públicos de validação, API e OpenAPI dos tipos novos, com integração da configuração, abertura, atendimento e API. Todas as suítes aprovadas (ver `NOTES.md`).

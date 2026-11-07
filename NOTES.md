@@ -2087,3 +2087,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CEP com pontuação fora do lugar:** "6607-5110" é aceito como `66075110`, porque a SPEC manda remover a pontuação. O primeiro teste que escrevi esperava recusa; o errado era o teste.
 - **Resultados:** typecheck, lint e build OK; unitários 1235/1235; integração 450/450; E2E de campos (3 arquivos) aprovados. O banco de teste (`../pgtest`) foi ligado para a integração e o E2E.
 - **Linhas:** 752 `added` (aplicação 365, testes 387).
+
+## SF-162 — Tipos novos na configuração, abertura, atendimento e API (2026-11-06)
+
+- **Editor:** os seis tipos novos entram na lista de criação. No decimal, o editor mostra "Casas decimais" (1 a 4, padrão 2) e os limites como caixas de texto, porque o servidor aceita vírgula. O resumo do campo mostra, por exemplo, "2 casas decimais; de 0,00 a 1.500,50".
+- **Ações:** `decimalPlaces`, `minDecimal` e `maxDecimal` só são enviados quando o formulário os tem, como `audience` e a condição. Assim, a asserção exata do teste das ações existente não mudou, e um formulário de outro tipo não carrega chaves vazias.
+- **Defeito achado pelo teste:** o `ValidationError` filtra os caminhos que não estão em `PUBLIC_VALIDATION_PATHS`. Sem incluir os três nomes, a mensagem específica do decimal nunca apareceria, nem em produção. Incluí os nomes (só nomes de campos, sem valores), como na condição, e a integração confere que o caminho chega do caso de uso.
+- **Auditoria:** os limites entram como texto com as casas do campo (`"1500.50"`). Se ficassem como objeto `Decimal` do Prisma, o registro mostraria `1500.5`.
+- **API:** o catálogo mostra `decimalPlaces`, `minDecimal` e `maxDecimal`; o OpenAPI lista os tipos a partir de `FIELD_TYPE_LABELS` (código compartilhado, sem importar o módulo com o Prisma). A recusa de uma resposta inválida é `400 invalid_request` com o código do campo, como já era. Eu tinha suposto 422 no primeiro teste.
+- **Teste da API em arquivo próprio:** com o mock de sessão de `@/server/auth`, o `runAsApiUser` da API some e a rota falha. O caso da API foi para `public-api-field-formats.test.ts`, sem mock de sessão, como no teste de API dos campos condicionais.
+- **Resultados:** typecheck, lint e build OK; unitários 1238/1238; integração 455/455; E2E de campos (3 arquivos) aprovados.
+- **Linhas:** 353 `added` (aplicação 117, testes 236).

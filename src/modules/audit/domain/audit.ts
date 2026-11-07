@@ -119,6 +119,10 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   type: "Tipo",
   minValue: "Mínimo",
   maxValue: "Máximo",
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1.
+  decimalPlaces: "Casas decimais",
+  minDecimal: "Mínimo decimal",
+  maxDecimal: "Máximo decimal",
   options: "Opções",
   position: "Posição",
   scope: "Escopo",
@@ -202,7 +206,24 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   SERVICE: ["name", "description", "categoryId", "sectorId", "defaultPriority", "slaHours", "requiresApproval", "slaBusinessHours", "isActive"],
   DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],
   // "audience" and the condition: SPEC 2026-11-03-campos-condicionais-atendimento, 5.7.4.
-  SERVICE_FIELD: ["label", "helpText", "type", "isRequired", "options", "minValue", "maxValue", "position", "isActive", "audience", "conditionFieldId", "conditionValue"],
+  // The decimal configuration: SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1.
+  SERVICE_FIELD: [
+    "label",
+    "helpText",
+    "type",
+    "isRequired",
+    "options",
+    "minValue",
+    "maxValue",
+    "decimalPlaces",
+    "minDecimal",
+    "maxDecimal",
+    "position",
+    "isActive",
+    "audience",
+    "conditionFieldId",
+    "conditionValue",
+  ],
   SERVICE_STAGE: ["name", "position", "isActive"],
   // Never the token value, its hash or the webhook secret (SPEC 2026-11-02-api-externa-webhooks, 5.7).
   API_TOKEN: ["name", "scope", "expiresAt", "revokedAt"],

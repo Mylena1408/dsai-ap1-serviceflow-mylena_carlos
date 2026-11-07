@@ -54,6 +54,16 @@ export function serviceFieldFields(formData: FormData) {
       .filter((option) => option !== ""),
     minValue: limit("minValue"),
     maxValue: limit("maxValue"),
+    // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1: places as a number, limits as typed
+    // (comma or dot); the schema validates and normalizes them. Sent only when the form has them
+    // (decimal fields); otherwise the schema uses "none".
+    ...(formData.has("decimalPlaces")
+      ? {
+          decimalPlaces: limit("decimalPlaces"),
+          minDecimal: field(formData, "minDecimal").trim(),
+          maxDecimal: field(formData, "maxDecimal").trim(),
+        }
+      : {}),
     // SPEC 2026-11-03-campos-condicionais-atendimento, 5.7: sent only when the form has them, so a
     // form without them keeps the current values. "condition" is "<field id>::<value>" or empty.
     ...(formData.has("audience") ? { audience: field(formData, "audience") } : {}),
@@ -77,6 +87,14 @@ export function serviceFieldFailure(error: unknown, kind: "create" | "update" = 
     return {
       status: "error",
       message: "Escolha uma condição válida: um campo de escolha ativo, do mesmo público e sem condição própria, e uma das suas opções.",
+    };
+  }
+  // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1.
+  if (error instanceof ValidationError && error.issues.some(({ path }) => ["decimalPlaces", "minDecimal", "maxDecimal"].includes(String(path[0])))) {
+    return {
+      status: "error",
+      message:
+        "Revise o número decimal: de 1 a 4 casas, e limites com no máximo essas casas, entre -1.000.000.000 e 1.000.000.000, com o mínimo até o máximo.",
     };
   }
   // On creation a conflict is only the limit or a repeated label, with the message it already had.

@@ -67,6 +67,9 @@ async function loadState(
           options: true,
           minValue: true,
           maxValue: true,
+          decimalPlaces: true,
+          minDecimal: true,
+          maxDecimal: true,
           position: true,
           isActive: true,
           audience: true,
@@ -74,7 +77,17 @@ async function loadState(
           conditionValue: true,
         },
       });
-      return row && { label: row.label, state: row };
+      // Decimal limits as the text the field shows ("1500.50"), not Prisma decimal objects.
+      return (
+        row && {
+          label: row.label,
+          state: {
+            ...row,
+            minDecimal: row.minDecimal === null ? null : row.minDecimal.toFixed(row.decimalPlaces ?? 4),
+            maxDecimal: row.maxDecimal === null ? null : row.maxDecimal.toFixed(row.decimalPlaces ?? 4),
+          },
+        }
+      );
     }
     case "SERVICE_STAGE": {
       const row = await transaction.serviceStage.findUnique({

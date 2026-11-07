@@ -19,9 +19,29 @@ type RedirectAction = (formData: FormData) => Promise<never>;
 
 type FieldType = FieldTypeCode;
 
-// Types offered on creation. The decimal and formatted types (SPEC
-// 2026-11-06-aprofundamento-configurabilidade, 3.3) join the list with their configuration (SF-162).
-const CREATABLE_FIELD_TYPES: readonly FieldType[] = ["SHORT_TEXT", "LONG_TEXT", "INTEGER", "DATE", "SELECT", "YES_NO", "MULTI_SELECT"];
+// Types offered on creation, in this order (SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3).
+const CREATABLE_FIELD_TYPES: readonly FieldType[] = [
+  "SHORT_TEXT",
+  "LONG_TEXT",
+  "INTEGER",
+  "DECIMAL",
+  "DATE",
+  "SELECT",
+  "MULTI_SELECT",
+  "YES_NO",
+  "EMAIL",
+  "PHONE",
+  "CPF",
+  "CNPJ",
+  "CEP",
+];
+
+/** "1500.50" as "1.500,50", as the requester will read it. */
+function decimalText(value: string): string {
+  const [integer, fraction] = value.split(".");
+  const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return fraction === undefined ? grouped : `${grouped},${fraction}`;
+}
 
 export type AdminServiceField = {
   id: string;
@@ -32,6 +52,10 @@ export type AdminServiceField = {
   options: string[];
   minValue: number | null;
   maxValue: number | null;
+  /** SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1; limits with a dot. */
+  decimalPlaces?: number | null;
+  minDecimal?: string | null;
+  maxDecimal?: string | null;
   isActive: boolean;
   /** SPEC 2026-11-03-campos-condicionais-atendimento, 5.2 and 5.4. */
   audience?: "REQUESTER" | "ATTENDANT";
@@ -86,11 +110,23 @@ const initialState: AdminUpdateState = {
 
 function fieldSummary(field: AdminServiceField): string | null {
   if (field.type === "SELECT" || field.type === "MULTI_SELECT") return `Opções: ${field.options.join(", ")}`;
+  if (field.type === "DECIMAL") return decimalSummary(field);
   if (field.type !== "INTEGER") return null;
   if (field.minValue !== null && field.maxValue !== null) return `De ${field.minValue} a ${field.maxValue}`;
   if (field.minValue !== null) return `Mínimo ${field.minValue}`;
   if (field.maxValue !== null) return `Máximo ${field.maxValue}`;
   return null;
+}
+
+function decimalSummary(field: AdminServiceField): string {
+  const places = field.decimalPlaces ?? 0;
+  const parts = [`${places} ${places === 1 ? "casa decimal" : "casas decimais"}`];
+  const lowest = field.minDecimal ?? null;
+  const highest = field.maxDecimal ?? null;
+  if (lowest !== null && highest !== null) parts.push(`de ${decimalText(lowest)} a ${decimalText(highest)}`);
+  else if (lowest !== null) parts.push(`mínimo ${decimalText(lowest)}`);
+  else if (highest !== null) parts.push(`máximo ${decimalText(highest)}`);
+  return parts.join("; ");
 }
 
 // The type is chosen only on creation (section 5.1); editing keeps it in a hidden input.
@@ -184,6 +220,27 @@ function FieldInputs({ field, fields = [] }: { field?: AdminServiceField; fields
           <label>
             Máximo (opcional)
             <input defaultValue={field?.maxValue ?? ""} name="maxValue" step={1} type="number" />
+          </label>
+        </>
+      ) : null}
+      {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1: limits take a comma or a dot. */}
+      {type === "DECIMAL" ? (
+        <>
+          <label>
+            Casas decimais
+            <select defaultValue={String(field?.decimalPlaces ?? 2)} name="decimalPlaces">
+              {[1, 2, 3, 4].map((places) => (
+                <option key={places} value={places}>{places}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Mínimo (opcional)
+            <input defaultValue={field?.minDecimal ? decimalText(field.minDecimal).replace(/\./g, "") : ""} inputMode="decimal" maxLength={16} name="minDecimal" />
+          </label>
+          <label>
+            Máximo (opcional)
+            <input defaultValue={field?.maxDecimal ? decimalText(field.maxDecimal).replace(/\./g, "") : ""} inputMode="decimal" maxLength={16} name="maxDecimal" />
           </label>
         </>
       ) : null}

@@ -1721,7 +1721,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-162 — Tipos novos na configuração, abertura, atendimento e API
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-06. Editor de campos com os seis tipos novos e, no decimal, as casas e os limites (vírgula ou ponto); ações enviam a configuração decimal só quando o formulário a tem, com mensagem fixa de recusa; `decimalPlaces`, `minDecimal` e `maxDecimal` nos caminhos públicos de validação, na auditoria (limites como texto) e na API (catálogo e OpenAPI). Integração da configuração, abertura, atendimento e API. CA-CMP-01 a 04 parciais: falta o percurso pela tela (E2E da SF-163).
 - **Objetivo:** Seção 3.3 (regras 1 a 4), parte A.
 - **Arquivos/módulos esperados:** `src/app/`, `src/modules/service-fields/`, `src/modules/requests/`, `src/modules/public-api/`.
 - **Dependências:** SF-161.
