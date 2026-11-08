@@ -26,6 +26,7 @@ import { RequestTimeline } from "@/app/_components/request-timeline";
 import { RequestTags } from "@/app/_components/request-tags";
 import { getRequestTags } from "@/modules/tags";
 import { getRequestChecklist } from "@/modules/checklists";
+import { RequestChecklist } from "@/app/_components/request-checklist";
 import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { requireManagerPageAccess } from "../../page-access";
 import { approveRequestAction, rejectRequestAction } from "../actions";
@@ -159,6 +160,8 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       <RequestLinks hrefFor={(id) => `/approvals/${id}`} links={links.links} requestId={request.id} />
       <RequestGroupBlock block={group} hrefFor={(id) => `/approvals/${id}`} />
       {tags ? <RequestTags requestId={request.id} view={tags} /> : null}
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3: the manager only reads. */}
+      {checklist ? <RequestChecklist requestId={request.id} view={checklist} /> : null}
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} />
     </main>
   );

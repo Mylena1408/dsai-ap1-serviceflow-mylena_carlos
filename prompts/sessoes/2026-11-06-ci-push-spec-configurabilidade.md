@@ -330,3 +330,7 @@
 > pode fazer Pendente de envio: 8 commits locais sem push, de SF-197 a SF-203. No próximo envio vai a migration nova do checklist (20261108800000_checklists), na ordem backup, migration e push. Faço quando você pedir.
 
 82. Envio feito no meio da SF-204: backup verificado (seção 16 da SPEC de backup), migration aplicada no Neon, push dos 8 commits; CI aprovado. SF-204 concluída depois, com a suíte completa aprovada.
+
+> pode prosseguir
+
+83. SF-205: telas do checklist no detalhe (fila e gestor) e E2E da parte B; CA-CHK-01 a 05 verificados.

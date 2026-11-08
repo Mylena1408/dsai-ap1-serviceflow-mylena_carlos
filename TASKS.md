@@ -2151,7 +2151,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-205 — Telas do checklist e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Bloco `RequestChecklist` no detalhe da fila (marcar com observação, desmarcar) e do gestor (leitura); E2E `checklists.spec.ts`. CA-CHK-01 a 05 verificados; CA-CHK-06 e 07 seguem com as SF-224 a SF-226.
 - **Objetivo:** Parte B, parte B.
 - **Arquivos/módulos esperados:** Detalhe da fila, administração.
 - **Dependências:** SF-204.

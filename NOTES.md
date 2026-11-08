@@ -2585,3 +2585,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CI do envio anterior:** passou (run 42511421391).
 - **Resultados:** typecheck, lint e build OK; unitários 1520/1520; integração 645/645; E2E 46/46.
 - **Linhas:** 123 `added` em TS (aplicação 28, testes 95).
+
+## SF-205 — Telas do checklist e E2E (2026-11-08)
+
+- **Detalhe da fila:** bloco "Checklist" com o progresso, os obrigatórios pendentes em destaque e cada item com quem marcou, quando e a observação; os formulários só aparecem para quem pode marcar agora (`canMark`), e o resultado volta para a âncora `#checklist`.
+- **Detalhe do gestor:** o mesmo bloco, sem ação. Sem checklist, nenhum bloco (CA-CHK-01).
+- **E2E** `checklists.spec.ts`: o gestor monta o checklist; o atendente inicia, tenta concluir (recusa com "Falta marcar"), marca com observação e conclui; o histórico mostra a marcação; o solicitante não vê. O serviço do teste é desativado no fim.
+- **Critérios:** CA-CHK-01 a 05 marcados como verificados na SPEC; CA-CHK-06 e 07 dependem das telas das SF-224 a SF-226.
+- **Resultados:** typecheck, lint e build OK; unitários 1524/1524; integração 645/645; E2E 47/47.
+- **Linhas:** 257 `added` em TS (aplicação 108, testes 149).

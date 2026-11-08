@@ -42,7 +42,8 @@ import { RequestLinks } from "@/app/_components/request-links";
 import { RequestTags } from "@/app/_components/request-tags";
 import { getRequestTags } from "@/modules/tags";
 import { getRequestChecklist } from "@/modules/checklists";
-import { checklistPendingText } from "@/app/_components/request-checklist";
+import { RequestChecklist, checklistFeedback, checklistPendingText } from "@/app/_components/request-checklist";
+import { markChecklistItemAction } from "../checklist-actions";
 import { addRequestTagAction, removeRequestTagAction } from "../tag-actions";
 import { RequestGroupBlock } from "@/app/_components/request-group";
 import { linkRequestAction, unlinkRequestAction } from "../link-actions";
@@ -100,6 +101,9 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "tag-state") return "Não é possível mudar as etiquetas de uma solicitação cancelada, ou ela mudou enquanto você agia.";
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 4; the pending items are listed next to it.
   if (error === "checklist-pending") return "Não foi possível concluir: há itens obrigatórios do checklist por marcar.";
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3.
+  const checklistMessage = checklistFeedback(error) ?? checklistFeedback(notice);
+  if (checklistMessage) return checklistMessage;
   return null;
 }
 
@@ -255,6 +259,8 @@ export default async function QueueRequestPage({
       />
       <RequestGroupBlock block={group} hrefFor={(id) => `/queue/${id}`} />
       {tags ? <RequestTags edit={{ addAction: addRequestTagAction, removeAction: removeRequestTagAction }} requestId={request.id} view={tags} /> : null}
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 and 13.1 items 3 and 4. */}
+      {checklist ? <RequestChecklist markAction={markChecklistItemAction} requestId={request.id} view={checklist} /> : null}
       <RequestConversation
         requestId={request.id}
         comments={comments}
