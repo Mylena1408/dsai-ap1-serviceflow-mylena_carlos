@@ -222,6 +222,13 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - as notificações do sistema (`RequestNotification`) pertencem sempre a uma solicitação, e uma execução "não aberta" não tem solicitação; por isso os tipos `recurring.skipped` e `recurring.paused` **não** são criados: o aviso a quem criou a agenda (regra 3) aparece na tela das agendas, com destaque para as execuções "não abertas" e as agendas pausadas pelo sistema (SF-185 e SF-186), e não gera e-mail;
   - na auditoria, os dias da semana da agenda são registrados como `recurrenceWeekdays` ("Dias da semana"), porque `weekdays` já é o campo dos dias de expediente do calendário;
   - o banco também confere: nome sem espaços nas pontas, descrição não vazia, dias da semana sem repetição e respostas como objeto.
+- *Esclarecimentos registrados em 2026-11-07 (SF-185):*
+  - "agendas ativas" do limite de 200 (decisão H22) são as não encerradas e ainda dentro do período, **incluindo as pausadas**, para que retomar nunca ultrapasse o limite;
+  - na alteração, um início que já passou pode ficar como está; só um início novo precisa ser hoje ou depois. Agendas encerradas ou com o fim já passado não são alteradas, pausadas nem retomadas;
+  - retomar uma agenda zera as execuções seguidas "não abertas" (regra 3);
+  - a tela abre o formulário em dois passos (primeiro o serviço, depois o formulário com os campos dele) e, na alteração, mantém o serviço da agenda; para trocar de serviço, encerra-se a agenda e cria-se outra;
+  - o administrador tem a seção "Agendas" e o gestor a página "Agendas" na sua área; o gestor escolhe o solicitante entre todos os solicitantes ativos;
+  - "Aberta automaticamente pela agenda …" na solicitação (regra 4) entra com a SF-186, porque só a execução pelo job cria essas solicitações.
 
 ### 5.5 Critérios de aceitação
 

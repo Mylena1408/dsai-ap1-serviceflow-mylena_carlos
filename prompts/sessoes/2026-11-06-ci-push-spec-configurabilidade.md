@@ -162,3 +162,11 @@
 > aprovado as ordens, backup,migrations,push
 
 40. Backup do Neon verificado, 5 migrations aplicadas (SF-175 a SF-184) e push, nesta ordem (ver `NOTES.md`).
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
+
+41. Contagem pelo `scripts/cloc-diff.sh` depois do deploy: 66.612 linhas `added` desde a baseline.
+
+> pode prosseguir
+
+42. SF-185: casos de uso e telas das agendas de recorrência (administração e gestor), auditoria e esclarecimentos na SPEC (ver `NOTES.md`).

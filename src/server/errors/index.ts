@@ -105,6 +105,10 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "actions",
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
   "serviceIds",
+  // SPEC 2026-11-07-operacao-e-automacao, 5.3 item 2.
+  "requesterId",
+  "frequency",
+  "monthDay",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

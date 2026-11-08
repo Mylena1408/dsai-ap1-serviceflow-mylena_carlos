@@ -1951,7 +1951,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-185 — Casos de uso e telas das agendas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Casos de uso (criar, alterar, pausar, retomar, encerrar) com escopo do gestor e auditoria; seção "Agendas" na administração e página `/approvals/recurring` do gestor; esclarecimentos na SPEC (5.4, SF-185).
 - **Objetivo:** Seção 5.3 (regras 1, 2 e 4), parte C.
 - **Arquivos/módulos esperados:** Administração e área do gestor, auditoria.
 - **Dependências:** SF-184.
