@@ -258,3 +258,7 @@
 > faça a SPEC 1 com os complementos / deixe a spec 2 para quando a spec 1 estiver perto do fim,me avise e revisamos,ok?
 
 64. `SPEC/2026-11-08-atendimento-dia-a-dia.md` escrita (partes A a G, decisões I1 a I24, SF-194 a SF-223); SPEC 2 adiada para perto do fim desta, com revisão junto da responsável.
+
+> pode prosseguir / terminou?
+
+65. SF-194: migration e domínio das etiquetas (ver `NOTES.md`); andamento da suíte informado.

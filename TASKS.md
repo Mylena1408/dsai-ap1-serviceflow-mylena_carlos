@@ -2041,7 +2041,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-194 — Etiquetas: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Migration `20261108600000_sector_tags` (etiquetas do setor, etiquetas das solicitações, histórico, auditoria `SECTOR_TAG`); módulo `src/modules/tags` com as regras e a paleta de contraste conferido.
 - **Objetivo:** Seção 3.3 (regra 1), parte A.
 - **Arquivos/módulos esperados:** `prisma/`, módulo novo de etiquetas.
 - **Dependências:** SPEC 2026-11-07 concluída.

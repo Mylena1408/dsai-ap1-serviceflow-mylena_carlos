@@ -156,6 +156,8 @@ describe("texts (section 5.2)", () => {
       SERVICE_BUNDLE: true,
       RECURRING_REQUEST: true,
       CONFIGURATION: true,
+      // Added by SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
+      SECTOR_TAG: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

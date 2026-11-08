@@ -44,6 +44,8 @@ export const AUDIT_ENTITY_TYPES = [
   "RECURRING_REQUEST",
   // SPEC 2026-11-07-operacao-e-automacao, 6.4.
   "CONFIGURATION",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
+  "SECTOR_TAG",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -81,6 +83,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   // The description and the answers may hold personal data: the record says they changed.
   RECURRING_REQUEST: ["description", "answers"],
   CONFIGURATION: [],
+  SECTOR_TAG: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -119,6 +122,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   SERVICE_BUNDLE: "Pacote de serviços",
   RECURRING_REQUEST: "Agenda de recorrência",
   CONFIGURATION: "Configuração da organização",
+  SECTOR_TAG: "Etiqueta",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -128,6 +132,8 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   role: "Perfil",
   sectorId: "Setor",
   isActive: "Ativo",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1.
+  color: "Cor",
   description: "Descrição",
   categoryId: "Categoria",
   defaultPriority: "Prioridade padrão",
@@ -344,6 +350,8 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   // The import's own entry carries its summary (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 5); the export
   // records no fields.
   CONFIGURATION: ["itemsCreated", "itemsUpdated", "itemsUnchanged"],
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1: the sector is fixed when the tag is created.
+  SECTOR_TAG: ["name", "color", "isActive"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

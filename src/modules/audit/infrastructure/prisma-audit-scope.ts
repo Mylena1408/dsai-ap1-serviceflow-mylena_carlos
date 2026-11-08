@@ -233,6 +233,11 @@ async function loadState(
     // the export's and the import's entries directly.
     case "CONFIGURATION":
       return null;
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 3.4: the color by its key ("blue").
+    case "SECTOR_TAG": {
+      const row = await transaction.sectorTag.findUnique({ where: { id }, select: { name: true, color: true, isActive: true } });
+      return row && { label: row.name, state: row };
+    }
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };

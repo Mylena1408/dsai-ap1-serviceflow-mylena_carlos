@@ -65,6 +65,10 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 - Nova tabela `SectorTag` (`sectorId`, `name` `citext`, `color`, `isActive`, datas), única entre as ativas por (`sectorId`, `name`).
 - Nova tabela `RequestTag` (`requestId`, `tagId`, `addedById`, `addedAt`), única por (`requestId`, `tagId`); nova tabela `RequestTagEvent` (aplicada/retirada, ator, data).
 - Enum da auditoria ganha `SECTOR_TAG`.
+- *Esclarecimentos registrados em 2026-11-08 (SF-194):*
+  - a paleta tem as cores cinza, vermelho, laranja, amarelo, verde, turquesa, azul e roxo, guardadas pela chave (`gray`, `red`…); cada uma é um fundo claro com texto escuro, e os testes conferem o contraste de pelo menos 4,5:1 (WCAG AA) de todos os pares;
+  - "não cancelada" na regra 2 inclui as concluídas: uma solicitação concluída ainda pode ser etiquetada (por exemplo, para análise posterior);
+  - uma etiqueta em uso nunca é apagada, só desativada (a chave estrangeira impede apagar); a auditoria da etiqueta registra nome, cor e situação, e o setor fica fixo desde a criação.
 
 ### 3.5 Critérios de aceitação
 

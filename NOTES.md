@@ -2470,3 +2470,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Calibração da estimativa:** a SPEC anterior previa de 16.000 a 21.000 linhas e entregou 11.903 em 19 tarefas (cerca de 630 por tarefa). Esta usa a média real: cerca de 18.900 linhas (±20%).
 - **SPEC 2:** itens 7 a 10 (avisos e manutenção programada, importação de usuários por CSV, relatório periódico, calendário por setor), escrita só perto do fim desta, depois de revisada com a responsável ("deixe a spec 2 para quando a spec 1 estiver perto do fim, me avise e revisamos").
 - **Fora:** recuperação de senha por e-mail (os e-mails seguem desativados no site publicado), verificação em duas etapas e múltiplas organizações.
+
+## SF-194 — Etiquetas: banco e domínio (2026-11-08)
+
+- **Banco:** migration `20261108600000_sector_tags`, aditiva: `SectorTag` (nome `citext` único entre as ativas do setor, cor da paleta, `CHECK` do nome e da cor), `RequestTag` (chave por solicitação e etiqueta), `RequestTagEvent` (aplicada/retirada) e a entidade `SECTOR_TAG` na auditoria (nome, cor e situação).
+- **Domínio** (`src/modules/tags/domain/tag.ts`): entrada (nome de 1 a 30, cor da paleta), quem administra (administrador; gestor do próprio setor), limite de 30 ativas por setor, e o plano de mudança numa solicitação (atendente do setor atual; não cancelada; só etiquetas ativas do setor; as de um setor anterior podem ser retiradas; até 5).
+- **Paleta:** 8 cores (fundo claro, texto escuro); o teste calcula o contraste WCAG de cada par e exige pelo menos 4,5:1.
+- **Resultados:** typecheck, lint e build OK; unitários 1486/1486; integração 614/614; E2E 45/45 na primeira rodada completa.
+- **Linhas:** 234 `added` (aplicação 111, testes 123).
