@@ -2011,7 +2011,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-191 — Visões salvas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Migration `20261108500000_saved_views`; módulo `src/modules/saved-views`; bloco "Minhas visões" na fila e em "Minhas solicitações"; anonimização apaga as visões; formulário de busca recriado ao abrir uma visão; E2E `saved-views.spec.ts`.
 - **Objetivo:** Seção 7.3 (regra 1), parte E.
 - **Arquivos/módulos esperados:** `prisma/`, fila e "Minhas solicitações".
 - **Dependências:** Parte D concluída.

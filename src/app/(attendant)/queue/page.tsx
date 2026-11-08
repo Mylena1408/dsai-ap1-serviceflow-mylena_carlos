@@ -9,6 +9,8 @@ import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
 import { hasSearchCriteria, type SearchParams } from "@/app/_components/request-search-url";
 import { RequestSla } from "@/app/_components/request-sla";
+import { SavedViews } from "@/app/_components/saved-views";
+import { listSavedViews } from "@/modules/saved-views";
 import { requireAttendantPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
@@ -30,6 +32,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   const stageChoices = await listQueueStageChoices();
   // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8: for a supervisor, when the sector distributes.
   const teamLoad = (await getTeamLoad())?.filter((load) => load.mode !== "NONE") ?? null;
+  // SPEC 2026-11-07-operacao-e-automacao, 7.3 item 1.
+  const views = await listSavedViews("QUEUE");
 
   try {
     result = await searchAttendantQueue(params);
@@ -58,6 +62,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
       ) : null}
       <TeamLoad loads={teamLoad} />
       <RequestSearchForm basePath="/queue" params={params} showAssignee showSla stageChoices={stageChoices} defaultOrder="oldest" />
+      <SavedViews list="QUEUE" params={params} views={views} />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
           Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.

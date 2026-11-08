@@ -214,3 +214,7 @@
 > pode prosseguir
 
 53. SF-190: telas da configuração portátil (exportar e importar com prévia) e E2E; fim da parte D (ver `NOTES.md`).
+
+> pode prosseguir
+
+54. SF-191: visões salvas na fila e em "Minhas solicitações" (migration, módulo, telas, E2E) (ver `NOTES.md`).

@@ -8,6 +8,8 @@ import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
 import { hasSearchCriteria, type SearchParams } from "@/app/_components/request-search-url";
 import { RequestSla } from "@/app/_components/request-sla";
+import { SavedViews } from "@/app/_components/saved-views";
+import { listSavedViews } from "@/modules/saved-views";
 import { requireRequesterPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 
@@ -33,6 +35,8 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
   const commentCounts = await countComments(requests.map(({ id }) => id));
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4: "Pacote: nome" on the requests of a bundle.
   const groupLabels = await listRequesterGroupLabels(requests.map(({ id }) => id));
+  // SPEC 2026-11-07-operacao-e-automacao, 7.3 item 1.
+  const views = await listSavedViews("MY_REQUESTS");
   const openedGroup = typeof params.group === "string" && /^[0-9a-f-]{36}$/i.test(params.group) ? params.group : null;
   const now = new Date();
 
@@ -58,6 +62,7 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
         </p>
       ) : null}
       <RequestSearchForm basePath="/requests" params={params} showAssignee={false} defaultOrder="newest" />
+      <SavedViews list="MY_REQUESTS" params={params} views={views} />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
           Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.

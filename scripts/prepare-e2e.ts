@@ -62,6 +62,7 @@ async function prepareDatabase(): Promise<void> {
       database.requestStatusEvent.deleteMany(),
       database.request.deleteMany(),
       database.recurringRequest.deleteMany(),
+      database.savedView.deleteMany(),
       database.requestGroup.deleteMany(),
       database.serviceBundle.deleteMany(),
       database.serviceDocumentRequirement.deleteMany(),

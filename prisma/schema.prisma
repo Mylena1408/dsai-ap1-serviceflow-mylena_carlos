@@ -267,6 +267,8 @@ model User {
   /// SPEC 2026-11-07-operacao-e-automacao, 5.
   recurringRequestsFor    RecurringRequest[]        @relation("RecurringRequestRequester")
   recurringRequestsCreated RecurringRequest[]       @relation("RecurringRequestCreator")
+  /// SPEC 2026-11-07-operacao-e-automacao, 7.4.
+  savedViews               SavedView[]
 }
 
 model Service {
@@ -1348,4 +1350,26 @@ model WebhookDelivery {
   @@unique([eventId, endpointId])
   @@index([status, availableAt])
   @@index([createdAt])
+}
+
+/// The lists with saved views (SPEC 2026-11-07-operacao-e-automacao, 7.3 item 1).
+enum SavedViewList {
+  QUEUE
+  MY_REQUESTS
+}
+
+/// A person's saved search of a list (7.3 item 1, decision H16): only the person sees it. The criteria are
+/// the list's normalized query string, as in the URL.
+model SavedView {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @db.Uuid
+  list      SavedViewList
+  name      String        @db.Citext
+  criteria  String
+  createdAt DateTime      @default(now()) @db.Timestamptz
+  updatedAt DateTime      @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, list, name])
 }

@@ -72,6 +72,8 @@ function createPrismaAnonymizationTransaction(transaction: Prisma.TransactionCli
       await transaction.emailDelivery.deleteMany({ where: { recipientId: userId } });
       await transaction.requestNotification.deleteMany({ where: { recipientId: userId } });
       await transaction.notificationPreference.deleteMany({ where: { userId } });
+      // SPEC 2026-11-07-operacao-e-automacao, 7.3 item 1: saved views keep the person's search terms.
+      await transaction.savedView.deleteMany({ where: { userId } });
     },
     async revokePermissions(userId, actorId, occurredAt) {
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: the roles go too, with their history.

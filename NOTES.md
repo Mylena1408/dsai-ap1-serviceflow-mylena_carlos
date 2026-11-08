@@ -2417,3 +2417,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **E2E** `configuration-portable.spec.ts`: exporta pela tela (sem ids nem senhas), um arquivo quebrado é recusado com os problemas, o arquivo com uma categoria nova é pré-visualizado e aplicado, a reimportação diz que não há o que aplicar, e a auditoria mostra "Exportou" e "Importou". A categoria é apagada no fim do teste.
 - **Resultados:** typecheck, lint e build OK; unitários 1463/1463; integração 605/605; E2E 43/43 na primeira rodada completa.
 - **Linhas:** 515 `added` (aplicação 341, testes 174). Parte D inteira (SF-187 a SF-190): 3161.
+
+## SF-191 — Visões salvas (2026-11-08)
+
+- **Banco:** migration `20261108500000_saved_views`, aditiva: enum `SavedViewList` e tabela `SavedView`, única por (pessoa, lista, nome) com o nome em `citext`; o `CHECK` limita o nome (1 a 40, sem espaços nas pontas) e os critérios (até 1.000).
+- **Domínio e casos de uso** (`src/modules/saved-views`): os critérios são a query string da lista normalizada (só os parâmetros dela, ordem fixa, sem a página, status ordenados). A fila é do Atendente e "Minhas solicitações" do Solicitante; cada pessoa só alcança as próprias visões (as de outra pessoa respondem "não encontrada"); até 20 por lista.
+- **Telas:** bloco "Minhas visões" abaixo da busca nas duas listas, com a visão aberta marcada, "Salvar esta busca", "Renomear ou apagar". As ações voltam à lista com a busca normalizada de novo no servidor.
+- **Defeito achado pelo E2E:** ao abrir uma visão pelo link (navegação no cliente), a lista vinha filtrada, mas os campos do formulário de busca continuavam com os valores anteriores (`defaultChecked`/`defaultValue` só valem na criação). O formulário passou a ter uma chave com os critérios, sendo recriado quando eles mudam. Também um erro meu no teste: o nome renomeado passava de 40 caracteres e o campo cortava.
+- **Anonimização:** apaga as visões da pessoa (podem guardar termos de busca).
+- **Resultados:** typecheck, lint e build OK; unitários 1470/1470; integração 609/609; E2E 44/44 na primeira rodada completa.
+- **Linhas:** 531 `added` (aplicação 305, testes 226).

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MAX_SEARCH_TERM, type RequestStatus } from "@/modules/requests";
 import { REQUEST_STATUS_LABELS } from "./request-status";
-import type { SearchParams } from "./request-search-url";
+import { searchPageHref, type SearchParams } from "./request-search-url";
 
 type RequestSearchFormProps = {
   basePath: string;
@@ -42,7 +42,9 @@ export function RequestSearchForm({ basePath, params, showAssignee, showSla = fa
   const statuses = values(params.status);
 
   return (
-    <form method="get" action={basePath} className="surface-card search-form" role="search">
+    // The fields only take their values when created: a new key recreates them when the criteria change
+    // without a full load (a link to a saved view, SPEC 2026-11-07-operacao-e-automacao, 7.3 item 1).
+    <form key={searchPageHref(basePath, params, 1)} method="get" action={basePath} className="surface-card search-form" role="search">
       <div className="search-field">
         <label htmlFor="search-term">Buscar</label>
         <input

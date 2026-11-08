@@ -340,6 +340,12 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 
 - Nova tabela `SavedView` (`userId`, `list` `QUEUE` ou `MY_REQUESTS`, `name` `citext`, `criteria` `text`, `createdAt`, `updatedAt`), única por (`userId`, `list`, `name`), com `CHECK` do nome e do tamanho dos critérios (até 1.000 caracteres).
 - As ações em lote não têm tabela própria: cada item grava o que a ação individual grava.
+- *Esclarecimentos registrados em 2026-11-08 (SF-191):*
+  - os critérios guardados são a query string da lista só com os parâmetros dela (fila: busca, status, responsável, prazo, etapa, datas e ordem; "Minhas solicitações": busca, status, datas e ordem), em ordem fixa, sem a página e com os status ordenados, para a mesma busca gerar sempre o mesmo texto;
+  - a fila é de quem tem perfil Atendente e "Minhas solicitações" de quem tem perfil Solicitante, como as próprias listas; nome repetido ou acima do limite de 20 tem mensagem própria, e uma busca normalizada acima de 1.000 caracteres conta como acima do limite;
+  - o bloco "Minhas visões" fica abaixo da busca, com a visão aberta marcada; renomear e apagar ficam dentro de "Renomear ou apagar";
+  - ao abrir uma visão sem recarregar a página, o formulário de busca passou a ser recriado com os critérios da visão (antes os campos mantinham os valores anteriores, embora a lista viesse filtrada certo);
+  - a anonimização de uma pessoa apaga as visões dela, porque podem guardar termos de busca; "Meus dados" continua sem as visões (fora do escopo desta SPEC).
 
 ### 7.5 Critérios de aceitação
 
