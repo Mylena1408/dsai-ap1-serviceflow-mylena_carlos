@@ -1991,7 +1991,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-189 — Aplicação da importação
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `applyConfigurationImport`: confere os resumos do arquivo e do destino, refaz a avaliação na transação, grava tudo ou nada com a auditoria de cada tela e um registro próprio com o resumo; ida e volta e banco vazio conferidos; esclarecimentos na SPEC (6.4, SF-189).
 - **Objetivo:** Seção 6.3 (regras 5 e 6), parte D.
 - **Arquivos/módulos esperados:** Módulo de configuração, casos de uso de cada configuração, auditoria.
 - **Dependências:** SF-188.

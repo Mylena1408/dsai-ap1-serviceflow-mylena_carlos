@@ -183,6 +183,10 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   endsOn: "Fim",
   pausedAt: "Pausada em",
   endedAt: "Encerrada em",
+  // SPEC 2026-11-07-operacao-e-automacao, 6.3 item 5.
+  itemsCreated: "Itens novos",
+  itemsUpdated: "Itens alterados",
+  itemsUnchanged: "Itens iguais",
   // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
   distributionMode: "Distribuição automática",
   maxActivePerAttendant: "Limite por atendente",
@@ -337,8 +341,9 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "pausedAt",
     "endedAt",
   ],
-  // The export and the import record what was done, not field changes.
-  CONFIGURATION: [],
+  // The import's own entry carries its summary (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 5); the export
+  // records no fields.
+  CONFIGURATION: ["itemsCreated", "itemsUpdated", "itemsUnchanged"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

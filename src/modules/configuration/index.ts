@@ -4,9 +4,11 @@ import * as exporting from "./application/export-configuration";
 import { createPrismaConfigurationExportStore } from "./infrastructure/prisma-configuration-export";
 import * as preview from "./application/preview-import";
 import { createPrismaConfigurationImportStore } from "./infrastructure/prisma-configuration-import";
+import * as applying from "./application/apply-import";
+import { createPrismaConfigurationApplyStore } from "./infrastructure/prisma-configuration-apply";
 
 // The portable configuration (SPEC 2026-11-07-operacao-e-automacao, part D): the export, the import's
-// preview (SF-188) and, in SF-189, its application.
+// preview (SF-188) and its application (SF-189).
 export {
   CONFIGURATION_FORMAT,
   CONFIGURATION_VERSION,
@@ -32,4 +34,9 @@ export type { ImportPreview } from "./application/preview-import";
 /** The import's preview: nothing is written (6.3 item 4). */
 export function previewConfigurationImport(content: unknown, database: PrismaClient = prisma): Promise<preview.ImportPreview> {
   return preview.previewConfigurationImport(content, createPrismaConfigurationImportStore(database));
+}
+
+/** Applies a previewed file: all or nothing, refused when the file or the destination changed (6.3 item 5). */
+export function applyConfigurationImport(input: unknown, database: PrismaClient = prisma) {
+  return applying.applyConfigurationImport(input, createPrismaConfigurationApplyStore(database));
 }

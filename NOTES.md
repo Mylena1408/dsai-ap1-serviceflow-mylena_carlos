@@ -2399,3 +2399,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Problema achado nos testes:** o `ValidationError` só deixa passar nomes de campo da lista pública, então a regra do prazo (`slaHours`) aparecia sem o campo. A prévia passou a dar o caminho completo de cada regra, sem depender do nome que vem no erro (só o calendário e o feriado usam esse nome, porque os campos deles são públicos).
 - **Resultados:** typecheck, lint e build OK; unitários 1453/1453; integração 600/600; E2E 42/42 na primeira rodada completa.
 - **Linhas:** 1091 `added` (aplicação 714, testes 377).
+
+## SF-189 — Configuração portátil: aplicação da importação (2026-11-08)
+
+- **Aplicação** (`application/apply-import.ts` e `infrastructure/prisma-configuration-apply.ts`): só o administrador; o resumo do arquivo é conferido antes da transação; dentro dela (serializável, até 60 s), o destino é lido de novo, a avaliação da prévia é refeita e o resumo do destino comparado. Diferença → conflito (nova prévia). Itens iguais não são tocados; novos e alterados são gravados na ordem das referências, cada um com a auditoria da sua tela; as condições (de campos, etapas e aprovação) num segundo passo, porque apontam para campos. Nada é apagado.
+- **Auditoria:** registro "Importou · Configuração da organização" com "Itens novos", "Itens alterados" e "Itens iguais" (campos novos da entidade `CONFIGURATION`).
+- **Testes de integração:** ida e volta dá "igual" e só grava o registro da importação; um banco sem configuração (pessoas mantidas) é reconstruído e exportado de novo idêntico ao original (a única diferença esperada é o atendente que estava fora do setor durante a importação); outro arquivo, destino alterado e quem não é administrador são recusados; o tudo ou nada foi provado com um gatilho temporário no banco que recusa a última gravação: nada fica, nem o setor novo nem a auditoria.
+- **Ajuste nos testes:** a primeira versão esperava um registro de auditoria do calendário, mas ele é igual ao padrão, e a auditoria (como na tela) não registra quando nada muda; o teste passou a conferir a linha gravada.
+- **Resultados:** typecheck, lint e build OK; unitários 1456/1456; integração 605/605; E2E 42/42 na primeira rodada completa.
+- **Linhas:** 635 `added` (aplicação 391, testes 244).

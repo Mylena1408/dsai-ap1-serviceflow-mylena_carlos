@@ -14,7 +14,8 @@ export const CONFIGURATION_ENTITY_LABEL = "Configuração da organização";
 
 const order = [{ createdAt: "asc" as const }, { id: "asc" as const }];
 
-async function readSnapshot(client: Prisma.TransactionClient): Promise<ConfigurationSnapshot> {
+/** The configuration read with `client`; inside a transaction, the import's application reads it this way. */
+export async function readSnapshot(client: Prisma.TransactionClient): Promise<ConfigurationSnapshot> {
   const [sectors, escalationRules, cannedResponses, categories, services, fields, documents, stages, articles, accessRoles, calendar, holidays, bundles] =
     await Promise.all([
       client.sector.findMany({

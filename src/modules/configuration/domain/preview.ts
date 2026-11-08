@@ -38,6 +38,7 @@ export interface PreviewMessage {
 }
 
 export interface DestinationPerson {
+  id: string;
   email: string;
   role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
   isActive: boolean;

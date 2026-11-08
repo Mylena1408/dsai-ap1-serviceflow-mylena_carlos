@@ -82,7 +82,7 @@ const data = (): ConfigurationData => ({
 });
 
 const facts: DestinationFacts = { sectorsWithPendingRequests: [], sectorsWithActiveAttendants: [] };
-const diego: DestinationPerson = { email: "diego@exemplo.test", role: "ATTENDANT", isActive: true, sectorName: "TI" };
+const diego: DestinationPerson = { id: "diego", email: "diego@exemplo.test", role: "ATTENDANT", isActive: true, sectorName: "TI" };
 const people = (...list: DestinationPerson[]) => new Map(list.map((person) => [person.email, person]));
 const empty = (): ConfigurationData => ({ sectors: [], categories: [], services: [], accessRoles: [], calendar: null, holidays: [], bundles: [] });
 
@@ -118,7 +118,7 @@ describe("people by e-mail (6.3 item 4)", () => {
   it("people who do not exist or cannot take the role stay out, with a warning", () => {
     const file = data();
     file.sectors[0].escalationRules[0].notify = ["gestor@exemplo.test", "fora@exemplo.test"];
-    const manager: DestinationPerson = { email: "gestor@exemplo.test", role: "MANAGER", isActive: true, sectorName: "TI" };
+    const manager: DestinationPerson = { id: "gestor", email: "gestor@exemplo.test", role: "MANAGER", isActive: true, sectorName: "TI" };
     const elsewhere: DestinationPerson = { ...diego, sectorName: "RH" };
 
     const result = withoutUnfitPeople(file, empty(), people(elsewhere, manager));

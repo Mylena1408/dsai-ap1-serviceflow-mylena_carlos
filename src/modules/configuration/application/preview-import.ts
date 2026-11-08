@@ -48,7 +48,7 @@ export function destinationOf(snapshot: ConfigurationSnapshot): { data: Configur
   return { data, digest: sha256(JSON.stringify(data)) };
 }
 
-function refused(problems: PreviewMessage[], digest: string, destinationDigest: string): ImportPreview {
+function refusal(problems: PreviewMessage[], digest: string, destinationDigest: string): ImportPreview {
   return {
     accepted: false,
     problems: problems.slice(0, MAX_PREVIEW_PROBLEMS),
@@ -74,20 +74,51 @@ function citedEmails(data: ConfigurationData): string[] {
   return [...emails];
 }
 
+/** What the preview finds, also used by the application with the destination read in its transaction. */
+export interface ImportEvaluation extends ImportPreview {
+  /** The file's data without the people who stay out, as it is applied. */
+  effective: ConfigurationData | null;
+  /** The people the file cites, by e-mail ignoring case. */
+  people: ReadonlyMap<string, DestinationPerson>;
+  /** The destination's configuration as the file would carry it. */
+  destination: ConfigurationData;
+}
+
 export async function previewConfigurationImport(content: unknown, store: ConfigurationImportStore): Promise<ImportPreview> {
   await requireConfigurationAdministrator();
+  const evaluation = await evaluateImport(content, store);
+  return {
+    accepted: evaluation.accepted,
+    problems: evaluation.problems,
+    problemCount: evaluation.problemCount,
+    warnings: evaluation.warnings,
+    items: evaluation.items,
+    summary: evaluation.summary,
+    digest: evaluation.digest,
+    destinationDigest: evaluation.destinationDigest,
+  };
+}
+
+export async function evaluateImport(content: unknown, store: ConfigurationImportStore): Promise<ImportEvaluation> {
   const text = typeof content === "string" ? content : "";
   const digest = sha256(text);
   const destination = destinationOf(await store.snapshot());
+  const none = new Map<string, DestinationPerson>();
+  const refused = (problems: PreviewMessage[]): ImportEvaluation => ({
+    ...refusal(problems, digest, destination.digest),
+    effective: null,
+    people: none,
+    destination: destination.data,
+  });
 
   if (new TextEncoder().encode(text).length > MAX_CONFIGURATION_BYTES) {
-    return refused([{ path: "arquivo", message: "O arquivo passa de 2 MB." }], digest, destination.digest);
+    return refused([{ path: "arquivo", message: "O arquivo passa de 2 MB." }]);
   }
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
-    return refused([{ path: "arquivo", message: "O arquivo não é um JSON válido." }], digest, destination.digest);
+    return refused([{ path: "arquivo", message: "O arquivo não é um JSON válido." }]);
   }
   const shape = configurationFileSchema.safeParse(parsed);
   if (!shape.success) {
@@ -98,17 +129,17 @@ export async function previewConfigurationImport(content: unknown, store: Config
           ? "Não é um arquivo de configuração do ServiceFlow nesta versão."
           : "Campo ausente, a mais ou com valor fora do formato.",
     }));
-    return refused(problems, digest, destination.digest);
+    return refused(problems);
   }
 
   const file = shape.data.data;
   const keys = keyProblems(file, repeatedKeys(destination.data));
-  if (keys.length > 0) return refused(keys, digest, destination.digest);
+  if (keys.length > 0) return refused(keys);
 
   const people = new Map((await store.people(citedEmails(file))).map((person) => [keyOf(person.email), person]));
   const effective = withoutUnfitPeople(file, destination.data, people);
   const problems = validateConfiguration(effective.data, destination.data, await store.facts());
-  if (problems.length > 0) return refused(problems, digest, destination.digest);
+  if (problems.length > 0) return refused(problems);
 
   const items = classifyItems(effective.data, destination.data);
   const summary: Record<ItemStatus, number> = { new: 0, changed: 0, equal: 0 };
@@ -123,5 +154,8 @@ export async function previewConfigurationImport(content: unknown, store: Config
     summary,
     digest,
     destinationDigest: destination.digest,
+    effective: effective.data,
+    people,
+    destination: destination.data,
   };
 }

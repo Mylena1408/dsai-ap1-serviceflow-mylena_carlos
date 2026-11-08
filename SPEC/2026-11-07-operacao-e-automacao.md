@@ -291,6 +291,12 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - um arquivo com nomes que não podem ser casados (repetidos no arquivo, ou repetidos no destino e usados pelo arquivo) é recusado antes das demais regras;
   - o caminho de cada problema segue o arquivo, com os nomes: por exemplo, "services › Acesso a sistema › fields › Sistema › options";
   - a prévia não grava nada nem entra na auditoria; ela devolve o resumo criptográfico (SHA-256) do arquivo e da configuração do destino, que a aplicação (SF-189) confere.
+- *Esclarecimentos registrados em 2026-11-08 (SF-189):*
+  - a aplicação confere o resumo do arquivo antes de abrir a transação e, dentro dela, lê o destino de novo, refaz a mesma avaliação da prévia e compara o resumo do destino; qualquer diferença recusa a aplicação e pede nova prévia;
+  - itens iguais não são tocados; os novos são criados e os alterados atualizados com a auditoria da tela correspondente. Como nas telas, um campo novo com condição e a condição de aprovação de um serviço são gravados em um segundo passo (a condição aponta para um campo), o que gera um segundo registro de auditoria; as respostas prontas não têm auditoria na tela e também não têm na importação; o calendário igual ao padrão não gera registro, como na tela;
+  - as pessoas são ligadas pelo e-mail; as posições (de campos, documentos, etapas e artigos) vêm do arquivo como estão;
+  - o registro próprio da importação ("Importou · Configuração da organização") traz "Itens novos", "Itens alterados" e "Itens iguais";
+  - a transação tem limite de 60 segundos; se estourar, nada é gravado.
 
 ### 6.5 Critérios de aceitação
 

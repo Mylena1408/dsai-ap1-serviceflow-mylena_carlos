@@ -202,3 +202,11 @@
 > quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
 
 50. Contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-188.
+
+> pode prosseguir
+
+51. SF-189: aplicação da importação da configuração, tudo ou nada, auditoria, ida e volta e banco vazio (ver `NOTES.md`).
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff / terminou?
+
+52. Andamento da suíte informado; contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-189.
