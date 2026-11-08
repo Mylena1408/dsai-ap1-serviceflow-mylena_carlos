@@ -67,3 +67,8 @@ export async function getPublishedService(
 ): Promise<PublishedService> {
   return catalog.getPublishedService(id, createPrismaPublishedCatalogRepository(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { serviceApprovalInputSchema, serviceInputSchema } from "./application/service-schemas";
+export { parseSlaHours } from "./domain/sla-config";
+export { assertApprovalLevels } from "./domain/approval-config";

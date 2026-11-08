@@ -190,3 +190,15 @@
 > (comando rodado pela responsável no prompt: o script de migration do agente)
 
 47. Migration `20261108400000_configuration_audit` aplicada no Neon pela responsável; registro do deploy e push (ver `NOTES.md`).
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
+
+48. Contagem pelo `scripts/cloc-diff.sh` depois do deploy (sem mudança de código desde a SF-187).
+
+> pode prosseguir
+
+49. SF-188: validação e prévia da importação da configuração com as regras das telas (ver `NOTES.md`).
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
+
+50. Contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-188.

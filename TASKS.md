@@ -1981,7 +1981,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-188 — Validação e prévia da importação
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Prévia (`previewConfigurationImport`): recusa com até 50 problemas e o caminho de cada um, classificação novo/alterado/igual, avisos de pessoas, resumos SHA-256 do arquivo e do destino; validação pelos esquemas e regras das próprias telas; esclarecimentos na SPEC (6.4, SF-188).
 - **Objetivo:** Seção 6.3 (regra 4), parte D.
 - **Arquivos/módulos esperados:** Módulo de configuração.
 - **Dependências:** SF-187.

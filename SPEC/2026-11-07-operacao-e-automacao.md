@@ -284,6 +284,13 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - o calendário vai com os horários em "HH:MM", como na tela; os limites decimais, como texto com as casas do campo;
   - um arquivo acima de 2 MB é gerado com aviso, porque a importação não o aceitará;
   - na auditoria, a configuração não tem linha própria: os registros de exportação e de importação usam um identificador fixo de entidade, com o rótulo "Configuração da organização"; a exportação não registra mudanças de campos.
+- *Esclarecimentos registrados em 2026-11-07 (SF-188):*
+  - a prévia usa os próprios esquemas e regras de cada tela, aplicados ao estado que a importação deixaria (o que existe mais o que vem no arquivo); itens **iguais** ao destino não mudam nada e não são conferidos de novo, e os limites de um grupo (por exemplo, 10 campos ativos por serviço) são conferidos quando o arquivo muda algo nele, para que exportar e importar de volta sempre funcione (regra 6);
+  - nas pessoas, o valor que o destino já tem naquele item é mantido, mesmo que hoje a pessoa não pudesse ser escolhida, pelo mesmo motivo; um item que perde a pessoa continua tendo de seguir as regras (por exemplo, uma regra de escalonamento que fica sem nenhuma ação é recusada);
+  - o tipo de um campo existente nunca muda, como na tela de campos (não só quando há respostas);
+  - um arquivo com nomes que não podem ser casados (repetidos no arquivo, ou repetidos no destino e usados pelo arquivo) é recusado antes das demais regras;
+  - o caminho de cada problema segue o arquivo, com os nomes: por exemplo, "services › Acesso a sistema › fields › Sistema › options";
+  - a prévia não grava nada nem entra na auditoria; ela devolve o resumo criptográfico (SHA-256) do arquivo e da configuração do destino, que a aplicação (SF-189) confere.
 
 ### 6.5 Critérios de aceitação
 

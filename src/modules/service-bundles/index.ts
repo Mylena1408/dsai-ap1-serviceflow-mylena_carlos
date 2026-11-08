@@ -46,3 +46,6 @@ export function updateBundle(id: unknown, input: unknown, database: PrismaClient
 export function setBundleActive(id: unknown, isActive: unknown, database: PrismaClient = prisma) {
   return bundles.setBundleActive(id, isActive, createPrismaBundleStore(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { bundleInputSchema } from "./domain/bundle";

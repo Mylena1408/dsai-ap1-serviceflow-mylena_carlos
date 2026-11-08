@@ -110,3 +110,8 @@ export async function setEscalationRuleActive(id: unknown, isActive: unknown, da
 export async function deleteEscalationRule(id: unknown, database: PrismaClient = prisma): Promise<void> {
   return escalationRules.deleteEscalationRule(id, createPrismaEscalationRuleStore(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { sectorInputSchema } from "./application/sector-schemas";
+export { distributionSettingsSchema } from "./domain/distribution-config";
+export { escalationRuleSettingsSchema } from "./domain/escalation-rule";

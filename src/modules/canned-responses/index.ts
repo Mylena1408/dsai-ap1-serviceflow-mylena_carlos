@@ -39,3 +39,6 @@ export function setCannedResponseActive(id: unknown, isActive: boolean, database
 export function listResponsesForRequest(requestId: unknown, database: PrismaClient = prisma) {
   return useCases.listResponsesForRequest(requestId, repository(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { cannedResponseInputSchema } from "./domain/canned-response";

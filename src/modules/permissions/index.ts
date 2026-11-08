@@ -73,3 +73,6 @@ export async function assignAccessRole(input: unknown, database: PrismaClient = 
 export async function removeAccessRole(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return roles.removeAccessRole(input, createPrismaAccessRoleTransactionRunner(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { accessRoleInputSchema } from "./domain/access-role";

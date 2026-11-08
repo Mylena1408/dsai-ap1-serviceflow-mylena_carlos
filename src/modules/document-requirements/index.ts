@@ -79,3 +79,6 @@ export async function deactivateDocumentRequirement(
     createPrismaDocumentRequirementTransactionRunner(database),
   );
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { documentRequirementInputSchema } from "./application/document-requirement-schemas";

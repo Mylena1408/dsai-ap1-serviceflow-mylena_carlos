@@ -37,3 +37,6 @@ export function deleteArticle(articleId: unknown, database: PrismaClient = prism
 export function listPublishedArticles(serviceId: unknown, database: PrismaClient = prisma) {
   return useCases.listPublishedArticles(serviceId, store(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { articleInputSchema } from "./domain/article";

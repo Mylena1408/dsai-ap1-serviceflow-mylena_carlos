@@ -2390,3 +2390,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Backup:** `serviceflow-2026-11-07-pre-deploy-4.dump`, conferido por restauração local (51 tabelas iguais), cifrado pelo EFS. Detalhes na seção 13 da SPEC de backup.
 - **Migration no Neon:** o modo automático do agente bloqueou a aplicação em produção; a responsável rodou ela mesma o script do agente no prompt. `prisma migrate deploy` aplicou `20261108400000_configuration_audit` e `prisma migrate status` confirmou o banco em dia (49).
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+## SF-188 — Configuração portátil: validação e prévia da importação (2026-11-08)
+
+- **Prévia** (`src/modules/configuration/application/preview-import.ts`): só o administrador; tamanho (2 MB), JSON, formato e versão; nomes que não podem ser casados; pessoas; regras das telas; classificação. Qualquer problema recusa o arquivo, com até 50 listados (e o total) e o caminho de cada um no arquivo. Nada é gravado nem auditado.
+- **Mesmas regras das telas** (`domain/validation.ts`): os esquemas e regras de cada módulo passaram a ser exportados pela API pública deles (setores, categorias, serviços, documentos, artigos, respostas prontas, papéis, pacotes) e são aplicados ao estado que a importação deixaria. Referências por nome viram identificadores fictícios válidos só para reaproveitar os esquemas.
+- **Decisões (esclarecimentos na SPEC, 6.4):** itens iguais ao destino não são conferidos de novo e os limites de um grupo só quando o arquivo mexe nele; a pessoa que o destino já tem no item é mantida (a ida e volta sempre funciona); o tipo de um campo existente nunca muda, como na tela.
+- **Problema achado nos testes:** o `ValidationError` só deixa passar nomes de campo da lista pública, então a regra do prazo (`slaHours`) aparecia sem o campo. A prévia passou a dar o caminho completo de cada regra, sem depender do nome que vem no erro (só o calendário e o feriado usam esse nome, porque os campos deles são públicos).
+- **Resultados:** typecheck, lint e build OK; unitários 1453/1453; integração 600/600; E2E 42/42 na primeira rodada completa.
+- **Linhas:** 1091 `added` (aplicação 714, testes 377).

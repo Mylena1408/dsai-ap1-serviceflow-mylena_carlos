@@ -124,11 +124,14 @@ async function readSnapshot(client: Prisma.TransactionClient): Promise<Configura
   };
 }
 
+/** The whole configuration as one consistent picture (also read by the import's preview). */
+export function readConfigurationSnapshot(database: PrismaClient): Promise<ConfigurationSnapshot> {
+  return database.$transaction((client) => readSnapshot(client), { isolationLevel: "RepeatableRead" });
+}
+
 export function createPrismaConfigurationExportStore(database: PrismaClient): ConfigurationExportStore {
   return {
-    snapshot() {
-      return database.$transaction((client) => readSnapshot(client), { isolationLevel: "RepeatableRead" });
-    },
+    snapshot: () => readConfigurationSnapshot(database),
     async now() {
       const [{ now }] = await database.$queryRaw<Array<{ now: Date }>>`SELECT now() AS "now"`;
       return now;

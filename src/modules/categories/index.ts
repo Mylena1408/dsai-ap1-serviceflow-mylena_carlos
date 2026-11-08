@@ -40,3 +40,6 @@ export async function setCategoryActive(
 ): Promise<CategoryRecord> {
   return useCases.setCategoryActive(id, isActive, createPrismaCategoryTransactionRunner(database));
 }
+
+// The rules of this configuration screen, also used by the import's preview (SPEC 2026-11-07-operacao-e-automacao, 6.3 item 4).
+export { categoryInputSchema } from "./application/category-schemas";
