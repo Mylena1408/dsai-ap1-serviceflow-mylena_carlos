@@ -2427,3 +2427,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Anonimização:** apaga as visões da pessoa (podem guardar termos de busca).
 - **Resultados:** typecheck, lint e build OK; unitários 1470/1470; integração 609/609; E2E 44/44 na primeira rodada completa.
 - **Linhas:** 531 `added` (aplicação 305, testes 226).
+
+## SF-192 — Ações em lote: casos de uso (2026-11-08)
+
+- **Caso de uso** `runQueueBatch`: só o Atendente; de 1 a 50 solicitações distintas; os dados comuns (colega, prioridade, setor e justificativa) conferidos uma vez antes de qualquer item. Cada item chama a própria ação individual (`assumeRequest`, `transferRequest`, `changeRequestPriority`, `sendRequestToSector`), que faz a autorização, a transação, o histórico, os eventos e os avisos dela; um depois do outro.
+- **Resultado por item:** "feito" ou "recusado" com motivo fixo, traduzido do erro da ação individual (`refusalOf`). Como a ação individual usa o mesmo conflito para "não vale agora" e "mudou enquanto você agia", esses casos têm um texto só (esclarecimento na SPEC). Uma falha inesperada num item não interrompe os outros.
+- **Integração:** assumir com um item de outra pessoa e um de outro setor (recusados, sem histórico); transferir para quem não é do setor (recusado); prioridade igual e de solicitação de outro responsável (recusadas); encaminhar com a mesma justificativa (histórico e evento por item, iguais aos da ação individual); dois lotes simultâneos sobre as mesmas 6 solicitações assumem cada uma uma vez.
+- **Resultados:** typecheck, lint e build OK; unitários 1475/1475; integração 612/612; E2E 44/44 na primeira rodada completa.
+- **Linhas:** 261 `added` (aplicação 84, testes 177).

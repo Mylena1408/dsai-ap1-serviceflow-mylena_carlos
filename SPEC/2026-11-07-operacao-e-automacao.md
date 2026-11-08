@@ -346,6 +346,12 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - o bloco "Minhas visões" fica abaixo da busca, com a visão aberta marcada; renomear e apagar ficam dentro de "Renomear ou apagar";
   - ao abrir uma visão sem recarregar a página, o formulário de busca passou a ser recriado com os critérios da visão (antes os campos mantinham os valores anteriores, embora a lista viesse filtrada certo);
   - a anonimização de uma pessoa apaga as visões dela, porque podem guardar termos de busca; "Meus dados" continua sem as visões (fora do escopo desta SPEC).
+- *Esclarecimentos registrados em 2026-11-08 (SF-192):*
+  - cada item passa pela própria ação individual (assumir, transferir, mudar a prioridade, encaminhar), com a autorização, a transação, o histórico, os eventos e os avisos dela; os itens são tratados um depois do outro, para cada um ver o que os anteriores deixaram (por exemplo, a vez da distribuição);
+  - o caso de uso aceita de 1 a 50 solicitações distintas; "todas da página atual" é garantido pela tela (SF-193), que só oferece as da página;
+  - os dados comuns são conferidos uma vez antes de qualquer item: a justificativa do encaminhamento vazia, mais de 50 ou solicitações repetidas recusam o lote inteiro, sem tocar em nada;
+  - os motivos são textos fixos: "sem permissão", "já tem responsável…", "a ação não vale para ela agora…", "o colega escolhido não pode recebê-la", "já está com essa prioridade", "o setor escolhido não pode recebê-la" e "não foi possível concluir". A ação individual usa o mesmo erro para "não vale agora" e "mudou enquanto você agia", por isso esses dois casos têm um texto só;
+  - uma falha inesperada num item vira "não foi possível concluir" e não interrompe os demais.
 
 ### 7.5 Critérios de aceitação
 

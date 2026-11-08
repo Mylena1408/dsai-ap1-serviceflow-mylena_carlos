@@ -2021,7 +2021,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-192 — Ações em lote: domínio e casos de uso
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `runQueueBatch` (`src/modules/requests/application/batch.ts`): assumir, transferir, prioridade e encaminhar para até 50 solicitações, cada item pela ação individual na sua transação, resultado por item com motivo fixo; concorrência conferida.
 - **Objetivo:** Seção 7.3 (regra 2), parte E.
 - **Arquivos/módulos esperados:** `src/modules/requests/application/`.
 - **Dependências:** SF-191.

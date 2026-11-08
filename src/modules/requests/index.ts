@@ -41,6 +41,7 @@ import * as groups from "./application/groups";
 import * as absenceHandover from "./application/absence-handover";
 import * as teamLoad from "./application/team-load";
 import * as recurringRuns from "./application/recurring-runs";
+import * as batch from "./application/batch";
 import { createPrismaRecurringRunStore, findRequestScheduleName } from "./infrastructure/prisma-recurring-runs";
 import { createPrismaTeamLoadReader } from "./infrastructure/prisma-team-load";
 import { createPrismaAbsenceHandoverStore } from "./infrastructure/prisma-absence-handover";
@@ -511,4 +512,17 @@ export async function getRequestScheduleName(requestId: unknown, database: Prism
   return recurringRuns.getRequestScheduleName(requestId, createPrismaAttachmentQueryRepository(database), (id) =>
     findRequestScheduleName(database, id),
   );
+}
+
+// Batch actions in the queue (SPEC 2026-11-07-operacao-e-automacao, 7.3 item 2).
+export { BATCH_ACTIONS, BATCH_REFUSAL_LABELS, MAX_BATCH_ITEMS, type BatchAction, type BatchItemResult, type BatchRefusal, type BatchResult } from "./application/batch";
+
+/** Each item through the individual action, in its own transaction; the result per item. */
+export async function runQueueBatch(input: unknown, database: PrismaClient = prisma): Promise<batch.BatchResult> {
+  return batch.runQueueBatch(input, {
+    assume: (item) => assumeRequest(item, database),
+    transfer: (item) => transferRequest(item, database),
+    priority: (item) => changeRequestPriority(item, database),
+    sector: (item) => sendRequestToSector(item, database),
+  });
 }

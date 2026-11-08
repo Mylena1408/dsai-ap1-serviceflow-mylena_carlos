@@ -218,3 +218,7 @@
 > pode prosseguir
 
 54. SF-191: visões salvas na fila e em "Minhas solicitações" (migration, módulo, telas, E2E) (ver `NOTES.md`).
+
+> pode prosseguir / terminou?
+
+55. SF-192: casos de uso das ações em lote na fila, com resultado por item e concorrência (ver `NOTES.md`); andamento da suíte informado.
