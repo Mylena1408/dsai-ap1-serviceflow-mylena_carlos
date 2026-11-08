@@ -20,6 +20,15 @@ async function findRequest(client: Client, requestId: string) {
 export function createPrismaRequestTagReader(database: PrismaClient): RequestTagReader {
   return {
     findRequest: (requestId) => findRequest(database, requestId),
+    async tagsOfRequests(requestIds) {
+      if (requestIds.length === 0) return [];
+      const rows = await database.requestTag.findMany({
+        where: { requestId: { in: [...requestIds] } },
+        orderBy: [{ tag: { name: "asc" } }, { tagId: "asc" }],
+        select: { requestId: true, tag: { select: tagColumns } },
+      });
+      return rows.map((row) => ({ requestId: row.requestId, tag: recordOf(row.tag) }));
+    },
     async tagsOf(requestId) {
       const rows = await database.requestTag.findMany({
         where: { requestId },

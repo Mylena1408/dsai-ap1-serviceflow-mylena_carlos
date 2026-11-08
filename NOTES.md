@@ -2518,3 +2518,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes existentes:** passaram sem mudar asserções; uma fixture que monta o objeto `Analytics` inteiro ganhou `tags: []`.
 - **Resultados:** typecheck, lint e build OK; unitários 1496/1496; integração 628/628; E2E 45/45 na primeira rodada completa.
 - **Linhas:** 115 `added` (aplicação 31, testes 84).
+
+## SF-199 — Etiquetas na lista da fila; fim da parte A (2026-11-08)
+
+- **Lista:** cada solicitação da página mostra as etiquetas (`TagChip`; as de outro setor ou inativas em cinza), lidas numa consulta só e apenas para as solicitações do setor do atendente.
+- **Defeito achado pelo E2E (no lote da SPEC anterior):** quando o lote tira as solicitações do filtro (por exemplo, retirar a etiqueta filtrada), a fila relida fica vazia e o bloco "Ações em lote", que só era renderizado com itens, sumia com o resultado. O bloco passou a ficar sempre na página (sem itens, esconde o formulário e mantém o resultado), e o resultado guarda os nomes das solicitações do momento do envio. Unitário novo para a página vazia; o E2E do lote continuou passando.
+- **E2E** `sector-tags.spec.ts`: o gestor cria a etiqueta; o atendente aplica no detalhe, vê na lista, filtra pela etiqueta e a retira no lote; "Análises" conta; o solicitante não vê. A etiqueta é desativada no fim do teste.
+- **Interrupção:** a primeira rodada da suíte foi encerrada pelo Claude Code por falta de memória no sistema (durante o build), junto com o banco de testes local. A pedido da responsável ("pode prosseguir"), o banco foi religado e a suíte rodou de novo.
+- **Resultados:** typecheck, lint e build OK; unitários 1497/1497; integração 628/628; E2E 46/46.
+- **Linhas:** 157 `added` (aplicação 56, testes 101). Parte A inteira (SF-194 a SF-199): cerca de 1.630, bem abaixo da média de 630 por tarefa usada na estimativa da SPEC (cerca de 270 por tarefa).

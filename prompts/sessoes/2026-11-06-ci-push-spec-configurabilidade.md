@@ -286,3 +286,11 @@
 > pode prosseguir
 
 71. SF-198: etiquetas em "Análises" (ver `NOTES.md`).
+
+> pode prosseguir
+
+72. SF-199: etiquetas na lista da fila, correção do bloco do lote e E2E; a suíte foi interrompida por falta de memória (banco de testes também), informada à responsável.
+
+> pode prosseguir
+
+73. Banco de testes religado e suíte da SF-199 rodada de novo, aprovada; fim da parte A (ver `NOTES.md`).

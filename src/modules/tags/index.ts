@@ -57,3 +57,11 @@ export function changeRequestTags(input: unknown, database: PrismaClient = prism
 export function listQueueTags(database: PrismaClient = prisma) {
   return requestTags.listQueueTags(createPrismaRequestTagReader(database));
 }
+
+/** The tags of the queue page's requests, by request (only the attendant's sector's requests). */
+export function listQueuePageTags(requestIds: readonly string[], database: PrismaClient = prisma) {
+  return requestTags.listQueuePageTags(requestIds, createPrismaRequestTagReader(database), async (ids) => {
+    const rows = await database.request.findMany({ where: { id: { in: [...ids] } }, select: { id: true, sectorId: true } });
+    return new Map(rows.map((row) => [row.id, row.sectorId]));
+  });
+}

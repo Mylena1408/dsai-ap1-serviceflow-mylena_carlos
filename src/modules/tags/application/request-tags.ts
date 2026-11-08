@@ -46,6 +46,8 @@ export interface RequestTagsView {
 
 export interface RequestTagReader {
   findRequest(requestId: string): Promise<TaggableRequest | null>;
+  /** The tags of these requests, by request (only the ones that have tags). */
+  tagsOfRequests?(requestIds: readonly string[]): Promise<Array<{ requestId: string; tag: TagRecord }>>;
   tagsOf(requestId: string): Promise<TagRecord[]>;
   activeTags(sectorId: string): Promise<TagRecord[]>;
   events(requestId: string): Promise<RequestTagEventView[]>;
@@ -92,6 +94,28 @@ export async function listQueueTags(reader: Pick<RequestTagReader, "activeTags">
   const actor = await requireCurrentActor();
   if (actor.role !== "ATTENDANT" || !actor.sectorId) return [];
   return (await reader.activeTags(actor.sectorId)).map(({ id, name, color }) => ({ id, name, color }));
+}
+
+/**
+ * The tags of the queue page's requests (3.3 item 4), by request, for the attendant: only requests of the
+ * attendant's sector are read, so a list never shows another sector's tags. A former sector's tag comes muted.
+ */
+export async function listQueuePageTags(
+  requestIds: readonly string[],
+  reader: Pick<RequestTagReader, "tagsOfRequests">,
+  sectorOf: (requestIds: readonly string[]) => Promise<Map<string, string>>,
+): Promise<Map<string, RequestTagView[]>> {
+  const actor = await requireCurrentActor();
+  const result = new Map<string, RequestTagView[]>();
+  if (actor.role !== "ATTENDANT" || !actor.sectorId || requestIds.length === 0 || !reader.tagsOfRequests) return result;
+  const sectors = await sectorOf(requestIds);
+  const own = requestIds.filter((id) => sectors.get(id) === actor.sectorId);
+  for (const { requestId, tag } of await reader.tagsOfRequests(own)) {
+    const views = result.get(requestId) ?? [];
+    views.push({ id: tag.id, name: tag.name, color: tag.color, isActive: tag.isActive, fromOtherSector: tag.sectorId !== actor.sectorId });
+    result.set(requestId, views);
+  }
+  return result;
 }
 
 /** Puts tags on and takes them off one request; a change that changes nothing writes nothing. */

@@ -69,6 +69,10 @@ describe("the batch from the queue (7.3 item 2)", () => {
     await expect(runBatchAction({ step: "idle" }, form([["action", "assume"]]))).resolves.toMatchObject({ message: "Só o atendente usa as ações em lote." });
   });
 
+  it("with no request on the page and nothing sent, the block shows nothing (SPEC 2026-11-08-atendimento-dia-a-dia, SF-199)", () => {
+    expect(renderToStaticMarkup(createElement(QueueBatch, { labels: {}, choices: { colleagues: [], sectors: [] }, empty: true }))).toBe("");
+  });
+
   it("the form offers the four actions and starts with 'Assumir'", () => {
     const html = renderToStaticMarkup(createElement(QueueBatch, { labels: {}, choices: { colleagues: [{ id: A, name: "Bia" }], sectors: [] } }));
     expect(html).toContain('id="queue-batch"');

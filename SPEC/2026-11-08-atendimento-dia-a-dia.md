@@ -84,14 +84,17 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - "Análises" conta as solicitações **abertas no período** pelas etiquetas que elas têm **agora**; uma solicitação com duas etiquetas conta nas duas; a mais usada vem primeiro;
   - vale o mesmo escopo das demais análises (gestor: o próprio setor; administrador: todos ou o setor filtrado); com todos os setores, cada etiqueta vem com o nome do setor;
   - o bloco "Etiquetas" só aparece quando alguma solicitação do período tem etiqueta.
+- *Esclarecimentos registrados em 2026-11-08 (SF-199):*
+  - a lista da fila mostra as etiquetas de cada solicitação (na cor delas; as de outro setor ou inativas, em cinza), lidas só para as solicitações do setor do atendente;
+  - o E2E achou um defeito no lote: quando a ação tira as solicitações do filtro (por exemplo, retirar a etiqueta filtrada), a fila relida fica vazia e o bloco "Ações em lote", que só aparecia com itens, sumia junto com o resultado. O bloco passou a ficar sempre na página: sem itens, esconde o formulário e mantém o resultado, que guarda os nomes das solicitações do momento do envio.
 
 ### 3.5 Critérios de aceitação
 
-- [ ] **CA-ETQ-01** — Setor sem etiquetas se comporta como hoje.
-- [ ] **CA-ETQ-02** — Administrador e gestor do setor cadastram, alteram, desativam e reativam etiquetas com os limites da regra 1; mudanças entram na auditoria.
-- [ ] **CA-ETQ-03** — Atendentes do setor aplicam e retiram etiquetas com a regra 2; o histórico e o evento registram cada mudança; o solicitante não vê etiquetas.
-- [ ] **CA-ETQ-04** — A busca, as visões salvas e o lote usam etiquetas; "Análises" conta solicitações por etiqueta.
-- [ ] **CA-ETQ-05** — Migration aditiva; nenhuma dependência nova.
+- [x] **CA-ETQ-01** — Setor sem etiquetas se comporta como hoje. *Verificado em 2026-11-08 (SF-194 a SF-199): sem etiquetas, a busca tem os mesmos critérios, o detalhe não mostra o bloco para quem só lê, "Análises" não mostra o bloco novo e a lista da fila não muda; as suítes anteriores passaram sem mudar asserções (só uma fixture do objeto de análises ganhou o campo novo vazio).*
+- [x] **CA-ETQ-02** — Administrador e gestor do setor cadastram, alteram, desativam e reativam etiquetas com os limites da regra 1; mudanças entram na auditoria. *Verificado em 2026-11-08 (SF-194, SF-195 e SF-199): seção "Etiquetas" da administração e página do gestor; nome único entre as ativas, cor da paleta com contraste conferido, até 30 ativas; auditoria `SECTOR_TAG` (unitário, integração e E2E `sector-tags.spec.ts`).*
+- [x] **CA-ETQ-03** — Atendentes do setor aplicam e retiram etiquetas com a regra 2; o histórico e o evento registram cada mudança; o solicitante não vê etiquetas. *Verificado em 2026-11-08 (SF-196 e SF-199): até 5, só ativas do setor, nunca em cancelada, as de setor anterior retiráveis; histórico e evento `request.tags_changed` a cada mudança; o solicitante não vê o bloco nem a etiqueta (integração com concorrência e E2E).*
+- [x] **CA-ETQ-04** — A busca, as visões salvas e o lote usam etiquetas; "Análises" conta solicitações por etiqueta. *Verificado em 2026-11-08 (SF-197 a SF-199): filtro por até 5 etiquetas na fila, guardado nas visões; "Etiquetar" e "Retirar etiqueta" no lote; "Análises" conta as solicitações abertas no período por etiqueta, no escopo de quem vê (unitário, integração e E2E).*
+- [x] **CA-ETQ-05** — Migration aditiva; nenhuma dependência nova. *Verificado em 2026-11-08 (SF-194 e SF-196): `20261108600000_sector_tags` só acrescenta (enums, tabelas, índices, restrições); `20261108700000_request_tags_event` recria as listas de tipos de evento do outbox e dos webhooks com o tipo novo, mantendo os anteriores; nenhuma dependência nova.*
 
 ## 4. Parte B — Checklist de atendimento
 

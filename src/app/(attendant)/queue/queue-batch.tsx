@@ -27,23 +27,39 @@ export function QueueBatch({
   labels,
   choices,
   tags = [],
+  empty = false,
 }: {
   labels: Record<string, string>;
   choices: BatchChoices;
   /** The sector's active tags, for "Etiquetar" and "Retirar etiqueta". */
   tags?: Array<{ id: string; name: string }>;
+  /**
+   * The page has no request (for example, the batch took them out of the filter): the form is hidden, but the
+   * last result stays on screen, so this block is always rendered by the page.
+   */
+  empty?: boolean;
 }) {
   const [state, run, running] = useActionState<BatchState, FormData>(runBatchAction, { step: "idle" });
   const [action, setAction] = useState<BatchAction>("assume");
+  // The names of the page's requests when the batch was sent: a request the batch took out of the list keeps its name.
+  const [sentLabels, setSentLabels] = useState<Record<string, string>>({});
+  const send = (formData: FormData) => {
+    setSentLabels(labels);
+    run(formData);
+  };
+
+  if (empty && state.step !== "result" && state.step !== "error") return null;
 
   return (
     <section className="surface-card queue-batch" aria-labelledby="queue-batch-heading">
       <h2 id="queue-batch-heading">Ações em lote</h2>
+      {empty ? null : (
+      <>
       <p className="section-description">
         Marque solicitações desta página (até 50) e escolha a ação. Cada uma é tratada sozinha, como se a ação fosse feita nela; uma recusada não
         desfaz as outras.
       </p>
-      <form action={run} aria-label="Aplicar ação às solicitações marcadas" className="inline-form" id={QUEUE_BATCH_FORM_ID}>
+      <form action={send} aria-label="Aplicar ação às solicitações marcadas" className="inline-form" id={QUEUE_BATCH_FORM_ID}>
         <label>
           Ação
           <select name="action" onChange={(event) => setAction(event.target.value as BatchAction)} value={action}>
@@ -115,6 +131,8 @@ export function QueueBatch({
           {running ? "Aplicando…" : "Aplicar às marcadas"}
         </button>
       </form>
+      </>
+      )}
       {state.step === "error" ? (
         <p className="feedback feedback-error" role="alert">
           {state.message}
@@ -128,7 +146,7 @@ export function QueueBatch({
           <ul aria-label="Resultado por solicitação">
             {state.result.items.map((item) => (
               <li key={item.requestId}>
-                {labels[item.requestId] ?? "Solicitação"}: {item.text}
+                {labels[item.requestId] ?? sentLabels[item.requestId] ?? "Solicitação"}: {item.text}
               </li>
             ))}
           </ul>

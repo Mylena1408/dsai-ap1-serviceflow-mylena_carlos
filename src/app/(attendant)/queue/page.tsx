@@ -5,7 +5,8 @@ import { countComments } from "@/modules/comments";
 import { effectiveAssigneeId, getTeamLoad, listBatchChoices, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
 import { QueueBatch } from "./queue-batch";
 import { QUEUE_BATCH_FORM_ID } from "./queue-batch-form";
-import { listQueueTags } from "@/modules/tags";
+import { listQueuePageTags, listQueueTags } from "@/modules/tags";
+import { TagChip } from "@/app/_components/sector-tags";
 import { TeamLoad } from "@/app/_components/team-load";
 import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
@@ -53,6 +54,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   const commentCounts = await countComments(requests.map(({ id }) => id));
   const now = new Date();
   // How the batch's result names each request of the page.
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4: the tags of the page's requests.
+  const pageTags = await listQueuePageTags(requests.map(({ id }) => id));
   const batchLabels = Object.fromEntries(requests.map((request) => [request.id, `${request.serviceNameSnapshot} (#${request.id.slice(0, 8)})`]));
 
   return (
@@ -72,6 +75,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
       <TeamLoad loads={teamLoad} />
       <RequestSearchForm basePath="/queue" params={params} showAssignee showSla stageChoices={stageChoices} tagChoices={sectorTags} defaultOrder="oldest" />
       <SavedViews list="QUEUE" params={params} views={views} />
+      {/* Always rendered, so the batch's result stays when it empties the page (SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 5). */}
+      {result !== null ? <QueueBatch choices={batchChoices} empty={requests.length === 0} labels={batchLabels} tags={sectorTags} /> : null}
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
           Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.
@@ -83,8 +88,6 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
             : "Não há solicitações no setor."}
         </p>
       ) : (
-        <>
-        <QueueBatch choices={batchChoices} labels={batchLabels} tags={sectorTags} />
         <ul className="content-list">
           {requests.map((request) => (
             <li key={request.id}>
@@ -110,6 +113,13 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
                 <RequestApprovalLabel request={request} />
               </p>
               <RequestSla request={request} now={now} />
+              {pageTags.get(request.id)?.length ? (
+                <p aria-label="Etiquetas" className="tag-line">
+                  {pageTags.get(request.id)!.map((tag) => (
+                    <TagChip color={tag.color} key={tag.id} muted={tag.fromOtherSector || !tag.isActive} name={tag.name} />
+                  ))}
+                </p>
+              ) : null}
               <p className="metadata">
                 Responsável:{" "}
                 {effectiveAssigneeId(request) === null
@@ -129,7 +139,6 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
             </li>
           ))}
         </ul>
-        </>
       )}
       {result && result.total > 0 ? (
         <RequestPagination

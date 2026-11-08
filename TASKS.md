@@ -2091,7 +2091,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-199 — Telas da fila com etiquetas e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Etiquetas na lista da fila (`listQueuePageTags`), correção do bloco do lote que sumia com a fila vazia, E2E `sector-tags.spec.ts`. Parte A concluída (CA-ETQ-01 a 05).
 - **Objetivo:** Parte A, parte A.
 - **Arquivos/módulos esperados:** Fila e detalhe do atendente.
 - **Dependências:** SF-198.
