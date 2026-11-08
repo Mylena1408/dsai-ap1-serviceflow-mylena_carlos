@@ -2121,7 +2121,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-202 — Cópia do checklist na entrada em atendimento
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Cópia em `transitionRequestStatus` (portas opcionais `hasChecklist`, `listChecklistModel`, `insertChecklist`), uma vez por solicitação, com os itens condicionais avaliados pelas respostas da abertura.
 - **Objetivo:** Seção 4.3 (regra 2), parte B.
 - **Arquivos/módulos esperados:** `src/modules/requests/`.
 - **Dependências:** SF-201.

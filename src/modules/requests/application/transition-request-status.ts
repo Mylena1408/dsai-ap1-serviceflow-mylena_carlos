@@ -20,6 +20,7 @@ import type { RequestTransactionRunner } from "./ports";
 import { closePause, resumeColumns } from "./sla-pause";
 import { assertAttendanceFieldsComplete } from "./attendance-fields";
 import { readRequestAfterWrite } from "./read-after-write";
+import { planChecklistCopy } from "@/modules/checklists";
 
 export async function transitionRequestStatus(
   input: unknown,
@@ -127,6 +128,24 @@ export async function transitionRequestStatus(
 
     if (ending) {
       await closePause(transaction, parsed.requestId, occurredAt, currentActor.id, "ATTENDANCE_ENDED");
+    }
+
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 2 and 13.1 item 1 (decision I5): the first start copies the
+    // service's active checklist items whose condition the opening answers meet; reopening and starting again
+    // does not copy anew.
+    if (
+      parsed.toStatus === "IN_PROGRESS" &&
+      currentRequest.serviceId &&
+      transaction.hasChecklist &&
+      transaction.listChecklistModel &&
+      transaction.insertChecklist &&
+      !(await transaction.hasChecklist(parsed.requestId))
+    ) {
+      const model = await transaction.listChecklistModel(currentRequest.serviceId);
+      const answers = model.some((item) => item.conditionFieldId !== null) && transaction.listOpeningAnswers
+        ? await transaction.listOpeningAnswers(parsed.requestId)
+        : [];
+      await transaction.insertChecklist(parsed.requestId, occurredAt, planChecklistCopy(model, answers));
     }
 
     if (stageCopy && stageCopy.stageIndex !== null) {

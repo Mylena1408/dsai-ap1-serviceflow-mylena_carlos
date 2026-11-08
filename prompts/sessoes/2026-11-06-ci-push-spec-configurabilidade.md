@@ -306,3 +306,11 @@
 > pode prosseguir
 
 76. SF-201: modelo de checklist por serviço com auditoria, na administração e na área do gestor; falha intermitente do E2E `access-roles` investigada (passou sozinho) e registrada.
+
+> pode prosseguir
+
+77. SF-202: cópia do checklist na entrada em atendimento; suíte interrompida por falta de memória (banco de testes também), informada à responsável.
+
+> pode prosseguir
+
+78. Banco de testes religado; E2E que falharam rodados sozinhos (passaram) e suíte completa aprovada; código da SF-203 preparado fora do projeto enquanto a suíte rodava.

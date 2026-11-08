@@ -2551,3 +2551,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Fora desta tarefa:** a condição do item e a cópia de outro serviço (SF-224 e SF-225); alterar o texto não mexe na condição.
 - **Suíte:** typecheck, lint e build OK; unitários 1515/1515; integração 635/635; E2E 45/46 na rodada completa: `access-roles.spec.ts` esgotou 5 min esperando a página de entrada ficar sem tráfego (`networkidle`), no primeiro teste da rodada; rodado sozinho em seguida, passou em 15 s. O teste não toca o checklist; registrado como falha intermitente do ambiente.
 - **Linhas:** 613 `added` em TS (aplicação 434, testes 179).
+
+## SF-202 — Cópia do checklist na entrada em atendimento (2026-11-08)
+
+- **Onde:** no caso de uso `transitionRequestStatus`, na mesma transação da passagem para "Em atendimento", com a hora dela. É o único caminho para essa situação (tela do atendente e API); o lote não inicia atendimentos.
+- **Uma vez só:** a tabela `RequestChecklist` marca a cópia, mesmo sem itens; reabrir e atender de novo não copia (a chave primária também barra uma segunda cópia concorrente). As portas novas são opcionais, como as das etapas, para os dublês antigos dos testes.
+- **Condições:** avaliadas com as respostas do solicitante na abertura, por `conditionMet` (a mesma regra das etapas); as respostas só são lidas quando o modelo tem item condicional.
+- **Suíte:** a primeira rodada foi encerrada pelo Claude Code por falta de memória (junto com o banco de testes), com `access-roles` (de novo, 5 min parado na página de entrada, no primeiro teste) e `request-search` falhando; a pedido da responsável, o banco foi religado, os dois passaram sozinhos (11 s e 9 s) e a suíte completa passou: typecheck, lint e build OK; unitários 1517/1517; integração 638/638; E2E 46/46.
+- **Linhas:** 199 `added` em TS (aplicação 39, testes 160).

@@ -569,6 +569,24 @@ export function createPrismaRequestTransaction(
         select: { name: true, assigneeId: true, targetDays: true, conditionFieldId: true, conditionValue: true },
       });
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 2.
+    async hasChecklist(requestId) {
+      return (await transaction.requestChecklist.count({ where: { requestId } })) > 0;
+    },
+    listChecklistModel(serviceId) {
+      return transaction.serviceChecklistItem.findMany({
+        where: { serviceId, isActive: true },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: { id: true, text: true, isRequired: true, position: true, isActive: true, conditionFieldId: true, conditionValue: true },
+      });
+    },
+    async insertChecklist(requestId, copiedAt, items) {
+      // The mark first: a second copy in a race fails on its primary key.
+      await transaction.requestChecklist.create({ data: { requestId, copiedAt } });
+      if (items.length > 0) {
+        await transaction.requestChecklistItem.createMany({ data: items.map((item) => ({ requestId, ...item })) });
+      }
+    },
     async listOpeningAnswers(requestId) {
       // The requester's answers: those without an attendance author (as CA-CND-08).
       const rows = await transaction.requestFieldValue.findMany({

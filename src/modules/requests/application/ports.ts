@@ -10,6 +10,7 @@ import type { RequestAttachmentSummary, StoredRequestAttachment } from "../domai
 import type { ActiveDocumentRequirement } from "../domain/attachment-requirements";
 import type { RequestFieldAnswer } from "../domain/field-answer";
 import type { ApprovalState } from "../domain/approval";
+import type { ChecklistTemplateItem } from "@/modules/checklists";
 import type { LifecycleRequest, LifecycleUser, SectorDestination } from "../domain/lifecycle";
 import type { SearchCriteria } from "../domain/search-criteria";
 import type { RequestPriority, RequestStatus, RequestWithHistory } from "../domain/request";
@@ -412,6 +413,18 @@ export interface RequestTransaction {
   listActiveStages?(serviceId: string): Promise<StageSettings[]>;
   /** The requester's answers given at the opening (5.3.3). */
   listOpeningAnswers?(requestId: string): Promise<OpeningAnswer[]>;
+  /**
+   * The checklist (SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 2): whether the request's checklist was
+   * already copied, the service's model, and the copy with its items. Optional for older doubles: absent = no
+   * checklist.
+   */
+  hasChecklist?(requestId: string): Promise<boolean>;
+  listChecklistModel?(serviceId: string): Promise<ChecklistTemplateItem[]>;
+  insertChecklist?(
+    requestId: string,
+    copiedAt: Date,
+    items: ReadonlyArray<{ templateItemId: string; textSnapshot: string; isRequired: boolean; position: number }>,
+  ): Promise<void>;
   /** Returns the number of rows changed (0 when the request changed meanwhile). */
   updateStageIfCurrent(update: StageUpdate): Promise<number>;
   /** Returns the id of the history row. */
