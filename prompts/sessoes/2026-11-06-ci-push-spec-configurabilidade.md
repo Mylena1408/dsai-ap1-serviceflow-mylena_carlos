@@ -262,3 +262,7 @@
 > pode prosseguir / terminou?
 
 65. SF-194: migration e domínio das etiquetas (ver `NOTES.md`); andamento da suíte informado.
+
+> pode prosseguir
+
+66. SF-195: cadastro das etiquetas na administração e na área do gestor, com auditoria (ver `NOTES.md`).

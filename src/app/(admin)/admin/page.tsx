@@ -43,6 +43,8 @@ import { RecurringSchedules } from "@/app/_components/recurring-schedules";
 import { loadScheduleScreen } from "@/app/_components/recurring-schedule-screen";
 import { checkConfigurationExport } from "@/modules/configuration";
 import { ConfigurationSection } from "./_sections/configuration/configuration-section";
+import { listSectorTags } from "@/modules/tags";
+import { SectorTagsPanel } from "@/app/_components/sector-tags";
 import { AbsencesSection, type AbsencesOverview } from "./_sections/absences/absences-section";
 import { CalendarSection } from "./_sections/calendar/calendar-section";
 
@@ -67,6 +69,8 @@ type AdminPageProps = {
     service?: string;
     edit?: string;
     fields?: string;
+    /** SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1: the tags' message. */
+    tag?: string;
   }>;
 };
 
@@ -76,6 +80,8 @@ const adminSections = [
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.1.
   { id: "roles", label: "Papéis" },
   { id: "sectors", label: "Setores" },
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1.
+  { id: "tags", label: "Etiquetas" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
@@ -125,7 +131,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge, absence, schedule, service, edit, fields }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
+  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge, absence, schedule, service, edit, fields, tag }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -170,6 +176,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const scheduleScreen = selectedSection === "recurring" ? await loadScheduleScreen({ schedule, service, edit, fields }) : null;
   // SPEC 2026-11-07-operacao-e-automacao, part D: read only when the section is open.
   const configurationCheck = selectedSection === "configuration" ? await checkConfigurationExport() : null;
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1: read only when the section is open.
+  const sectorTags = selectedSection === "tags" ? await listSectorTags() : null;
   const absencesOverview: AbsencesOverview | null =
     selectedSection === "absences"
       ? { ...(await listAbsences()), managers: await listSubstituteCandidates() }
@@ -308,6 +316,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {attendantAbsences ? <AttendantAbsences area="admin" message={absence} overview={attendantAbsences} /> : null}
       {scheduleScreen ? <RecurringSchedules area="admin" screen={scheduleScreen} /> : null}
       {configurationCheck ? <ConfigurationSection check={configurationCheck} /> : null}
+      {sectorTags ? <SectorTagsPanel area="admin" message={tag} sectors={sectorTags} /> : null}
         </div>
       ) : null}
     </main>

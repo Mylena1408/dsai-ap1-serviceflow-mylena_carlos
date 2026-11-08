@@ -2478,3 +2478,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Paleta:** 8 cores (fundo claro, texto escuro); o teste calcula o contraste WCAG de cada par e exige pelo menos 4,5:1.
 - **Resultados:** typecheck, lint e build OK; unitários 1486/1486; integração 614/614; E2E 45/45 na primeira rodada completa.
 - **Linhas:** 234 `added` (aplicação 111, testes 123).
+
+## SF-195 — Etiquetas: cadastro (2026-11-08)
+
+- **Casos de uso** (`src/modules/tags/application/sector-tags.ts`): o administrador cuida de todos os setores, o gestor só do próprio; criar, alterar (nome e cor), desativar e reativar, cada um com a auditoria `SECTOR_TAG`. Nome repetido entre as ativas do setor é conflito (o índice único parcial responde, e o repositório traduz). Reativar conta no limite de 30 e exige o nome livre.
+- **Telas:** componente compartilhado `_components/sector-tags.tsx` (com `TagChip`, a etiqueta na cor dela, que as próximas tarefas usam) na seção "Etiquetas" da administração e na nova página "Etiquetas" do gestor; lista com cor, situação e quantas solicitações usam cada etiqueta.
+- **Resultados:** typecheck, lint e build OK; unitários 1488/1488; integração 617/617; E2E 45/45 na primeira rodada completa.
+- **Linhas:** 482 `added` (aplicação 365, testes 117).

@@ -69,6 +69,9 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - a paleta tem as cores cinza, vermelho, laranja, amarelo, verde, turquesa, azul e roxo, guardadas pela chave (`gray`, `red`…); cada uma é um fundo claro com texto escuro, e os testes conferem o contraste de pelo menos 4,5:1 (WCAG AA) de todos os pares;
   - "não cancelada" na regra 2 inclui as concluídas: uma solicitação concluída ainda pode ser etiquetada (por exemplo, para análise posterior);
   - uma etiqueta em uso nunca é apagada, só desativada (a chave estrangeira impede apagar); a auditoria da etiqueta registra nome, cor e situação, e o setor fica fixo desde a criação.
+- *Esclarecimentos registrados em 2026-11-08 (SF-195):*
+  - o administrador cuida das etiquetas na seção "Etiquetas" da administração (todos os setores ativos); o gestor, na página "Etiquetas" da área dele (só o próprio setor); atendentes e solicitantes não chegam a essas telas;
+  - reativar uma etiqueta conta no limite de 30 e exige o nome livre entre as ativas do setor; a lista mostra quantas solicitações usam cada etiqueta, e as inativas aparecem em cinza.
 
 ### 3.5 Critérios de aceitação
 

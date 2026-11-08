@@ -2051,7 +2051,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-195 — Cadastro das etiquetas com auditoria
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Casos de uso (criar, alterar, desativar, reativar) com escopo do gestor e auditoria; seção "Etiquetas" da administração e página `/approvals/tags` do gestor; componente compartilhado `sector-tags.tsx`.
 - **Objetivo:** Seção 3.3 (regra 1), parte A.
 - **Arquivos/módulos esperados:** Administração (Setores) e área do gestor, auditoria.
 - **Dependências:** SF-194.
