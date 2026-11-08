@@ -95,6 +95,11 @@ export interface AnalyticsReader {
    */
   automaticAssignments?(scope: DashboardScope, range: DashboardRange): Promise<number>;
   /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 3.1 item 4: requests opened in the range that have each tag now,
+   * with the tag's sector. Optional for older doubles.
+   */
+  requestsByTag?(scope: DashboardScope, range: DashboardRange): Promise<Array<{ name: string; sectorName: string; count: number }>>;
+  /**
    * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: approval levels whose deadline fell in
    * the range and that were decided after it or are still pending past it. Optional for older doubles.
    */

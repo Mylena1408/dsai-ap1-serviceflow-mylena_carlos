@@ -80,6 +80,10 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - o filtro aceita até 5 etiquetas ("qualquer uma delas"), pelos identificadores; o formulário de busca da fila mostra as etiquetas ativas do setor como caixas de marcar; a lista "Minhas solicitações" ignora o parâmetro, porque o solicitante não vê etiquetas;
   - sem etiqueta escolhida, os critérios da busca ficam exatamente como antes; nas visões salvas, as etiquetas são guardadas ordenadas, como os status;
   - no lote, "Etiquetar" e "Retirar etiqueta" usam a etiqueta escolhida para todos os itens e passam cada item pelo caso de uso das etiquetas (o mesmo do detalhe); a recusa por etiqueta de outro setor, inativa ou acima de 5 aparece como "a etiqueta não é do setor dela, está inativa ou ela já tem 5 etiquetas".
+- *Esclarecimentos registrados em 2026-11-08 (SF-198):*
+  - "Análises" conta as solicitações **abertas no período** pelas etiquetas que elas têm **agora**; uma solicitação com duas etiquetas conta nas duas; a mais usada vem primeiro;
+  - vale o mesmo escopo das demais análises (gestor: o próprio setor; administrador: todos ou o setor filtrado); com todos os setores, cada etiqueta vem com o nome do setor;
+  - o bloco "Etiquetas" só aparece quando alguma solicitação do período tem etiqueta.
 
 ### 3.5 Critérios de aceitação
 

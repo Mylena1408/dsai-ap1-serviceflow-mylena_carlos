@@ -2081,7 +2081,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-198 — Etiquetas em "Análises"
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Leitor `requestsByTag` (solicitações abertas no período, pelas etiquetas atuais, no escopo das análises); bloco "Etiquetas" em "Análises" só quando há dados.
 - **Objetivo:** Seção 3.1 (item 4), parte A.
 - **Arquivos/módulos esperados:** `src/modules/reports/`.
 - **Dependências:** SF-197.

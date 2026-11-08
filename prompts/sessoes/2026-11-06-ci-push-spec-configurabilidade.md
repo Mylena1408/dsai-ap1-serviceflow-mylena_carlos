@@ -282,3 +282,7 @@
 > pode prosseguir
 
 70. SF-197: etiquetas na busca da fila, nas visões salvas e no lote (ver `NOTES.md`); CI do envio aprovado.
+
+> pode prosseguir
+
+71. SF-198: etiquetas em "Análises" (ver `NOTES.md`).

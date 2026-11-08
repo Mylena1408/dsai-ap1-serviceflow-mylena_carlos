@@ -2510,3 +2510,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Tela:** caixas "Etiquetas (qualquer uma)" no formulário de busca da fila e a escolha da etiqueta no bloco "Ações em lote" (`listQueueTags`, as etiquetas ativas do setor).
 - **Resultados:** typecheck, lint e build OK; unitários 1495/1495; integração 625/625; E2E 45/45 na primeira rodada completa. CI do envio anterior (`42492220791`) aprovado.
 - **Linhas:** 186 `added` (aplicação 73, testes 113).
+
+## SF-198 — Etiquetas em "Análises" (2026-11-08)
+
+- **Leitor:** `requestsByTag`, uma consulta SQL que agrupa por etiqueta as solicitações abertas no período, pelas etiquetas que têm agora, com o mesmo filtro de escopo das demais análises (`scopeSql`). Método opcional no port, como os anteriores.
+- **Análises:** campo `tags` (rótulo e contagem), a mais usada primeiro; com todos os setores, o rótulo leva o setor (`tagCounts`). Bloco "Etiquetas" com `GroupTable`, só quando há dados.
+- **Testes existentes:** passaram sem mudar asserções; uma fixture que monta o objeto `Analytics` inteiro ganhou `tags: []`.
+- **Resultados:** typecheck, lint e build OK; unitários 1496/1496; integração 628/628; E2E 45/45 na primeira rodada completa.
+- **Linhas:** 115 `added` (aplicação 31, testes 84).

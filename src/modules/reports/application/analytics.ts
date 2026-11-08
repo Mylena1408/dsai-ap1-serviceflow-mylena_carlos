@@ -89,6 +89,11 @@ export interface Analytics {
   team: TeamMember[];
   /** SPEC 2026-11-06-pesquisa-satisfacao, 4.7. */
   satisfaction: SatisfactionSummary;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 3.1 item 4: requests opened in the period, per tag, most used first;
+   * with the sector's name when the administrator sees every sector. Empty without tags.
+   */
+  tags: Array<{ label: string; count: number }>;
   /** The administrator without a sector filter sees each person's sector (5.6). */
   teamShowsSector: boolean;
 }
@@ -193,6 +198,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
       sla: EMPTY_ANALYTICS_SLA,
       team: [],
       satisfaction: satisfactionSummary({ distribution: [], completed: 0, ratedCompletions: 0, byService: [] }),
+      tags: [],
     };
   }
 
@@ -216,6 +222,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.ruleEscalations ? reader.ruleEscalations(scope, range) : Promise.resolve({ dueSoon: 0, overdueDays: 0 }),
     reader.automaticAssignments ? reader.automaticAssignments(scope, range) : Promise.resolve(0),
   ]);
+  const byTag = reader.requestsByTag ? await reader.requestsByTag(scope, range) : [];
 
   return {
     ...base,
@@ -245,5 +252,14 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     },
     team: teamTable(team),
     satisfaction: satisfactionSummary(ratings),
+    tags: tagCounts(byTag, base.teamShowsSector),
   };
+}
+
+/** Most used first, then by name; the sector named only when every sector is shown. */
+export function tagCounts(rows: ReadonlyArray<{ name: string; sectorName: string; count: number }>, showSector: boolean): Analytics["tags"] {
+  return rows
+    .filter((row) => row.count > 0)
+    .map((row) => ({ label: showSector ? `${row.name} (${row.sectorName})` : row.name, count: row.count }))
+    .sort((left, right) => right.count - left.count || collator.compare(left.label, right.label));
 }

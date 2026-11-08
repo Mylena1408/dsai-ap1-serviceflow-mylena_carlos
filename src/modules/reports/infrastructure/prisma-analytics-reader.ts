@@ -314,6 +314,18 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
       return row?.count ?? 0;
     },
 
+    async requestsByTag(scope, range) {
+      // SPEC 2026-11-08-atendimento-dia-a-dia, 3.1 item 4: the tags the requests opened in the range have now.
+      return database.$queryRaw<Array<{ name: string; sectorName: string; count: number }>>`
+        SELECT t."name"::text AS "name", s."name"::text AS "sectorName", count(*)::int AS "count"
+        FROM "RequestTag" rt
+        JOIN "Request" r ON r."id" = rt."requestId"
+        JOIN "SectorTag" t ON t."id" = rt."tagId"
+        JOIN "Sector" s ON s."id" = t."sectorId"
+        WHERE r."createdAt" >= ${range.from} AND r."createdAt" < ${range.before} ${scopeSql(scope)}
+        GROUP BY t."id", t."name", s."name"`;
+    },
+
     async ruleEscalations(scope, range) {
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: requests, per trigger.
       const [row] = await database.$queryRaw<Array<{ dueSoon: number; overdueDays: number }>>`

@@ -349,6 +349,17 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
         </div>
       </section>
 
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 3.1 item 4: only when some request of the period has a tag. */}
+      {analytics.tags.length > 0 ? (
+        <section className="surface-card" aria-labelledby="analytics-tags">
+          <h2 id="analytics-tags">Etiquetas</h2>
+          <p className="metadata">Solicitações abertas no período, pelas etiquetas que têm agora. Uma solicitação com duas etiquetas conta nas duas.</p>
+          <div className="dashboard-groups">
+            <GroupTable title="Solicitações por etiqueta" groups={analytics.tags} />
+          </div>
+        </section>
+      ) : null}
+
       <section className="surface-card" aria-labelledby="analytics-team">
         <h2 id="analytics-team">Desempenho da equipe</h2>
         <p className="analytics-notice">{TEAM_NOTICE}</p>
