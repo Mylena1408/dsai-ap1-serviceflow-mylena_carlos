@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createChecklistItem, moveChecklistItem, setChecklistItemActive, updateChecklistItem } from "@/modules/checklists";
+import { createChecklistItem, moveChecklistItem, setChecklistItemActive, setChecklistItemCondition, updateChecklistItem } from "@/modules/checklists";
 import { ApplicationError, ValidationError } from "@/server/errors";
 
 // The services' checklist models from the administration and the manager's area (SPEC
@@ -23,6 +23,9 @@ function pageOf(formData: FormData): string {
 /** The message code of a refusal (internal: only async exports become actions). */
 function errorCode(error: ApplicationError): string {
   if (error instanceof ValidationError && error.issues.some(({ path, code }) => path.length === 0 && code === "too_big")) return "checklist-limit";
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("conditionFieldId") || path.includes("conditionValue"))) {
+    return "checklist-condition";
+  }
   if (error.code === "CONFLICT") return "checklist-conflict";
   if (error.code === "VALIDATION_ERROR") return "checklist-invalid";
   return "checklist-missing";
@@ -61,4 +64,17 @@ export async function moveChecklistItemAction(formData: FormData): Promise<never
 export async function setChecklistItemActiveAction(formData: FormData): Promise<never> {
   const active = field(formData, "isActive") === "true";
   return run(formData, () => setChecklistItemActive(field(formData, "itemId"), active), active ? "checklist-reactivated" : "checklist-deactivated");
+}
+
+/** 13.1 item 1: the form sends "<field id>|<value>", or nothing for "always". */
+export async function setChecklistItemConditionAction(formData: FormData): Promise<never> {
+  const choice = field(formData, "condition");
+  const separator = choice.indexOf("|");
+  const condition =
+    choice === ""
+      ? { conditionFieldId: null, conditionValue: null }
+      : separator > 0
+        ? { conditionFieldId: choice.slice(0, separator), conditionValue: choice.slice(separator + 1) }
+        : { conditionFieldId: choice, conditionValue: null };
+  return run(formData, () => setChecklistItemCondition(field(formData, "itemId"), condition), "checklist-condition-saved");
 }

@@ -2341,7 +2341,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-224 — Itens condicionais do checklist
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `setChecklistItemCondition` com a regra das etapas, lista "Aplica-se" no painel dos checklists, condições dos itens protegendo o campo (`findChecklistConditionValues`) e reativação só com o campo ativo.
 - **Objetivo:** Seção 13.1 (item 1), parte B (aprofundamento).
 - **Arquivos/módulos esperados:** Módulo do checklist, cópia.
 - **Dependências:** SF-205.

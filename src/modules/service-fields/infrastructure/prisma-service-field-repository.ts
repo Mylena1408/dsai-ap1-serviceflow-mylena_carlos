@@ -75,6 +75,14 @@ function createPrismaServiceFieldTransaction(transaction: Prisma.TransactionClie
       });
       return stages.flatMap(({ conditionValue }) => (conditionValue === null ? [] : [conditionValue]));
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1.
+    async findChecklistConditionValues(fieldId) {
+      const items = await transaction.serviceChecklistItem.findMany({
+        where: { conditionFieldId: fieldId, isActive: true },
+        select: { conditionValue: true },
+      });
+      return items.flatMap(({ conditionValue }) => (conditionValue === null ? [] : [conditionValue]));
+    },
     async find(fieldId) {
       const row = await transaction.serviceField.findUnique({ where: { id: fieldId } });
       return row && toDomain(row);

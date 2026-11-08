@@ -334,3 +334,7 @@
 > pode prosseguir
 
 83. SF-205: telas do checklist no detalhe (fila e gestor) e E2E da parte B; CA-CHK-01 a 05 verificados.
+
+> pode prosseguir
+
+84. SF-224: itens condicionais do checklist pela tela, com a regra e a proteção dos campos das etapas.

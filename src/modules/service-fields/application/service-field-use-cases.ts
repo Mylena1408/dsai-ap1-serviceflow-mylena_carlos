@@ -238,7 +238,9 @@ export async function reactivateServiceField(
 async function conditionValuesOutsideFields(transaction: ServiceFieldTransaction, fieldId: string): Promise<string[]> {
   const approvalValue = (await transaction.findApprovalConditionValue?.(fieldId)) ?? null;
   const stageValues = (await transaction.findStageConditionValues?.(fieldId)) ?? [];
-  return [...(approvalValue === null ? [] : [approvalValue]), ...stageValues];
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1 (decision J1): the active checklist items' conditions too.
+  const checklistValues = (await transaction.findChecklistConditionValues?.(fieldId)) ?? [];
+  return [...(approvalValue === null ? [] : [approvalValue]), ...stageValues, ...checklistValues];
 }
 
 /** Section 5.2 of SPEC 2026-11-03-campos-condicionais-atendimento, against the fields of the same service. */

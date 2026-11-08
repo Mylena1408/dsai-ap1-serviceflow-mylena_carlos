@@ -2594,3 +2594,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Critérios:** CA-CHK-01 a 05 marcados como verificados na SPEC; CA-CHK-06 e 07 dependem das telas das SF-224 a SF-226.
 - **Resultados:** typecheck, lint e build OK; unitários 1524/1524; integração 645/645; E2E 47/47.
 - **Linhas:** 257 `added` em TS (aplicação 108, testes 149).
+
+## SF-224 — Itens condicionais do checklist (2026-11-08)
+
+- **Regra:** a mesma das etapas (`assertConditionTarget` com público do solicitante); a condição tem formulário próprio, separado do texto do item, e entra na auditoria como `UPDATED`.
+- **Tela:** uma lista só, "Aplica-se", com "Sempre" e cada par campo e valor (sim ou não aparece como "Sim"/"Não"); a ação recebe `<id do campo>|<valor>`. A tabela nomeia o campo mesmo que ele deixe de poder ser condição.
+- **Integridade dos campos:** a porta opcional `findChecklistConditionValues` soma as condições dos itens ativos às das etapas e da aprovação, então o campo não é desativado, não perde a opção usada e não muda de público enquanto um item ativo depende dele. Reativar um item exige o campo da condição ativo.
+- **Resultados:** typecheck, lint e build OK; unitários 1527/1527; integração 648/648; E2E 47/47.
+- **Linhas:** 314 `added` em TS (aplicação 150, testes 164).

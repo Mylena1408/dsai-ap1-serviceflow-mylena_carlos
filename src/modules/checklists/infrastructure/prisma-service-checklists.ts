@@ -7,6 +7,7 @@ import type { ServiceChecklistReader, ServiceChecklistStore, ServiceChecklistTra
 // the text, the position and the condition; the composite key keeps the condition's field in the same service.
 
 const columns = { id: true, text: true, isRequired: true, position: true, isActive: true, conditionFieldId: true, conditionValue: true } as const;
+const CONTROLLER_TYPES = new Set<string>(["SELECT", "YES_NO", "MULTI_SELECT"]);
 const order = [{ isActive: "desc" }, { position: "asc" }, { id: "asc" }] satisfies Prisma.ServiceChecklistItemOrderByWithRelationInput[];
 
 export function createPrismaServiceChecklistReader(database: PrismaClient): ServiceChecklistReader {
@@ -15,11 +16,30 @@ export function createPrismaServiceChecklistReader(database: PrismaClient): Serv
       const services = await database.service.findMany({
         where: { isActive: true, sector: { isActive: true }, ...(sectorId ? { sectorId } : {}) },
         orderBy: [{ sector: { name: "asc" } }, { name: "asc" }, { id: "asc" }],
-        select: { id: true, name: true, sector: { select: { name: true } }, checklistItems: { orderBy: order, select: columns } },
+        select: {
+          id: true,
+          name: true,
+          sector: { select: { name: true } },
+          checklistItems: { orderBy: order, select: columns },
+          fields: {
+            orderBy: [{ position: "asc" }, { id: "asc" }],
+            select: { id: true, label: true, type: true, options: true, audience: true, isActive: true, conditionFieldId: true },
+          },
+        },
       });
       return services.map((service) => ({
         service: { id: service.id, name: service.name, sectorName: service.sector.name },
         items: service.checklistItems,
+        // The same fields a stage's condition accepts (decision J1).
+        conditionFields: service.fields
+          .filter((field) => field.isActive && field.audience === "REQUESTER" && field.conditionFieldId === null && CONTROLLER_TYPES.has(field.type))
+          .map((field) => ({
+            id: field.id,
+            label: field.label,
+            values: field.type === "YES_NO" ? ["true", "false"] : field.options,
+            isYesNo: field.type === "YES_NO",
+          })),
+        fieldLabels: Object.fromEntries(service.fields.map((field) => [field.id, field.label])),
       }));
     },
   };
@@ -42,6 +62,12 @@ function transactionOf(client: Prisma.TransactionClient): ServiceChecklistTransa
     },
     update(itemId, data) {
       return client.serviceChecklistItem.update({ where: { id: itemId }, data, select: columns });
+    },
+    findConditionField(fieldId, serviceId) {
+      return client.serviceField.findFirst({
+        where: { id: fieldId, serviceId },
+        select: { id: true, type: true, options: true, audience: true, isActive: true, conditionFieldId: true },
+      });
     },
   };
 }

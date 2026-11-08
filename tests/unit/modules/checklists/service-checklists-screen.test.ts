@@ -31,8 +31,10 @@ describe("the services' checklists screen", () => {
           {
             service: { id: "s1", name: "Instalar software", sectorName: "TI" },
             items: [item("a", 1), item("b", 2, { isRequired: false }), item("c", 3, { isActive: false })],
+            conditionFields: [],
+            fieldLabels: {},
           },
-          { service: { id: "s2", name: "Férias", sectorName: "RH" }, items: [] },
+          { service: { id: "s2", name: "Férias", sectorName: "RH" }, items: [], conditionFields: [], fieldLabels: {} },
         ],
       }),
     );
@@ -58,7 +60,7 @@ describe("the services' checklists screen", () => {
     const html = renderToStaticMarkup(
       createElement(ServiceChecklistsPanel, {
         area: "approvals",
-        services: [{ service: { id: "s1", name: "Cheio", sectorName: "TI" }, items: Array.from({ length: 20 }, (_, index) => item(`i${index}`, index + 1)) }],
+        services: [{ service: { id: "s1", name: "Cheio", sectorName: "TI" }, items: Array.from({ length: 20 }, (_, index) => item(`i${index}`, index + 1)), conditionFields: [], fieldLabels: {} }],
       }),
     );
     expect(html).toContain("Limite de 20 itens ativos atingido.");

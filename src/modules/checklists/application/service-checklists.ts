@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { activeStateAction, type AuditScope } from "@/modules/audit";
+import { assertConditionTarget, type ConditionController } from "@/modules/service-fields";
 import { requireCurrentActor } from "@/server/authorization";
 import { AuthorizationError, ConflictError, NotFoundError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
@@ -8,6 +9,7 @@ import { activeStateSchema, entityIdSchema } from "@/shared/validation";
 import {
   assertChecklistRoom,
   canManageServiceChecklist,
+  checklistConditionSchema,
   checklistItemTextSchema,
   type ChecklistActor,
   type ChecklistTemplateItem,
@@ -18,10 +20,23 @@ import {
 // and whether they are required, move them up and down, deactivate and reactivate them; every change goes to
 // the audit trail. The checklists already copied to requests never change (decision I7).
 
+/** A field that may be an item's condition, with the values it offers (13.1 item 1). */
+export interface ChecklistConditionField {
+  id: string;
+  label: string;
+  /** The options of a list, or "true"/"false" for yes or no. */
+  values: string[];
+  isYesNo: boolean;
+}
+
 export interface ServiceChecklist {
   service: { id: string; name: string; sectorName: string };
   /** Active first, by position; then the inactive ones. */
   items: ChecklistTemplateItem[];
+  /** The service's fields that may be a condition, as the stages' conditions (decision J1). */
+  conditionFields: ChecklistConditionField[];
+  /** The labels of every field of the service by id, to show a condition whose field changed later. */
+  fieldLabels: Record<string, string>;
 }
 
 export interface ServiceChecklistReader {
@@ -34,7 +49,12 @@ export interface ServiceChecklistTransaction extends AuditScope {
   findItem(itemId: string): Promise<(ChecklistTemplateItem & { serviceId: string }) | null>;
   listItems(serviceId: string): Promise<ChecklistTemplateItem[]>;
   create(item: { serviceId: string; text: string; isRequired: boolean; position: number }): Promise<ChecklistTemplateItem>;
-  update(itemId: string, data: Partial<Pick<ChecklistTemplateItem, "text" | "isRequired" | "position" | "isActive">>): Promise<ChecklistTemplateItem>;
+  update(
+    itemId: string,
+    data: Partial<Pick<ChecklistTemplateItem, "text" | "isRequired" | "position" | "isActive" | "conditionFieldId" | "conditionValue">>,
+  ): Promise<ChecklistTemplateItem>;
+  /** A field of the service with what the condition rule reads; null when it is of another service. */
+  findConditionField(fieldId: string, serviceId: string): Promise<ConditionController | null>;
 }
 
 export interface ServiceChecklistStore {
@@ -131,8 +151,32 @@ export async function setChecklistItemActive(itemId: unknown, isActive: unknown,
     if (item.isActive === active) return item;
     const items = await transaction.listItems(item.serviceId);
     if (active) assertChecklistRoom(activeCount(items));
+    if (active && item.conditionFieldId !== null) {
+      const controller = await transaction.findConditionField(item.conditionFieldId, item.serviceId);
+      if (!controller?.isActive) throw new ConflictError();
+    }
     return transaction.audited({ actor, action: activeStateAction(active), entityType: "CHECKLIST_ITEM", entityId: id }, () =>
       transaction.update(id, active ? { isActive: true, position: positionAfter(items) } : { isActive: false }),
     );
+  });
+}
+
+/**
+ * 13.1 item 1 (decision J1): an item's condition follows the stages' rule: an active requester field of the same
+ * service, with choices and without its own condition, and one of its values; or no condition at all. Requests
+ * already copied keep their checklist (decision I7).
+ */
+export async function setChecklistItemCondition(itemId: unknown, input: unknown, store: ServiceChecklistStore): Promise<ChecklistTemplateItem> {
+  const actor = await requireCurrentActor();
+  const id = validateInput(entityIdSchema, itemId);
+  const condition = validateInput(checklistConditionSchema, input);
+
+  return store.run(async (transaction) => {
+    const item = await managedItem(transaction, actor, id);
+    if (condition.conditionFieldId !== null) {
+      const controller = await transaction.findConditionField(condition.conditionFieldId, item.serviceId);
+      assertConditionTarget({ id: null, audience: "REQUESTER" }, controller, condition.conditionValue ?? "");
+    }
+    return transaction.audited({ actor, action: "UPDATED", entityType: "CHECKLIST_ITEM", entityId: id }, () => transaction.update(id, condition));
   });
 }

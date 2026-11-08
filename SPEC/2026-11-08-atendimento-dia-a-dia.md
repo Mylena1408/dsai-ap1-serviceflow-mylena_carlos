@@ -360,6 +360,7 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 
 - **CA-CHK-06** — Itens condicionais entram na cópia só quando a resposta atende à condição; a condição segue as regras das etapas.
 - **CA-CHK-07** — Copiar de outro serviço acrescenta os itens ativos sem condição, dentro do limite, com auditoria; a fila mostra o progresso; a observação do item fica no checklist e no histórico.
+- *Esclarecimentos registrados em 2026-11-08 (SF-224):* a condição se escolhe no bloco "Alterar" de cada item, numa lista "Aplica-se" com "Sempre" e cada valor dos campos que podem ser condição (os mesmos das etapas: campo ativo do formulário do solicitante, de lista, sim ou não ou múltipla escolha, sem condição própria); a tabela mostra "Sempre" ou "Quando "campo" for "valor"". Mudar a condição entra na auditoria e só vale para as solicitações que entrarem em atendimento depois (decisão I7). Como nas etapas, um campo usado por item ativo não é desativado, não perde a opção usada e não muda de público; item desativado libera o campo, e um item só é reativado com o campo da sua condição ativo.
 
 ### 13.2 Parte C — Apontamento de horas (acréscimos)
 

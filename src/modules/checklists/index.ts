@@ -16,6 +16,7 @@ export {
   assertChecklistAllowsCompletion,
   assertChecklistRoom,
   canManageServiceChecklist,
+  checklistConditionSchema,
   checklistItemInputSchema,
   checklistItemTextSchema,
   checklistMarkInputSchema,
@@ -29,6 +30,7 @@ export {
 export type {
   ChecklistActor,
   ChecklistAnswer,
+  ChecklistCondition,
   ChecklistItemInput,
   ChecklistItemText,
   ChecklistMarkInput,
@@ -37,7 +39,7 @@ export type {
   ChecklistTemplateItem,
   RequestChecklistItemRecord,
 } from "./domain/checklist";
-export type { ServiceChecklist } from "./application/service-checklists";
+export type { ChecklistConditionField, ServiceChecklist } from "./application/service-checklists";
 export type { RequestChecklistEventView, RequestChecklistItemView, RequestChecklistView } from "./application/request-checklist";
 
 export function listServiceChecklists(database: PrismaClient = prisma): Promise<serviceChecklists.ServiceChecklist[]> {
@@ -58,6 +60,10 @@ export function moveChecklistItem(itemId: unknown, direction: unknown, database:
 
 export function setChecklistItemActive(itemId: unknown, isActive: unknown, database: PrismaClient = prisma) {
   return serviceChecklists.setChecklistItemActive(itemId, isActive, createPrismaServiceChecklistStore(database));
+}
+
+export function setChecklistItemCondition(itemId: unknown, input: unknown, database: PrismaClient = prisma) {
+  return serviceChecklists.setChecklistItemCondition(itemId, input, createPrismaServiceChecklistStore(database));
 }
 
 // A request's checklist (SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 and 13.1 item 4).

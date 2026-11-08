@@ -53,6 +53,21 @@ export const checklistItemTextSchema = z
 
 export type ChecklistItemText = z.output<typeof checklistItemTextSchema>;
 
+/** 13.1 item 1 (decision J1): a field and a value, or neither (the item applies to every request). */
+export const checklistConditionSchema = z
+  .object({
+    conditionFieldId: entityIdSchema.nullable(),
+    conditionValue: optionalText(MAX_CHECKLIST_CONDITION_LENGTH),
+  })
+  .strict()
+  .superRefine((input, context) => {
+    if ((input.conditionFieldId === null) !== (input.conditionValue === null)) {
+      context.addIssue({ code: "custom", path: ["conditionValue"], message: "A condition needs a field and a value." });
+    }
+  });
+
+export type ChecklistCondition = z.output<typeof checklistConditionSchema>;
+
 // Who configures the model (4.1 item 1).
 
 export interface ChecklistActor {

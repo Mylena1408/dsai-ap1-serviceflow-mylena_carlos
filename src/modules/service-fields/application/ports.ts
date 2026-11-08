@@ -35,6 +35,11 @@ export interface ServiceFieldTransaction extends AuditScope {
    * 2026-11-06-aprofundamento-configurabilidade, 5.3.3). Optional for older doubles: absent = none.
    */
   findStageConditionValues?(fieldId: string): Promise<string[]>;
+  /**
+   * Values of the active checklist items' conditions that use this field (SPEC 2026-11-08-atendimento-dia-a-dia,
+   * 13.1 item 1). Optional for older doubles: absent = none.
+   */
+  findChecklistConditionValues?(fieldId: string): Promise<string[]>;
   create(data: ServiceFieldDefinition & { serviceId: string; position: number }): Promise<ServiceFieldRecord>;
   update(
     fieldId: string,

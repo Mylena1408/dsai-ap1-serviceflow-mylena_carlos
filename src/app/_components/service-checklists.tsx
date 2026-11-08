@@ -1,8 +1,15 @@
-import { MAX_ACTIVE_CHECKLIST_ITEMS, MAX_CHECKLIST_TEXT_LENGTH, type ServiceChecklist } from "@/modules/checklists";
+import {
+  MAX_ACTIVE_CHECKLIST_ITEMS,
+  MAX_CHECKLIST_TEXT_LENGTH,
+  type ChecklistConditionField,
+  type ChecklistTemplateItem,
+  type ServiceChecklist,
+} from "@/modules/checklists";
 import {
   createChecklistItemAction,
   moveChecklistItemAction,
   setChecklistItemActiveAction,
+  setChecklistItemConditionAction,
   updateChecklistItemAction,
 } from "./service-checklist-actions";
 
@@ -18,8 +25,14 @@ const MESSAGES: Record<string, { text: string; error: boolean }> = {
   "checklist-reactivated": { text: "Item reativado, no fim da lista.", error: false },
   "checklist-limit": { text: `O serviço já tem ${MAX_ACTIVE_CHECKLIST_ITEMS} itens ativos. Desative algum antes.`, error: true },
   "checklist-invalid": { text: `Escreva o item com 1 a ${MAX_CHECKLIST_TEXT_LENGTH} caracteres.`, error: true },
-  "checklist-conflict": { text: "Só itens ativos mudam de ordem.", error: true },
+  "checklist-conflict": { text: "Só itens ativos mudam de ordem, e um item só é reativado com o campo da sua condição ativo.", error: true },
   "checklist-missing": { text: "O serviço ou o item não está disponível para você.", error: true },
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1.
+  "checklist-condition-saved": { text: "Condição do item salva. Vale para as solicitações que entrarem em atendimento daqui em diante.", error: false },
+  "checklist-condition": {
+    text: "Escolha um campo ativo do formulário do solicitante, de escolha e sem condição própria, e um dos seus valores.",
+    error: true,
+  },
 };
 
 export function serviceChecklistMessage(code: string | undefined): { text: string; error: boolean } | null {
@@ -31,6 +44,40 @@ function RequiredSelect({ defaultValue }: { defaultValue: boolean }) {
     <select defaultValue={defaultValue ? "true" : "false"} name="isRequired">
       <option value="true">Obrigatório</option>
       <option value="false">Opcional</option>
+    </select>
+  );
+}
+
+/** How a value reads: yes or no for that kind of field, the option itself otherwise. */
+function valueLabel(value: string, isYesNo: boolean): string {
+  if (!isYesNo) return value;
+  return value === "true" ? "Sim" : "Não";
+}
+
+/** 13.1 item 1: "Sempre", or "Quando Equipamento for Notebook". */
+export function conditionText(
+  item: Pick<ChecklistTemplateItem, "conditionFieldId" | "conditionValue">,
+  fields: readonly ChecklistConditionField[],
+  labels: Readonly<Record<string, string>>,
+): string {
+  if (item.conditionFieldId === null || item.conditionValue === null) return "Sempre";
+  const field = fields.find(({ id }) => id === item.conditionFieldId);
+  const label = field?.label ?? labels[item.conditionFieldId] ?? "campo removido";
+  return `Quando "${label}" for "${valueLabel(item.conditionValue, field?.isYesNo ?? false)}"`;
+}
+
+function ConditionSelect({ item, fields }: { item: ChecklistTemplateItem; fields: readonly ChecklistConditionField[] }) {
+  const current = item.conditionFieldId && item.conditionValue !== null ? `${item.conditionFieldId}|${item.conditionValue}` : "";
+  return (
+    <select defaultValue={current} name="condition">
+      <option value="">Sempre</option>
+      {fields.flatMap((field) =>
+        field.values.map((value) => (
+          <option key={`${field.id}|${value}`} value={`${field.id}|${value}`}>
+            Quando &quot;{field.label}&quot; for &quot;{valueLabel(value, field.isYesNo)}&quot;
+          </option>
+        )),
+      )}
     </select>
   );
 }
@@ -71,7 +118,7 @@ export function ServiceChecklistsPanel({
         </p>
       ) : null}
       {services.length === 0 ? <p>Nenhum serviço ativo.</p> : null}
-      {services.map(({ service, items }) => {
+      {services.map(({ service, items, conditionFields, fieldLabels }) => {
         const active = items.filter((item) => item.isActive);
         return (
           <details className="service-checklist" key={service.id} open={open === service.id}>
@@ -88,6 +135,7 @@ export function ServiceChecklistsPanel({
                     <th scope="col">Ordem</th>
                     <th scope="col">Item</th>
                     <th scope="col">Tipo</th>
+                    <th scope="col">Aplica-se</th>
                     <th scope="col">Situação</th>
                     <th scope="col">Ações</th>
                   </tr>
@@ -100,6 +148,7 @@ export function ServiceChecklistsPanel({
                         <td>{item.isActive ? index + 1 : "—"}</td>
                         <td>{item.text}</td>
                         <td>{item.isRequired ? "Obrigatório" : "Opcional"}</td>
+                        <td>{conditionText(item, conditionFields, fieldLabels)}</td>
                         <td>{item.isActive ? "Ativo" : "Inativo"}</td>
                         <td>
                           <details>
@@ -116,6 +165,16 @@ export function ServiceChecklistsPanel({
                                 <RequiredSelect defaultValue={item.isRequired} />
                               </label>
                               <button type="submit">Salvar</button>
+                            </form>
+                            {/* SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1 (decision J1). */}
+                            <form action={setChecklistItemConditionAction} aria-label={`Condição do item ${item.text}`} className="inline-form">
+                              <Hidden area={area} serviceId={service.id} />
+                              <input name="itemId" type="hidden" value={item.id} />
+                              <label>
+                                Aplica-se
+                                <ConditionSelect fields={conditionFields} item={item} />
+                              </label>
+                              <button type="submit">Salvar condição</button>
                             </form>
                           </details>
                           {item.isActive && index > 0 ? (
