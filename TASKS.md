@@ -2101,7 +2101,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-200 — Checklist: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Migration `20261108800000_checklists` (modelo por serviço com condição, checklist da solicitação, itens e histórico, `CHECK`s), auditoria `CHECKLIST_ITEM` e domínio `src/modules/checklists` (limites, cópia com condições, cópia de outro serviço, marcação, regra da conclusão, progresso).
 - **Objetivo:** Seção 4.3 (regra 1), parte B.
 - **Arquivos/módulos esperados:** `prisma/`, módulo do checklist.
 - **Dependências:** Parte A concluída.

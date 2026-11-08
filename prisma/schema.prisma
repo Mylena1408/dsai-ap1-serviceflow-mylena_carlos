@@ -94,6 +94,8 @@ enum AuditEntityType {
   CONFIGURATION
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
   SECTOR_TAG
+  /// 4.4.
+  CHECKLIST_ITEM
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -276,6 +278,9 @@ model User {
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
   tagsAdded                RequestTag[]
   tagEvents                RequestTagEvent[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
+  checklistItemsDone       RequestChecklistItem[]
+  checklistEvents          RequestChecklistEvent[]
 }
 
 model Service {
@@ -311,6 +316,8 @@ model Service {
   fields                 ServiceField[]
   stages                 ServiceStage[]
   knowledgeArticles      KnowledgeArticle[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
+  checklistItems ServiceChecklistItem[]
 }
 
 model Request {
@@ -410,6 +417,10 @@ model Request {
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
   tags                  RequestTag[]
   tagEvents             RequestTagEvent[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
+  checklist             RequestChecklist?
+  checklistItems        RequestChecklistItem[]
+  checklistEvents       RequestChecklistEvent[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -670,6 +681,8 @@ model ServiceField {
   @@unique([id, serviceId])
   @@index([serviceId])
   @@index([conditionFieldId])
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1: checklist items conditioned on this field.
+  checklistConditions ServiceChecklistItem[]
 }
 
 /// Answer given on opening, with a snapshot of the field definition; immutable.
@@ -1434,6 +1447,78 @@ model RequestTagEvent {
   request Request   @relation(fields: [requestId], references: [id], onDelete: Restrict)
   tag     SectorTag @relation(fields: [tagId], references: [id], onDelete: Restrict)
   actor   User      @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId, occurredAt])
+}
+
+/// An item of a service's checklist model (SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1 and 13.1 item 1):
+/// text, required or optional, order, and an optional condition on an answer, as the stages' conditions.
+model ServiceChecklistItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  serviceId        String   @db.Uuid
+  text             String
+  isRequired       Boolean
+  position         Int
+  isActive         Boolean  @default(true)
+  conditionFieldId String?  @db.Uuid
+  conditionValue   String?
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  service        Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  conditionField ServiceField? @relation(fields: [conditionFieldId], references: [id], onDelete: Restrict)
+  copies         RequestChecklistItem[]
+
+  @@index([serviceId])
+}
+
+/// Marks that a request's checklist was copied (4.3 item 2): once, even when the model had no item.
+model RequestChecklist {
+  requestId String   @id @db.Uuid
+  copiedAt  DateTime @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+}
+
+/// An item of a request's checklist (4.3 items 2 and 3; 13.1 item 4): a copy of the model's item when the
+/// request entered the attendance, marked or not, with an optional note.
+model RequestChecklistItem {
+  id             String    @id @default(uuid()) @db.Uuid
+  requestId      String    @db.Uuid
+  templateItemId String?   @db.Uuid
+  textSnapshot   String
+  isRequired     Boolean
+  position       Int
+  doneAt         DateTime? @db.Timestamptz
+  doneById       String?   @db.Uuid
+  note           String?
+
+  request      Request               @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  templateItem ServiceChecklistItem? @relation(fields: [templateItemId], references: [id], onDelete: Restrict)
+  doneBy       User?                 @relation(fields: [doneById], references: [id], onDelete: Restrict)
+  events       RequestChecklistEvent[]
+
+  @@unique([requestId, position])
+}
+
+enum RequestChecklistAction {
+  DONE
+  UNDONE
+}
+
+/// The history of a request's checklist (4.3 item 3).
+model RequestChecklistEvent {
+  id         String                 @id @default(uuid()) @db.Uuid
+  requestId  String                 @db.Uuid
+  itemId     String                 @db.Uuid
+  action     RequestChecklistAction
+  note       String?
+  actorId    String                 @db.Uuid
+  occurredAt DateTime               @db.Timestamptz
+
+  request Request              @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  item    RequestChecklistItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  actor   User                 @relation(fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId, occurredAt])
 }

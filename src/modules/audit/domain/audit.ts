@@ -46,6 +46,8 @@ export const AUDIT_ENTITY_TYPES = [
   "CONFIGURATION",
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
   "SECTOR_TAG",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
+  "CHECKLIST_ITEM",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -84,6 +86,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   RECURRING_REQUEST: ["description", "answers"],
   CONFIGURATION: [],
   SECTOR_TAG: [],
+  CHECKLIST_ITEM: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -123,6 +126,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   RECURRING_REQUEST: "Agenda de recorrência",
   CONFIGURATION: "Configuração da organização",
   SECTOR_TAG: "Etiqueta",
+  CHECKLIST_ITEM: "Item de checklist",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -210,6 +214,8 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   audience: "Quem preenche",
   conditionFieldId: "Condição (campo)",
   conditionValue: "Condição (valor)",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1.
+  text: "Texto",
 };
 
 function normalize(value: AuditInputValue): AuditValue {
@@ -352,6 +358,9 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   CONFIGURATION: ["itemsCreated", "itemsUpdated", "itemsUnchanged"],
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1: the sector is fixed when the tag is created.
   SECTOR_TAG: ["name", "color", "isActive"],
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1 and 13.1 item 1: the service is fixed when the item is
+  // created.
+  CHECKLIST_ITEM: ["text", "isRequired", "position", "isActive", "conditionFieldId", "conditionValue"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

@@ -12,6 +12,9 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.requestSectorEvent.deleteMany(),
     prisma.requestSlaPause.deleteMany(),
     prisma.recurringRequestRun.deleteMany(),
+    prisma.requestChecklistEvent.deleteMany(),
+    prisma.requestChecklistItem.deleteMany(),
+    prisma.requestChecklist.deleteMany(),
     prisma.requestTagEvent.deleteMany(),
     prisma.requestTag.deleteMany(),
     prisma.requestLinkEvent.deleteMany(),
@@ -39,6 +42,7 @@ export async function resetTestFixtures(): Promise<void> {
     prisma.requestGroup.deleteMany(),
     prisma.serviceBundle.deleteMany(),
     prisma.serviceDocumentRequirement.deleteMany(),
+    prisma.serviceChecklistItem.deleteMany(),
     // A service's approval condition points to one of its fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
     prisma.service.updateMany({ data: { approvalConditionFieldId: null, approvalConditionValue: null } }),
     // A stage's condition points to a field too (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.4).

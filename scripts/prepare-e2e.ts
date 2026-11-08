@@ -42,6 +42,9 @@ async function prepareDatabase(): Promise<void> {
       database.requestSectorEvent.deleteMany(),
       database.requestSlaPause.deleteMany(),
       database.recurringRequestRun.deleteMany(),
+      database.requestChecklistEvent.deleteMany(),
+      database.requestChecklistItem.deleteMany(),
+      database.requestChecklist.deleteMany(),
       database.requestTagEvent.deleteMany(),
       database.requestTag.deleteMany(),
       database.requestLinkEvent.deleteMany(),
@@ -69,6 +72,7 @@ async function prepareDatabase(): Promise<void> {
       database.requestGroup.deleteMany(),
       database.serviceBundle.deleteMany(),
       database.serviceDocumentRequirement.deleteMany(),
+      database.serviceChecklistItem.deleteMany(),
       // A service's approval condition points to one of its fields (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4).
       database.service.updateMany({ data: { approvalConditionFieldId: null, approvalConditionValue: null } }),
       // A stage's condition points to a field too (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.4).

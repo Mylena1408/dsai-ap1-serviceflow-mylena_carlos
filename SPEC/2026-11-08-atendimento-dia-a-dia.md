@@ -122,6 +122,7 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 - Nova tabela `ServiceChecklistItem` (`serviceId`, `text`, `isRequired`, `position`, `isActive`, datas).
 - Nova tabela `RequestChecklistItem` (`requestId`, `textSnapshot`, `isRequired`, `position`, `doneAt`, `doneById`).
 - Enum da auditoria ganha `CHECKLIST_ITEM`.
+- *Esclarecimentos registrados em 2026-11-08 (SF-200):* para cumprir as regras 2 e 3 e a seção 13.1, os dados ganham: `ServiceChecklistItem.conditionFieldId`/`conditionValue` (item 1 da 13.1; o campo é do mesmo serviço por chave composta, como nas etapas, e a condição tem campo e valor de 1 a 80 caracteres, ou nenhum); `RequestChecklistItem.templateItemId` (de qual item do modelo veio) e `note` (observação de 1 a 200 caracteres, só em item marcado); a tabela `RequestChecklist` (`requestId`, `copiedAt`), que marca que a cópia já foi feita, mesmo quando nenhum item entrou, para que reabrir não copie de novo; e a tabela `RequestChecklistEvent` (item, `DONE`/`UNDONE`, observação, quem e quando) para o histórico. Os limites (texto de 1 a 120, posição a partir de 1, quem e quando sempre juntos) também ficam em `CHECK`s. Item do modelo usado numa cópia nunca é apagado: é desativado. Copiar de outro serviço que ultrapassaria 20 itens ativos não acrescenta nenhum (recusa inteira, como as demais validações de limite), e copiar de um serviço sem itens ativos é recusado. Marcar um item já marcado (ou desmarcar um desmarcado) não muda nada nem gera histórico.
 
 ### 4.5 Critérios de aceitação
 

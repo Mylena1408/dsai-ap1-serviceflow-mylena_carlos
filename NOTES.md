@@ -2533,3 +2533,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Motivo:** a parte A rendeu cerca de 270 linhas por tarefa, contra as 630 da estimativa; a responsável escolheu aprofundar as partes B a F ("vamos prosseguir pela opção 2").
 - **Registro:** seção 13 da SPEC, com os acréscimos de cada parte (checklist condicional, cópia de modelo, progresso e observação; estimativa de horas, "Minhas horas" e horas por etiqueta; "Que eu acompanho" na fila, seguir ao comentar e seguidores na tela da equipe; "Minhas menções" e menções do gestor; possíveis duplicadas e duplicadas no lote), decisões J1 a J10, critérios novos e as tarefas SF-224 a SF-233.
 - **Estimativa revista:** de 11.000 a 14.000 linhas para a SPEC 1; o restante da meta fica para a revisão da SPEC 2.
+
+## SF-200 — Checklist: banco e domínio (2026-11-08)
+
+- **Dados além da lista da seção 4.4** (registrados como esclarecimento na SPEC): condição no item do modelo (campo do mesmo serviço por chave composta, como nas etapas), `templateItemId` e observação no item da solicitação, tabela `RequestChecklist` para marcar que a cópia já foi feita (mesmo sem itens, para reabrir não copiar de novo) e `RequestChecklistEvent` para o histórico.
+- **Regras no banco:** texto de 1 a 120 sem espaços nas pontas, posição a partir de 1, condição inteira ou nenhuma, quem e quando sempre juntos, observação de 1 a 200 só em item marcado (com `IS NOT NULL` explícito nos ramos que exigem valor).
+- **Domínio:** a condição reaproveita `conditionMet` das etapas (decisão J1); copiar de outro serviço recusa por inteiro se passar de 20 itens ativos (decisão J2); marcar o que já está marcado não muda nada; a conclusão com obrigatórios pendentes é recusada com conflito (decisão I8) e a tela lerá os pendentes por `pendingRequiredItems`.
+- **Auditoria:** `CHECKLIST_ITEM` com texto, obrigatório, posição, ativo e condição; a lista exata do teste da auditoria foi estendida, como prevê a seção 2.
+- **Resultados:** typecheck, lint e build OK; unitários 1512/1512; integração 631/631; E2E 46/46.
+- **Linhas:** 415 `added` em TS (aplicação 170, testes 241, scripts 4), mais 152 de SQL na migration (não contadas na meta).

@@ -298,3 +298,7 @@
 > vamos prosseguir pela opção 2.
 
 74. Aprofundamento das partes B a F registrado na SPEC (seção 13, decisões J1 a J10, tarefas SF-224 a SF-233), antes da parte B.
+
+> pode prosseguir
+
+75. SF-200: migration e domínio do checklist, auditoria `CHECKLIST_ITEM`, esclarecimentos na seção 4.4 da SPEC; suíte completa aprovada (ver `NOTES.md`).

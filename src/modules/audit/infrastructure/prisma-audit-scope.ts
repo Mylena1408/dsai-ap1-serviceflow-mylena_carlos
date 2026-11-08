@@ -238,6 +238,14 @@ async function loadState(
       const row = await transaction.sectorTag.findUnique({ where: { id }, select: { name: true, color: true, isActive: true } });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
+    case "CHECKLIST_ITEM": {
+      const row = await transaction.serviceChecklistItem.findUnique({
+        where: { id },
+        select: { text: true, isRequired: true, position: true, isActive: true, conditionFieldId: true, conditionValue: true },
+      });
+      return row && { label: row.text, state: row };
+    }
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };
