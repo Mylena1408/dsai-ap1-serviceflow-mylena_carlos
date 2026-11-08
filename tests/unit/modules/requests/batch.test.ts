@@ -20,7 +20,7 @@ function actions(failures: Record<string, unknown> = {}): BatchActions & { calls
       calls.push(`${name}:${input.requestId}`);
       if (failures[input.requestId]) throw failures[input.requestId];
     });
-  return { calls, assume: act("assume"), transfer: act("transfer"), priority: act("priority"), sector: act("sector") };
+  return { calls, assume: act("assume"), transfer: act("transfer"), priority: act("priority"), sector: act("sector"), tag: act("tag"), untag: act("untag") };
 }
 
 describe("the reasons of a refused item (7.3 item 2)", () => {

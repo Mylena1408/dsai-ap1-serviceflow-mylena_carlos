@@ -2071,7 +2071,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-197 — Busca, visões salvas e lote com etiquetas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Critério `tag` na busca da fila (até 5, qualquer uma), nas visões salvas e na URL; caixas de etiqueta no formulário; ações "Etiquetar" e "Retirar etiqueta" no lote pelo caso de uso das etiquetas.
 - **Objetivo:** Seção 3.3 (regras 4 e 5), parte A.
 - **Arquivos/módulos esperados:** Busca da fila, `saved-views`, lote.
 - **Dependências:** SF-196.

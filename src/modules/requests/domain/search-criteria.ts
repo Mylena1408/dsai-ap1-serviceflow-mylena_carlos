@@ -46,7 +46,16 @@ export interface SearchCriteria {
    * or "none" for requests without a stage. Present only when chosen.
    */
   stage?: StageFilter;
+  /**
+   * Queue only (SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4): requests with any of these tags. Present
+   * only when chosen.
+   */
+  tagIds?: string[];
 }
+
+/** 3.3 item 4: up to 5 tags in the filter, as many as a request may have. */
+export const MAX_TAG_FILTERS = 5;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The value of the "Etapa" filter that means "Sem etapa". */
 export const NO_STAGE_FILTER = "__none__";
@@ -145,6 +154,11 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
 
   // The requester list has no stage filter either (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4).
   const stage = audience === "attendant" ? parseStageFilter(single(raw.stage)) : null;
+  // Nor a tag filter: only the team sees tags (SPEC 2026-11-08-atendimento-dia-a-dia, decision I2).
+  const tagIds = audience === "attendant" ? [...new Set(many(raw.tag).map((value) => value.trim().toLowerCase()).filter((value) => value !== ""))] : [];
+  if (tagIds.length > MAX_TAG_FILTERS || tagIds.some((id) => !UUID.test(id))) {
+    invalid("invalid_value");
+  }
 
   return {
     term: parseTerm(single(raw.q)),
@@ -156,6 +170,7 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
     page: parsePage(single(raw.page)),
     ...(slaRaw !== null ? { sla: slaRaw as SlaFilter } : {}),
     ...(stage !== null ? { stage } : {}),
+    ...(tagIds.length > 0 ? { tagIds } : {}),
   };
 }
 

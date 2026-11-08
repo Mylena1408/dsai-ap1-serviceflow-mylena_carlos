@@ -278,3 +278,7 @@
 > faça essa envio agora, e depois prossiga para a sf-197
 
 69. Backup do Neon verificado, migrations `20261108600000_sector_tags` e `20261108700000_request_tags_event` aplicadas e push, nesta ordem (ver `NOTES.md`); depois, SF-197.
+
+> pode prosseguir
+
+70. SF-197: etiquetas na busca da fila, nas visões salvas e no lote (ver `NOTES.md`); CI do envio aprovado.

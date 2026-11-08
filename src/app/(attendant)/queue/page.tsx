@@ -5,6 +5,7 @@ import { countComments } from "@/modules/comments";
 import { effectiveAssigneeId, getTeamLoad, listBatchChoices, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
 import { QueueBatch } from "./queue-batch";
 import { QUEUE_BATCH_FORM_ID } from "./queue-batch-form";
+import { listQueueTags } from "@/modules/tags";
 import { TeamLoad } from "@/app/_components/team-load";
 import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
@@ -38,6 +39,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   const views = await listSavedViews("QUEUE");
   // SPEC 2026-11-07-operacao-e-automacao, 7.3 item 2.
   const batchChoices = await listBatchChoices();
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 items 4 and 5: the sector's tags, for the filter and the batch.
+  const sectorTags = await listQueueTags();
 
   try {
     result = await searchAttendantQueue(params);
@@ -67,7 +70,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
         </p>
       ) : null}
       <TeamLoad loads={teamLoad} />
-      <RequestSearchForm basePath="/queue" params={params} showAssignee showSla stageChoices={stageChoices} defaultOrder="oldest" />
+      <RequestSearchForm basePath="/queue" params={params} showAssignee showSla stageChoices={stageChoices} tagChoices={sectorTags} defaultOrder="oldest" />
       <SavedViews list="QUEUE" params={params} views={views} />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
@@ -81,7 +84,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
         </p>
       ) : (
         <>
-        <QueueBatch choices={batchChoices} labels={batchLabels} />
+        <QueueBatch choices={batchChoices} labels={batchLabels} tags={sectorTags} />
         <ul className="content-list">
           {requests.map((request) => (
             <li key={request.id}>

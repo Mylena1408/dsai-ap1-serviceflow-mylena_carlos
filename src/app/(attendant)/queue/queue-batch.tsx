@@ -14,13 +14,25 @@ const ACTION_LABELS: Record<BatchAction, string> = {
   transfer: "Transferir a um colega",
   priority: "Mudar a prioridade",
   sector: "Encaminhar a outro setor",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 5.
+  tag: "Etiquetar",
+  untag: "Retirar etiqueta",
 };
 
 const PRIORITY_LABELS = { LOW: "Baixa", NORMAL: "Normal", HIGH: "Alta", URGENT: "Urgente" } as const;
 
 const count = (value: number, one: string, many: string) => `${value} ${value === 1 ? one : many}`;
 
-export function QueueBatch({ labels, choices }: { labels: Record<string, string>; choices: BatchChoices }) {
+export function QueueBatch({
+  labels,
+  choices,
+  tags = [],
+}: {
+  labels: Record<string, string>;
+  choices: BatchChoices;
+  /** The sector's active tags, for "Etiquetar" and "Retirar etiqueta". */
+  tags?: Array<{ id: string; name: string }>;
+}) {
   const [state, run, running] = useActionState<BatchState, FormData>(runBatchAction, { step: "idle" });
   const [action, setAction] = useState<BatchAction>("assume");
 
@@ -62,6 +74,19 @@ export function QueueBatch({ labels, choices }: { labels: Record<string, string>
               {(Object.keys(PRIORITY_LABELS) as Array<keyof typeof PRIORITY_LABELS>).map((value) => (
                 <option key={value} value={value}>
                   {PRIORITY_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        {action === "tag" || action === "untag" ? (
+          <label>
+            Etiqueta
+            <select name="tagId" required>
+              <option value="">Escolha a etiqueta</option>
+              {tags.map((tag) => (
+                <option key={tag.id} value={tag.id}>
+                  {tag.name}
                 </option>
               ))}
             </select>

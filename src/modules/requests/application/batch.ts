@@ -14,7 +14,8 @@ import type { RequestQueryRepository } from "./ports";
 
 export const MAX_BATCH_ITEMS = 50;
 
-export const BATCH_ACTIONS = ["assume", "transfer", "priority", "sector"] as const;
+// "tag" and "untag": SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 5 (decision I21).
+export const BATCH_ACTIONS = ["assume", "transfer", "priority", "sector", "tag", "untag"] as const;
 export type BatchAction = (typeof BATCH_ACTIONS)[number];
 
 const requestIds = z
@@ -28,6 +29,8 @@ export const batchInputSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("transfer"), requestIds, assigneeId: entityIdSchema }).strict(),
   z.object({ action: z.literal("priority"), requestIds, priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]) }).strict(),
   z.object({ action: z.literal("sector"), requestIds, sectorId: entityIdSchema, note: z.string() }).strict(),
+  z.object({ action: z.literal("tag"), requestIds, tagId: entityIdSchema }).strict(),
+  z.object({ action: z.literal("untag"), requestIds, tagId: entityIdSchema }).strict(),
 ]);
 
 export type BatchInput = z.output<typeof batchInputSchema>;
@@ -38,9 +41,12 @@ export interface BatchActions {
   transfer(input: { requestId: string; assigneeId: string }): Promise<void>;
   priority(input: { requestId: string; priority: string }): Promise<void>;
   sector(input: { requestId: string; sectorId: string; note: string }): Promise<void>;
+  /** Puts the tag on, or takes it off, through the tags' own rules. */
+  tag(input: { requestId: string; tagId: string }): Promise<void>;
+  untag(input: { requestId: string; tagId: string }): Promise<void>;
 }
 
-export type BatchRefusal = "no_access" | "taken" | "not_allowed" | "invalid_colleague" | "same_priority" | "invalid_sector" | "unexpected";
+export type BatchRefusal = "no_access" | "taken" | "not_allowed" | "invalid_colleague" | "same_priority" | "invalid_sector" | "invalid_tag" | "unexpected";
 
 export const BATCH_REFUSAL_LABELS: Record<BatchRefusal, string> = {
   no_access: "sem permissão: não está mais na fila do seu setor",
@@ -49,6 +55,7 @@ export const BATCH_REFUSAL_LABELS: Record<BatchRefusal, string> = {
   invalid_colleague: "o colega escolhido não pode recebê-la",
   same_priority: "já está com essa prioridade",
   invalid_sector: "o setor escolhido não pode recebê-la",
+  invalid_tag: "a etiqueta não é do setor dela, está inativa ou ela já tem 5 etiquetas",
   unexpected: "não foi possível concluir; tente de novo",
 };
 
@@ -70,6 +77,7 @@ export function refusalOf(action: BatchAction, error: unknown): BatchRefusal {
     if (action === "transfer") return "invalid_colleague";
     if (action === "priority") return "same_priority";
     if (action === "sector") return "invalid_sector";
+    if (action === "tag" || action === "untag") return "invalid_tag";
   }
   return "unexpected";
 }
@@ -88,6 +96,8 @@ export async function runQueueBatch(input: unknown, actions: BatchActions): Prom
       if (batch.action === "assume") await actions.assume({ requestId });
       else if (batch.action === "transfer") await actions.transfer({ requestId, assigneeId: batch.assigneeId });
       else if (batch.action === "priority") await actions.priority({ requestId, priority: batch.priority });
+      else if (batch.action === "tag") await actions.tag({ requestId, tagId: batch.tagId });
+      else if (batch.action === "untag") await actions.untag({ requestId, tagId: batch.tagId });
       else await actions.sector({ requestId, sectorId: batch.sectorId, note: note! });
       items.push({ requestId, outcome: "done" });
     } catch (error) {

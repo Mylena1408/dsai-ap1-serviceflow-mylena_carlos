@@ -44,7 +44,9 @@ export async function runBatchAction(_previous: BatchState, formData: FormData):
         ? { priority: field(formData, "priority") }
         : action === "sector"
           ? { sectorId: field(formData, "sectorId"), note: field(formData, "note") }
-          : {};
+          : action === "tag" || action === "untag"
+            ? { tagId: field(formData, "tagId") }
+            : {};
   try {
     const result = await runQueueBatch({ action, requestIds, ...extra });
     revalidatePath("/queue");

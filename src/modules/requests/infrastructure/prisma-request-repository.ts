@@ -228,6 +228,11 @@ function searchWhere(
     and.push({ currentStageName: criteria.stage.kind === "none" ? null : criteria.stage.name });
   }
 
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4: any of the chosen tags.
+  if ("sectorId" in scope && criteria.tagIds) {
+    and.push({ tags: { some: { tagId: { in: criteria.tagIds } } } });
+  }
+
   return { AND: and };
 }
 

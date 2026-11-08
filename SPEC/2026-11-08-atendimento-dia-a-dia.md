@@ -76,6 +76,10 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - o bloco "Etiquetas" fica no detalhe da fila (o atendente aplica e retira) e no detalhe do gestor do setor (só leitura); quem não é da equipe do setor (inclusive o gestor que só decide uma aprovação de outro setor e o solicitante) não vê o bloco, e a ação responde "não encontrada";
   - o evento `request.tags_changed` leva só quem mudou e quantas etiquetas foram aplicadas e retiradas (as etiquetas ficam no banco); como os webhooks aceitam qualquer evento do domínio, ele também aparece como opção ("Etiquetas alteradas") no cadastro de webhooks. Uma migration nova (`20261108700000_request_tags_event`) acrescenta o tipo às listas do outbox e dos webhooks no banco;
   - uma mudança que não muda nada não grava histórico nem evento; duas pessoas aplicando a mesma etiqueta ao mesmo tempo gravam uma vez só (a outra recebe conflito).
+- *Esclarecimentos registrados em 2026-11-08 (SF-197):*
+  - o filtro aceita até 5 etiquetas ("qualquer uma delas"), pelos identificadores; o formulário de busca da fila mostra as etiquetas ativas do setor como caixas de marcar; a lista "Minhas solicitações" ignora o parâmetro, porque o solicitante não vê etiquetas;
+  - sem etiqueta escolhida, os critérios da busca ficam exatamente como antes; nas visões salvas, as etiquetas são guardadas ordenadas, como os status;
+  - no lote, "Etiquetar" e "Retirar etiqueta" usam a etiqueta escolhida para todos os itens e passam cada item pelo caso de uso das etiquetas (o mesmo do detalhe); a recusa por etiqueta de outro setor, inativa ou acima de 5 aparece como "a etiqueta não é do setor dela, está inativa ou ela já tem 5 etiquetas".
 
 ### 3.5 Critérios de aceitação
 

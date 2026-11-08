@@ -14,7 +14,8 @@ export const MAX_CRITERIA_LENGTH = 1_000;
 
 /** The search parameters of each list, in the order they are kept (SPEC 2026-10-31-busca-filtros-paginacao). */
 export const LIST_PARAMETERS: Record<SavedViewList, readonly string[]> = {
-  QUEUE: ["q", "status", "assignee", "sla", "stage", "from", "to", "order"],
+  // "tag": SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4.
+  QUEUE: ["q", "status", "assignee", "sla", "stage", "tag", "from", "to", "order"],
   MY_REQUESTS: ["q", "status", "from", "to", "order"],
 };
 
@@ -25,7 +26,7 @@ export type CriteriaSource = string | Record<string, string | string[] | undefin
 
 /**
  * The list's criteria as a query string: only its parameters, in a fixed order, without blanks or the page;
- * several statuses are sorted, so the same search always reads the same.
+ * several statuses (or tags) are sorted, so the same search always reads the same.
  */
 export function normalizedCriteria(list: SavedViewList, source: CriteriaSource): string {
   const values = (name: string): string[] => {
@@ -36,7 +37,7 @@ export function normalizedCriteria(list: SavedViewList, source: CriteriaSource):
   const query = new URLSearchParams();
   for (const name of LIST_PARAMETERS[list]) {
     const items = values(name).map((item) => item.trim()).filter((item) => item !== "");
-    const kept = name === "status" ? [...new Set(items)].sort() : items.slice(0, 1);
+    const kept = name === "status" || name === "tag" ? [...new Set(items)].sort() : items.slice(0, 1);
     for (const item of kept) query.append(name, item);
   }
   return query.toString();

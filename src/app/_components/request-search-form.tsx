@@ -15,6 +15,8 @@ type RequestSearchFormProps = {
    * stages of the sector's requests in progress. Absent in the requester list.
    */
   stageChoices?: string[];
+  /** The queue's "Etiquetas" filter (SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4): the sector's active tags. */
+  tagChoices?: Array<{ id: string; name: string }>;
   defaultOrder: "newest" | "oldest";
 };
 
@@ -33,7 +35,7 @@ function first(value: string | string[] | undefined): string {
 
 // GET form: works without JavaScript, keeps the criteria in the URL and always starts on
 // page 1 because it carries no page field (SPEC 2026-10-31-busca-filtros-paginacao, 5.5).
-export function RequestSearchForm({ basePath, params, showAssignee, showSla = false, stageChoices, defaultOrder }: RequestSearchFormProps) {
+export function RequestSearchForm({ basePath, params, showAssignee, showSla = false, stageChoices, tagChoices, defaultOrder }: RequestSearchFormProps) {
   const currentStage = first(params.stage);
   // A stage chosen before it left the list stays selectable, so the form shows what the URL filters.
   const stageOptions = stageChoices && currentStage && currentStage !== NO_STAGE && !stageChoices.includes(currentStage)
@@ -102,6 +104,17 @@ export function RequestSearchForm({ basePath, params, showAssignee, showSla = fa
             ))}
           </select>
         </div>
+      ) : null}
+      {tagChoices && tagChoices.length > 0 ? (
+        <fieldset className="search-statuses">
+          <legend>Etiquetas (qualquer uma)</legend>
+          {tagChoices.map((tag) => (
+            <label key={tag.id} className="checkbox-label">
+              <input type="checkbox" name="tag" value={tag.id} defaultChecked={values(params.tag).includes(tag.id)} />
+              {tag.name}
+            </label>
+          ))}
+        </fieldset>
       ) : null}
       <div className="search-field">
         <label htmlFor="search-from">Aberta de</label>

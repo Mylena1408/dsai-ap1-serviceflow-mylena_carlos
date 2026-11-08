@@ -87,6 +87,13 @@ export async function getRequestTags(requestId: unknown, reader: RequestTagReade
   };
 }
 
+/** The active tags of the attendant's sector, for the queue's filter and batch (3.3 items 4 and 5). */
+export async function listQueueTags(reader: Pick<RequestTagReader, "activeTags">): Promise<Array<Pick<TagRecord, "id" | "name" | "color">>> {
+  const actor = await requireCurrentActor();
+  if (actor.role !== "ATTENDANT" || !actor.sectorId) return [];
+  return (await reader.activeTags(actor.sectorId)).map(({ id, name, color }) => ({ id, name, color }));
+}
+
 /** Puts tags on and takes them off one request; a change that changes nothing writes nothing. */
 export async function changeRequestTags(input: unknown, store: RequestTagStore): Promise<{ added: number; removed: number }> {
   const authorized = await requireCurrentActor();

@@ -52,3 +52,8 @@ export function getRequestTags(requestId: unknown, database: PrismaClient = pris
 export function changeRequestTags(input: unknown, database: PrismaClient = prisma) {
   return requestTags.changeRequestTags(input, createPrismaRequestTagStore(database));
 }
+
+/** The attendant's sector tags, for the queue's filter and batch. */
+export function listQueueTags(database: PrismaClient = prisma) {
+  return requestTags.listQueueTags(createPrismaRequestTagReader(database));
+}

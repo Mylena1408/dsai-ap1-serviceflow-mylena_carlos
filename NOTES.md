@@ -2501,3 +2501,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Backup:** `serviceflow-2026-11-08-pre-deploy-2.dump`, conferido por restauração local (52 tabelas iguais), cifrado pelo EFS. Detalhes na seção 15 da SPEC de backup.
 - **Migrations no Neon:** `prisma migrate deploy` aplicou `20261108600000_sector_tags` e `20261108700000_request_tags_event`; `prisma migrate status` confirmou o banco em dia (52).
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+## SF-197 — Etiquetas na busca, nas visões e no lote (2026-11-08)
+
+- **Busca:** critério `tagIds` só na fila (até 5 identificadores, "qualquer uma"), aplicado como `tags some tagId in`; ausente quando não escolhido, então os critérios de quem não usa etiqueta não mudam. A lista do solicitante ignora o parâmetro.
+- **URL e visões:** `tag` entra nos parâmetros conhecidos da paginação e nos critérios normalizados das visões da fila (ordenado, como os status).
+- **Lote:** ações `tag` e `untag` com a etiqueta escolhida para todos; cada item passa por `changeRequestTags` (o mesmo caso de uso do detalhe); motivo próprio para etiqueta inválida.
+- **Tela:** caixas "Etiquetas (qualquer uma)" no formulário de busca da fila e a escolha da etiqueta no bloco "Ações em lote" (`listQueueTags`, as etiquetas ativas do setor).
+- **Resultados:** typecheck, lint e build OK; unitários 1495/1495; integração 625/625; E2E 45/45 na primeira rodada completa. CI do envio anterior (`42492220791`) aprovado.
+- **Linhas:** 186 `added` (aplicação 73, testes 113).

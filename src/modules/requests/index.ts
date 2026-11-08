@@ -42,6 +42,7 @@ import * as absenceHandover from "./application/absence-handover";
 import * as teamLoad from "./application/team-load";
 import * as recurringRuns from "./application/recurring-runs";
 import * as batch from "./application/batch";
+import { changeRequestTags } from "@/modules/tags";
 import { createPrismaRecurringRunStore, findRequestScheduleName } from "./infrastructure/prisma-recurring-runs";
 import { createPrismaTeamLoadReader } from "./infrastructure/prisma-team-load";
 import { createPrismaAbsenceHandoverStore } from "./infrastructure/prisma-absence-handover";
@@ -524,6 +525,13 @@ export async function runQueueBatch(input: unknown, database: PrismaClient = pri
     transfer: (item) => transferRequest(item, database),
     priority: (item) => changeRequestPriority(item, database),
     sector: (item) => sendRequestToSector(item, database),
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 5: through the tags' own use case.
+    tag: async (item) => {
+      await changeRequestTags({ requestId: item.requestId, add: [item.tagId] }, database);
+    },
+    untag: async (item) => {
+      await changeRequestTags({ requestId: item.requestId, remove: [item.tagId] }, database);
+    },
   });
 }
 
