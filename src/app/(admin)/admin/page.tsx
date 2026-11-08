@@ -41,6 +41,8 @@ import { listAbsences, listAttendantAbsences, listSubstituteCandidates } from "@
 import { AttendantAbsences } from "@/app/_components/attendant-absences";
 import { RecurringSchedules } from "@/app/_components/recurring-schedules";
 import { loadScheduleScreen } from "@/app/_components/recurring-schedule-screen";
+import { checkConfigurationExport } from "@/modules/configuration";
+import { ConfigurationSection } from "./_sections/configuration/configuration-section";
 import { AbsencesSection, type AbsencesOverview } from "./_sections/absences/absences-section";
 import { CalendarSection } from "./_sections/calendar/calendar-section";
 
@@ -86,6 +88,8 @@ const adminSections = [
   { id: "attendant-absences", label: "Afastamentos de atendentes" },
   // SPEC 2026-11-07-operacao-e-automacao, 5.3 item 4.
   { id: "recurring", label: "Agendas" },
+  // SPEC 2026-11-07-operacao-e-automacao, part D.
+  { id: "configuration", label: "Configuração portátil" },
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
   { id: "analytics", label: "Análises" },
@@ -164,6 +168,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const attendantAbsences = selectedSection === "attendant-absences" ? await listAttendantAbsences() : null;
   // SPEC 2026-11-07-operacao-e-automacao, 5.3 item 4: read only when the section is open.
   const scheduleScreen = selectedSection === "recurring" ? await loadScheduleScreen({ schedule, service, edit, fields }) : null;
+  // SPEC 2026-11-07-operacao-e-automacao, part D: read only when the section is open.
+  const configurationCheck = selectedSection === "configuration" ? await checkConfigurationExport() : null;
   const absencesOverview: AbsencesOverview | null =
     selectedSection === "absences"
       ? { ...(await listAbsences()), managers: await listSubstituteCandidates() }
@@ -301,6 +307,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7: a section of its own. */}
       {attendantAbsences ? <AttendantAbsences area="admin" message={absence} overview={attendantAbsences} /> : null}
       {scheduleScreen ? <RecurringSchedules area="admin" screen={scheduleScreen} /> : null}
+      {configurationCheck ? <ConfigurationSection check={configurationCheck} /> : null}
         </div>
       ) : null}
     </main>

@@ -210,3 +210,7 @@
 > quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff / terminou?
 
 52. Andamento da suíte informado; contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-189.
+
+> pode prosseguir
+
+53. SF-190: telas da configuração portátil (exportar e importar com prévia) e E2E; fim da parte D (ver `NOTES.md`).

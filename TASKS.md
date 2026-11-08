@@ -2001,7 +2001,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-190 — Telas da configuração portátil e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Seção "Configuração portátil" na administração (exportar com avisos prévios, importar com prévia e aplicação), rota `/api/configuration/export`, E2E `configuration-portable.spec.ts`. Parte D concluída (CA-CFG-01 a 05).
 - **Objetivo:** Seção 6.3, parte D.
 - **Arquivos/módulos esperados:** Administração.
 - **Dependências:** SF-189.

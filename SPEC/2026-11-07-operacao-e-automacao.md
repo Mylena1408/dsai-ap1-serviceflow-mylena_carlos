@@ -297,14 +297,19 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - as pessoas são ligadas pelo e-mail; as posições (de campos, documentos, etapas e artigos) vêm do arquivo como estão;
   - o registro próprio da importação ("Importou · Configuração da organização") traz "Itens novos", "Itens alterados" e "Itens iguais";
   - a transação tem limite de 60 segundos; se estourar, nada é gravado.
+- *Esclarecimentos registrados em 2026-11-08 (SF-190):*
+  - a seção "Configuração portátil" da administração mostra, antes de exportar, o tamanho previsto e os nomes repetidos, por uma leitura que não é exportação e não entra na auditoria; o botão "Exportar configuração" baixa o arquivo e registra a exportação;
+  - a importação na tela é em dois passos sem passar pelo endereço: o arquivo vai para a prévia, que volta com o texto do arquivo; "Aplicar a importação" só aparece numa prévia aceita e envia esse mesmo texto com os resumos;
+  - como um formulário envia as quebras de linha como CRLF, os dois passos usam quebras LF (no JSON, só espaço em branco); sem isso, o resumo do arquivo não conferia e a aplicação era recusada;
+  - quando tudo no arquivo já está igual, a tela diz que não há o que aplicar e o botão fica desativado.
 
 ### 6.5 Critérios de aceitação
 
-- [ ] **CA-CFG-01** — Só o administrador exporta e importa; as duas ações entram na auditoria.
-- [ ] **CA-CFG-02** — O arquivo exportado segue o formato e o conteúdo da regra 2, sem dados pessoais, segredos ou identificadores internos.
-- [ ] **CA-CFG-03** — A prévia recusa arquivo inválido com a lista de problemas, classifica cada item e avisa sobre pessoas não encontradas.
-- [ ] **CA-CFG-04** — A aplicação é tudo ou nada, não apaga nada, audita cada item e recusa quando o destino mudou depois da prévia.
-- [ ] **CA-CFG-05** — Exportar de um ambiente e importar num banco vazio reproduz a configuração; reimportar o mesmo arquivo dá "igual" em tudo.
+- [x] **CA-CFG-01** — Só o administrador exporta e importa; as duas ações entram na auditoria. *Verificado em 2026-11-08 (SF-187 a SF-190): exportar, a prévia e a aplicação recusam os outros perfis; "Exportou" e "Importou · Configuração da organização" entram na auditoria, a importação com os itens novos, alterados e iguais (unitário, integração e E2E `configuration-portable.spec.ts`).*
+- [x] **CA-CFG-02** — O arquivo exportado segue o formato e o conteúdo da regra 2, sem dados pessoais, segredos ou identificadores internos. *Verificado em 2026-11-08 (SF-187 e SF-190): formato `serviceflow-config` versão 1 com todos os itens da regra 2, ativos e inativos, por nomes, rótulos e e-mails; nenhum id interno de linha, nome de pessoa, senha ou segredo de webhook aparece no arquivo (unitário, integração e E2E).*
+- [x] **CA-CFG-03** — A prévia recusa arquivo inválido com a lista de problemas, classifica cada item e avisa sobre pessoas não encontradas. *Verificado em 2026-11-08 (SF-188 e SF-190): arquivo fora do formato, acima de 2 MB, com nomes repetidos ou com qualquer violação das regras das telas é recusado inteiro, com até 50 problemas e o caminho de cada um; os itens aparecem como novos, alterados (com os campos) ou iguais; pessoas que não existem ou não podem ocupar o papel viram aviso e o item entra sem elas (unitário, integração e E2E).*
+- [x] **CA-CFG-04** — A aplicação é tudo ou nada, não apaga nada, audita cada item e recusa quando o destino mudou depois da prévia. *Verificado em 2026-11-08 (SF-189 e SF-190): uma falha provocada na última gravação não deixa nada; o que não está no arquivo fica como está; cada item criado ou alterado tem a auditoria da sua tela; outro arquivo ou destino alterado depois da prévia são recusados com pedido de nova prévia (integração e unitário).*
+- [x] **CA-CFG-05** — Exportar de um ambiente e importar num banco vazio reproduz a configuração; reimportar o mesmo arquivo dá "igual" em tudo. *Verificado em 2026-11-08 (SF-189 e SF-190): um banco sem configuração (pessoas mantidas) é reconstruído e exportado de novo igual ao original; reimportar o arquivo exportado dá "igual" em tudo e só grava o registro da importação; na tela, a segunda importação do mesmo arquivo informa que não há o que aplicar (integração e E2E).*
 
 ## 7. Parte E — Fila em escala
 

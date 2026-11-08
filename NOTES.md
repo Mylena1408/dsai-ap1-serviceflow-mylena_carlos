@@ -2408,3 +2408,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ajuste nos testes:** a primeira versão esperava um registro de auditoria do calendário, mas ele é igual ao padrão, e a auditoria (como na tela) não registra quando nada muda; o teste passou a conferir a linha gravada.
 - **Resultados:** typecheck, lint e build OK; unitários 1456/1456; integração 605/605; E2E 42/42 na primeira rodada completa.
 - **Linhas:** 635 `added` (aplicação 391, testes 244).
+
+## SF-190 — Telas da configuração portátil; fim da parte D (2026-11-08)
+
+- **Exportar:** a seção "Configuração portátil" mostra o tamanho previsto e os nomes repetidos (`checkConfigurationExport`, uma leitura sem auditoria) e baixa o arquivo pela rota `/api/configuration/export`, que registra a exportação.
+- **Importar:** componente cliente com `useActionState`: o arquivo vai para a prévia, que volta com o texto; "Aplicar a importação" só aparece numa prévia aceita e envia o mesmo texto com os resumos. Nada passa pelo endereço; o limite de corpo das server actions (4,25 MB) já comporta o arquivo de 2 MB.
+- **Defeito achado pelo E2E:** o formulário envia as quebras de linha como CRLF, então o texto devolvido na aplicação não era o da prévia e o resumo não conferia (a proteção recusou corretamente). As duas ações passaram a normalizar as quebras para LF; teste unitário cobre o caso. Na primeira correção, o script em Python transformou o `\r\n` do regex em quebras reais (o mesmo problema já registrado de barras invertidas fora do Write/Edit); foi refeita com o Edit e conferida.
+- **E2E** `configuration-portable.spec.ts`: exporta pela tela (sem ids nem senhas), um arquivo quebrado é recusado com os problemas, o arquivo com uma categoria nova é pré-visualizado e aplicado, a reimportação diz que não há o que aplicar, e a auditoria mostra "Exportou" e "Importou". A categoria é apagada no fim do teste.
+- **Resultados:** typecheck, lint e build OK; unitários 1463/1463; integração 605/605; E2E 43/43 na primeira rodada completa.
+- **Linhas:** 515 `added` (aplicação 341, testes 174). Parte D inteira (SF-187 a SF-190): 3161.

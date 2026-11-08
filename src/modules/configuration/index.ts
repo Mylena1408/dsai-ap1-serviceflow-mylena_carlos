@@ -21,11 +21,16 @@ export {
   type ConfigurationFile,
 } from "./domain/format";
 export { buildConfigurationData, buildConfigurationFile, configurationFileName, type ConfigurationSnapshot } from "./domain/export";
-export type { ConfigurationExport } from "./application/export-configuration";
+export type { ConfigurationExport, ConfigurationExportCheck } from "./application/export-configuration";
 export { CONFIGURATION_ENTITY_ID, CONFIGURATION_ENTITY_LABEL } from "./infrastructure/prisma-configuration-export";
 
 export function exportConfiguration(database: PrismaClient = prisma): Promise<exporting.ConfigurationExport> {
   return exporting.exportConfiguration(createPrismaConfigurationExportStore(database));
+}
+
+/** The export's warnings, read without exporting (no audit entry). */
+export function checkConfigurationExport(database: PrismaClient = prisma): Promise<exporting.ConfigurationExportCheck> {
+  return exporting.checkConfigurationExport(createPrismaConfigurationExportStore(database));
 }
 
 export { ITEM_KIND_LABELS, MAX_PREVIEW_PROBLEMS, type ItemKind, type ItemStatus, type PreviewItem, type PreviewMessage } from "./domain/preview";

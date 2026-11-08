@@ -41,3 +41,20 @@ export async function exportConfiguration(store: ConfigurationExportStore): Prom
     tooLarge: bytes > MAX_CONFIGURATION_BYTES,
   };
 }
+
+export interface ConfigurationExportCheck {
+  repeated: string[];
+  bytes: number;
+  tooLarge: boolean;
+}
+
+/**
+ * What the export would warn about, shown before exporting (SPEC 2026-11-07-operacao-e-automacao, part D,
+ * SF-190); only the administrator. Reading is not an export, so nothing enters the audit trail.
+ */
+export async function checkConfigurationExport(store: Pick<ConfigurationExportStore, "snapshot">): Promise<ConfigurationExportCheck> {
+  await requireConfigurationAdministrator();
+  const file = buildConfigurationFile(await store.snapshot(), new Date(0));
+  const bytes = new TextEncoder().encode(`${JSON.stringify(file, null, 2)}\n`).length;
+  return { repeated: repeatedKeys(file.data), bytes, tooLarge: bytes > MAX_CONFIGURATION_BYTES };
+}
