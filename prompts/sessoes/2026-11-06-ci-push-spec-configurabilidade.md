@@ -226,3 +226,7 @@
 > pode prosseguir
 
 56. SF-193: telas das ações em lote na fila e E2E; correção do E2E do lote que contaminava o da distribuição; fim da parte E e da SPEC (ver `NOTES.md`).
+
+> aprovado as ordens, backup, migrations, push
+
+57. Backup do Neon verificado, migration `20261108500000_saved_views` aplicada e push, nesta ordem (ver `NOTES.md`).

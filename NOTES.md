@@ -2445,3 +2445,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck, lint e build OK; unitários 1478/1478; integração 612/612; E2E 45/45 na segunda rodada (a primeira teve 44/45, ver acima).
 - **Linhas:** 339 `added` (aplicação 193, testes 146). Parte E inteira (SF-191 a SF-193): 1131.
 - **SPEC concluída:** todos os critérios de `SPEC/2026-11-07-operacao-e-automacao.md` (partes A a E) estão verificados.
+
+## Deploy de SF-188 a SF-193 (2026-11-08)
+
+- **Ordem seguida:** backup verificado → 1 migration no Neon → push.
+- **Backup:** `serviceflow-2026-11-08-pre-deploy.dump`, conferido por restauração local (51 tabelas iguais), cifrado pelo EFS. Detalhes na seção 14 da SPEC de backup.
+- **Migration no Neon:** `prisma migrate deploy` aplicou `20261108500000_saved_views`; `prisma migrate status` confirmou o banco em dia (50). Desta vez o agente pôde rodar a migration.
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
