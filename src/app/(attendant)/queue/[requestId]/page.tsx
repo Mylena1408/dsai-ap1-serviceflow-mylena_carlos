@@ -42,6 +42,7 @@ import { RequestLinks } from "@/app/_components/request-links";
 import { RequestTags } from "@/app/_components/request-tags";
 import { getRequestTags } from "@/modules/tags";
 import { getRequestChecklist } from "@/modules/checklists";
+import { checklistPendingText } from "@/app/_components/request-checklist";
 import { addRequestTagAction, removeRequestTagAction } from "../tag-actions";
 import { RequestGroupBlock } from "@/app/_components/request-group";
 import { linkRequestAction, unlinkRequestAction } from "../link-actions";
@@ -97,6 +98,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "tag-limit") return "Uma solicitação tem no máximo 5 etiquetas.";
   if (error === "tag-invalid") return "Escolha uma etiqueta ativa do setor.";
   if (error === "tag-state") return "Não é possível mudar as etiquetas de uma solicitação cancelada, ou ela mudou enquanto você agia.";
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 4; the pending items are listed next to it.
+  if (error === "checklist-pending") return "Não foi possível concluir: há itens obrigatórios do checklist por marcar.";
   return null;
 }
 
@@ -181,6 +184,7 @@ export default async function QueueRequestPage({
       {feedback(error, notice) ? (
         <p className={`feedback${error ? " feedback-error" : ""}`} role={error ? "alert" : "status"}>
           {feedback(error, notice)}
+          {error === "checklist-pending" && checklist ? <> {checklistPendingText(checklist.pending)}</> : null}
         </p>
       ) : null}
       <article className="surface-card">

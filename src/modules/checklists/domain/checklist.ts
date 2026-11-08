@@ -200,10 +200,20 @@ export function pendingRequiredItems<T extends Pick<RequestChecklistItemRecord, 
   return items.filter((item) => item.isRequired && item.doneAt === null).sort((left, right) => left.position - right.position);
 }
 
+/** 4.3 item 4 (decision I8): the refused completion names the required items still to mark, in order. */
+export class ChecklistPendingError extends ConflictError {
+  constructor(readonly pendingItems: readonly string[]) {
+    super();
+  }
+}
+
 /** 4.3 item 4: with required items to mark, the completion is refused; without a checklist, it goes on. */
-export function assertChecklistAllowsCompletion(items: readonly Pick<RequestChecklistItemRecord, "isRequired" | "doneAt" | "position">[]): void {
-  if (pendingRequiredItems(items).length > 0) {
-    throw new ConflictError();
+export function assertChecklistAllowsCompletion(
+  items: readonly Pick<RequestChecklistItemRecord, "isRequired" | "doneAt" | "position" | "textSnapshot">[],
+): void {
+  const pending = pendingRequiredItems(items);
+  if (pending.length > 0) {
+    throw new ChecklistPendingError(pending.map(({ textSnapshot }) => textSnapshot));
   }
 }
 

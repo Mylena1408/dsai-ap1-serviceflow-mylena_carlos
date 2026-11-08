@@ -419,6 +419,8 @@ export interface RequestTransaction {
    * checklist.
    */
   hasChecklist?(requestId: string): Promise<boolean>;
+  /** The request's checklist items, for the completion's rule (4.3 item 4). */
+  listChecklistItems?(requestId: string): Promise<Array<{ textSnapshot: string; isRequired: boolean; position: number; doneAt: Date | null }>>;
   listChecklistModel?(serviceId: string): Promise<ChecklistTemplateItem[]>;
   insertChecklist?(
     requestId: string,

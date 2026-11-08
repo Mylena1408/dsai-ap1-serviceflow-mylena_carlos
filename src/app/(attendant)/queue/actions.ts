@@ -29,6 +29,8 @@ function errorCode(error: ApplicationError, noteCode: string): string {
   // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5. Recognized by shape, not by class, so
   // this file does not depend on more of the modules than the use cases it calls.
   if (error.code === "CONFLICT" && Array.isArray((error as { labels?: unknown }).labels)) return "attendance-required";
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 4: the page lists the pending items it reads itself.
+  if (error.code === "CONFLICT" && Array.isArray((error as { pendingItems?: unknown }).pendingItems)) return "checklist-pending";
   const fieldsReason = (error as { reason?: unknown }).reason;
   if (error instanceof ValidationError && (fieldsReason === "stale_form" || fieldsReason === "invalid")) {
     return fieldsReason === "stale_form" ? "attendance-changed" : "attendance-invalid";

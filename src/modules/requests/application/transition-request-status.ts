@@ -20,7 +20,7 @@ import type { RequestTransactionRunner } from "./ports";
 import { closePause, resumeColumns } from "./sla-pause";
 import { assertAttendanceFieldsComplete } from "./attendance-fields";
 import { readRequestAfterWrite } from "./read-after-write";
-import { planChecklistCopy } from "@/modules/checklists";
+import { assertChecklistAllowsCompletion, planChecklistCopy } from "@/modules/checklists";
 
 export async function transitionRequestStatus(
   input: unknown,
@@ -64,6 +64,11 @@ export async function transitionRequestStatus(
       assertCanCompleteAtStage(stageState);
       // SPEC 2026-11-03-campos-condicionais-atendimento, 5.5.4.
       await assertAttendanceFieldsComplete(transaction, parsed.requestId, currentRequest.serviceId);
+      // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 items 4 and 5 (decision I8): in the same transaction, the
+      // required checklist items still to mark refuse the completion; without a checklist, it goes on.
+      if (transaction.listChecklistItems) {
+        assertChecklistAllowsCompletion(await transaction.listChecklistItems(parsed.requestId));
+      }
     }
     // SPEC 2026-11-01-aprovacoes, 5.3.2: nobody starts while the approval is pending.
     if (parsed.toStatus === "IN_PROGRESS") {

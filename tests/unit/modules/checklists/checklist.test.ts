@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ChecklistPendingError,
   MAX_ACTIVE_CHECKLIST_ITEMS,
   assertChecklistAllowsCompletion,
   assertChecklistRoom,
@@ -146,15 +147,22 @@ describe("marking (4.3 item 3; 13.1 item 4)", () => {
 describe("completion and progress (4.3 items 4 and 5; 13.1 item 3)", () => {
   const done = new Date("2026-11-08T12:00:00Z");
   const items = [
-    { position: 3, isRequired: true, doneAt: null },
-    { position: 1, isRequired: true, doneAt: done },
-    { position: 2, isRequired: false, doneAt: null },
-    { position: 4, isRequired: true, doneAt: null },
+    { position: 3, isRequired: true, doneAt: null, textSnapshot: "Testar" },
+    { position: 1, isRequired: true, doneAt: done, textSnapshot: "Instalar" },
+    { position: 2, isRequired: false, doneAt: null, textSnapshot: "Avisar" },
+    { position: 4, isRequired: true, doneAt: null, textSnapshot: "Entregar" },
   ];
 
   it("lists the required items still to mark and refuses the completion", () => {
     expect(pendingRequiredItems(items).map(({ position }) => position)).toEqual([3, 4]);
     expect(() => assertChecklistAllowsCompletion(items)).toThrow(ConflictError);
+    // Decision I8: the refusal names what is missing, in order.
+    try {
+      assertChecklistAllowsCompletion(items);
+    } catch (error) {
+      expect(error).toBeInstanceOf(ChecklistPendingError);
+      expect((error as ChecklistPendingError).pendingItems).toEqual(["Testar", "Entregar"]);
+    }
   });
 
   it("allows the completion with every required item marked, or without a checklist", () => {

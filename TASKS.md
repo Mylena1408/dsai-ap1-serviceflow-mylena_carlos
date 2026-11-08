@@ -2141,7 +2141,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-204 — Regra da conclusão com o checklist
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `ChecklistPendingError` (conflito com os itens que faltam) na conclusão, na mesma transação; código `checklist-pending` e a lista "Falta marcar" na tela do atendente.
 - **Objetivo:** Seção 4.3 (regras 4 e 5), parte B.
 - **Arquivos/módulos esperados:** Conclusão da solicitação.
 - **Dependências:** SF-203.

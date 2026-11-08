@@ -573,6 +573,13 @@ export function createPrismaRequestTransaction(
     async hasChecklist(requestId) {
       return (await transaction.requestChecklist.count({ where: { requestId } })) > 0;
     },
+    listChecklistItems(requestId) {
+      return transaction.requestChecklistItem.findMany({
+        where: { requestId },
+        orderBy: { position: "asc" },
+        select: { textSnapshot: true, isRequired: true, position: true, doneAt: true },
+      });
+    },
     listChecklistModel(serviceId) {
       return transaction.serviceChecklistItem.findMany({
         where: { serviceId, isActive: true },

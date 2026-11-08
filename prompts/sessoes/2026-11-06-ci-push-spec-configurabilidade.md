@@ -322,3 +322,11 @@
 > quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
 
 80. Contagem total com `scripts/cloc-diff.sh` informada depois do commit da SF-203.
+
+> pode prosseguir
+
+81. SF-204: regra da conclusão com o checklist.
+
+> pode fazer Pendente de envio: 8 commits locais sem push, de SF-197 a SF-203. No próximo envio vai a migration nova do checklist (20261108800000_checklists), na ordem backup, migration e push. Faço quando você pedir.
+
+82. Envio feito no meio da SF-204: backup verificado (seção 16 da SPEC de backup), migration aplicada no Neon, push dos 8 commits; CI aprovado. SF-204 concluída depois, com a suíte completa aprovada.

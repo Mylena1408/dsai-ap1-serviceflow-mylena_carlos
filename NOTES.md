@@ -2569,3 +2569,19 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Processo:** o código foi preparado fora do projeto enquanto a suíte da SF-202 rodava e trazido depois do commit dela. A suíte desta tarefa foi iniciada sem o modo de segundo plano da ferramenta; o acompanhamento foi feito pelo log.
 - **Resultados:** typecheck, lint e build OK; unitários 1518/1518; integração 643/643; E2E 46/46.
 - **Linhas:** 396 `added` em TS (aplicação 270, testes 126).
+
+## Deploy de SF-197 a SF-203 (2026-11-08)
+
+- **Ordem seguida:** backup verificado → 1 migration no Neon → push.
+- **Backup:** `serviceflow-2026-11-08-pre-deploy-3.dump`, conferido por restauração local (55 tabelas iguais), cifrado pelo EFS. Detalhes na seção 16 da SPEC de backup.
+- **Migration no Neon:** `prisma migrate deploy` aplicou `20261108800000_checklists`; `prisma migrate status` confirmou o banco em dia (53).
+- **Push:** 8 commits, de `55a0b20` (SF-197) a `3c5a0e0` (SF-203); a SF-204, em andamento e sem commit, não foi junto.
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+## SF-204 — Regra da conclusão com o checklist (2026-11-08)
+
+- **Onde:** `transitionRequestStatus`, ao concluir, logo depois das informações do atendimento obrigatórias; porta opcional `listChecklistItems`, como as demais do checklist.
+- **Recusa:** `ChecklistPendingError` estende `ConflictError` (409 na API, sem mudar o contrato) e leva os textos pendentes; a ação da fila a reconhece pelo formato (`pendingItems`), como já fazia com as informações do atendimento, e a página monta "Falta marcar: ..." com a lista lida no momento (`checklistPendingText`, num módulo à parte porque `page.tsx` só pode exportar a página).
+- **CI do envio anterior:** passou (run 42511421391).
+- **Resultados:** typecheck, lint e build OK; unitários 1520/1520; integração 645/645; E2E 46/46.
+- **Linhas:** 123 `added` em TS (aplicação 28, testes 95).

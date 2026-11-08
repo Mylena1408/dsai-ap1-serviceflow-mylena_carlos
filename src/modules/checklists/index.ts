@@ -8,6 +8,7 @@ import { createPrismaRequestChecklistReader, createPrismaRequestChecklistStore }
 // Attendance checklists (SPEC 2026-11-08-atendimento-dia-a-dia, part B): the rules (SF-200) and the services'
 // models (SF-201) and the requests' checklists (SF-203).
 export {
+  ChecklistPendingError,
   MAX_ACTIVE_CHECKLIST_ITEMS,
   MAX_CHECKLIST_CONDITION_LENGTH,
   MAX_CHECKLIST_NOTE_LENGTH,
