@@ -1961,7 +1961,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-186 — Execução das agendas pelo job e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Passo `recurringRequests` do job diário (abertura pela função da abertura normal, execuções não abertas com motivo, pausa na terceira seguida, uma execução por agenda e dia); "Aberta automaticamente pela agenda …" para o solicitante; E2E `recurring-requests.spec.ts`. Parte C concluída (CA-REC-01 a 06).
 - **Objetivo:** Seção 5.3 (regra 3), parte C.
 - **Arquivos/módulos esperados:** Job diário, abertura, notificações.
 - **Dependências:** SF-185.

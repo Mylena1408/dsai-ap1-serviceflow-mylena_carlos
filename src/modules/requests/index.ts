@@ -40,6 +40,8 @@ import * as bundleOpening from "./application/open-bundle";
 import * as groups from "./application/groups";
 import * as absenceHandover from "./application/absence-handover";
 import * as teamLoad from "./application/team-load";
+import * as recurringRuns from "./application/recurring-runs";
+import { createPrismaRecurringRunStore, findRequestScheduleName } from "./infrastructure/prisma-recurring-runs";
 import { createPrismaTeamLoadReader } from "./infrastructure/prisma-team-load";
 import { createPrismaAbsenceHandoverStore } from "./infrastructure/prisma-absence-handover";
 import { createPrismaGroupReader } from "./infrastructure/prisma-request-groups";
@@ -494,4 +496,19 @@ export { atLimit, type SectorLoad, type TeamMemberLoad } from "./application/tea
 
 export async function getTeamLoad(database: PrismaClient = prisma): Promise<teamLoad.SectorLoad[] | null> {
   return teamLoad.getTeamLoad(createPrismaTeamLoadReader(database));
+}
+
+// Runs of the recurring requests' schedules (SPEC 2026-11-07-operacao-e-automacao, 5.3 items 3 and 4).
+export type { RecurringRunSummary } from "./application/recurring-runs";
+
+/** Daily job step: one run per active schedule whose latest day up to today has not run. */
+export async function runRecurringSchedules(database: PrismaClient = prisma): Promise<recurringRuns.RecurringRunSummary> {
+  return recurringRuns.runRecurringSchedules(createPrismaRecurringRunStore(database));
+}
+
+/** "Aberta automaticamente pela agenda …": the schedule that opened the request, or null. */
+export async function getRequestScheduleName(requestId: unknown, database: PrismaClient = prisma): Promise<string | null> {
+  return recurringRuns.getRequestScheduleName(requestId, createPrismaAttachmentQueryRepository(database), (id) =>
+    findRequestScheduleName(database, id),
+  );
 }

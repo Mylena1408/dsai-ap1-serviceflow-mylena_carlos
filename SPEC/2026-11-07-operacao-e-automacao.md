@@ -229,15 +229,21 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - a tela abre o formulário em dois passos (primeiro o serviço, depois o formulário com os campos dele) e, na alteração, mantém o serviço da agenda; para trocar de serviço, encerra-se a agenda e cria-se outra;
   - o administrador tem a seção "Agendas" e o gestor a página "Agendas" na sua área; o gestor escolhe o solicitante entre todos os solicitantes ativos;
   - "Aberta automaticamente pela agenda …" na solicitação (regra 4) entra com a SF-186, porque só a execução pelo job cria essas solicitações.
+- *Esclarecimentos registrados em 2026-11-07 (SF-186):*
+  - depois do fim da agenda, o job não abre mais nada, nem o último dia previsto que tenha perdido (CA-REC-05); antes do fim, se o job não rodou no dia, a próxima execução abre só o dia previsto mais recente (decisão H10);
+  - a execução roda no job depois da passagem por ausência (para a distribuição já pular quem está ausente) e antes do processamento dos eventos (para os avisos da abertura saírem na mesma execução);
+  - a pausa automática na terceira execução seguida "não aberta" é feita pelo sistema e não gera registro de auditoria (que exige uma pessoa como autora); a tela mostra "Pausada pelo sistema" com o número de execuções;
+  - um erro inesperado numa agenda não grava nada, não impede as outras e aparece no resumo do job como `failed`; a próxima execução tenta de novo;
+  - o aviso "Aberta automaticamente pela agenda …" aparece na tela da solicitação do solicitante.
 
 ### 5.5 Critérios de aceitação
 
-- [ ] **CA-REC-01** — Sem agendas, nada muda.
-- [ ] **CA-REC-02** — Administrador e gestor (só do próprio setor) criam e alteram agendas; a configuração recusa as violações da regra 2; outros perfis são recusados; as mudanças entram na auditoria.
-- [ ] **CA-REC-03** — O job abre a solicitação no dia previsto, uma vez por agenda e dia, mesmo com execuções simultâneas; a solicitação nasce como a abertura normal e mostra a agenda; dias perdidos não são recuperados.
-- [ ] **CA-REC-04** — Uma execução que não confere fica registrada com o motivo e avisa quem criou; três seguidas pausam a agenda.
-- [ ] **CA-REC-05** — Pausar, retomar e encerrar funcionam; agenda pausada ou encerrada não executa; o fim da agenda é respeitado.
-- [ ] **CA-REC-06** — Migrations aditivas; nenhuma dependência nova.
+- [x] **CA-REC-01** — Sem agendas, nada muda. *Verificado em 2026-11-07 (SF-186): sem agendas, o passo do job não abre nada e devolve zeros; as telas das agendas só aparecem na seção "Agendas" e na página do gestor; as suítes anteriores passaram sem mudança (integração `recurring-runs.test.ts`).*
+- [x] **CA-REC-02** — Administrador e gestor (só do próprio setor) criam e alteram agendas; a configuração recusa as violações da regra 2; outros perfis são recusados; as mudanças entram na auditoria. *Verificado em 2026-11-07 (SF-184 a SF-186): o administrador agenda qualquer serviço e o gestor só os do próprio setor; atendente e solicitante são recusados; serviço indisponível ou com documentos exigidos, solicitante inativo, respostas inválidas, datas fora da regra e a 201ª agenda em vigor são recusados com mensagem própria; criação e mudanças entram na auditoria, com descrição e respostas como dados pessoais (unitário, integração `recurring-schedules.test.ts` e E2E `recurring-requests.spec.ts`).*
+- [x] **CA-REC-03** — O job abre a solicitação no dia previsto, uma vez por agenda e dia, mesmo com execuções simultâneas; a solicitação nasce como a abertura normal e mostra a agenda; dias perdidos não são recuperados. *Verificado em 2026-11-07 (SF-186): o job abre pela mesma função da abertura, em nome do solicitante, com respostas, histórico e evento `request.opened`; uma segunda chamada no mesmo dia e três jobs simultâneos abrem uma só (linha única por agenda e dia); os dias perdidos não são recuperados; o solicitante vê "Aberta automaticamente pela agenda …" (integração `recurring-runs.test.ts` e E2E pela rota do job).*
+- [x] **CA-REC-04** — Uma execução que não confere fica registrada com o motivo e avisa quem criou; três seguidas pausam a agenda. *Verificado em 2026-11-07 (SF-185 e SF-186): serviço indisponível, solicitante inativo, documento exigido e formulário mudado ficam registrados como "não aberta" com o motivo; a tela das agendas mostra o aviso (esclarecimento da SF-184); a terceira seguida pausa a agenda e uma abertura zera a contagem (integração e unitário).*
+- [x] **CA-REC-05** — Pausar, retomar e encerrar funcionam; agenda pausada ou encerrada não executa; o fim da agenda é respeitado. *Verificado em 2026-11-07 (SF-185 e SF-186): pausar, retomar (zerando as falhas) e encerrar seguem o estado, com conflito para o que não se aplica; agendas pausadas, encerradas, ainda não iniciadas ou com o fim passado não executam (integração e E2E).*
+- [x] **CA-REC-06** — Migrations aditivas; nenhuma dependência nova. *Verificado em 2026-11-07 (SF-184): migration `20261108300000_recurring_requests` só acrescenta (enums, duas tabelas, coluna opcional em `Request`, função e restrições); nenhuma dependência nova (integração do schema).*
 
 ## 6. Parte D — Configuração portátil
 

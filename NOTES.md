@@ -2361,3 +2361,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Validação:** `requesterId`, `frequency` e `monthDay` entraram nos caminhos públicos dos erros de validação, para a tela dizer qual regra foi violada.
 - **Resultados:** typecheck, lint e build OK; unitários 1431/1431; integração 585/585; E2E 41/41 na segunda rodada completa. Na primeira, `comment-files-late-documents.spec.ts` falhou uma vez: o download do PDF do comentário respondeu 404, num fluxo que não passa pelas agendas. Ele passou sozinho e o E2E completo rodado de novo deu 41/41. Fica registrado como falha intermitente a observar, como a do `field-formats.spec.ts` na SF-183.
 - **Linhas:** 1344 `added` (aplicação 1008, testes 336).
+
+## SF-186 — Execução das agendas pelo job; fim da parte C (2026-11-07)
+
+- **Execução** (`src/modules/requests/application/recurring-runs.ts`): o passo `recurringRequests` do job diário lê as agendas não encerradas, não pausadas, já iniciadas e dentro do período. Para cada uma com dia devido (`dueOccurrence`, sem recuperar dias perdidos), faz uma transação serializável que relê a agenda, confere o motivo de recusa (serviço indisponível, solicitante inativo, documento exigido, formulário mudado) e abre pela mesma `openRequest` da abertura normal, em nome do solicitante e com `recurringRequestId`; grava a execução e a contagem de falhas, pausando na terceira.
+- **Concorrência:** a linha única por agenda e dia faz a segunda execução do mesmo dia falhar com conflito, que o job ignora; três jobs simultâneos abrem uma só solicitação (integração). Um erro inesperado numa agenda conta em `failed` e não impede as outras.
+- **Ordem no job:** depois da passagem por ausência (a distribuição já pula quem está ausente) e antes dos eventos (os avisos da abertura saem na mesma execução).
+- **Solicitante:** "Aberta automaticamente pela agenda …" na tela da solicitação, pela regra de leitura da solicitação.
+- **Decisões (esclarecimentos na SPEC, 5.4):** depois do fim, nada mais abre, nem o último dia perdido; a pausa automática não gera auditoria (que exige uma pessoa) e aparece na tela como "Pausada pelo sistema".
+- **E2E** `recurring-requests.spec.ts`: o gestor cria a agenda pela tela, a rota protegida do job abre a solicitação (e não abre outra na segunda chamada), o solicitante vê a origem, o gestor vê a execução, pausa e encerra, e a auditoria registra. Ao escrever o teste, a escolha do serviço pelo rótulo não funcionou porque o `<label>` envolve o `<select>` e o texto dele inclui as opções; o teste passou a usar o nome do campo. Um gancho encerra as agendas ao fim do teste, para uma falha não deixar agenda ativa para os testes seguintes que chamam o job.
+- **Ambiente:** um arquivo de tipos gerado pelo servidor de desenvolvimento (`.next/dev/types/routes.d.ts`, fora do git) ficou truncado quando o servidor de teste foi encerrado; o diretório foi apagado e é recriado sozinho.
+- **Resultados:** typecheck, lint e build OK; unitários 1433/1433; integração 593/593; E2E 42/42 na primeira rodada completa.
+- **Linhas:** 542 `added` (aplicação 225, testes 317). Parte C inteira (SF-184 a SF-186): 2302.

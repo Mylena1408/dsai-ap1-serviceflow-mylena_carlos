@@ -170,7 +170,8 @@ function requiresApprovalNow(service: ServiceForRequest, answers: readonly Field
 
 /**
  * Opens one request in the caller's transaction. A bundle opens one per service with the group's id
- * (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3); a single opening has no group.
+ * (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3); a single opening has no group. A schedule's run
+ * opens it in the requester's name and marks the schedule (5.3 item 3).
  */
 export async function openRequest(
   transaction: RequestTransaction,
@@ -179,6 +180,7 @@ export async function openRequest(
   requestId: string,
   prepared: readonly PreparedAttachment[],
   group: { id: string; position: number } | null = null,
+  recurringRequestId: string | null = null,
 ): Promise<void> {
   const context = await loadOpeningContext(transaction, actorId, parsed.serviceId);
   const answers = await fieldAnswers(transaction, context.service.id, parsed);
@@ -211,6 +213,7 @@ export async function openRequest(
     id: requestId,
     description: parsed.description,
     ...(group ? { groupId: group.id, groupPosition: group.position } : {}),
+    ...(recurringRequestId ? { recurringRequestId } : {}),
     status: "OPEN",
     openedAt,
     // SPEC 2026-11-01, sections 5.1 to 5.3: default priority and SLA snapshot of the service.

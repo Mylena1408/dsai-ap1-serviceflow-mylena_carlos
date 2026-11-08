@@ -170,3 +170,7 @@
 > pode prosseguir
 
 42. SF-185: casos de uso e telas das agendas de recorrência (administração e gestor), auditoria e esclarecimentos na SPEC (ver `NOTES.md`).
+
+> pode prosseguir
+
+43. SF-186: execução das agendas pelo job diário, aviso da origem para o solicitante, E2E pela rota do job; fim da parte C (ver `NOTES.md`).

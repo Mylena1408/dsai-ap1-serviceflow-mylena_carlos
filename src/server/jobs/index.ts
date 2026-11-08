@@ -12,6 +12,7 @@ import {
 import {
   applyEscalationRules,
   handOverAbsentAttendants,
+  runRecurringSchedules,
   cleanOrphanAttachmentObjects,
   recordApprovalDeadlineAlerts,
   recordSlaAlerts,
@@ -19,6 +20,7 @@ import {
   type ApprovalDeadlineSummary,
   type EscalationRuleSummary,
   type AbsenceHandoverSummary,
+  type RecurringRunSummary,
   type StageDeadlineSummary,
   type OrphanCleanupSummary,
   type SlaAlertSummary,
@@ -65,6 +67,8 @@ export interface DailyJobSummary {
   escalationRules: DailyStep<EscalationRuleSummary>;
   /** SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7. */
   absenceHandover: DailyStep<AbsenceHandoverSummary>;
+  /** SPEC 2026-11-07-operacao-e-automacao, 5.3 item 3. */
+  recurringRequests: DailyStep<RecurringRunSummary>;
   /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
   approvalDeadlines: DailyStep<ApprovalDeadlineSummary>;
   /** 5.3.2. */
@@ -122,6 +126,10 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
   // Absent attendants' requests go to colleagues, before the events so the warnings go out in this run
   // (SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7).
   const absenceHandover = await step(() => handOverAbsentAttendants());
+  // The schedules' requests open after the handover, so the distribution already skips absent attendants,
+  // and before the events, so their notifications go out in this run (SPEC 2026-11-07-operacao-e-automacao,
+  // 5.3 item 3).
+  const recurringRequests = await step(() => runRecurringSchedules());
   // Late approval levels, also before the events (SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6).
   const approvalDeadlines = await step(() => recordApprovalDeadlineAlerts(now));
   // Late stages too (SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2).
@@ -147,6 +155,7 @@ export async function runDailyJob(now: Date = new Date()): Promise<DailyJobSumma
     slaAlerts,
     escalationRules,
     absenceHandover,
+    recurringRequests,
     approvalDeadlines,
     stageDeadlines,
     events,
