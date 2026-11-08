@@ -230,3 +230,7 @@
 > aprovado as ordens, backup, migrations, push
 
 57. Backup do Neon verificado, migration `20261108500000_saved_views` aplicada e push, nesta ordem (ver `NOTES.md`).
+
+> aguardo,me avise quando terminar
+
+58. CI do envio falhou no download do gitleaks (erro HTTP do GitHub, código 22); varredura local sem achados; Vercel publicou. Registrado; CI a repetir.

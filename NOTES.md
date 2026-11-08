@@ -2452,3 +2452,5 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Backup:** `serviceflow-2026-11-08-pre-deploy.dump`, conferido por restauração local (51 tabelas iguais), cifrado pelo EFS. Detalhes na seção 14 da SPEC de backup.
 - **Migration no Neon:** `prisma migrate deploy` aplicou `20261108500000_saved_views`; `prisma migrate status` confirmou o banco em dia (50). Desta vez o agente pôde rodar a migration.
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+- **CI do deploy de 2026-11-08 (execução `42470836259`, commit `f50c765`):** falhou no passo "Secret scan (gitleaks)" com código 22, que é o `curl -f` recebendo erro HTTP ao baixar o binário oficial do gitleaks; o download do mesmo arquivo respondia 504 também a partir da máquina local. Não foi um achado: a varredura local com o mesmo binário 8.30.1 (o já conferido na SF-143) nos 258 commits deu "no leaks found". Os passos seguintes (typecheck, testes) não rodaram nesse CI; as mesmas suítes passaram localmente antes de cada commit. A Vercel publicou normalmente. Falta rodar o CI de novo quando o GitHub voltar a servir o arquivo.
