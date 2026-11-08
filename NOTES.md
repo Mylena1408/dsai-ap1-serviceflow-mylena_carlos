@@ -2383,3 +2383,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes:** a integração confere que nenhum id interno de linha (configuração e pessoas), nome de pessoa ou segredo de webhook aparece no arquivo. A primeira versão do teste procurava qualquer UUID e falhou porque as fixtures põem UUIDs aleatórios nos nomes; passou a conferir os ids reais das linhas.
 - **Resultados:** typecheck, lint e build OK; unitários 1439/1439; integração 596/596; E2E 42/42 na primeira rodada completa.
 - **Linhas:** 920 `added` (aplicação 555, testes 365).
+
+## Deploy de SF-185 a SF-187 (2026-11-07)
+
+- **Ordem seguida:** backup verificado → 1 migration no Neon → push.
+- **Backup:** `serviceflow-2026-11-07-pre-deploy-4.dump`, conferido por restauração local (51 tabelas iguais), cifrado pelo EFS. Detalhes na seção 13 da SPEC de backup.
+- **Migration no Neon:** o modo automático do agente bloqueou a aplicação em produção; a responsável rodou ela mesma o script do agente no prompt. `prisma migrate deploy` aplicou `20261108400000_configuration_audit` e `prisma migrate status` confirmou o banco em dia (49).
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.

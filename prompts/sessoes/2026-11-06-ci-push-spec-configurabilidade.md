@@ -182,3 +182,11 @@
 > quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
 
 45. Contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-187.
+
+> faça os commits e o que for necessario
+
+46. Commits já feitos; backup do Neon verificado; a aplicação da migration foi bloqueada pelo modo automático e o agente parou e explicou.
+
+> (comando rodado pela responsável no prompt: o script de migration do agente)
+
+47. Migration `20261108400000_configuration_audit` aplicada no Neon pela responsável; registro do deploy e push (ver `NOTES.md`).
