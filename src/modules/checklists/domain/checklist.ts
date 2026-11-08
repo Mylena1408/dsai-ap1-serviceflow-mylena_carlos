@@ -43,6 +43,30 @@ export const checklistItemInputSchema = z
 
 export type ChecklistItemInput = z.output<typeof checklistItemInputSchema>;
 
+/** 4.3 item 1 without the condition, which has its own form (13.1 item 1). */
+export const checklistItemTextSchema = z
+  .object({
+    text: z.string().trim().min(1).max(MAX_CHECKLIST_TEXT_LENGTH),
+    isRequired: z.boolean(),
+  })
+  .strict();
+
+export type ChecklistItemText = z.output<typeof checklistItemTextSchema>;
+
+// Who configures the model (4.1 item 1).
+
+export interface ChecklistActor {
+  id: string;
+  role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
+  isActive: boolean;
+  sectorId: string | null;
+}
+
+/** The administrator for every service; a manager for the services of their own sector. */
+export function canManageServiceChecklist(actor: ChecklistActor, serviceSectorId: string): boolean {
+  return actor.isActive && (actor.role === "ADMIN" || (actor.role === "MANAGER" && actor.sectorId === serviceSectorId));
+}
+
 /** 13.1 item 4 (decision J3): an optional note of up to 200 characters when an item is marked. */
 export const checklistMarkInputSchema = z
   .object({

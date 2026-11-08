@@ -45,6 +45,8 @@ import { checkConfigurationExport } from "@/modules/configuration";
 import { ConfigurationSection } from "./_sections/configuration/configuration-section";
 import { listSectorTags } from "@/modules/tags";
 import { SectorTagsPanel } from "@/app/_components/sector-tags";
+import { listServiceChecklists } from "@/modules/checklists";
+import { ServiceChecklistsPanel } from "@/app/_components/service-checklists";
 import { AbsencesSection, type AbsencesOverview } from "./_sections/absences/absences-section";
 import { CalendarSection } from "./_sections/calendar/calendar-section";
 
@@ -71,6 +73,9 @@ type AdminPageProps = {
     fields?: string;
     /** SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1: the tags' message. */
     tag?: string;
+    /** SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1: the checklists' message and the service to open. */
+    checklist?: string;
+    open?: string;
   }>;
 };
 
@@ -84,6 +89,8 @@ const adminSections = [
   { id: "tags", label: "Etiquetas" },
   { id: "categories", label: "Categorias" },
   { id: "services", label: "Serviços" },
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.1 item 1.
+  { id: "checklists", label: "Checklists" },
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
   { id: "bundles", label: "Pacotes" },
   { id: "knowledge", label: "Base de conhecimento" },
@@ -131,7 +138,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     throw error;
   }
 
-  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge, absence, schedule, service, edit, fields, tag }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
+  const [{ entity, error, notice, section, period, from, to, sector, type, actor, page, knowledge, absence, schedule, service, edit, fields, tag, checklist, open }, sectors, categories, users, services, documentRequirements, serviceFields, serviceStages, permissions] =
     await Promise.all([
       searchParams,
       listSectors(),
@@ -178,6 +185,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const configurationCheck = selectedSection === "configuration" ? await checkConfigurationExport() : null;
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1: read only when the section is open.
   const sectorTags = selectedSection === "tags" ? await listSectorTags() : null;
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.1 item 1: read only when the section is open.
+  const serviceChecklists = selectedSection === "checklists" ? await listServiceChecklists() : null;
   const absencesOverview: AbsencesOverview | null =
     selectedSection === "absences"
       ? { ...(await listAbsences()), managers: await listSubstituteCandidates() }
@@ -317,6 +326,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {scheduleScreen ? <RecurringSchedules area="admin" screen={scheduleScreen} /> : null}
       {configurationCheck ? <ConfigurationSection check={configurationCheck} /> : null}
       {sectorTags ? <SectorTagsPanel area="admin" message={tag} sectors={sectorTags} /> : null}
+      {serviceChecklists ? <ServiceChecklistsPanel area="admin" message={checklist} open={open} services={serviceChecklists} /> : null}
         </div>
       ) : null}
     </main>

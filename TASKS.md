@@ -2111,7 +2111,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-201 — Modelo de checklist por serviço com auditoria
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Casos de uso `src/modules/checklists/application/service-checklists.ts`, painel `ServiceChecklistsPanel` na seção "Checklists" da administração e na página `/approvals/checklists` do gestor; auditoria `CHECKLIST_ITEM` (criar, alterar, reordenar, desativar, reativar).
 - **Objetivo:** Seção 4.3 (regra 1), parte B.
 - **Arquivos/módulos esperados:** Administração (Serviços) e gestor, auditoria.
 - **Dependências:** SF-200.

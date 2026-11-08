@@ -2542,3 +2542,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Auditoria:** `CHECKLIST_ITEM` com texto, obrigatório, posição, ativo e condição; a lista exata do teste da auditoria foi estendida, como prevê a seção 2.
 - **Resultados:** typecheck, lint e build OK; unitários 1512/1512; integração 631/631; E2E 46/46.
 - **Linhas:** 415 `added` em TS (aplicação 170, testes 241, scripts 4), mais 152 de SQL na migration (não contadas na meta).
+
+## SF-201 — Modelo de checklist por serviço (2026-11-08)
+
+- **Quem configura:** a mesma regra das etiquetas: o administrador para todos os serviços ativos, o gestor para os serviços ativos do seu setor; os demais perfis recebem recusa de autorização, e um item de outro setor responde "não encontrado".
+- **Ordem:** reaproveita `planPositionMove` (as posições do plano começam em 0 e as do checklist em 1, por causa do `CHECK`; o caso de uso converte). Uma entrada `REORDERED` só para o item movido; mover o primeiro para cima não grava nada. Item reativado vai para o fim e conta no limite de 20.
+- **Telas:** um bloco recolhível por serviço; o bloco do serviço recém-alterado volta aberto (`open` no endereço, só com id bem formado). Sem itens, a tela diz que as solicitações seguem como hoje (CA-CHK-01).
+- **Fora desta tarefa:** a condição do item e a cópia de outro serviço (SF-224 e SF-225); alterar o texto não mexe na condição.
+- **Suíte:** typecheck, lint e build OK; unitários 1515/1515; integração 635/635; E2E 45/46 na rodada completa: `access-roles.spec.ts` esgotou 5 min esperando a página de entrada ficar sem tráfego (`networkidle`), no primeiro teste da rodada; rodado sozinho em seguida, passou em 15 s. O teste não toca o checklist; registrado como falha intermitente do ambiente.
+- **Linhas:** 613 `added` em TS (aplicação 434, testes 179).

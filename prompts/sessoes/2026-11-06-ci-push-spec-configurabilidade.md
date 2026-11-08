@@ -302,3 +302,7 @@
 > pode prosseguir
 
 75. SF-200: migration e domínio do checklist, auditoria `CHECKLIST_ITEM`, esclarecimentos na seção 4.4 da SPEC; suíte completa aprovada (ver `NOTES.md`).
+
+> pode prosseguir
+
+76. SF-201: modelo de checklist por serviço com auditoria, na administração e na área do gestor; falha intermitente do E2E `access-roles` investigada (passou sozinho) e registrada.

@@ -27,6 +27,8 @@ export default function ManagerLayout({
           <Link href="/approvals/recurring">Agendas</Link>
           {/* SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1. */}
           <Link href="/approvals/tags">Etiquetas</Link>
+          {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.1 item 1. */}
+          <Link href="/approvals/checklists">Checklists</Link>
           <NotificationsLink href="/approvals/notifications" />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>
