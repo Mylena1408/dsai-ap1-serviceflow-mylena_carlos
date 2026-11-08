@@ -158,3 +158,7 @@
 > pode prosseguir
 
 39. SF-184: migration das agendas de recorrência e das execuções, regras das datas, auditoria e esclarecimento na SPEC sobre os avisos (ver `NOTES.md`).
+
+> aprovado as ordens, backup,migrations,push
+
+40. Backup do Neon verificado, 5 migrations aplicadas (SF-175 a SF-184) e push, nesta ordem (ver `NOTES.md`).

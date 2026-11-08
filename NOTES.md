@@ -2345,3 +2345,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Decisão (esclarecimento na SPEC, 5.4):** `RequestNotification` sempre pertence a uma solicitação, e a execução não aberta não tem uma. Em vez de criar `recurring.skipped` e `recurring.paused`, o aviso a quem criou a agenda fica na tela das agendas (SF-185 e SF-186).
 - **Resultados:** typecheck, lint e build OK; unitários 1423/1423; integração 577/577; E2E 41/41. O lint da rodada completa deu um aviso (uma função não usada no domínio); ela foi apagada e typecheck, lint e os testes do domínio foram rodados de novo, limpos.
 - **Linhas:** 416 `added` (aplicação 208, testes 208).
+
+## Deploy de SF-175 a SF-184 (2026-11-07)
+
+- **Ordem seguida:** backup verificado → 5 migrations no Neon → push.
+- **Backup:** `serviceflow-2026-11-07-pre-deploy-3.dump`, conferido por restauração local (44 tabelas iguais), cifrado pelo EFS. Detalhes na seção 12 da SPEC de backup.
+- **Migrations no Neon:** `prisma migrate deploy` aplicou `20261107900000_request_links`, `20261108000000_service_bundles`, `20261108100000_request_group_position`, `20261108200000_queue_distribution` e `20261108300000_recurring_requests`; `prisma migrate status` confirmou o banco em dia (48).
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
