@@ -2460,3 +2460,5 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Motivo:** as duas execuções do CI de hoje falharam no download do binário do gitleaks (códigos 22 e 56 do `curl`: 504 do GitHub e conexão interrompida), antes de typecheck, lint e testes; nenhum achado.
 - **Mudança:** `.github/workflows/ci.yml`, passo "Secret scan (gitleaks)": `curl` com `--retry 5 --retry-all-errors --retry-delay 10`. Versão, SHA-256 e varredura iguais. Registrado na seção 7 da SPEC de integração contínua.
 - **Conferência local:** o comando novo baixou o arquivo e o checksum conferiu. O arquivo do CI não roda localmente; o resultado vem da próxima execução.
+
+- **Resultado:** a execução `42472539280` (commit `6e99ff1`) passou inteira: gitleaks, typecheck, lint, build, unitários, integração e E2E; a Vercel publicou. É o primeiro CI completo desde o envio de SF-188 a SF-193.

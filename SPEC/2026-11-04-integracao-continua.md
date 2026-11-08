@@ -56,3 +56,5 @@ A responsável aprovou em 2026-11-08 ("pode fazer a opção 2"). Duas execuçõe
 
 - O download passou a tentar de novo até 5 vezes, com 10 segundos entre as tentativas, também nos erros de rede e de servidor (`--retry 5 --retry-all-errors --retry-delay 10`). A versão (8.30.1), a conferência do SHA-256 e a varredura do histórico completo não mudaram.
 - Conferido localmente: o comando novo baixou o arquivo e o SHA-256 bateu com o fixado no CI.
+
+- Resultado: a execução `42472539280` passou em todos os passos, inclusive a varredura de segredos.

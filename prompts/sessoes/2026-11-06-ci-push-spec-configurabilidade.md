@@ -242,3 +242,7 @@
 > pode fazer a opção 2
 
 60. `curl` do gitleaks com novas tentativas no CI, conferido localmente, registrado na SPEC de integração contínua; commit e push (ver `NOTES.md`).
+
+> terminou?
+
+61. CI `42472539280` aprovado em todos os passos; Vercel publicou.
