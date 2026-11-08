@@ -4,6 +4,7 @@ import { ApplicationError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
 import { sectorTransferNote } from "../domain/lifecycle";
+import type { RequestQueryRepository } from "./ports";
 
 // Batch actions in the queue (SPEC 2026-11-07-operacao-e-automacao, 7.3 item 2; decisions H17 and H18): the
 // attendant applies one action to up to 50 requests of the page: assume, transfer to a colleague, change the
@@ -96,4 +97,22 @@ export async function runQueueBatch(input: unknown, actions: BatchActions): Prom
 
   const done = items.filter((item) => item.outcome === "done").length;
   return { action: batch.action, items, done, refused: items.length - done };
+}
+
+export interface BatchChoices {
+  /** Active attendants of the person's sector, other than the person, for "Transferir". */
+  colleagues: Array<{ id: string; name: string }>;
+  /** Sectors that may receive the sector's requests, for "Encaminhar". */
+  sectors: Array<{ id: string; name: string }>;
+}
+
+/**
+ * The choices of the batch form (7.3 item 2): the same lists the individual actions offer, for the person's
+ * sector, since the page's requests are all of it. Each item is still checked by its action.
+ */
+export async function listBatchChoices(repository: Pick<RequestQueryRepository, "listSectorAttendants" | "listSectorDestinations">): Promise<BatchChoices> {
+  const actor = assertRole(await requireCurrentActor(), "ATTENDANT");
+  if (!actor.sectorId) return { colleagues: [], sectors: [] };
+  const [attendants, sectors] = await Promise.all([repository.listSectorAttendants(actor.sectorId), repository.listSectorDestinations(actor.sectorId)]);
+  return { colleagues: attendants.filter(({ id }) => id !== actor.id), sectors };
 }

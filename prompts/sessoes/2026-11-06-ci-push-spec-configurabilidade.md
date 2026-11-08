@@ -222,3 +222,7 @@
 > pode prosseguir / terminou?
 
 55. SF-192: casos de uso das ações em lote na fila, com resultado por item e concorrência (ver `NOTES.md`); andamento da suíte informado.
+
+> pode prosseguir
+
+56. SF-193: telas das ações em lote na fila e E2E; correção do E2E do lote que contaminava o da distribuição; fim da parte E e da SPEC (ver `NOTES.md`).

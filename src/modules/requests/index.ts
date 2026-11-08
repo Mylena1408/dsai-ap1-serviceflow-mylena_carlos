@@ -515,7 +515,7 @@ export async function getRequestScheduleName(requestId: unknown, database: Prism
 }
 
 // Batch actions in the queue (SPEC 2026-11-07-operacao-e-automacao, 7.3 item 2).
-export { BATCH_ACTIONS, BATCH_REFUSAL_LABELS, MAX_BATCH_ITEMS, type BatchAction, type BatchItemResult, type BatchRefusal, type BatchResult } from "./application/batch";
+export { BATCH_ACTIONS, BATCH_REFUSAL_LABELS, MAX_BATCH_ITEMS, type BatchAction, type BatchChoices, type BatchItemResult, type BatchRefusal, type BatchResult } from "./application/batch";
 
 /** Each item through the individual action, in its own transaction; the result per item. */
 export async function runQueueBatch(input: unknown, database: PrismaClient = prisma): Promise<batch.BatchResult> {
@@ -525,4 +525,9 @@ export async function runQueueBatch(input: unknown, database: PrismaClient = pri
     priority: (item) => changeRequestPriority(item, database),
     sector: (item) => sendRequestToSector(item, database),
   });
+}
+
+/** The colleagues and sectors the batch form offers. */
+export async function listBatchChoices(database: PrismaClient = prisma): Promise<batch.BatchChoices> {
+  return batch.listBatchChoices(createPrismaRequestQueryRepository(database));
 }

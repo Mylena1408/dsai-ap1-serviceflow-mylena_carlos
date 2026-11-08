@@ -2031,7 +2031,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-193 — Telas do lote e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Bloco "Ações em lote" e caixas de marcação na fila (`queue-batch.tsx`, `batch-actions.ts`), escolhas do lote (`listBatchChoices`), E2E `queue-batch.spec.ts`. Parte E concluída (CA-LOT-01 a 05) e, com ela, a SPEC "Operação e automação do atendimento".
 - **Objetivo:** Seção 7.3 (regra 2), parte E.
 - **Arquivos/módulos esperados:** Fila do atendente.
 - **Dependências:** SF-192.

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { RequestStageLabel } from "@/app/_components/request-stage";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { countComments } from "@/modules/comments";
-import { effectiveAssigneeId, getTeamLoad, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
+import { effectiveAssigneeId, getTeamLoad, listBatchChoices, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
+import { QueueBatch } from "./queue-batch";
+import { QUEUE_BATCH_FORM_ID } from "./queue-batch-form";
 import { TeamLoad } from "@/app/_components/team-load";
 import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
@@ -34,6 +36,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   const teamLoad = (await getTeamLoad())?.filter((load) => load.mode !== "NONE") ?? null;
   // SPEC 2026-11-07-operacao-e-automacao, 7.3 item 1.
   const views = await listSavedViews("QUEUE");
+  // SPEC 2026-11-07-operacao-e-automacao, 7.3 item 2.
+  const batchChoices = await listBatchChoices();
 
   try {
     result = await searchAttendantQueue(params);
@@ -45,6 +49,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   const requests = result?.items ?? [];
   const commentCounts = await countComments(requests.map(({ id }) => id));
   const now = new Date();
+  // How the batch's result names each request of the page.
+  const batchLabels = Object.fromEntries(requests.map((request) => [request.id, `${request.serviceNameSnapshot} (#${request.id.slice(0, 8)})`]));
 
   return (
     <main className="page-shell">
@@ -74,9 +80,22 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
             : "Não há solicitações no setor."}
         </p>
       ) : (
+        <>
+        <QueueBatch choices={batchChoices} labels={batchLabels} />
         <ul className="content-list">
           {requests.map((request) => (
             <li key={request.id}>
+              {/* Belongs to the batch form by its id: only the page's requests can be marked. */}
+              <label className="checkbox-label">
+                <input
+                  aria-label={`Marcar ${batchLabels[request.id]} para ação em lote`}
+                  form={QUEUE_BATCH_FORM_ID}
+                  name="requestIds"
+                  type="checkbox"
+                  value={request.id}
+                />
+                Marcar para ação em lote
+              </label>
               <h2>
                 <Link href={`/queue/${request.id}`}>
                   {request.serviceNameSnapshot}
@@ -107,6 +126,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
             </li>
           ))}
         </ul>
+        </>
       )}
       {result && result.total > 0 ? (
         <RequestPagination

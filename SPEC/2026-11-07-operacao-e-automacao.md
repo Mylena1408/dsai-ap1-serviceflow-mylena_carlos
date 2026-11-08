@@ -352,14 +352,18 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
   - os dados comuns são conferidos uma vez antes de qualquer item: a justificativa do encaminhamento vazia, mais de 50 ou solicitações repetidas recusam o lote inteiro, sem tocar em nada;
   - os motivos são textos fixos: "sem permissão", "já tem responsável…", "a ação não vale para ela agora…", "o colega escolhido não pode recebê-la", "já está com essa prioridade", "o setor escolhido não pode recebê-la" e "não foi possível concluir". A ação individual usa o mesmo erro para "não vale agora" e "mudou enquanto você agia", por isso esses dois casos têm um texto só;
   - uma falha inesperada num item vira "não foi possível concluir" e não interrompe os demais.
+- *Esclarecimentos registrados em 2026-11-08 (SF-193):*
+  - na fila, cada solicitação da página ganha "Marcar para ação em lote"; as caixas pertencem ao formulário "Ações em lote" pelo identificador dele, então só as solicitações da página podem ser enviadas;
+  - o formulário mostra só os dados da ação escolhida (colega, prioridade, ou setor e justificativa); os colegas e setores oferecidos são os mesmos das ações individuais, para o setor de quem está na fila;
+  - o resultado aparece no próprio bloco, sem passar pelo endereço: o resumo ("Assumir: 2 feitas, 1 recusada") e cada solicitação com "feito" ou "recusado (motivo)"; a fila é lida de novo depois do lote.
 
 ### 7.5 Critérios de aceitação
 
-- [ ] **CA-LOT-01** — Quem não salva visões nem usa o lote não vê mudança além dos controles novos.
-- [ ] **CA-LOT-02** — Salvar, abrir, renomear e apagar visões nas duas listas, com os limites da regra 1; uma pessoa nunca vê as visões de outra.
-- [ ] **CA-LOT-03** — As quatro ações em lote aplicam a cada item as regras da ação individual, cada um na sua transação, e mostram o resultado por item; um item recusado não afeta os outros; mais de 50 é recusado.
-- [ ] **CA-LOT-04** — O histórico, os eventos e os avisos de cada item são os mesmos da ação individual.
-- [ ] **CA-LOT-05** — Migration aditiva; nenhuma dependência nova.
+- [x] **CA-LOT-01** — Quem não salva visões nem usa o lote não vê mudança além dos controles novos. *Verificado em 2026-11-08 (SF-191 e SF-193): sem visões nem lote, as listas e as ações individuais funcionam como antes (as suítes anteriores passaram sem mudança de comportamento); os controles novos são o bloco "Minhas visões", o bloco "Ações em lote" e as caixas de marcação da fila. A única mudança fora deles foi a correção do formulário de busca, que agora mostra os critérios da página também numa navegação sem recarregar (unitário, integração e E2E).*
+- [x] **CA-LOT-02** — Salvar, abrir, renomear e apagar visões nas duas listas, com os limites da regra 1; uma pessoa nunca vê as visões de outra. *Verificado em 2026-11-08 (SF-191): na fila e em "Minhas solicitações", com nome de 1 a 40, único por pessoa e lista sem diferenciar maiúsculas, até 20 por lista e critérios normalizados de até 1.000 caracteres; as visões de outra pessoa não aparecem e respondem "não encontrada" (unitário, integração e E2E `saved-views.spec.ts`).*
+- [x] **CA-LOT-03** — As quatro ações em lote aplicam a cada item as regras da ação individual, cada um na sua transação, e mostram o resultado por item; um item recusado não afeta os outros; mais de 50 é recusado. *Verificado em 2026-11-08 (SF-192 e SF-193): assumir, transferir, mudar a prioridade e encaminhar passam cada item pela ação individual; a tela mostra o resultado por item com motivo fixo; um item de outra pessoa ou de outro setor é recusado sem afetar os demais; mais de 50, repetidas ou encaminhamento sem justificativa são recusados antes de qualquer item; dois lotes simultâneos assumem cada solicitação uma vez (unitário, integração com concorrência e E2E `queue-batch.spec.ts`).*
+- [x] **CA-LOT-04** — O histórico, os eventos e os avisos de cada item são os mesmos da ação individual. *Verificado em 2026-11-08 (SF-192 e SF-193): cada item grava a atribuição, a prioridade ou o encaminhamento com o ator, o evento (`request.assignment_changed`, `request.priority_changed`, `request.sector_changed`) e os avisos da própria ação individual, que é a que roda; o histórico da solicitação mostra a mudança como numa ação feita sozinha (integração e E2E).*
+- [x] **CA-LOT-05** — Migration aditiva; nenhuma dependência nova. *Verificado em 2026-11-08 (SF-191): migration `20261108500000_saved_views` só acrescenta (enum, tabela, índice único e `CHECK`); as ações em lote não têm tabela; nenhuma dependência nova (integração do schema).*
 
 ## 8. Testes
 
