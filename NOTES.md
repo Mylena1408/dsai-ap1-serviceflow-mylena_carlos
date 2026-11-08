@@ -2454,3 +2454,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
 
 - **CI do deploy de 2026-11-08 (execução `42470836259`, commit `f50c765`):** falhou no passo "Secret scan (gitleaks)" com código 22, que é o `curl -f` recebendo erro HTTP ao baixar o binário oficial do gitleaks; o download do mesmo arquivo respondia 504 também a partir da máquina local. Não foi um achado: a varredura local com o mesmo binário 8.30.1 (o já conferido na SF-143) nos 258 commits deu "no leaks found". Os passos seguintes (typecheck, testes) não rodaram nesse CI; as mesmas suítes passaram localmente antes de cada commit. A Vercel publicou normalmente. Falta rodar o CI de novo quando o GitHub voltar a servir o arquivo.
+
+## CI: novas tentativas no download do gitleaks (2026-11-08)
+
+- **Motivo:** as duas execuções do CI de hoje falharam no download do binário do gitleaks (códigos 22 e 56 do `curl`: 504 do GitHub e conexão interrompida), antes de typecheck, lint e testes; nenhum achado.
+- **Mudança:** `.github/workflows/ci.yml`, passo "Secret scan (gitleaks)": `curl` com `--retry 5 --retry-all-errors --retry-delay 10`. Versão, SHA-256 e varredura iguais. Registrado na seção 7 da SPEC de integração contínua.
+- **Conferência local:** o comando novo baixou o arquivo e o checksum conferiu. O arquivo do CI não roda localmente; o resultado vem da próxima execução.

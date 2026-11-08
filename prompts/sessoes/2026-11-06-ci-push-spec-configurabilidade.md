@@ -234,3 +234,11 @@
 > aguardo,me avise quando terminar
 
 58. CI do envio falhou no download do gitleaks (erro HTTP do GitHub, código 22); varredura local sem achados; Vercel publicou. Registrado; CI a repetir.
+
+> faça o push do commit para rodar o CI de novo
+
+59. Espera pelo arquivo do gitleaks (504) e push quando voltou; o CI falhou de novo no download (código 56); explicadas as opções.
+
+> pode fazer a opção 2
+
+60. `curl` do gitleaks com novas tentativas no CI, conferido localmente, registrado na SPEC de integração contínua; commit e push (ver `NOTES.md`).

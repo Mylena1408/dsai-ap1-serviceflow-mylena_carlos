@@ -49,3 +49,10 @@ Novos critérios:
 **Atualização 2026-11-06 (execução `42168361870`):** as anotações mostraram 5 E2E falhando porque, no Node 24 do CI, um campo de arquivo vazio chega à Server Action com o nome `"blob"`. Era um defeito real da aplicação, que também afetava a produção (Node 26), e não do CI. Corrigido em `comment-form-data.ts`; a suíte E2E inteira passou localmente com o Node 24. CA-CI-06 continua a verificar na próxima execução.
 
 **Atualização 2026-11-06 (execução `42205142445`):** os 5 E2E do campo de arquivo vazio não chegaram a rodar, porque a integração falhou antes num teste que dependia da hora do dia (`business-hours-sla.test.ts`, só entre 10:00 e 11:00 UTC). Corrigido o teste; com o Node 24 fixado também na máquina, todas as suítes passaram localmente.
+
+## 7. Novas tentativas no download do gitleaks (2026-11-08)
+
+A responsável aprovou em 2026-11-08 ("pode fazer a opção 2"). Duas execuções seguidas (`42470836259` e `42472307287`) falharam no passo da varredura de segredos sem achado nenhum: o `curl` que baixa o binário oficial terminou com o código 22 (o GitHub respondeu 504) e depois com o 56 (a conexão caiu). A varredura local com o mesmo binário não encontrou segredos.
+
+- O download passou a tentar de novo até 5 vezes, com 10 segundos entre as tentativas, também nos erros de rede e de servidor (`--retry 5 --retry-all-errors --retry-delay 10`). A versão (8.30.1), a conferência do SHA-256 e a varredura do histórico completo não mudaram.
+- Conferido localmente: o comando novo baixou o arquivo e o SHA-256 bateu com o fixado no CI.
