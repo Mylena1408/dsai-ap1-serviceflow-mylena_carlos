@@ -2,6 +2,7 @@ import { LINK_ROLE_LABELS, type RequestLinkEventView, type RequestWithHistory } 
 import { requestShortCode } from "@/shared/requests";
 import type { RequestTagEventView } from "@/modules/tags";
 import { tagEventTitle } from "./request-tags";
+import type { RequestChecklistEventView } from "@/modules/checklists";
 import { PRIORITY_LABELS } from "./request-priority";
 import { REQUEST_STATUS_LABELS } from "./request-status";
 
@@ -23,6 +24,8 @@ type RequestTimelineProps = {
   linkEvents?: readonly RequestLinkEventView[];
   /** SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 3: tags put on and taken off, for the team. */
   tagEvents?: readonly RequestTagEventView[];
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 and 13.1 item 4: checklist items marked and unmarked, for the team. */
+  checklistEvents?: readonly RequestChecklistEventView[];
 };
 
 /** Who made an assignment change: a person or, for a rule's handover, the system (decision G17). */
@@ -74,6 +77,7 @@ export function buildTimeline(
   request: RequestWithHistory,
   linkEvents: readonly RequestLinkEventView[] = [],
   tagEvents: readonly RequestTagEventView[] = [],
+  checklistEvents: readonly RequestChecklistEventView[] = [],
 ): TimelineEntry[] {
   // A rejection cancels the request with the same note (SPEC 2026-11-01-aprovacoes, 5.3.4); the
   // note is shown once, on the decision.
@@ -206,13 +210,40 @@ export function buildTimeline(
     note: null,
   }));
 
-  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries, ...fieldEntries, ...linkEntries, ...tagEntries].sort(
+  const checklistEntries = checklistEvents.map((event) => ({
+    id: `checklist-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: checklistEventTitle(event),
+    actor: event.actorName,
+    note: event.note,
+    noteLabel: "Observação",
+  }));
+
+  return [
+    ...statusEntries,
+    ...sectorEntries,
+    ...assignmentEntries,
+    ...priorityEntries,
+    ...stageEntries,
+    ...approvalEntries,
+    ...documentEntries,
+    ...pauseEntries,
+    ...fieldEntries,
+    ...linkEntries,
+    ...tagEntries,
+    ...checklistEntries,
+  ].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }
 
-export function RequestTimeline({ request, actorLabel, linkEvents = [], tagEvents = [] }: RequestTimelineProps) {
-  const entries = buildTimeline(request, linkEvents, tagEvents);
+/** 4.3 item 3: "Item X concluído"; the one who did it is the entry's actor. */
+export function checklistEventTitle(event: Pick<RequestChecklistEventView, "action" | "itemText">): string {
+  return event.action === "DONE" ? `Item do checklist "${event.itemText}" concluído` : `Item do checklist "${event.itemText}" desmarcado`;
+}
+
+export function RequestTimeline({ request, actorLabel, linkEvents = [], tagEvents = [], checklistEvents = [] }: RequestTimelineProps) {
+  const entries = buildTimeline(request, linkEvents, tagEvents, checklistEvents);
 
   return (
     <section className="surface-card content-section" aria-labelledby="history-heading">

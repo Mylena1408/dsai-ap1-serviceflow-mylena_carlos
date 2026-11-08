@@ -2131,7 +2131,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-203 — Marcar e desmarcar itens, histórico
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Casos de uso `src/modules/checklists/application/request-checklist.ts` (`getRequestChecklist`, `markChecklistItem`), histórico "Item do checklist ... concluído/desmarcado" com a observação no detalhe do atendente e do gestor.
 - **Objetivo:** Seção 4.3 (regra 3), parte B.
 - **Arquivos/módulos esperados:** `src/modules/requests/`.
 - **Dependências:** SF-202.

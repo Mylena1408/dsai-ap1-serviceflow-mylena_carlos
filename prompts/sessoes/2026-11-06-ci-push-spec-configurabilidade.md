@@ -314,3 +314,11 @@
 > pode prosseguir
 
 78. Banco de testes religado; E2E que falharam rodados sozinhos (passaram) e suíte completa aprovada; código da SF-203 preparado fora do projeto enquanto a suíte rodava.
+
+> pode prosseguir
+
+79. SF-203: marcar e desmarcar itens com observação e histórico; suíte completa aprovada.
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
+
+80. Contagem total com `scripts/cloc-diff.sh` informada depois do commit da SF-203.

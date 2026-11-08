@@ -25,6 +25,7 @@ import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
 import { RequestTags } from "@/app/_components/request-tags";
 import { getRequestTags } from "@/modules/tags";
+import { getRequestChecklist } from "@/modules/checklists";
 import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { requireManagerPageAccess } from "../../page-access";
 import { approveRequestAction, rejectRequestAction } from "../actions";
@@ -80,8 +81,11 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 2 (decision I2): the sector's manager reads the tags; a
   // manager who only decides an approval of another sector is not on its team and sees none.
   let tags: Awaited<ReturnType<typeof getRequestTags>> | null = null;
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 (decision I6): the same team reads the checklist.
+  let checklist: Awaited<ReturnType<typeof getRequestChecklist>> | null = null;
   try {
     tags = await getRequestTags(request.id);
+    checklist = await getRequestChecklist(request.id);
   } catch (caught) {
     if (!(caught instanceof NotFoundError)) throw caught;
   }
@@ -155,7 +159,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       <RequestLinks hrefFor={(id) => `/approvals/${id}`} links={links.links} requestId={request.id} />
       <RequestGroupBlock block={group} hrefFor={(id) => `/approvals/${id}`} />
       {tags ? <RequestTags requestId={request.id} view={tags} /> : null}
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} />
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} />
     </main>
   );
 }

@@ -2559,3 +2559,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Condições:** avaliadas com as respostas do solicitante na abertura, por `conditionMet` (a mesma regra das etapas); as respostas só são lidas quando o modelo tem item condicional.
 - **Suíte:** a primeira rodada foi encerrada pelo Claude Code por falta de memória (junto com o banco de testes), com `access-roles` (de novo, 5 min parado na página de entrada, no primeiro teste) e `request-search` falhando; a pedido da responsável, o banco foi religado, os dois passaram sozinhos (11 s e 9 s) e a suíte completa passou: typecheck, lint e build OK; unitários 1517/1517; integração 638/638; E2E 46/46.
 - **Linhas:** 199 `added` em TS (aplicação 39, testes 160).
+
+## SF-203 — Marcar e desmarcar itens do checklist (2026-11-08)
+
+- **Quem marca:** a regra das demais ações do atendimento (responsável efetivo; qualquer atendente do setor sem responsável; supervisor da fila). As permissões só são lidas quando outra pessoa detém a solicitação.
+- **Quem lê:** a mesma equipe das etiquetas (atendentes e gestor do setor); o solicitante e outros setores recebem "não encontrado" (decisão I6).
+- **Concorrência:** a marcação é gravada com `updateMany` condicionado ao `doneAt` lido; quem chega depois recebe conflito, e marcar o que já está marcado não grava nada.
+- **Histórico:** `RequestTimeline` ganhou `checklistEvents`, com a observação rotulada "Observação". O bloco do checklist no detalhe fica para a SF-205.
+- **Processo:** o código foi preparado fora do projeto enquanto a suíte da SF-202 rodava e trazido depois do commit dela. A suíte desta tarefa foi iniciada sem o modo de segundo plano da ferramenta; o acompanhamento foi feito pelo log.
+- **Resultados:** typecheck, lint e build OK; unitários 1518/1518; integração 643/643; E2E 46/46.
+- **Linhas:** 396 `added` em TS (aplicação 270, testes 126).
