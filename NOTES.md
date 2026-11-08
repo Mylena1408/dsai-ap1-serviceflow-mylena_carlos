@@ -2527,3 +2527,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Interrupção:** a primeira rodada da suíte foi encerrada pelo Claude Code por falta de memória no sistema (durante o build), junto com o banco de testes local. A pedido da responsável ("pode prosseguir"), o banco foi religado e a suíte rodou de novo.
 - **Resultados:** typecheck, lint e build OK; unitários 1497/1497; integração 628/628; E2E 46/46.
 - **Linhas:** 157 `added` (aplicação 56, testes 101). Parte A inteira (SF-194 a SF-199): cerca de 1.630, bem abaixo da média de 630 por tarefa usada na estimativa da SPEC (cerca de 270 por tarefa).
+
+## Aprofundamento da SPEC "Atendimento no dia a dia" (2026-11-08)
+
+- **Motivo:** a parte A rendeu cerca de 270 linhas por tarefa, contra as 630 da estimativa; a responsável escolheu aprofundar as partes B a F ("vamos prosseguir pela opção 2").
+- **Registro:** seção 13 da SPEC, com os acréscimos de cada parte (checklist condicional, cópia de modelo, progresso e observação; estimativa de horas, "Minhas horas" e horas por etiqueta; "Que eu acompanho" na fila, seguir ao comentar e seguidores na tela da equipe; "Minhas menções" e menções do gestor; possíveis duplicadas e duplicadas no lote), decisões J1 a J10, critérios novos e as tarefas SF-224 a SF-233.
+- **Estimativa revista:** de 11.000 a 14.000 linhas para a SPEC 1; o restante da meta fica para a revisão da SPEC 2.

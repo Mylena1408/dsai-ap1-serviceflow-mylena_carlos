@@ -2338,3 +2338,103 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-CMP-03 (checklist); revisão de todos os critérios.
 - **Testes relacionados:** Unitários, integração e E2E.
 - **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-224 — Itens condicionais do checklist
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.1 (item 1), parte B (aprofundamento).
+- **Arquivos/módulos esperados:** Módulo do checklist, cópia.
+- **Dependências:** SF-205.
+- **Critérios de conclusão:** CA-CHK-06.
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-225 — Copiar o modelo de outro serviço
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.1 (item 2), parte B (aprofundamento).
+- **Arquivos/módulos esperados:** Configuração do checklist, auditoria.
+- **Dependências:** SF-224.
+- **Critérios de conclusão:** CA-CHK-07 (cópia).
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-226 — Progresso do checklist na fila e observação no item
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.1 (itens 3 e 4), parte B (aprofundamento).
+- **Arquivos/módulos esperados:** Fila, detalhe, histórico.
+- **Dependências:** SF-225.
+- **Critérios de conclusão:** CA-CHK-07 (progresso e observação).
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-227 — Estimativa de horas por serviço
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.2 (item 1), parte C (aprofundamento).
+- **Arquivos/módulos esperados:** Serviços, detalhe, relatório de horas.
+- **Dependências:** SF-210.
+- **Critérios de conclusão:** CA-HRS-05.
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-228 — "Minhas horas" no painel e horas por etiqueta
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.2 (itens 2 e 3), parte C (aprofundamento).
+- **Arquivos/módulos esperados:** "Meu painel", relatório de horas.
+- **Dependências:** SF-227.
+- **Critérios de conclusão:** CA-HRS-06.
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-229 — "Que eu acompanho" na fila e seguidores na tela da equipe
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.3 (itens 1 e 3), parte D (aprofundamento).
+- **Arquivos/módulos esperados:** Busca da fila, detalhes.
+- **Dependências:** SF-214.
+- **Critérios de conclusão:** CA-SEG-06 (filtro e lista).
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-230 — Seguir ao comentar, com a preferência
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.3 (item 2), parte D (aprofundamento).
+- **Arquivos/módulos esperados:** Comentários, preferências.
+- **Dependências:** SF-229.
+- **Critérios de conclusão:** CA-SEG-06 (seguir ao comentar).
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-231 — "Minhas menções" e menções do gestor
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.4, parte E (aprofundamento).
+- **Arquivos/módulos esperados:** Áreas do atendente e do gestor, notificações.
+- **Dependências:** SF-216.
+- **Critérios de conclusão:** CA-MEN-04.
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-232 — Possíveis duplicadas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.5 (item 1), parte F (aprofundamento).
+- **Arquivos/módulos esperados:** Detalhe da fila.
+- **Dependências:** SF-219.
+- **Critérios de conclusão:** CA-DUP-04 (sugestões).
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-233 — Encerrar como duplicada no lote
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 13.5 (item 2), parte F (aprofundamento).
+- **Arquivos/módulos esperados:** Lote da fila.
+- **Dependências:** SF-232.
+- **Critérios de conclusão:** CA-DUP-04 (lote).
+- **Testes relacionados:** Unitários, integração e E2E da parte.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.

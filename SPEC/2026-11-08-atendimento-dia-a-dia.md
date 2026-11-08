@@ -340,3 +340,80 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 **Estimativa:** cerca de 30 tarefas × 630 linhas (média real medida na SPEC 2026-11-07: 11.903 linhas em 19 tarefas) ≈ **18.900 linhas** pelo `cloc`, com margem de ±20%. Com a contagem de 72.773 linhas em 2026-11-08, esta SPEC leva o projeto a algo entre 87.900 e 95.400; a SPEC 2 (itens 7 a 10 do levantamento: avisos e manutenção programada, importação de usuários por CSV, relatório periódico e calendário por setor, cerca de 10.000 linhas) completa a meta de 100.000. Por pedido da responsável ("deixe a spec 2 para quando a spec 1 estiver perto do fim, me avise e revisamos"), a SPEC 2 só será escrita perto do fim desta, depois de revisada com ela.
 
 **Lembrete registrado:** ao passar de 99.000 linhas `added`, lembrar a responsável da escolha entre a conexão direta e o pooling do Neon.
+
+## 13. Aprofundamento das partes B a F (2026-11-08)
+
+**Registro da mudança de escopo.** A parte A entregou cerca de 1.630 linhas em 6 tarefas (cerca de 270 por tarefa, contra a média de 630 usada na estimativa), porque o código existente já resolvia boa parte do trabalho. Diante disso, a responsável escolheu aprofundar as partes que faltam ("vamos prosseguir pela opção 2"): mais regras e telas onde a SPEC já previa espaço, sempre registradas aqui antes de implementar. Cada acréscimo abaixo resolve um uso real do atendimento e segue o padrão de regras que já existem no sistema; vale a mesma garantia da seção 2 (quem não usa não percebe mudança) e a mesma exclusão de segurança da conta e de acesso. As decisões J1 a J10 foram adotadas como recomendadas e podem ser revistas pela responsável antes de cada parte.
+
+### 13.1 Parte B — Checklist (acréscimos)
+
+1. **Itens condicionais (decisão J1):** um item do modelo pode depender da resposta a um campo do serviço, com a mesma regra das condições das etapas (campo ativo do formulário do solicitante, do tipo escolha, e um valor entre as opções); na cópia, o item só entra se a resposta da solicitação atender à condição.
+2. **Copiar o modelo de outro serviço (decisão J2):** na configuração do checklist, "Copiar de outro serviço" acrescenta os itens ativos do outro serviço ao fim do modelo (sem as condições, que apontam para campos do outro serviço), respeitando o limite de 20 itens; entra na auditoria.
+3. **Progresso:** a lista da fila mostra "Checklist 3/5" (marcados sobre o total) nas solicitações que têm checklist; o detalhe mostra os obrigatórios pendentes em destaque.
+4. **Observação no item (decisão J3):** ao marcar um item, o atendente pode escrever uma observação curta (até 200 caracteres), que aparece no checklist e no histórico.
+
+- **CA-CHK-06** — Itens condicionais entram na cópia só quando a resposta atende à condição; a condição segue as regras das etapas.
+- **CA-CHK-07** — Copiar de outro serviço acrescenta os itens ativos sem condição, dentro do limite, com auditoria; a fila mostra o progresso; a observação do item fica no checklist e no histórico.
+
+### 13.2 Parte C — Apontamento de horas (acréscimos)
+
+1. **Estimativa por serviço (decisão J4):** o serviço pode ter uma estimativa de horas de atendimento (de 1 a 200 horas, opcional, com auditoria); a solicitação mostra o total apontado contra a estimativa ("3h de 4h estimadas") e o relatório mostra, por serviço, a média apontada nas solicitações concluídas contra a estimativa.
+2. **"Minhas horas" (decisão J5):** o painel do atendente ("Meu painel") ganha as horas que ele apontou no período, por dia e por serviço.
+3. **Horas por etiqueta:** o relatório de horas soma as horas também por etiqueta (uma solicitação com duas etiquetas conta nas duas, como em "Análises").
+
+- **CA-HRS-05** — A estimativa do serviço é configurável com auditoria e aparece na solicitação e no relatório.
+- **CA-HRS-06** — "Meu painel" mostra as horas do atendente no período; o relatório soma também por etiqueta.
+
+### 13.3 Parte D — Seguidores (acréscimos)
+
+1. **"Acompanhando" na fila (decisão J6):** a fila ganha o filtro "Que eu acompanho", com as solicitações que o atendente segue, inclusive as de outro setor que ele seguiu antes de serem encaminhadas (só os dados que a leitura permite).
+2. **Seguir ao comentar (decisão J7):** o atendente que escreve um comentário numa solicitação passa a segui-la automaticamente, se ainda não segue; a preferência "Seguir automaticamente as solicitações em que comento" (ligada por padrão) fica em "Notificações" e pode ser desligada.
+3. **Seguidores na tela da equipe:** o detalhe da fila e do gestor mostra quem acompanha a solicitação (nomes), sem dados de contato.
+
+- **CA-SEG-06** — O filtro "Que eu acompanho" da fila mostra só o que a pessoa segue e pode ler; seguir ao comentar respeita a preferência; a equipe vê quem acompanha.
+
+### 13.4 Parte E — Menções (acréscimos)
+
+1. **"Minhas menções" (decisão J8):** a área do atendente e a do gestor ganham a lista das menções recebidas (solicitação, quem mencionou, quando, lida ou não), ligada à notificação; abrir a solicitação marca a menção como vista.
+2. **Gestor também menciona:** o gestor do setor, que já escreve comentários internos, pode mencionar os atendentes do setor.
+
+- **CA-MEN-04** — "Minhas menções" lista as menções recebidas, marca como vistas ao abrir e respeita quem pode ler cada solicitação.
+
+### 13.5 Parte F — Duplicadas (acréscimos)
+
+1. **Possíveis duplicadas (decisão J9):** o detalhe da fila mostra, para a equipe, até 5 solicitações do mesmo solicitante e do mesmo serviço abertas nos 7 dias anteriores ou posteriores e ainda não encerradas, com atalho para vincular como duplicada.
+2. **Encerrar como duplicada no lote (decisão J10):** o lote ganha "Encerrar como duplicada de", que pede o código da original e a nota; cada item exige o vínculo "duplicada de" com essa original (criado na hora, se ainda não existir, pelas regras dos vínculos) e segue a regra 8.3.
+
+- **CA-DUP-04** — As possíveis duplicadas aparecem com o critério da regra 1, só para a equipe; o lote encerra como duplicada item a item, com resultado por item.
+
+### 13.6 Decisões (2026-11-08)
+
+| # | Questão | Decisão | Alternativa descartada |
+|---|---|---|---|
+| J1 | Item condicional | Mesma regra das condições das etapas | Condição própria (outra regra para aprender) |
+| J2 | Copiar modelo | Acrescenta ao fim, sem condições | Substituir o modelo (apagaria itens) |
+| J3 | Observação no item | Opcional, até 200 caracteres | Obrigatória |
+| J4 | Estimativa | Por serviço, em horas inteiras | Por solicitação |
+| J5 | Horas do atendente | Em "Meu painel" | Página nova |
+| J6 | "Acompanhando" na fila | Filtro da busca | Página separada |
+| J7 | Seguir ao comentar | Automático, com preferência para desligar | Só manual |
+| J8 | Menções recebidas | Lista própria ligada às notificações | Só a notificação |
+| J9 | Possíveis duplicadas | Mesmo solicitante e serviço, ±7 dias, não encerradas | Semelhança de texto (cara e imprecisa) |
+| J10 | Duplicadas no lote | Uma original para todos os itens | Uma original por item |
+
+### 13.7 Tarefas acrescentadas
+
+| Tarefa | Parte | Conteúdo |
+|---|---|---|
+| SF-224 | B | Itens condicionais do checklist |
+| SF-225 | B | Copiar o modelo de outro serviço |
+| SF-226 | B | Progresso do checklist na fila e observação no item |
+| SF-227 | C | Estimativa de horas por serviço |
+| SF-228 | C | "Minhas horas" no painel e horas por etiqueta |
+| SF-229 | D | "Que eu acompanho" na fila e seguidores na tela da equipe |
+| SF-230 | D | Seguir ao comentar, com a preferência |
+| SF-231 | E | "Minhas menções" e menções do gestor |
+| SF-232 | F | Possíveis duplicadas |
+| SF-233 | F | Encerrar como duplicada no lote |
+
+**Ordem:** cada tarefa acrescentada entra no fim da sua parte (por exemplo, SF-224 a SF-226 depois da SF-205 e antes da parte C). **Estimativa revista:** pela média real da parte A (cerca de 270 linhas por tarefa) e com os acréscimos (que têm mais telas e regras próprias), a SPEC 1 deve somar algo entre 11.000 e 14.000 linhas; o que faltar para as 100.000 será tratado na revisão da SPEC 2, perto do fim desta.

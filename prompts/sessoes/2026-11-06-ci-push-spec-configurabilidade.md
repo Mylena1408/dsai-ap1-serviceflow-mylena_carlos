@@ -294,3 +294,7 @@
 > pode prosseguir
 
 73. Banco de testes religado e suíte da SF-199 rodada de novo, aprovada; fim da parte A (ver `NOTES.md`).
+
+> vamos prosseguir pela opção 2.
+
+74. Aprofundamento das partes B a F registrado na SPEC (seção 13, decisões J1 a J10, tarefas SF-224 a SF-233), antes da parte B.
