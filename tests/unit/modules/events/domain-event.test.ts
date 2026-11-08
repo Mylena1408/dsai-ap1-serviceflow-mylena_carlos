@@ -44,6 +44,8 @@ describe("outbox payload (CA-EVT-02)", () => {
       "request.stage_overdue",
       // 7.3.
       "request.escalated",
+      // Added by SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 3.
+      "request.tags_changed",
     ]);
     expect(
       outboxPayload({

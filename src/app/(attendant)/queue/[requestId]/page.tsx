@@ -39,6 +39,9 @@ import { TeamSatisfaction } from "@/app/_components/request-satisfaction";
 import { listResponsesForRequest } from "@/modules/canned-responses";
 import { RequestEscalations } from "@/app/_components/request-escalations";
 import { RequestLinks } from "@/app/_components/request-links";
+import { RequestTags } from "@/app/_components/request-tags";
+import { getRequestTags } from "@/modules/tags";
+import { addRequestTagAction, removeRequestTagAction } from "../tag-actions";
 import { RequestGroupBlock } from "@/app/_components/request-group";
 import { linkRequestAction, unlinkRequestAction } from "../link-actions";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
@@ -87,6 +90,12 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "link-missing") return "Não há solicitação com esse código que você possa ver.";
   if (error === "link-conflict")
     return "Não foi possível vincular: as duas já estão vinculadas, uma delas já tem 10 vínculos, ou a duplicada já é duplicada ou original de outra.";
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 2.
+  if (notice === "tagged") return "Etiqueta aplicada.";
+  if (notice === "untagged") return "Etiqueta retirada.";
+  if (error === "tag-limit") return "Uma solicitação tem no máximo 5 etiquetas.";
+  if (error === "tag-invalid") return "Escolha uma etiqueta ativa do setor.";
+  if (error === "tag-state") return "Não é possível mudar as etiquetas de uma solicitação cancelada, ou ela mudou enquanto você agia.";
   return null;
 }
 
@@ -107,6 +116,7 @@ export default async function QueueRequestPage({
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
   let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
   let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
+  let tags: Awaited<ReturnType<typeof getRequestTags>> | null = null;
   let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
@@ -126,6 +136,8 @@ export default async function QueueRequestPage({
     links = await listRequestLinks(request.id);
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
     group = await getRequestGroupBlock(request.id);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 2.
+    tags = await getRequestTags(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -234,6 +246,7 @@ export default async function QueueRequestPage({
         requestId={request.id}
       />
       <RequestGroupBlock block={group} hrefFor={(id) => `/queue/${id}`} />
+      {tags ? <RequestTags edit={{ addAction: addRequestTagAction, removeAction: removeRequestTagAction }} requestId={request.id} view={tags} /> : null}
       <RequestConversation
         requestId={request.id}
         comments={comments}
@@ -242,7 +255,7 @@ export default async function QueueRequestPage({
         action={addCommentAction}
         cannedResponses={cannedResponses}
       />
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} />
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} />
     </main>
   );
 }

@@ -2485,3 +2485,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Telas:** componente compartilhado `_components/sector-tags.tsx` (com `TagChip`, a etiqueta na cor dela, que as próximas tarefas usam) na seção "Etiquetas" da administração e na nova página "Etiquetas" do gestor; lista com cor, situação e quantas solicitações usam cada etiqueta.
 - **Resultados:** typecheck, lint e build OK; unitários 1488/1488; integração 617/617; E2E 45/45 na primeira rodada completa.
 - **Linhas:** 482 `added` (aplicação 365, testes 117).
+
+## SF-196 — Etiquetas na solicitação (2026-11-08)
+
+- **Casos de uso** (`src/modules/tags/application/request-tags.ts`): o atendente do setor atual aplica e retira (até 5, só ativas do setor, nunca em cancelada; as de setor anterior podem ser retiradas), numa transação serializável com as linhas de `RequestTag`, o histórico `RequestTagEvent` e o evento `request.tags_changed` (quem mudou e quantas). Leitura só para a equipe do setor (atendentes e gestor); os demais recebem "não encontrada".
+- **Tela:** bloco "Etiquetas" (`_components/request-tags.tsx`) no detalhe da fila, com aplicar e retirar, e no detalhe do gestor do setor, só leitura (fora do bloco que vira 404, porque um gestor de outro setor pode ler a solicitação para aprovar e não é da equipe dela); o histórico ganha "Etiqueta X aplicada/retirada".
+- **Problema achado pela integração:** o banco tem um `CHECK` com os tipos de evento aceitos no outbox e nos webhooks; o tipo novo foi recusado. Migration nova `20261108700000_request_tags_event` recria as duas listas com ele (a da SF-194, já no commit, não foi alterada). Os webhooks passam a oferecer "Etiquetas alteradas".
+- **Concorrência:** duas pessoas aplicando a mesma etiqueta ao mesmo tempo gravam uma vez (integração).
+- **Resultados:** typecheck, lint e build OK; unitários 1492/1492; integração 622/622; E2E 45/45 na primeira rodada completa.
+- **Linhas:** 458 `added` (aplicação 308, testes 150).

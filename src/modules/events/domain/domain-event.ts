@@ -99,6 +99,14 @@ export type DomainEvent =
       payload: { escalationId: string };
     }
   | {
+      // Tags put on or taken off a request (SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 3): no one is
+      // warned; the counts say what changed, the tags themselves stay in the database.
+      type: "request.tags_changed";
+      requestId: string;
+      occurredAt: Date;
+      payload: { actorId: string; added: number; removed: number };
+    }
+  | {
       // A pending approval level passed its deadline (SPEC 2026-11-06-aprofundamento-configurabilidade,
       // 4.3.6). Written by the daily job, once per level; the sector names who decides it.
       type: "request.approval_overdue";
@@ -134,6 +142,7 @@ export const DOMAIN_EVENT_TYPES: readonly DomainEventType[] = [
   "request.approval_overdue",
   "request.stage_overdue",
   "request.escalated",
+  "request.tags_changed",
 ];
 
 const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
@@ -153,6 +162,7 @@ const PAYLOAD_KEYS: Record<DomainEventType, readonly string[]> = {
   "request.approval_overdue": ["level", "sectorId"],
   "request.stage_overdue": ["stageIndex"],
   "request.escalated": ["escalationId"],
+  "request.tags_changed": ["actorId", "added", "removed"],
 };
 
 /**

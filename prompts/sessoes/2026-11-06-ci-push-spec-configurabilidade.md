@@ -266,3 +266,7 @@
 > pode prosseguir
 
 66. SF-195: cadastro das etiquetas na administração e na área do gestor, com auditoria (ver `NOTES.md`).
+
+> pode prosseguir
+
+67. SF-196: aplicar e retirar etiquetas na solicitação, histórico, evento e migration das listas de eventos (ver `NOTES.md`).

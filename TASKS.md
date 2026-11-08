@@ -2061,7 +2061,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-196 — Aplicar e retirar etiquetas na solicitação
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `changeRequestTags` e `getRequestTags`; bloco "Etiquetas" no detalhe da fila (edição) e do gestor (leitura); histórico; evento `request.tags_changed` com a migration `20261108700000_request_tags_event`.
 - **Objetivo:** Seção 3.3 (regras 2 e 3), parte A.
 - **Arquivos/módulos esperados:** `src/modules/requests/`, detalhe da fila.
 - **Dependências:** SF-195.

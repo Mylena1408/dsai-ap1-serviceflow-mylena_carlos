@@ -33,6 +33,8 @@ export const WEBHOOK_EVENT_LABELS: Record<DomainEventType, string> = {
   "request.stage_overdue": "Etapa atrasada",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3.
   "request.escalated": "Regra de escalonamento aplicada",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 3.
+  "request.tags_changed": "Etiquetas alteradas",
 };
 
 export function normalizeWebhookName(raw: string): string | null {

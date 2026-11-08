@@ -1,5 +1,7 @@
 import { LINK_ROLE_LABELS, type RequestLinkEventView, type RequestWithHistory } from "@/modules/requests";
 import { requestShortCode } from "@/shared/requests";
+import type { RequestTagEventView } from "@/modules/tags";
+import { tagEventTitle } from "./request-tags";
 import { PRIORITY_LABELS } from "./request-priority";
 import { REQUEST_STATUS_LABELS } from "./request-status";
 
@@ -19,6 +21,8 @@ type RequestTimelineProps = {
   actorLabel: string;
   /** SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1: the history of the links the reader sees. */
   linkEvents?: readonly RequestLinkEventView[];
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 3: tags put on and taken off, for the team. */
+  tagEvents?: readonly RequestTagEventView[];
 };
 
 /** Who made an assignment change: a person or, for a rule's handover, the system (decision G17). */
@@ -66,7 +70,11 @@ export function linkEventTitle(event: Pick<RequestLinkEventView, "role" | "actio
   return event.action === "LINKED" ? `Vinculada como ${target}` : `Vínculo removido: ${target}`;
 }
 
-export function buildTimeline(request: RequestWithHistory, linkEvents: readonly RequestLinkEventView[] = []): TimelineEntry[] {
+export function buildTimeline(
+  request: RequestWithHistory,
+  linkEvents: readonly RequestLinkEventView[] = [],
+  tagEvents: readonly RequestTagEventView[] = [],
+): TimelineEntry[] {
   // A rejection cancels the request with the same note (SPEC 2026-11-01-aprovacoes, 5.3.4); the
   // note is shown once, on the decision.
   const rejection = request.approval?.decision === "REJECTED" ? request.approval : null;
@@ -190,13 +198,21 @@ export function buildTimeline(request: RequestWithHistory, linkEvents: readonly 
     note: null,
   }));
 
-  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries, ...fieldEntries, ...linkEntries].sort(
+  const tagEntries = tagEvents.map((event) => ({
+    id: `tag-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: tagEventTitle(event),
+    actor: event.actorName,
+    note: null,
+  }));
+
+  return [...statusEntries, ...sectorEntries, ...assignmentEntries, ...priorityEntries, ...stageEntries, ...approvalEntries, ...documentEntries, ...pauseEntries, ...fieldEntries, ...linkEntries, ...tagEntries].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
 }
 
-export function RequestTimeline({ request, actorLabel, linkEvents = [] }: RequestTimelineProps) {
-  const entries = buildTimeline(request, linkEvents);
+export function RequestTimeline({ request, actorLabel, linkEvents = [], tagEvents = [] }: RequestTimelineProps) {
+  const entries = buildTimeline(request, linkEvents, tagEvents);
 
   return (
     <section className="surface-card content-section" aria-labelledby="history-heading">

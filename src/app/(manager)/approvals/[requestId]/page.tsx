@@ -23,6 +23,8 @@ import { RequestFieldAnswers } from "@/app/_components/request-field-answers";
 import { RequestSla } from "@/app/_components/request-sla";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
+import { RequestTags } from "@/app/_components/request-tags";
+import { getRequestTags } from "@/modules/tags";
 import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { requireManagerPageAccess } from "../../page-access";
 import { approveRequestAction, rejectRequestAction } from "../actions";
@@ -73,6 +75,15 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   } catch (caught) {
     if (caught instanceof NotFoundError) notFound();
     throw caught;
+  }
+
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 2 (decision I2): the sector's manager reads the tags; a
+  // manager who only decides an approval of another sector is not on its team and sees none.
+  let tags: Awaited<ReturnType<typeof getRequestTags>> | null = null;
+  try {
+    tags = await getRequestTags(request.id);
+  } catch (caught) {
+    if (!(caught instanceof NotFoundError)) throw caught;
   }
 
   const message = feedback(error, notice);
@@ -143,7 +154,8 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       <RequestEscalations escalations={escalations} />
       <RequestLinks hrefFor={(id) => `/approvals/${id}`} links={links.links} requestId={request.id} />
       <RequestGroupBlock block={group} hrefFor={(id) => `/approvals/${id}`} />
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} />
+      {tags ? <RequestTags requestId={request.id} view={tags} /> : null}
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} />
     </main>
   );
 }

@@ -72,6 +72,10 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 - *Esclarecimentos registrados em 2026-11-08 (SF-195):*
   - o administrador cuida das etiquetas na seção "Etiquetas" da administração (todos os setores ativos); o gestor, na página "Etiquetas" da área dele (só o próprio setor); atendentes e solicitantes não chegam a essas telas;
   - reativar uma etiqueta conta no limite de 30 e exige o nome livre entre as ativas do setor; a lista mostra quantas solicitações usam cada etiqueta, e as inativas aparecem em cinza.
+- *Esclarecimentos registrados em 2026-11-08 (SF-196):*
+  - o bloco "Etiquetas" fica no detalhe da fila (o atendente aplica e retira) e no detalhe do gestor do setor (só leitura); quem não é da equipe do setor (inclusive o gestor que só decide uma aprovação de outro setor e o solicitante) não vê o bloco, e a ação responde "não encontrada";
+  - o evento `request.tags_changed` leva só quem mudou e quantas etiquetas foram aplicadas e retiradas (as etiquetas ficam no banco); como os webhooks aceitam qualquer evento do domínio, ele também aparece como opção ("Etiquetas alteradas") no cadastro de webhooks. Uma migration nova (`20261108700000_request_tags_event`) acrescenta o tipo às listas do outbox e dos webhooks no banco;
+  - uma mudança que não muda nada não grava histórico nem evento; duas pessoas aplicando a mesma etiqueta ao mesmo tempo gravam uma vez só (a outra recebe conflito).
 
 ### 3.5 Critérios de aceitação
 
