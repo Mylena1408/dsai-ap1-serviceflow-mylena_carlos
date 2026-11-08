@@ -2038,3 +2038,303 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** Revisão de CA-LOT-01 a 05.
 - **Testes relacionados:** Unitários e E2E.
 - **SPEC:** `SPEC/2026-11-07-operacao-e-automacao.md`.
+
+### SF-194 — Etiquetas: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 1), parte A.
+- **Arquivos/módulos esperados:** `prisma/`, módulo novo de etiquetas.
+- **Dependências:** SPEC 2026-11-07 concluída.
+- **Critérios de conclusão:** CA-ETQ-05 e regras da CA-ETQ-02.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-195 — Cadastro das etiquetas com auditoria
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 1), parte A.
+- **Arquivos/módulos esperados:** Administração (Setores) e área do gestor, auditoria.
+- **Dependências:** SF-194.
+- **Critérios de conclusão:** CA-ETQ-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-196 — Aplicar e retirar etiquetas na solicitação
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regras 2 e 3), parte A.
+- **Arquivos/módulos esperados:** `src/modules/requests/`, detalhe da fila.
+- **Dependências:** SF-195.
+- **Critérios de conclusão:** CA-ETQ-03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-197 — Busca, visões salvas e lote com etiquetas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regras 4 e 5), parte A.
+- **Arquivos/módulos esperados:** Busca da fila, `saved-views`, lote.
+- **Dependências:** SF-196.
+- **Critérios de conclusão:** CA-ETQ-04 (busca, visões, lote).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-198 — Etiquetas em "Análises"
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.1 (item 4), parte A.
+- **Arquivos/módulos esperados:** `src/modules/reports/`.
+- **Dependências:** SF-197.
+- **Critérios de conclusão:** CA-ETQ-04 (análises).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-199 — Telas da fila com etiquetas e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte A, parte A.
+- **Arquivos/módulos esperados:** Fila e detalhe do atendente.
+- **Dependências:** SF-198.
+- **Critérios de conclusão:** CA-ETQ-01; revisão de CA-ETQ-01 a 05.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-200 — Checklist: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 1), parte B.
+- **Arquivos/módulos esperados:** `prisma/`, módulo do checklist.
+- **Dependências:** Parte A concluída.
+- **Critérios de conclusão:** CA-CHK-05 e regras da CA-CHK-02.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-201 — Modelo de checklist por serviço com auditoria
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 1), parte B.
+- **Arquivos/módulos esperados:** Administração (Serviços) e gestor, auditoria.
+- **Dependências:** SF-200.
+- **Critérios de conclusão:** CA-CHK-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-202 — Cópia do checklist na entrada em atendimento
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 2), parte B.
+- **Arquivos/módulos esperados:** `src/modules/requests/`.
+- **Dependências:** SF-201.
+- **Critérios de conclusão:** CA-CHK-03 (cópia).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-203 — Marcar e desmarcar itens, histórico
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regra 3), parte B.
+- **Arquivos/módulos esperados:** `src/modules/requests/`.
+- **Dependências:** SF-202.
+- **Critérios de conclusão:** CA-CHK-03 (marcar).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-204 — Regra da conclusão com o checklist
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3 (regras 4 e 5), parte B.
+- **Arquivos/módulos esperados:** Conclusão da solicitação.
+- **Dependências:** SF-203.
+- **Critérios de conclusão:** CA-CHK-04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-205 — Telas do checklist e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte B, parte B.
+- **Arquivos/módulos esperados:** Detalhe da fila, administração.
+- **Dependências:** SF-204.
+- **Critérios de conclusão:** CA-CHK-01; revisão de CA-CHK-01 a 05.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-206 — Horas: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regra 2), parte C.
+- **Arquivos/módulos esperados:** `prisma/`, módulo de horas.
+- **Dependências:** Parte B concluída.
+- **Critérios de conclusão:** CA-HRS-04 e regras da CA-HRS-02.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-207 — Lançar, alterar e apagar horas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regras 1 a 3), parte C.
+- **Arquivos/módulos esperados:** Módulo de horas.
+- **Dependências:** SF-206.
+- **Critérios de conclusão:** CA-HRS-02 (lançamentos).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-208 — Totais de horas na solicitação
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.1 (item 2), parte C.
+- **Arquivos/módulos esperados:** Detalhe da fila.
+- **Dependências:** SF-207.
+- **Critérios de conclusão:** CA-HRS-02 (totais).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-209 — Relatório de horas e CSV
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3 (regra 4), parte C.
+- **Arquivos/módulos esperados:** `src/modules/reports/`, rota CSV.
+- **Dependências:** SF-208.
+- **Critérios de conclusão:** CA-HRS-03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-210 — Telas das horas e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte C, parte C.
+- **Arquivos/módulos esperados:** Detalhe da fila, gestor, administração.
+- **Dependências:** SF-209.
+- **Critérios de conclusão:** CA-HRS-01; revisão de CA-HRS-01 a 04.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-211 — Seguidores: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3 (regra 1), parte D.
+- **Arquivos/módulos esperados:** `prisma/`, módulo de seguidores.
+- **Dependências:** Parte C concluída.
+- **Critérios de conclusão:** CA-SEG-05 e regras da CA-SEG-02.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-212 — Incluir, retirar e leitura do seguidor
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3 (regras 1, 2 e 4), parte D.
+- **Arquivos/módulos esperados:** Leitura da solicitação, "Minhas solicitações".
+- **Dependências:** SF-211.
+- **Critérios de conclusão:** CA-SEG-02 e 03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-213 — Avisos aos seguidores e anonimização
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3 (regras 3 e 5), parte D.
+- **Arquivos/módulos esperados:** Notificações, anonimização.
+- **Dependências:** SF-212.
+- **Critérios de conclusão:** CA-SEG-04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-214 — Telas dos seguidores e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte D, parte D.
+- **Arquivos/módulos esperados:** Detalhe do solicitante e da fila.
+- **Dependências:** SF-213.
+- **Critérios de conclusão:** CA-SEG-01; revisão de CA-SEG-01 a 05.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-215 — Menções: migration, domínio e avisos
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7.3, parte E.
+- **Arquivos/módulos esperados:** `prisma/`, comentários, notificações.
+- **Dependências:** Parte D concluída.
+- **Critérios de conclusão:** CA-MEN-02 e 03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-216 — Telas das menções e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte E, parte E.
+- **Arquivos/módulos esperados:** Comentário interno.
+- **Dependências:** SF-215.
+- **Critérios de conclusão:** CA-MEN-01; revisão de CA-MEN-01 a 03.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-217 — Encerrar como duplicada: domínio e caso de uso
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 8.3 (regras 1 e 2), parte F.
+- **Arquivos/módulos esperados:** `src/modules/requests/`.
+- **Dependências:** Parte E concluída.
+- **Critérios de conclusão:** CA-DUP-02 (regras).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-218 — Duplicada: histórico, avisos e leitura da original
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 8.3 (regras 2 e 3), parte F.
+- **Arquivos/módulos esperados:** Histórico, notificações, seguidores.
+- **Dependências:** SF-217.
+- **Critérios de conclusão:** CA-DUP-02 e 03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-219 — Telas do encerramento como duplicada e E2E
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte F, parte F.
+- **Arquivos/módulos esperados:** Detalhe da fila.
+- **Dependências:** SF-218.
+- **Critérios de conclusão:** CA-DUP-01; revisão de CA-DUP-01 a 03.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-220 — Configuração portátil versão 2
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 9.1 (item 1), parte G.
+- **Arquivos/módulos esperados:** `src/modules/configuration/`.
+- **Dependências:** Parte F concluída.
+- **Critérios de conclusão:** CA-CMP-01.
+- **Testes relacionados:** Unitários e integração (ida e volta).
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-221 — API pública: etiquetas, checklist e horas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 9.1 (item 2), parte G.
+- **Arquivos/módulos esperados:** `src/modules/public-api/`.
+- **Dependências:** SF-220.
+- **Critérios de conclusão:** CA-CMP-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-222 — Análises de horas
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 9.1 (item 3), parte G.
+- **Arquivos/módulos esperados:** `src/modules/reports/`.
+- **Dependências:** SF-221.
+- **Critérios de conclusão:** CA-CMP-03 (horas).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-223 — Análises de checklist e revisão final da SPEC
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 9.1 (item 3), parte G.
+- **Arquivos/módulos esperados:** `src/modules/reports/`.
+- **Dependências:** SF-222.
+- **Critérios de conclusão:** CA-CMP-03 (checklist); revisão de todos os critérios.
+- **Testes relacionados:** Unitários, integração e E2E.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.

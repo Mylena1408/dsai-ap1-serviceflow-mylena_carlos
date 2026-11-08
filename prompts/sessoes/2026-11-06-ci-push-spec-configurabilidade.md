@@ -246,3 +246,15 @@
 > terminou?
 
 61. CI `42472539280` aprovado em todos os passos; Vercel publicou.
+
+> vamos investigar quais funcionalidades acrescentar para alcançar a meta
+
+62. Levantamento: 11 funcionalidades que não existem, com tarefas, linhas (média real de 630 por tarefa) e risco; proposta de duas SPECs.
+
+> prefiro as funcionalidades 1, 2, 3, 4,5, 6, 7,8,9, 10. Vamos evitar o item 11 pois não desejo mexer na segurança e ferir algum pricipio de acesso decidido anteriormente
+
+63. Item 11 excluído; conta com os itens 1 a 10 (cerca de 99.200 linhas) e complementos sugeridos.
+
+> faça a SPEC 1 com os complementos / deixe a spec 2 para quando a spec 1 estiver perto do fim,me avise e revisamos,ok?
+
+64. `SPEC/2026-11-08-atendimento-dia-a-dia.md` escrita (partes A a G, decisões I1 a I24, SF-194 a SF-223); SPEC 2 adiada para perto do fim desta, com revisão junto da responsável.

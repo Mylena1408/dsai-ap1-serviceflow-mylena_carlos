@@ -2462,3 +2462,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Conferência local:** o comando novo baixou o arquivo e o checksum conferiu. O arquivo do CI não roda localmente; o resultado vem da próxima execução.
 
 - **Resultado:** a execução `42472539280` (commit `6e99ff1`) passou inteira: gitleaks, typecheck, lint, build, unitários, integração e E2E; a Vercel publicou. É o primeiro CI completo desde o envio de SF-188 a SF-193.
+
+## SPEC "Atendimento no dia a dia" (2026-11-08)
+
+- **Origem:** levantamento de funcionalidades para a meta (72.773 linhas `added` pelo `cloc` depois da SF-193, cerca de 27.200 faltando). A responsável escolheu os itens 1 a 10 e excluiu o 11 (segurança da conta: "não desejo mexer na segurança e ferir algum princípio de acesso decidido anteriormente"). Dividido em duas SPECs; esta cobre os itens 1 a 6 e os complementos.
+- **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`, partes A a G (etiquetas, checklist, apontamento de horas, seguidores, menções, encerrar como duplicada, complementos de configuração portátil, API e análises), decisões I1 a I24, tarefas SF-194 a SF-223.
+- **Calibração da estimativa:** a SPEC anterior previa de 16.000 a 21.000 linhas e entregou 11.903 em 19 tarefas (cerca de 630 por tarefa). Esta usa a média real: cerca de 18.900 linhas (±20%).
+- **SPEC 2:** itens 7 a 10 (avisos e manutenção programada, importação de usuários por CSV, relatório periódico, calendário por setor), escrita só perto do fim desta, depois de revisada com a responsável ("deixe a spec 2 para quando a spec 1 estiver perto do fim, me avise e revisamos").
+- **Fora:** recuperação de senha por e-mail (os e-mails seguem desativados no site publicado), verificação em duas etapas e múltiplas organizações.
