@@ -85,6 +85,8 @@ enum AuditEntityType {
   ESCALATION_RULE
   /// SPEC 2026-11-07-operacao-e-automacao, 3.4.
   SERVICE_BUNDLE
+  /// 5.4.
+  RECURRING_REQUEST
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -257,6 +259,9 @@ model User {
   sectorsLastDistributed  Sector[]                  @relation("SectorLastDistributedTo")
   attendantAbsences       AttendantAbsence[]        @relation("AttendantAbsenceUser")
   attendantAbsencesCreated AttendantAbsence[]       @relation("AttendantAbsenceCreator")
+  /// SPEC 2026-11-07-operacao-e-automacao, 5.
+  recurringRequestsFor    RecurringRequest[]        @relation("RecurringRequestRequester")
+  recurringRequestsCreated RecurringRequest[]       @relation("RecurringRequestCreator")
 }
 
 model Service {
@@ -287,6 +292,8 @@ model Service {
   approvalConditionField ServiceField?                @relation("ServiceApprovalCondition", fields: [approvalConditionFieldId], references: [id], onDelete: Restrict)
   requests               Request[]
   documentRequirements   ServiceDocumentRequirement[]
+  /// SPEC 2026-11-07-operacao-e-automacao, 5.
+  recurringRequests      RecurringRequest[]
   fields                 ServiceField[]
   stages                 ServiceStage[]
   knowledgeArticles      KnowledgeArticle[]
@@ -376,6 +383,10 @@ model Request {
   groupId               String?                    @db.Uuid
   /// Position in the bundle's order (1 to 5), only with a group: the requests share the opening instant.
   groupPosition         Int?
+  /// SPEC 2026-11-07-operacao-e-automacao, 5.3 item 3: opened by this schedule.
+  recurringRequestId    String?                    @db.Uuid
+  recurringRequest      RecurringRequest?          @relation(fields: [recurringRequestId], references: [id], onDelete: Restrict)
+  recurringRuns         RecurringRequestRun[]
   group                 RequestGroup?              @relation(fields: [groupId], references: [id], onDelete: Restrict)
   satisfactionEvents    RequestSatisfactionEvent[]
   approvals             RequestApproval[]
@@ -974,6 +985,74 @@ model KnowledgeArticle {
   updatedBy User    @relation("KnowledgeArticleUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
 
   @@unique([serviceId, title])
+}
+
+/// How often a schedule opens a request (SPEC 2026-11-07-operacao-e-automacao, 5.3, decision H9).
+enum RecurrenceFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+enum RecurringRunOutcome {
+  OPENED
+  SKIPPED
+}
+
+/// Why a run did not open the request (5.3 item 3).
+enum RecurringSkipReason {
+  SERVICE_UNAVAILABLE
+  REQUESTER_INACTIVE
+  FORM_CHANGED
+  DOCUMENT_REQUIRED
+}
+
+/// A schedule that opens a request periodically in a requester's name (5.3). The shape is checked in SQL.
+model RecurringRequest {
+  id                  String              @id @default(uuid()) @db.Uuid
+  name                String
+  serviceId           String              @db.Uuid
+  requesterId         String              @db.Uuid
+  createdById         String              @db.Uuid
+  description         String
+  /// The answers to the service's fields, by field id, as the opening form sends them.
+  answers             Json                @default("{}")
+  frequency           RecurrenceFrequency
+  /// ISO weekdays (1 = Monday to 7 = Sunday), only with WEEKLY.
+  weekdays            Int[]               @default([])
+  /// 1 to 28, only with MONTHLY.
+  monthDay            Int?
+  startsOn            DateTime            @db.Date
+  endsOn              DateTime?           @db.Date
+  pausedAt            DateTime?           @db.Timestamptz
+  endedAt             DateTime?           @db.Timestamptz
+  /// Runs in a row that did not open; three pause the schedule (5.3 item 3).
+  consecutiveFailures Int                 @default(0)
+  createdAt           DateTime            @default(now()) @db.Timestamptz
+  updatedAt           DateTime            @updatedAt @db.Timestamptz
+
+  service   Service               @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  requester User                  @relation("RecurringRequestRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  createdBy User                  @relation("RecurringRequestCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  runs      RecurringRequestRun[]
+  requests  Request[]
+
+  @@index([serviceId])
+}
+
+/// One run of a schedule, on a day (5.3 item 3): once per schedule and day.
+model RecurringRequestRun {
+  id                 String               @id @default(uuid()) @db.Uuid
+  recurringRequestId String               @db.Uuid
+  scheduledOn        DateTime             @db.Date
+  outcome            RecurringRunOutcome
+  reason             RecurringSkipReason?
+  requestId          String?              @db.Uuid
+  occurredAt         DateTime             @db.Timestamptz
+
+  recurringRequest RecurringRequest @relation(fields: [recurringRequestId], references: [id], onDelete: Restrict)
+  request          Request?         @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@unique([recurringRequestId, scheduledOn])
 }
 
 /// How a sector assigns the requests entering its queue (SPEC 2026-11-07-operacao-e-automacao, 4.3).

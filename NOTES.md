@@ -2336,3 +2336,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Falha não reproduzida:** na primeira rodada completa, o E2E `field-formats.spec.ts` (campos decimais e com formato, sem relação com esta tarefa) falhou uma vez, aos 8,9 s. O registro da falha se perdeu no reteste. Ele passou sozinho, passou junto com os seis testes que vêm antes dele na ordem da suíte, e o E2E completo rodado de novo deu 41/41. Fica registrado como falha intermitente a observar.
 - **Resultados:** typecheck, lint e build OK; unitários 1415/1415; integração 574/574; E2E 41/41 (na segunda rodada completa; a primeira teve 40/41, ver abaixo).
 - **Linhas:** 554 `added` (aplicação 296, testes 258). Parte B inteira (SF-180 a SF-183): 2431.
+
+## SF-184 — Agendas de recorrência: banco e domínio (2026-11-07)
+
+- **Banco:** migration `20261108300000_recurring_requests`, aditiva: tabelas `RecurringRequest` e `RecurringRequestRun` (única por agenda e dia), `Request.recurringRequestId` com índice parcial. O `CHECK` da agenda confere nome (sem espaços nas pontas, até 80), descrição, frequência (semanal com 1 a 7 dias sem repetição, pela função `recurring_weekdays_valid`; mensal com dia de 1 a 28), fim até 731 dias depois do início, falhas não negativas e respostas como objeto. O da execução: aberta com solicitação e sem motivo; não aberta com motivo e sem solicitação.
+- **Domínio:** esquema da entrada (o formulário manda texto; a escolha da outra frequência é descartada, como o banco exige), datas (início hoje ou depois), próximo dia, dia devido sem recuperar dias perdidos (decisão H10), estado e textos ("Semanal: segunda e quarta", "Diária", "Mensal: dia 10").
+- **Auditoria:** `RECURRING_REQUEST`, com descrição e respostas como campos pessoais. Os dias da semana entram como `recurrenceWeekdays`, porque `weekdays` já é o campo do calendário (com outro rótulo).
+- **Decisão (esclarecimento na SPEC, 5.4):** `RequestNotification` sempre pertence a uma solicitação, e a execução não aberta não tem uma. Em vez de criar `recurring.skipped` e `recurring.paused`, o aviso a quem criou a agenda fica na tela das agendas (SF-185 e SF-186).
+- **Resultados:** typecheck, lint e build OK; unitários 1423/1423; integração 577/577; E2E 41/41. O lint da rodada completa deu um aviso (uma função não usada no domínio); ela foi apagada e typecheck, lint e os testes do domínio foram rodados de novo, limpos.
+- **Linhas:** 416 `added` (aplicação 208, testes 208).

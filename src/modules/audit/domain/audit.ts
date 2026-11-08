@@ -37,6 +37,8 @@ export const AUDIT_ENTITY_TYPES = [
   "ESCALATION_RULE",
   // SPEC 2026-11-07-operacao-e-automacao, 3.4.
   "SERVICE_BUNDLE",
+  // SPEC 2026-11-07-operacao-e-automacao, 5.4.
+  "RECURRING_REQUEST",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -71,6 +73,8 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   ACCESS_ROLE: [],
   ESCALATION_RULE: [],
   SERVICE_BUNDLE: [],
+  // The description and the answers may hold personal data: the record says they changed.
+  RECURRING_REQUEST: ["description", "answers"],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -105,6 +109,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   ACCESS_ROLE: "Papel de acesso",
   ESCALATION_RULE: "Regra de escalonamento",
   SERVICE_BUNDLE: "Pacote de serviços",
+  RECURRING_REQUEST: "Agenda de recorrência",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -158,6 +163,17 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   notifyUserIds: "Avisar as pessoas",
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
   serviceIds: "Serviços",
+  // SPEC 2026-11-07-operacao-e-automacao, 5.3.
+  requesterId: "Solicitante",
+  answers: "Respostas",
+  frequency: "Frequência",
+  // Not "weekdays": that name is the calendar's (business days).
+  recurrenceWeekdays: "Dias da semana",
+  monthDay: "Dia do mês",
+  startsOn: "Início",
+  endsOn: "Fim",
+  pausedAt: "Pausada em",
+  endedAt: "Encerrada em",
   // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
   distributionMode: "Distribuição automática",
   maxActivePerAttendant: "Limite por atendente",
@@ -298,6 +314,20 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "isActive",
   ],
   SERVICE_BUNDLE: ["name", "description", "serviceIds", "isActive"],
+  RECURRING_REQUEST: [
+    "name",
+    "serviceId",
+    "requesterId",
+    "description",
+    "answers",
+    "frequency",
+    "recurrenceWeekdays",
+    "monthDay",
+    "startsOn",
+    "endsOn",
+    "pausedAt",
+    "endedAt",
+  ],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

@@ -72,6 +72,7 @@ function persistedRequest(requesterId: string, sectorId: string) {
     // SPEC 2026-11-07-operacao-e-automacao, 3.4.
     groupId: null,
     groupPosition: null,
+    recurringRequestId: null,
   };
 }
 

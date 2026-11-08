@@ -154,3 +154,7 @@
 > pode prosseguir
 
 38. SF-182 corrigida (bloco das ausências de atendente em páginas próprias) e registrada; SF-183: configuração da distribuição em "Setores", carga da equipe, "Distribuídas automaticamente", medição com volume e E2E; fim da parte B (ver `NOTES.md`).
+
+> pode prosseguir
+
+39. SF-184: migration das agendas de recorrência e das execuções, regras das datas, auditoria e esclarecimento na SPEC sobre os avisos (ver `NOTES.md`).

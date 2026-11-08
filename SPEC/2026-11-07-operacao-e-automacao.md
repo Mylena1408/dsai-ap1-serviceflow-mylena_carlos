@@ -218,6 +218,10 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 - Nova tabela `RecurringRequestRun` (`recurringRequestId`, `scheduledOn` `DATE`, `outcome` `OPENED` ou `SKIPPED`, `reason`, `requestId` opcional, `occurredAt`), única por (`recurringRequestId`, `scheduledOn`).
 - `Request.recurringRequestId` opcional.
 - Enum da auditoria ganha `RECURRING_REQUEST`; tipos de notificação ganham `recurring.skipped` e `recurring.paused` (categoria de e-mail "Prazos").
+- *Esclarecimentos registrados em 2026-11-07 (SF-184):*
+  - as notificações do sistema (`RequestNotification`) pertencem sempre a uma solicitação, e uma execução "não aberta" não tem solicitação; por isso os tipos `recurring.skipped` e `recurring.paused` **não** são criados: o aviso a quem criou a agenda (regra 3) aparece na tela das agendas, com destaque para as execuções "não abertas" e as agendas pausadas pelo sistema (SF-185 e SF-186), e não gera e-mail;
+  - na auditoria, os dias da semana da agenda são registrados como `recurrenceWeekdays` ("Dias da semana"), porque `weekdays` já é o campo dos dias de expediente do calendário;
+  - o banco também confere: nome sem espaços nas pontas, descrição não vazia, dias da semana sem repetição e respostas como objeto.
 
 ### 5.5 Critérios de aceitação
 

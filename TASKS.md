@@ -1941,7 +1941,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-184 — Agendas de recorrência: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261108300000_recurring_requests` (agendas, execuções, `Request.recurringRequestId`, CHECKs); regras das agendas e das datas em `src/modules/recurring-requests/domain/schedule.ts`; auditoria `RECURRING_REQUEST`. Esclarecimento na SPEC: sem tipos de notificação da recorrência (aviso na tela das agendas).
 - **Objetivo:** Seção 5.3 (regra 2), parte C.
 - **Arquivos/módulos esperados:** `prisma/`, módulo novo de recorrência.
 - **Dependências:** Parte B concluída.

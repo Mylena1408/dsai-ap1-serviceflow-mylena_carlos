@@ -188,6 +188,39 @@ async function loadState(
       });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-07-operacao-e-automacao, 5.4. Days as "YYYY-MM-DD"; the answers as their text.
+    case "RECURRING_REQUEST": {
+      const row = await transaction.recurringRequest.findUnique({
+        where: { id },
+        select: {
+          name: true,
+          serviceId: true,
+          requesterId: true,
+          description: true,
+          answers: true,
+          frequency: true,
+          weekdays: true,
+          monthDay: true,
+          startsOn: true,
+          endsOn: true,
+          pausedAt: true,
+          endedAt: true,
+        },
+      });
+      return (
+        row && {
+          label: row.name,
+          state: {
+            ...row,
+            answers: JSON.stringify(row.answers),
+            // Only the audited fields are recorded, so the row's own "weekdays" is left out.
+            recurrenceWeekdays: row.weekdays.map(String),
+            startsOn: row.startsOn.toISOString().slice(0, 10),
+            endsOn: row.endsOn ? row.endsOn.toISOString().slice(0, 10) : null,
+          },
+        }
+      );
+    }
     // SPEC 2026-11-07-operacao-e-automacao, 3.4.
     case "SERVICE_BUNDLE": {
       const row = await transaction.serviceBundle.findUnique({
