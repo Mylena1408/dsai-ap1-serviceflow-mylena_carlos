@@ -2373,3 +2373,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Ambiente:** um arquivo de tipos gerado pelo servidor de desenvolvimento (`.next/dev/types/routes.d.ts`, fora do git) ficou truncado quando o servidor de teste foi encerrado; o diretório foi apagado e é recriado sozinho.
 - **Resultados:** typecheck, lint e build OK; unitários 1433/1433; integração 593/593; E2E 42/42 na primeira rodada completa.
 - **Linhas:** 542 `added` (aplicação 225, testes 317). Parte C inteira (SF-184 a SF-186): 2302.
+
+## SF-187 — Configuração portátil: formato e exportação (2026-11-07)
+
+- **Banco:** migration `20261108400000_configuration_audit`, só valores novos de enum: a entidade `CONFIGURATION` e as ações `IMPORTED` e `EXPORTED_CONFIGURATION` da auditoria (decisão H15). As listas exatas do teste da auditoria foram estendidas com esses valores, como a SPEC pede.
+- **Formato** (`src/modules/configuration/domain/format.ts`): `{"format": "serviceflow-config", "version": 1, "exportedAt", "data"}` validado por zod (forma e limites folgados; as regras de cada tela ficam para a prévia da SF-188). Respostas prontas e regras de escalonamento dentro do setor; campos, documentos, etapas e artigos dentro do serviço; referências por nome, rótulo e e-mail.
+- **Exportação:** lê todas as tabelas de configuração numa transação `RepeatableRead`, monta o arquivo com ordem fixa (`buildConfigurationData`, função pura) e grava "Exportou · Configuração da organização" na auditoria. Só o administrador.
+- **Decisão (esclarecimento na SPEC, 6.4):** o nome do serviço não é único no banco, e vários outros nomes só são únicos entre os ativos. A exportação gera o arquivo mesmo assim, mas lista os nomes repetidos, porque a importação casa pelo nome (H14) e vai recusá-los.
+- **Testes:** a integração confere que nenhum id interno de linha (configuração e pessoas), nome de pessoa ou segredo de webhook aparece no arquivo. A primeira versão do teste procurava qualquer UUID e falhou porque as fixtures põem UUIDs aleatórios nos nomes; passou a conferir os ids reais das linhas.
+- **Resultados:** typecheck, lint e build OK; unitários 1439/1439; integração 596/596; E2E 42/42 na primeira rodada completa.
+- **Linhas:** 920 `added` (aplicação 555, testes 365).

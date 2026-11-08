@@ -64,6 +64,9 @@ enum AuditAction {
   REVOKED
   SECRET_ROTATED
   DELETED
+  /// SPEC 2026-11-07-operacao-e-automacao, 6.4 (decision H15): the configuration's import and export.
+  IMPORTED
+  EXPORTED_CONFIGURATION
 }
 
 enum AuditEntityType {
@@ -87,6 +90,8 @@ enum AuditEntityType {
   SERVICE_BUNDLE
   /// 5.4.
   RECURRING_REQUEST
+  /// 6.4.
+  CONFIGURATION
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).

@@ -1971,7 +1971,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-187 — Formato e exportação da configuração
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Migration `20261108400000_configuration_audit` (auditoria: `CONFIGURATION`, `IMPORTED`, `EXPORTED_CONFIGURATION`); módulo `src/modules/configuration` com o formato (zod), a montagem do arquivo e a exportação auditada; esclarecimentos na SPEC (6.4, SF-187), entre eles o aviso de nomes repetidos.
 - **Objetivo:** Seção 6.3 (regras 1 a 3), parte D.
 - **Arquivos/módulos esperados:** Módulo novo de configuração, auditoria.
 - **Dependências:** Parte C concluída.

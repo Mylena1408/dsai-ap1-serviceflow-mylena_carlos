@@ -129,6 +129,9 @@ describe("texts (section 5.2)", () => {
       SECRET_ROTATED: true,
       // Added by SPEC 2026-11-03 (pausa do prazo e calendário).
       DELETED: true,
+      // Added by SPEC 2026-11-07-operacao-e-automacao, 6.4.
+      IMPORTED: true,
+      EXPORTED_CONFIGURATION: true,
     };
     const entities: Record<AuditEntityType, true> = {
       USER: true,
@@ -152,6 +155,7 @@ describe("texts (section 5.2)", () => {
       // Added by SPEC 2026-11-07-operacao-e-automacao, 3.4.
       SERVICE_BUNDLE: true,
       RECURRING_REQUEST: true,
+      CONFIGURATION: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

@@ -174,3 +174,11 @@
 > pode prosseguir
 
 43. SF-186: execução das agendas pelo job diário, aviso da origem para o solicitante, E2E pela rota do job; fim da parte C (ver `NOTES.md`).
+
+> pode prosseguir
+
+44. SF-187: formato do arquivo de configuração, exportação auditada, migration da auditoria e esclarecimento sobre nomes repetidos (ver `NOTES.md`).
+
+> quando terminar me informe quantas linhas de codigo tem agora o sistema passando com o cloc --diff
+
+45. Contagem pelo `scripts/cloc-diff.sh` depois do commit da SF-187.

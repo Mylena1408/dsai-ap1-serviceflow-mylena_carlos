@@ -277,6 +277,13 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 ### 6.4 Dados
 
 - Sem tabelas novas de configuração. Enum da auditoria ganha `CONFIGURATION`, e a ação ganha `IMPORTED` e `EXPORTED_CONFIGURATION` **(decisão H15)**.
+- *Esclarecimentos registrados em 2026-11-07 (SF-187):*
+  - **nomes repetidos:** o nome do serviço não é único no banco, e campos, etapas, documentos, papéis, pacotes, respostas prontas e regras de escalonamento só são únicos entre os ativos. Como a importação casa pelo nome (decisão H14), a exportação gera o arquivo mesmo assim, mas lista os nomes repetidos no mesmo escopo (comparados sem diferenciar maiúsculas), avisando que eles vão impedir a importação; a prévia (SF-188) recusa o arquivo com chaves repetidas;
+  - no arquivo, as respostas prontas e as regras de escalonamento ficam dentro do setor, e os campos, documentos, etapas e artigos dentro do serviço; a ordem é fixa (por nome ou posição), para a mesma configuração dar sempre o mesmo conteúdo;
+  - não vão para o arquivo o estado de funcionamento (por exemplo, o último atendente que recebeu pelo rodízio) nem referências a itens que não existem mais; das pessoas, só o e-mail das que a configuração cita;
+  - o calendário vai com os horários em "HH:MM", como na tela; os limites decimais, como texto com as casas do campo;
+  - um arquivo acima de 2 MB é gerado com aviso, porque a importação não o aceitará;
+  - na auditoria, a configuração não tem linha própria: os registros de exportação e de importação usam um identificador fixo de entidade, com o rótulo "Configuração da organização"; a exportação não registra mudanças de campos.
 
 ### 6.5 Critérios de aceitação
 

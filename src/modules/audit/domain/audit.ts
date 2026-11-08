@@ -14,6 +14,9 @@ export const AUDIT_ACTIONS = [
   "SECRET_ROTATED",
   // SPEC 2026-11-03-pausa-sla-calendario, 5.9: a holiday is removed, not deactivated.
   "DELETED",
+  // SPEC 2026-11-07-operacao-e-automacao, 6.4 (decision H15).
+  "IMPORTED",
+  "EXPORTED_CONFIGURATION",
 ] as const;
 
 export const AUDIT_ENTITY_TYPES = [
@@ -39,6 +42,8 @@ export const AUDIT_ENTITY_TYPES = [
   "SERVICE_BUNDLE",
   // SPEC 2026-11-07-operacao-e-automacao, 5.4.
   "RECURRING_REQUEST",
+  // SPEC 2026-11-07-operacao-e-automacao, 6.4.
+  "CONFIGURATION",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -75,6 +80,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   SERVICE_BUNDLE: [],
   // The description and the answers may hold personal data: the record says they changed.
   RECURRING_REQUEST: ["description", "answers"],
+  CONFIGURATION: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -91,6 +97,8 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   REVOKED: "Revogou",
   SECRET_ROTATED: "Gerou novo segredo",
   DELETED: "Removeu",
+  IMPORTED: "Importou",
+  EXPORTED_CONFIGURATION: "Exportou",
 };
 
 export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
@@ -110,6 +118,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   ESCALATION_RULE: "Regra de escalonamento",
   SERVICE_BUNDLE: "Pacote de serviços",
   RECURRING_REQUEST: "Agenda de recorrência",
+  CONFIGURATION: "Configuração da organização",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -328,6 +337,8 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "pausedAt",
     "endedAt",
   ],
+  // The export and the import record what was done, not field changes.
+  CONFIGURATION: [],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

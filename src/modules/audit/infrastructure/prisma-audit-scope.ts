@@ -229,6 +229,10 @@ async function loadState(
       });
       return row && { label: row.name, state: row };
     }
+    // SPEC 2026-11-07-operacao-e-automacao, 6.4: no row of its own; the configuration module writes
+    // the export's and the import's entries directly.
+    case "CONFIGURATION":
+      return null;
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };
