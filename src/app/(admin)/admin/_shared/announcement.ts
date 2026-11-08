@@ -12,6 +12,11 @@ export function announcement(error?: string, notice?: string, entity?: string): 
   if (error === "dependency" && entity === "permissions") {
     return "Usuários inativos não recebem permissões.";
   }
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1: the distribution of a sector.
+  if (error === "validation" && entity === "distribution") {
+    return "Confira a distribuição: escolha um modo e, se quiser um limite, de 1 a 100 solicitações por atendente.";
+  }
+  if (notice === "updated" && entity === "distribution") return "Distribuição salva. Vale para as próximas solicitações que entrarem na fila.";
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2: bundles.
   if (error === "validation" && entity === "bundles") {
     return "Confira o pacote: nome de 1 a 80 caracteres, descrição de até 500 e de 2 a 5 serviços diferentes, ativos e sem documentos exigidos.";

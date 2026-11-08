@@ -7,6 +7,7 @@ import {
 import { AuthenticationError, AuthorizationError } from "@/server/errors";
 import { requireConfigurationAdministrator } from "@/server/authorization";
 import { listEscalationRuleOverview, listSectors } from "@/modules/sectors";
+import { getTeamLoad } from "@/modules/requests";
 import { listServices } from "@/modules/services";
 import { listUsers } from "@/modules/users";
 import { listDocumentRequirements } from "@/modules/document-requirements";
@@ -146,6 +147,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const bundleOverview = selectedSection === "bundles" ? await listBundleOverview() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3: read only when the section is open.
   const escalationRules = selectedSection === "sectors" ? await listEscalationRuleOverview() : null;
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8.
+  const teamLoad = selectedSection === "sectors" ? await getTeamLoad() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3: read only where roles are shown.
   const roleOverview = selectedSection === "users" || selectedSection === "roles" ? await listAccessRoleOverview() : null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5: read only when the section is open.
@@ -209,7 +212,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {selectedSection !== "overview" ? (
         <div className="admin-sections">
       {selectedSection === "sectors" && escalationRules ? (
-        <SectorsSection escalationRules={escalationRules} section={selectedSection} sectors={sectors} />
+        <SectorsSection escalationRules={escalationRules} section={selectedSection} sectors={sectors} teamLoad={teamLoad} />
       ) : null}
 
       {selectedSection === "categories" ? (

@@ -1931,7 +1931,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-183 — Configuração, carga da equipe, análises e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-07. Bloco "Distribuição automática" em "Setores"; "Carga da equipe" (administração, painel do gestor, fila do supervisor); "Distribuídas automaticamente" em "Análises"; medição no `serviceflow_perf`; E2E `queue-distribution.spec.ts`. Parte B concluída (CA-DST-01 a 07).
 - **Objetivo:** Seção 4.3 (regras 1 e 8), parte B.
 - **Arquivos/módulos esperados:** Seção "Setores", fila, `src/modules/reports/`.
 - **Dependências:** SF-182.

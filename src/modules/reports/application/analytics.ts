@@ -81,6 +81,8 @@ export interface Analytics {
     escalated: number;
     /** SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: by the rules, per trigger. */
     escalatedByRule: RuleEscalationCounts;
+    /** SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8: assignments made by the distribution. */
+    distributedAutomatically: number;
     /** SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6. */
     overdueApprovals: number;
   };
@@ -164,6 +166,7 @@ const EMPTY_ANALYTICS_SLA: Analytics["sla"] = {
   arrivals: arrivalGrid([]),
   escalated: 0,
   escalatedByRule: { dueSoon: 0, overdueDays: 0 },
+  distributedAutomatically: 0,
   overdueApprovals: 0,
 };
 
@@ -197,7 +200,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
   const range = { from: period.from, before: period.before };
   // The pending count of an interval that has not ended yet is the count now.
   const ends = intervals.map((item) => (item.end.getTime() > now.getTime() ? now : item.end));
-  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings, escalated, overdueApprovals, escalatedByRule] = await Promise.all([
+  const [daily, pending, firstResponse, stages, pauses, byService, byPriority, arrivals, team, ratings, escalated, overdueApprovals, escalatedByRule, distributedAutomatically] = await Promise.all([
     reader.dailyCounts(scope, range),
     reader.pendingAt(scope, ends),
     reader.firstResponse(scope, range),
@@ -211,6 +214,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.escalations(scope, range),
     reader.overdueApprovals ? reader.overdueApprovals(scope, range, now) : Promise.resolve(0),
     reader.ruleEscalations ? reader.ruleEscalations(scope, range) : Promise.resolve({ dueSoon: 0, overdueDays: 0 }),
+    reader.automaticAssignments ? reader.automaticAssignments(scope, range) : Promise.resolve(0),
   ]);
 
   return {
@@ -236,6 +240,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
       arrivals: arrivalGrid(arrivals),
       escalated,
       escalatedByRule,
+      distributedAutomatically,
       overdueApprovals,
     },
     team: teamTable(team),

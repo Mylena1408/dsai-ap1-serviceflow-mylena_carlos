@@ -8,6 +8,7 @@ import {
   updateEscalationRule,
   setSectorActive,
   setSectorEscalation,
+  setSectorDistribution,
   updateSector,
 } from "@/modules/sectors";
 import {
@@ -122,4 +123,18 @@ export async function deleteEscalationRuleAction(formData: FormData): Promise<ne
     reportFailure("escalationRules", "sectors", error);
   }
   return finish("escalationRules", "deleted", "sectors");
+}
+
+// SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1: the distribution of a sector.
+export async function setSectorDistributionAction(formData: FormData): Promise<never> {
+  try {
+    await setSectorDistribution(field(formData, "id"), {
+      distributionMode: field(formData, "distributionMode"),
+      maxActivePerAttendant: field(formData, "maxActivePerAttendant"),
+      redistributeOnAbsence: field(formData, "redistributeOnAbsence") === "true",
+    });
+  } catch (error) {
+    reportFailure("distribution", "sectors", error);
+  }
+  return finish("distribution", "updated", "sectors");
 }

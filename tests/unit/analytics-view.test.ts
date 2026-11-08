@@ -55,6 +55,8 @@ const analytics: Analytics = {
     escalated: 3,
     // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5.
     escalatedByRule: { dueSoon: 0, overdueDays: 0 },
+    // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8.
+    distributedAutomatically: 0,
     overdueApprovals: 2,
   },
   team: [

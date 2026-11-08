@@ -39,6 +39,8 @@ import * as links from "./application/links";
 import * as bundleOpening from "./application/open-bundle";
 import * as groups from "./application/groups";
 import * as absenceHandover from "./application/absence-handover";
+import * as teamLoad from "./application/team-load";
+import { createPrismaTeamLoadReader } from "./infrastructure/prisma-team-load";
 import { createPrismaAbsenceHandoverStore } from "./infrastructure/prisma-absence-handover";
 import { createPrismaGroupReader } from "./infrastructure/prisma-request-groups";
 import { createPrismaLinkReader, createPrismaLinkStore } from "./infrastructure/prisma-request-links";
@@ -485,4 +487,11 @@ export async function handOverAbsentAttendants(database: PrismaClient = prisma):
       createPrismaRequestTransactionRunner(database, { translate: ["P2025"], fallbackMessage: "Absence handover failed." }),
     ),
   );
+}
+
+// "Carga da equipe" (SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8).
+export { atLimit, type SectorLoad, type TeamMemberLoad } from "./application/team-load";
+
+export async function getTeamLoad(database: PrismaClient = prisma): Promise<teamLoad.SectorLoad[] | null> {
+  return teamLoad.getTeamLoad(createPrismaTeamLoadReader(database));
 }

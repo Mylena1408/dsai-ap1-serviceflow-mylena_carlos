@@ -2325,3 +2325,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Job:** passo `absenceHandover`, depois das regras de escalonamento e antes do outbox. As ausências do dia ainda não passadas, de setores com a opção e a distribuição ligadas, são marcadas primeiro e então cada solicitação aberta ou em atendimento da pessoa vai para um colega pelo modo do setor, numa transação própria (`handOverOnAbsence`, que divide o código com a distribuição da entrada).
 - **Resultados:** typecheck, lint e build OK; unitários 1412/1412; integração 573/573; E2E 40/40 (na segunda rodada, depois da correção; a primeira teve 39/40).
 - **Linhas:** 916 `added` (aplicação 628, testes 288).
+
+## SF-183 — Telas da distribuição, carga da equipe; fim da parte B (2026-11-07)
+
+- **Configuração:** bloco "Distribuição automática" em "Setores", um formulário por setor ativo (modo, limite, passagem na ausência), com mensagem própria e o resumo ("Rodízio · até 5 por atendente").
+- **Carga da equipe:** uma consulta por tela (`createPrismaTeamLoadReader`): por setor, os atendentes ativos com as solicitações ativas, a ausência do dia e a fila sem responsável. Na fila (supervisor) e no "Painel do setor" (gestor), só para setores que distribuem, pela garantia 7.4.
+- **Análises:** "Distribuídas automaticamente", só quando houver alguma no período.
+- **Medição** (`serviceflow_perf`, migrations aplicadas, teste temporário apagado): setor mais cheio com 98.014 solicitações e 56.008 ativas; carga ~50–55 ms; distribuição com a trava ~50–56 ms (rodízio e menor carga). Esse banco tem só 1 atendente no setor; com mais atendentes, cada contagem usa o índice do responsável, mas isso não foi medido.
+- **E2E:** liga o rodízio no setor de demonstração pela tela, com uma colega ausente que viria antes pelo nome; a solicitação vai para o Diego; o gestor vê a carga. O teste desliga a distribuição no final. Dois erros meus no teste, corrigidos: um serviço de demonstração que não existia (o teste passou a criar o seu) e um nome que não vinha antes de "Diego", o que tirava o sentido da ausência.
+- **Falha não reproduzida:** na primeira rodada completa, o E2E `field-formats.spec.ts` (campos decimais e com formato, sem relação com esta tarefa) falhou uma vez, aos 8,9 s. O registro da falha se perdeu no reteste. Ele passou sozinho, passou junto com os seis testes que vêm antes dele na ordem da suíte, e o E2E completo rodado de novo deu 41/41. Fica registrado como falha intermitente a observar.
+- **Resultados:** typecheck, lint e build OK; unitários 1415/1415; integração 574/574; E2E 41/41 (na segunda rodada completa; a primeira teve 40/41, ver abaixo).
+- **Linhas:** 554 `added` (aplicação 296, testes 258). Parte B inteira (SF-180 a SF-183): 2431.

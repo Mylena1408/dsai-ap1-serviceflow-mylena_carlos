@@ -2,7 +2,8 @@ import Link from "next/link";
 import { RequestStageLabel } from "@/app/_components/request-stage";
 import { RequestApprovalLabel } from "@/app/_components/request-approval";
 import { countComments } from "@/modules/comments";
-import { effectiveAssigneeId, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
+import { effectiveAssigneeId, getTeamLoad, listQueueStageChoices, searchAttendantQueue, type RequestSearchResult } from "@/modules/requests";
+import { TeamLoad } from "@/app/_components/team-load";
 import { ValidationError } from "@/server/errors";
 import { RequestPagination } from "@/app/_components/request-pagination";
 import { RequestSearchForm } from "@/app/_components/request-search-form";
@@ -27,6 +28,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   let result: RequestSearchResult | null = null;
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.4.
   const stageChoices = await listQueueStageChoices();
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8: for a supervisor, when the sector distributes.
+  const teamLoad = (await getTeamLoad())?.filter((load) => load.mode !== "NONE") ?? null;
 
   try {
     result = await searchAttendantQueue(params);
@@ -53,6 +56,7 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
           Solicitação encaminhada ao outro setor. Ela saiu da fila deste setor.
         </p>
       ) : null}
+      <TeamLoad loads={teamLoad} />
       <RequestSearchForm basePath="/queue" params={params} showAssignee showSla stageChoices={stageChoices} defaultOrder="oldest" />
       {result === null ? (
         <p className="feedback feedback-error" role="alert">

@@ -12,7 +12,9 @@ export type Entity = "sectors" | "categories" | "users" | "services" | "document
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3.
   | "escalationRules" | "escalationRuleDays" | "escalationRuleEmpty" | "escalationRulePeople"
   // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 2.
-  | "bundles";
+  | "bundles"
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 1.
+  | "distribution";
 // "sector-services" is the page of a "Gerir serviços do setor" holder (SPEC de permissões, 5.3.1).
 export type AdminSection = "overview" | "users" | "sectors" | "categories" | "services" | "sector-services" | "api-tokens" | "webhooks" | "calendar" | "roles" | "bundles";
 

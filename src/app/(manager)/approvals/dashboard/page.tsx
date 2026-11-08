@@ -1,4 +1,6 @@
 import { getDashboard } from "@/modules/reports";
+import { getTeamLoad } from "@/modules/requests";
+import { TeamLoad } from "@/app/_components/team-load";
 import { DashboardView } from "@/app/_components/dashboard-view";
 import { requireManagerPageAccess } from "../../page-access";
 
@@ -12,6 +14,8 @@ export default async function ManagerDashboardPage({ searchParams }: ManagerDash
   await requireManagerPageAccess();
   const { period, from, to } = await searchParams;
   const dashboard = await getDashboard({ period, from, to });
+  // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8: the manager's sector, when it distributes.
+  const teamLoad = (await getTeamLoad())?.filter((load) => load.mode !== "NONE") ?? null;
 
   return (
     <main className="page-shell">
@@ -23,6 +27,7 @@ export default async function ManagerDashboardPage({ searchParams }: ManagerDash
         </div>
       </header>
       <DashboardView action="/approvals/dashboard" dashboard={dashboard} />
+      <TeamLoad loads={teamLoad} />
     </main>
   );
 }

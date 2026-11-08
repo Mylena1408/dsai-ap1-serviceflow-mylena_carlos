@@ -228,6 +228,14 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
             value={String(sla.escalated)}
             detail="setores com escalonamento ligado"
           />
+          {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8: only once the distribution assigned something. */}
+          {sla.distributedAutomatically > 0 ? (
+            <Indicator
+              label="Distribuídas automaticamente"
+              value={String(sla.distributedAutomatically)}
+              detail="pela distribuição da fila ou na ausência do responsável"
+            />
+          ) : null}
           {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: only once a rule escalated. */}
           {sla.escalatedByRule.dueSoon + sla.escalatedByRule.overdueDays > 0 ? (
             <Indicator

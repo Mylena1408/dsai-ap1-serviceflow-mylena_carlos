@@ -303,6 +303,17 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
       return row?.count ?? 0;
     },
 
+    async automaticAssignments(scope, range) {
+      // SPEC 2026-11-07-operacao-e-automacao, 4.3 item 8: one per system assignment by the distribution.
+      const [row] = await database.$queryRaw<Array<{ count: number }>>`
+        SELECT count(*)::int AS "count"
+        FROM "RequestAssignmentEvent" e
+        JOIN "Request" r ON r."id" = e."requestId"
+        WHERE e."reason" IN ('DISTRIBUTION', 'ABSENCE')
+          AND e."occurredAt" >= ${range.from} AND e."occurredAt" < ${range.before} ${scopeSql(scope)}`;
+      return row?.count ?? 0;
+    },
+
     async ruleEscalations(scope, range) {
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: requests, per trigger.
       const [row] = await database.$queryRaw<Array<{ dueSoon: number; overdueDays: number }>>`
