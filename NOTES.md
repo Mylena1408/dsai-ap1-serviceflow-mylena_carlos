@@ -2494,3 +2494,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Concorrência:** duas pessoas aplicando a mesma etiqueta ao mesmo tempo gravam uma vez (integração).
 - **Resultados:** typecheck, lint e build OK; unitários 1492/1492; integração 622/622; E2E 45/45 na primeira rodada completa.
 - **Linhas:** 458 `added` (aplicação 308, testes 150).
+
+## Deploy de SF-194 a SF-196 (2026-11-08)
+
+- **Ordem seguida:** backup verificado → 2 migrations no Neon → push.
+- **Backup:** `serviceflow-2026-11-08-pre-deploy-2.dump`, conferido por restauração local (52 tabelas iguais), cifrado pelo EFS. Detalhes na seção 15 da SPEC de backup.
+- **Migrations no Neon:** `prisma migrate deploy` aplicou `20261108600000_sector_tags` e `20261108700000_request_tags_event`; `prisma migrate status` confirmou o banco em dia (52).
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.

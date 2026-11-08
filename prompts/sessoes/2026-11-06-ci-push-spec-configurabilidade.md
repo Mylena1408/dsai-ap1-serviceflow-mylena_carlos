@@ -270,3 +270,11 @@
 > pode prosseguir
 
 67. SF-196: aplicar e retirar etiquetas na solicitação, histórico, evento e migration das listas de eventos (ver `NOTES.md`).
+
+> pode fazer os commits
+
+68. Commits já estavam todos feitos; perguntado se era o envio.
+
+> faça essa envio agora, e depois prossiga para a sf-197
+
+69. Backup do Neon verificado, migrations `20261108600000_sector_tags` e `20261108700000_request_tags_event` aplicadas e push, nesta ordem (ver `NOTES.md`); depois, SF-197.
