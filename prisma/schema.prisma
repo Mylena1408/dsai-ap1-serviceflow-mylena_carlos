@@ -290,6 +290,8 @@ model User {
   followerEvents           RequestFollowerEvent[]   @relation("RequestFollowerEventUser")
   followerEventsActed      RequestFollowerEvent[]   @relation("RequestFollowerEventActor")
   followPreference         FollowPreference?
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 7.4.
+  mentions                 CommentMention[]
 }
 
 model Service {
@@ -545,6 +547,8 @@ model RequestComment {
   request Request              @relation(fields: [requestId], references: [id], onDelete: Restrict)
   author  User                 @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
   files   RequestCommentFile[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 7.4.
+  mentions CommentMention[]
 
   /// Target of the composite key of RequestCommentFile: a file belongs to the comment's request.
   @@unique([id, requestId])
@@ -1629,4 +1633,19 @@ model FollowPreference {
   updatedAt           DateTime @db.Timestamptz
 
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+}
+
+/// A colleague mentioned in an internal note (SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 and 7.4; decisions I15 and I16):
+/// kept by the chosen id, never parsed from the text; `seenAt` when the person opened it from "Minhas menções" (13.4).
+model CommentMention {
+  commentId String    @db.Uuid
+  userId    String    @db.Uuid
+  createdAt DateTime  @db.Timestamptz
+  seenAt    DateTime? @db.Timestamptz
+
+  comment RequestComment @relation(fields: [commentId], references: [id], onDelete: Restrict)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([commentId, userId])
+  @@index([userId, createdAt])
 }

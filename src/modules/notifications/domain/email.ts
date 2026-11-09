@@ -19,6 +19,7 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   "assignment.received": "ASSIGNMENT",
   "comment.public": "COMMENTS",
   "comment.internal": "COMMENTS",
+  "comment.mention": "COMMENTS",
   "sla.warning": "SLA",
   "sla.breached": "SLA",
   "sla.escalated": "SLA",

@@ -46,6 +46,8 @@ export interface NotificationStore {
    * of its sector who follow it. Optional for older doubles: absent = nobody.
    */
   followers?(requestId: string, sectorId: string): Promise<{ colleagueIds: string[]; attendantIds: string[] }>;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2: who an internal note mentions. Optional for older doubles. */
+  mentionedIds?(commentId: string): Promise<string[]>;
   /** Active attendants of a sector (SLA alerts without an assignee). */
   sectorAttendantIds(sectorId: string): Promise<string[]>;
   /** The subset of `userIds` that are active. */

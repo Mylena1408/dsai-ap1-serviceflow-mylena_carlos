@@ -117,6 +117,14 @@ export function createPrismaCommentTransactionRunner(database: PrismaClient): Co
             resumeSlaOnRequesterReply(requestId, authorId) {
               return resumeSlaOnRequesterReply(transaction, requestId, authorId);
             },
+            // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the active attendants of the sector.
+            async listMentionableIds(sectorId) {
+              const rows = await transaction.user.findMany({ where: { sectorId, role: "ATTENDANT", isActive: true }, select: { id: true } });
+              return rows.map(({ id }) => id);
+            },
+            async insertMentions(commentId, userIds, at) {
+              await transaction.commentMention.createMany({ data: userIds.map((userId) => ({ commentId, userId, createdAt: at })) });
+            },
             // SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 2 (decision J7).
             async followOnComment(requestId, authorId, at) {
               const [preference, following] = await Promise.all([

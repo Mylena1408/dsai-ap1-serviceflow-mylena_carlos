@@ -7,6 +7,8 @@ export type NotificationType =
   | "assignment.received"
   | "comment.public"
   | "comment.internal"
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2.
+  | "comment.mention"
   | "sla.warning"
   | "sla.breached"
   // SPEC 2026-11-06-escalonamento, 4.5.
@@ -36,6 +38,7 @@ const MESSAGES: Record<NotificationType, (service: string, stage?: string) => st
   "assignment.received": (service) => `Uma solicitação foi transferida para você: ${service}`,
   "comment.public": (service) => `Novo comentário em ${service}`,
   "comment.internal": (service) => `Nova nota interna em ${service}`,
+  "comment.mention": (service) => `Você foi mencionado numa nota interna em ${service}`,
   "sla.warning": (service) => `Prazo próximo do vencimento: ${service}`,
   "sla.breached": (service) => `Prazo vencido: ${service}`,
   "sla.escalated": (service) => `Solicitação vencida escalada: ${service}`,

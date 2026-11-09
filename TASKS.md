@@ -2251,7 +2251,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-215 — Menções: migration, domínio e avisos
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Migration `20261109200000_comment_mentions`, regra `planMentions`, menções gravadas com o comentário e o aviso `comment.mention`. Gestor fora das menções (correção da seção 13.10 da SPEC).
 - **Objetivo:** Seção 7.3, parte E.
 - **Arquivos/módulos esperados:** `prisma/`, comentários, notificações.
 - **Dependências:** Parte D concluída.

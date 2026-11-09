@@ -17,6 +17,8 @@ export const commentInputSchema = z
     body: z.string(),
     isInternal: z.boolean().default(false),
     files: z.array(commentFileUploadSchema).optional(),
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the colleagues chosen, by id.
+    mentionIds: z.array(entityIdSchema).max(20).optional(),
   })
   .strict();
 

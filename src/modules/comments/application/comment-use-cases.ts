@@ -11,6 +11,7 @@ import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
 import { assertCanComment, canSeeComment, commentAudience, normalizeCommentBody } from "../domain/comment-policy";
 import { commentFileDownloadSchema, commentInputSchema } from "./comment-schemas";
+import { planMentions } from "../domain/mentions";
 import type {
   CommentFileStorage,
   CommentRecord,
@@ -46,6 +47,8 @@ interface CommentDraft {
   authorId: string;
   body: string;
   isInternal: boolean;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1. */
+  mentionIds: readonly string[];
 }
 
 /** Reloads reader and request, checks who may comment and, with files, the room left (5.1). */
@@ -73,6 +76,17 @@ async function saveComment(
   files: readonly PreparedFile[],
 ): Promise<CommentRecord> {
   const reader = await checkComment(transaction, draft, files.map(({ sizeBytes }) => ({ size: sizeBytes })));
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: checked before anything is written.
+  const mentions =
+    draft.mentionIds.length === 0
+      ? []
+      : planMentions(draft.mentionIds, {
+          authorId: reader.id,
+          isInternal: draft.isInternal,
+          mentionableIds: new Set(
+            transaction.listMentionableIds ? await transaction.listMentionableIds((await transaction.findRequestScope(draft.requestId))!.sectorId) : [],
+          ),
+        });
   const createdAt = await transaction.currentTime();
   const comment = await transaction.insertComment({
     id: commentId,
@@ -99,6 +113,10 @@ async function saveComment(
         createdAt,
       })),
     );
+  }
+
+  if (mentions.length > 0) {
+    await transaction.insertMentions?.(commentId, mentions, createdAt);
   }
 
   // Identifiers only: the text never goes to the outbox (SPEC de eventos, 6.1).
@@ -144,7 +162,13 @@ export async function addComment(
   const parsed = validateInput(commentInputSchema, input);
   const body = normalizeCommentBody(parsed.body);
   const actor = await requireCurrentActor();
-  const draft: CommentDraft = { requestId: parsed.requestId, authorId: actor.id, body, isInternal: parsed.isInternal };
+  const draft: CommentDraft = {
+    requestId: parsed.requestId,
+    authorId: actor.id,
+    body,
+    isInternal: parsed.isInternal,
+    mentionIds: parsed.mentionIds ?? [],
+  };
   const uploads = parsed.files ?? [];
   const commentId = randomUUID();
 

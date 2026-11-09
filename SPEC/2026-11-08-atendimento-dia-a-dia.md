@@ -229,6 +229,7 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 ### 7.4 Dados
 
 - Nova tabela `CommentMention` (`commentId`, `userId`), única pelo par.
+- *Esclarecimentos registrados em 2026-11-09 (SF-215):* a tabela guarda também quando a menção foi feita e quando a pessoa a viu (`seenAt`, para "Minhas menções", 13.4), já nesta migration para a parte E ter um só envio com backup; um `CHECK` impede que seja vista antes de existir. Mencionáveis são os atendentes ativos do setor da solicitação (ver a correção da seção 13.10); o autor que se menciona é ignorado; menção em comentário público, de outra pessoa ou acima de 5 recusa o comentário inteiro. O aviso `comment.mention` (categoria "Comentários") substitui, para a pessoa mencionada, o aviso de nota interna que ela receberia; quem segue a solicitação e não foi mencionado recebe o de nota interna; ninguém recebe dois avisos do mesmo comentário.
 
 ### 7.5 Critérios de aceitação
 
@@ -447,3 +448,7 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 ### 13.9 Ajuste de um teste antigo pelo seguir ao comentar (2026-11-09)
 
 **Registro da mudança.** Com o seguir ao comentar ligado por padrão (decisão J7), o atendente que comenta passa a seguir a solicitação e, depois de uma transferência, recebe os avisos da equipe como seguidor. O teste de integração `notifications.test.ts` ("notifies the right people and never the author", CA-EVT-06), que espera que a atendente que comentou e transferiu não receba aviso, passou a desligar a preferência dessa atendente no início, para continuar conferindo a regra original; as asserções não mudaram. O comportamento novo (a atendente que seguiu ao comentar recebe o aviso da resposta do solicitante depois da transferência) é conferido em `follow-on-comment.test.ts`.
+
+### 13.10 Correção da parte E: o gestor não menciona nem é mencionado (2026-11-09)
+
+**Registro da mudança.** A regra 7.1 ("colega do setor, atendente ou gestor") e o 13.4 item 2 ("o gestor do setor, que já escreve comentários internos") partiam de uma premissa errada: no sistema, só os atendentes do setor leem e escrevem comentários internos (decisão C3 de uma SPEC anterior); o gestor não lê nem escreve comentários. Mencionar o gestor o avisaria de uma nota que ele não pode ler, e deixá-lo mencionar exigiria dar a ele acesso aos comentários internos. Consultada, a responsável escolheu manter as regras de acesso: **as menções são só entre os atendentes ativos do setor**; o gestor não menciona nem é mencionado, e "Minhas menções" (13.4 item 1) fica só na área do atendente. O 13.4 item 2 sai do escopo; o CA-MEN-04 passa a valer para o atendente.

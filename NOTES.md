@@ -2755,3 +2755,16 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Parte D concluída:** CA-SEG-01 a 06 verificados. Somou cerca de 1.900 linhas em 6 tarefas (SF-211 a SF-214, SF-229 e SF-230).
 - **Resultados:** typecheck, lint e build OK; unitários 1571/1571; integração 685/685; E2E 49/49.
 - **Linhas:** 196 `added` em TS (aplicação 103, testes 93).
+
+## Envio de SF-229 e SF-230 (2026-11-09)
+
+- Só push (nenhum dos 3 commits tinha migration): `42fdd23` a `1bc8507`. CI aprovado (run 42618286364). Parte D inteira em produção.
+
+## SF-215 — Menções: banco, regra e avisos (2026-11-09)
+
+- **Correção da SPEC (seção 13.10):** a SPEC supunha que o gestor escreve comentários internos; no sistema só os atendentes do setor leem e escrevem (decisão C3). Perguntada, a responsável escolheu não mexer no acesso: menções só entre atendentes ativos do setor; o gestor não menciona nem é mencionado; "Minhas menções" só na área do atendente.
+- **Migration** `20261109200000_comment_mentions`: `CommentMention` (chave por comentário e pessoa, quando foi feita e `seenAt`, já para a SF-231), com `CHECK` de que só é vista depois de existir.
+- **Regra:** `planMentions` (só em nota interna, até 5, só atendentes ativos do setor, sem repetir, o autor ignorado); qualquer menção inválida recusa o comentário inteiro, antes de gravar.
+- **Avisos:** tipo `comment.mention` na categoria "Comentários" (a lista exata do teste de categorias foi estendida, como a SPEC prevê); para a pessoa mencionada ele substitui o de nota interna; quem segue recebe o de nota interna; a checagem de repetição dos seguidores passou a ser por pessoa, porque o banco já guarda um aviso por pessoa e evento. O rótulo "Menção em nota interna" entrou na seção "E-mails" da administração.
+- **Resultados:** typecheck, lint e build OK; unitários 1577/1577; integração 688/688; E2E 49/49.
+- **Linhas:** 173 `added` em TS (aplicação 63, testes 109, scripts 1).

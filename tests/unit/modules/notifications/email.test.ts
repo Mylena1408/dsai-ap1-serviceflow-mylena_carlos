@@ -20,8 +20,9 @@ describe("notification categories (SF-092)", () => {
       // SPEC 2026-11-03-pausa-sla-calendario, 5.6.
       STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "sector.changed", "sla.paused"],
       ASSIGNMENT: ["assignment.received", "sector.received"],
-      // "document.added" added by SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6.
-      COMMENTS: ["comment.public", "comment.internal", "document.added"],
+      // "document.added" added by SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6; "comment.mention" by
+      // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2.
+      COMMENTS: ["comment.public", "comment.internal", "comment.mention", "document.added"],
       // "sla.escalated" added by SPEC 2026-11-06-escalonamento, 4.5.
       SLA: ["sla.warning", "sla.breached", "sla.escalated"],
       // "stage.overdue" added by SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.2.

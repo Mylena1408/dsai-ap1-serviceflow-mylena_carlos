@@ -11,6 +11,8 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "assignment.received": "Transferência recebida",
   "comment.public": "Comentário",
   "comment.internal": "Nota interna",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2.
+  "comment.mention": "Menção em nota interna",
   "sla.warning": "Prazo próximo",
   "sla.breached": "Prazo vencido",
   "sla.escalated": "Solicitação vencida escalada",

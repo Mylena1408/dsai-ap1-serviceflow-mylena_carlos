@@ -35,6 +35,8 @@ export interface NotificationContext {
    * active attendants of its current sector who follow it.
    */
   followers?: { colleagueIds: readonly string[]; attendantIds: readonly string[] };
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2: the people mentioned in an internal note, loaded for it. */
+  mentionedIds?: readonly string[];
 }
 
 export type NotifiableEvent =
@@ -89,11 +91,14 @@ function withFollowers(planned: PlannedNotification[], event: NotifiableEvent, c
   const actorId = actorOf(event);
   const team = new Set([context.effectiveAssigneeId, ...(context.slaRecipients?.sectorAttendantIds ?? [])].filter((id): id is string => id !== null));
   const result = [...planned];
-  const has = (recipientId: string, type: NotificationType) => result.some((item) => item.recipientId === recipientId && item.type === type);
+  // One notice per person per event (the database keeps it so too).
+  const has = (recipientId: string) => result.some((item) => item.recipientId === recipientId);
   for (const item of planned) {
     const extra = item.recipientId === context.requesterId ? followers.colleagueIds : team.has(item.recipientId) ? followers.attendantIds : [];
     for (const recipientId of extra) {
-      if (recipientId !== actorId && recipientId !== context.requesterId && !has(recipientId, item.type)) result.push({ recipientId, type: item.type });
+      // A mention is personal: who follows hears of the note itself.
+      const type: NotificationType = item.type === "comment.mention" ? "comment.internal" : item.type;
+      if (recipientId !== actorId && recipientId !== context.requesterId && !has(recipientId)) result.push({ recipientId, type });
     }
   }
   return result;
@@ -130,8 +135,11 @@ function plannedWithoutFollowers(event: NotifiableEvent, context: NotificationCo
     case "request.comment_added": {
       const { authorId, isInternal } = event.payload;
       if (isInternal) {
-        // Internal notes never reach the requester.
-        return plan(context.effectiveAssigneeId, "comment.internal", authorId);
+        // Internal notes never reach the requester. SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2: each mentioned
+        // person gets "comment.mention", once, even when they would also get the note's notice.
+        const mentioned = [...new Set(context.mentionedIds ?? [])].filter((id) => id !== authorId);
+        const note = plan(context.effectiveAssigneeId, "comment.internal", authorId).filter(({ recipientId }) => !mentioned.includes(recipientId));
+        return [...note, ...mentioned.map((recipientId): PlannedNotification => ({ recipientId, type: "comment.mention" }))];
       }
       const recipient = authorId === context.requesterId ? context.effectiveAssigneeId : context.requesterId;
       return plan(recipient, "comment.public", authorId);

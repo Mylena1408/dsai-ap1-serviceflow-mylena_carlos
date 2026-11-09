@@ -444,3 +444,11 @@
 > pode prosseguir
 
 111. SF-230: seguir ao comentar com a preferência; ajuste registrado de um teste antigo; CA-SEG-06 verificado; fim da parte D.
+
+> faça os commits
+
+112. Nenhum commit pendente; informados os 3 commits ainda não enviados (sem migration).
+
+> aprovado,pode prosseguir
+
+113. Push dos 3 commits; CI aprovado. Início da parte E: pergunta à responsável sobre o gestor nas menções (a SPEC supunha acesso que ele não tem); resposta: "Só atendentes". SF-215: migration, regra e avisos das menções; correção registrada na seção 13.10 da SPEC.

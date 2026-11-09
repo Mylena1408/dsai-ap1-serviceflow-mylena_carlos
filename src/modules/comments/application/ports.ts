@@ -92,6 +92,12 @@ export interface CommentTransaction extends CommentScopeReader {
    * older doubles.
    */
   followOnComment?(requestId: string, authorId: string, at: Date): Promise<void>;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the active attendants of a sector, who may be mentioned, and
+   * the mentions of a note. Optional for older doubles: absent = nobody may be mentioned.
+   */
+  listMentionableIds?(sectorId: string): Promise<string[]>;
+  insertMentions?(commentId: string, userIds: readonly string[], at: Date): Promise<void>;
 }
 
 export interface CommentTransactionRunner {

@@ -91,6 +91,11 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
       });
       return rows.map(({ id }) => id);
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2.
+    async mentionedIds(commentId) {
+      const rows = await database.commentMention.findMany({ where: { commentId }, select: { userId: true }, orderBy: { userId: "asc" } });
+      return rows.map(({ userId }) => userId);
+    },
     // SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 3.
     async followers(requestId, sectorId) {
       const rows = await database.requestFollower.findMany({
