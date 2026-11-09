@@ -284,6 +284,12 @@ model User {
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 5.4.
   timeEntries              RequestTimeEntry[]
   timeEntryEvents          RequestTimeEntryEvent[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 6.4 and 13.3.
+  following                RequestFollower[]        @relation("RequestFollowerUser")
+  followersAdded           RequestFollower[]        @relation("RequestFollowerAddedBy")
+  followerEvents           RequestFollowerEvent[]   @relation("RequestFollowerEventUser")
+  followerEventsActed      RequestFollowerEvent[]   @relation("RequestFollowerEventActor")
+  followPreference         FollowPreference?
 }
 
 model Service {
@@ -429,6 +435,9 @@ model Request {
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 5.4.
   timeEntries           RequestTimeEntry[]
   timeEntryEvents       RequestTimeEntryEvent[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 6.4.
+  followers             RequestFollower[]
+  followerEvents        RequestFollowerEvent[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -1574,4 +1583,50 @@ model RequestTimeEntryEvent {
   actor   User             @relation(fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId, occurredAt])
+}
+
+/// Who follows a request (SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 and 6.4; decisions I12 to I14): colleagues the
+/// requester added (requesters) and attendants of the sector who follow it themselves.
+model RequestFollower {
+  requestId String   @db.Uuid
+  userId    String   @db.Uuid
+  addedById String   @db.Uuid
+  createdAt DateTime @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  user    User    @relation("RequestFollowerUser", fields: [userId], references: [id], onDelete: Restrict)
+  addedBy User    @relation("RequestFollowerAddedBy", fields: [addedById], references: [id], onDelete: Restrict)
+
+  @@id([requestId, userId])
+  @@index([userId])
+}
+
+enum RequestFollowerAction {
+  ADDED
+  REMOVED
+}
+
+/// The history of the followers (6.3 item 4): "passou a acompanhar" and "deixou de acompanhar".
+model RequestFollowerEvent {
+  id         String                @id @default(uuid()) @db.Uuid
+  requestId  String                @db.Uuid
+  userId     String                @db.Uuid
+  action     RequestFollowerAction
+  actorId    String                @db.Uuid
+  occurredAt DateTime              @db.Timestamptz
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  user    User    @relation("RequestFollowerEventUser", fields: [userId], references: [id], onDelete: Restrict)
+  actor   User    @relation("RequestFollowerEventActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId, occurredAt])
+}
+
+/// 13.3 item 2 (decision J7): whether commenting makes the attendant follow the request; no row means on.
+model FollowPreference {
+  userId              String   @id @db.Uuid
+  autoFollowOnComment Boolean
+  updatedAt           DateTime @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
 }

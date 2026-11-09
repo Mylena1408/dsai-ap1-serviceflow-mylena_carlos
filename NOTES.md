@@ -2689,3 +2689,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Parte C concluída:** CA-HRS-01 a 06 verificados. Somou cerca de 2.000 linhas em 7 tarefas (SF-206 a SF-210, SF-227 e SF-228).
 - **Resultados:** typecheck, lint e build OK; unitários 1555/1555; integração 669/669; E2E 48/48.
 - **Linhas:** 227 `added` em TS (aplicação 152, testes 75).
+
+## Envio de SF-210 a SF-228 (2026-11-09)
+
+- Só push (nenhum dos 5 commits tinha migration, então sem backup nem mudança no Neon): `572042a` a `cfe03d4`. CI aprovado (run 42565751538).
+
+## SF-211 — Seguidores: banco e domínio (2026-11-09)
+
+- **Migration** `20261109100000_request_followers`: `RequestFollower` (chave por solicitação e pessoa, quem incluiu e quando), `RequestFollowerEvent` (`ADDED`/`REMOVED`) e `FollowPreference` (a preferência da SF-230, numa tabela própria para não mexer no modelo do usuário; sem linha, vale "ligada"). Entrou já nesta migration para a parte D ter um só envio com backup.
+- **Domínio:** `planAddFollower` (o solicitante inclui colega ativo com perfil Solicitante, até 10; o atendente do setor segue só a si mesmo), `assertCanRemoveFollower` (o solicitante retira colegas; cada um deixa de seguir sozinho), `readsAsFollower` (só o colega ativo que segue lê como o solicitante), título do histórico e o padrão da preferência.
+- **Acesso:** a parte D amplia quem lê uma solicitação só para o colega seguidor e só para leitura (decisão I13), como está na SPEC aprovada; registrado na SPEC que nenhuma outra regra de acesso nem a segurança da conta mudam.
+- **Resultados:** typecheck, lint e build OK; unitários 1563/1563; integração 670/670; E2E 48/48.
+- **Linhas:** 168 `added` em TS (aplicação 66, testes 99, scripts 3).

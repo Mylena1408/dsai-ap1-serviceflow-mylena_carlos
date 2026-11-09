@@ -402,3 +402,15 @@
 > pode prosseguir
 
 100. SF-228: "Minhas horas" em "Meu painel" e horas por etiqueta no relatório; CA-HRS-06 verificado; fim da parte C.
+
+> quantas linhas temos de codigo passando por cloc --diff
+
+101. Contagem total: 78.941 `added` sobre a baseline (saldo 76.451); sistema com 87.194 linhas.
+
+> faça os envios pendentes
+
+102. Push dos 5 commits (sem migration, sem backup); CI aprovado.
+
+> pode prosseguir
+
+103. SF-211: migration e domínio dos seguidores; registrado na SPEC o alcance da leitura do colega seguidor.

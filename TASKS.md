@@ -2211,7 +2211,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-211 — Seguidores: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Migration `20261109100000_request_followers` (seguidores, histórico e a preferência de seguir ao comentar) e domínio `src/modules/followers` (incluir, retirar, leitura do colega, histórico, preferência).
 - **Objetivo:** Seção 6.3 (regra 1), parte D.
 - **Arquivos/módulos esperados:** `prisma/`, módulo de seguidores.
 - **Dependências:** Parte C concluída.

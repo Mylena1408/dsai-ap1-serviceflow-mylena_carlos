@@ -197,6 +197,7 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 ### 6.4 Dados
 
 - Nova tabela `RequestFollower` (`requestId`, `userId`, `addedById`, `createdAt`), única por (`requestId`, `userId`); nova tabela `RequestFollowerEvent`.
+- *Esclarecimentos registrados em 2026-11-09 (SF-211):* `RequestFollowerEvent` guarda quem passou a acompanhar ou deixou de acompanhar (`ADDED`/`REMOVED`), quem fez e quando. A preferência "seguir ao comentar" (13.3 item 2) fica numa tabela própria, `FollowPreference` (uma linha por pessoa; sem linha, vale "ligada"), entrando nesta mesma migration para a parte D ter um só envio com backup; o modelo do usuário não muda. O limite de 10 colegas e quem pode ser seguidor são conferidos pelos casos de uso, em transações serializáveis. O solicitante não retira um atendente que segue (cada atendente deixa de seguir só a si mesmo); retirar quem não segue é conflito. Esta parte amplia quem lê uma solicitação (o colega seguidor, só leitura, decisão I13), sem mudar nenhuma outra regra de acesso nem a segurança da conta.
 
 ### 6.5 Critérios de aceitação
 
