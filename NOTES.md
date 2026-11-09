@@ -2820,3 +2820,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Push** `c984f03..66da450` (2 commits, sem migration; sem cópia nem migration no Neon, autorizado pela responsável). O CI (run 42662447775) reprovou: 1 de 50 E2E, `mentions.spec.ts`, não achou a lista "Menções recebidas" em 5 s depois do clique em "Minhas menções"; todos os outros passos passaram. O mesmo teste tinha passado no CI anterior e na suíte local: na máquina do CI o clique volta antes de a navegação terminar.
 - **Correção (só no teste):** esperar o endereço `/queue/mentions` e o título "Minhas menções" antes de ler a lista, como no E2E dos seguidores. Rodado 3 vezes seguidas localmente (3/3), e a suíte completa: typecheck, lint e build OK; unitários 1586/1586; integração 696/696; E2E 50/50.
 - **Acompanhamento do CI:** a espera consultava a API pública do GitHub a cada 30 s e esgotou o limite de 60 consultas por hora; as próximas esperas consultam a cada 90 s.
+
+## Correção do diagnóstico do E2E das menções (2026-11-09)
+
+- **O primeiro diagnóstico estava errado.** Com a espera pela página (`572de96`), o CI (run 42668936510) falhou de novo no mesmo teste: o título "Minhas menções" apareceu, mas a lista não existia, ou seja, a página abriu sem nenhuma menção. Não era tempo.
+- **Causa real:** o teste escolhia quem recebe a menção com `findFirst` do "primeiro atendente ativo do setor", sem ordem. Outros E2E da rodada criam atendentes no mesmo setor; no CI o banco devolveu um deles, e não o atendente de demonstração que entra pelo botão. Na máquina local a ordem devolvia o certo, por isso passava.
+- **Correção (só no teste):** a menção vai para o atendente de demonstração pelo e-mail exato (`DEMO_ACCOUNTS.ATTENDANT`), como o `request-search.spec.ts` já faz; a espera pela página, que não resolvia nada, foi retirada. Suíte completa: typecheck, lint e build OK; unitários 1586/1586; integração 696/696; E2E 50/50.

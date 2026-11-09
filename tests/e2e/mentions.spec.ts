@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import { ENTRANCE } from "./entrance";
 import { seedDemoData } from "../../scripts/demo-data";
+import { DEMO_ACCOUNTS } from "../../src/modules/auth/domain/demo-accounts";
 
 // SPEC 2026-11-08-atendimento-dia-a-dia, section 11, part E (SF-216; CA-MEN-01 and 02 through the screens): the attendant
 // writes an internal note mentioning a colleague of the sector; the note shows whom it mentions; a mention in a public
@@ -46,7 +47,8 @@ test("mentions: an internal note mentions a colleague of the sector, never seen 
     const category = await database.category.findFirstOrThrow({ where: { isActive: true } });
     const service = await database.service.create({ data: { name: serviceName, description: "Serviço do teste.", categoryId: category.id, sectorId: sector.id } });
     const requester = await database.user.findUniqueOrThrow({ where: { email: "ana.souza@exemplo.test" } });
-    const template = await database.user.findFirstOrThrow({ where: { role: "ATTENDANT", sectorId: sector.id, isActive: true } });
+    // The demo attendant itself, who enters by the button: other tests of the run add attendants to the same sector.
+    const template = await database.user.findUniqueOrThrow({ where: { email: DEMO_ACCOUNTS.ATTENDANT.email } });
     colleagueId = (
       await database.user.create({
         data: { name: colleagueName, email: `${unique}@exemplo.test`, role: "ATTENDANT", sectorId: sector.id, passwordHash: template.passwordHash },
@@ -79,9 +81,6 @@ test("mentions: an internal note mentions a colleague of the sector, never seen 
   await enterAs(page, "Atendente");
   // "Minhas menções": the new mention, opened from the list, leads to the conversation and becomes seen.
   await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: /^Minhas menções/ }).click();
-  // Wait for the page itself before reading the list: on a slower machine the click returns before the navigation ends.
-  await expect(page).toHaveURL(/\/queue\/mentions$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Minhas menções" })).toBeVisible();
   const mentions = page.getByRole("list", { name: "Menções recebidas" });
   await expect(mentions).toContainText(serviceName);
   await expect(mentions).toContainText("Nova");

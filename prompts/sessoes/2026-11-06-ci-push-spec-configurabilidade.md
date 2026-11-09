@@ -488,3 +488,7 @@
 > autorizado
 
 122. Suíte completa, commit e push da correção do E2E das menções.
+
+> terminou?
+
+123. CI do `572de96` reprovado no mesmo E2E; a anotação mostrou a página aberta sem menções: diagnóstico corrigido (atendente escolhido sem ordem), menção para a conta de demonstração pelo e-mail, espera retirada; suíte completa e commit; push autorizado pela responsável ("autorizo puch").
