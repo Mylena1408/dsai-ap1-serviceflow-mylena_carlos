@@ -558,6 +558,12 @@ export async function runQueueBatch(input: unknown, database: PrismaClient = pri
     untag: async (item) => {
       await changeRequestTags({ requestId: item.requestId, remove: [item.tagId] }, database);
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 2: the links' rules, then the closing of 8.3.
+    duplicateOriginal: (code) => links.findDuplicateTarget(code, createPrismaLinkStore(database)),
+    duplicate: async (item) => {
+      await links.ensureDuplicateLink({ requestId: item.requestId, originalId: item.originalId }, createPrismaLinkStore(database));
+      await closeAsDuplicate({ requestId: item.requestId, note: item.note }, database);
+    },
   });
 }
 

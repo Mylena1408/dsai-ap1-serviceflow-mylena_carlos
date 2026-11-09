@@ -17,6 +17,8 @@ const ACTION_LABELS: Record<BatchAction, string> = {
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 5.
   tag: "Etiquetar",
   untag: "Retirar etiqueta",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 2.
+  duplicate: "Encerrar como duplicada de",
 };
 
 const PRIORITY_LABELS = { LOW: "Baixa", NORMAL: "Normal", HIGH: "Alta", URGENT: "Urgente" } as const;
@@ -123,6 +125,18 @@ export function QueueBatch({
             </label>
             <label>
               Justificativa
+              <textarea maxLength={1000} name="note" required rows={2} />
+            </label>
+          </>
+        ) : null}
+        {action === "duplicate" ? (
+          <>
+            <label>
+              Código da original
+              <input maxLength={9} name="code" placeholder="#AB12CD34" required />
+            </label>
+            <label>
+              Nota do encerramento
               <textarea maxLength={1000} name="note" required rows={2} />
             </label>
           </>

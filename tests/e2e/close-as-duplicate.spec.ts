@@ -165,3 +165,57 @@ test("possible duplicates: the same requester's request of the same service, lin
   await expect(page.getByRole("status")).toContainText("Solicitação encerrada como duplicada.");
   await expect(page.getByText(`Encerrada como duplicada de #${code(olderId)}`)).toBeVisible();
 });
+
+test("batch: two requests closed as duplicates of the same original, item by item", async ({ page }) => {
+  test.setTimeout(240_000);
+  const batchName = `${unique} Lote`;
+  const database = new PrismaClient({ datasourceUrl: process.env.TEST_DATABASE_URL, log: [] });
+  let originalId = "";
+  const duplicateIds: string[] = [];
+  try {
+    await seedDemoData(database);
+    const sector = await database.sector.findFirstOrThrow({ where: { name: "Central de Serviços" } });
+    const category = await database.category.findFirstOrThrow({ where: { isActive: true } });
+    const service = await database.service.create({ data: { name: batchName, description: "Serviço do teste.", categoryId: category.id, sectorId: sector.id } });
+    const ana = await database.user.findUniqueOrThrow({ where: { email: DEMO_ACCOUNTS.REQUESTER.email } });
+    const open = (description: string) =>
+      database.request.create({
+        data: {
+          requesterId: ana.id,
+          serviceId: service.id,
+          sectorId: sector.id,
+          serviceNameSnapshot: service.name,
+          serviceDescriptionSnapshot: service.description,
+          categoryIdSnapshot: category.id,
+          categoryNameSnapshot: category.name,
+          sectorNameSnapshot: sector.name,
+          description,
+          status: "OPEN",
+        },
+      });
+    originalId = (await open("O pedido que fica.")).id;
+    for (const description of ["Repetido 1.", "Repetido 2."]) duplicateIds.push((await open(description)).id);
+  } finally {
+    await database.$disconnect();
+  }
+  const label = (id: string) => `${batchName} (#${id.slice(0, 8)})`;
+
+  await enterAs(page, "Atendente");
+  await page.goto(`/queue?q=${encodeURIComponent(batchName)}`);
+  const batch = page.getByRole("region", { name: "Ações em lote" });
+  for (const id of duplicateIds) await page.getByRole("checkbox", { name: `Marcar ${label(id)} para ação em lote` }).check();
+  await batch.locator('select[name="action"]').selectOption("duplicate");
+  await batch.getByLabel("Código da original").fill(`#${code(originalId)}`);
+  await batch.getByLabel("Nota do encerramento").fill("Repetidos do mesmo pedido.");
+  await batch.getByRole("button", { name: "Aplicar às marcadas" }).click();
+
+  await expect(batch.getByRole("status")).toContainText("Encerrar como duplicada de: 2 feitas, 0 recusadas.");
+  const items = batch.getByRole("list", { name: "Resultado por solicitação" });
+  for (const id of duplicateIds) await expect(items).toContainText(`${label(id)}: feito`);
+
+  // Each one carries the closing in its history; the original lists both.
+  await page.goto(`/queue/${duplicateIds[0]}`);
+  await expect(page.getByText(`Encerrada como duplicada de #${code(originalId)}`)).toBeVisible();
+  await page.goto(`/queue/${originalId}`);
+  for (const id of duplicateIds) await expect(page.getByText(`Duplicada #${code(id)} encerrada`)).toBeVisible();
+});

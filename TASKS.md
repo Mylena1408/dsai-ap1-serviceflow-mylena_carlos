@@ -2431,7 +2431,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-233 — Encerrar como duplicada no lote
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Ação "Encerrar como duplicada de" no lote da fila; CA-DUP-04 verificado; parte F concluída.
 - **Objetivo:** Seção 13.5 (item 2), parte F (aprofundamento).
 - **Arquivos/módulos esperados:** Lote da fila.
 - **Dependências:** SF-232.

@@ -512,3 +512,15 @@
 > pode prosseguir
 
 128. SF-232: "Possíveis duplicadas" no detalhe da fila, com atalho para vincular; CA-DUP-04 (sugestões) verificado; o lote fica para a SF-233.
+
+> faça o push
+
+129. Push autorizado; a suíte da SF-233 falhou em 1 E2E (404 intermitente, sem relação com o lote), então o push ficou para depois.
+
+> faça a investigação e correção desta falha, me informe e peça minha aprovação
+
+130. Investigação do 404: compilação do Next, reinício, limpeza de órfãos, setor do atendente e nomes repetidos descartados; registro temporário no servidor, duas rodadas 53/53 sem reproduzir; registro retirado.
+
+> (pergunta) "Registro só nos testes (Recomendado)"
+
+131. Commit e push da SF-233; os testes afetados passam a gravar detalhes quando falharem, numa tarefa à parte.

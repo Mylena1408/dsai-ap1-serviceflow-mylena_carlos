@@ -24,9 +24,14 @@ function field(formData: FormData, name: string): string {
 }
 
 /** The fixed message of a batch refused before any item (internal: only async exports become actions). */
-function refusal(error: ApplicationError): string {
+function refusal(error: ApplicationError, action: string): string {
   if (error instanceof ValidationError) {
     const paths = error.issues.flatMap(({ path }) => path);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 2.
+    if (action === "duplicate" && paths.includes("note")) return "Escreva a nota do encerramento como duplicada, com até 1.000 caracteres.";
+    if (action === "duplicate" && paths.includes("code")) {
+      return "Informe o código de 8 caracteres de uma solicitação que você possa ver e que não esteja cancelada.";
+    }
     if (paths.includes("note")) return "Escreva a justificativa do encaminhamento.";
     return "Marque de 1 a 50 solicitações desta página e preencha os dados da ação escolhida.";
   }
@@ -46,7 +51,9 @@ export async function runBatchAction(_previous: BatchState, formData: FormData):
           ? { sectorId: field(formData, "sectorId"), note: field(formData, "note") }
           : action === "tag" || action === "untag"
             ? { tagId: field(formData, "tagId") }
-            : {};
+            : action === "duplicate"
+              ? { code: field(formData, "code"), note: field(formData, "note") }
+              : {};
   try {
     const result = await runQueueBatch({ action, requestIds, ...extra });
     revalidatePath("/queue");
@@ -64,7 +71,7 @@ export async function runBatchAction(_previous: BatchState, formData: FormData):
       },
     };
   } catch (error) {
-    if (error instanceof ApplicationError) return { step: "error", message: refusal(error) };
+    if (error instanceof ApplicationError) return { step: "error", message: refusal(error, action) };
     throw error;
   }
 }

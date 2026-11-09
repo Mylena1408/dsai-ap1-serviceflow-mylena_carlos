@@ -8,6 +8,7 @@ import {
   linkRole,
   linkVisibleToRequester,
   otherRequestId,
+  requestCodeSchema,
   unlinkInputSchema,
   type LinkKind,
   type LinkRecord,
@@ -241,4 +242,45 @@ export async function listPossibleDuplicates(
     createdAt: candidate.createdAt,
     readable: readable(actor, candidate),
   }));
+}
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 2 (decision J10): the original a batch closes into, by its short
+ * code, checked once before any item: one request the attendant reads, not cancelled. Anything else refuses the
+ * whole batch, as a wrong code (the items are not touched).
+ */
+export async function findDuplicateTarget(code: unknown, store: LinkStore): Promise<string> {
+  const actor = await requireCurrentActor();
+  const refused = () => new ValidationError([{ path: ["code"], code: "invalid_value" }]);
+  const parsed = requestCodeSchema.safeParse(code);
+  if (!parsed.success) throw refused();
+
+  return store.run(async (transaction) => {
+    const matches = await transaction.findByCode(codeRange(parsed.data));
+    const target = matches.length === 1 ? await transaction.findRequest(matches[0]) : null;
+    if (!target || !readable(actor, target) || target.status === "CANCELLED") throw refused();
+    return target.id;
+  });
+}
+
+/**
+ * 13.5 item 2: the request becomes "duplicada de" the original, by the links' rules, unless it already is (then
+ * nothing is written). Same transaction and checks as linking by the form.
+ */
+export async function ensureDuplicateLink(input: { requestId: string; originalId: string }, store: LinkStore): Promise<void> {
+  const actor = await requireCurrentActor();
+  await store.run(async (transaction) => {
+    const source = await loadSource(transaction, actor, input.requestId);
+    const target = await transaction.findRequest(input.originalId);
+    if (!target || !readable(actor, target)) throw new NotFoundError();
+
+    const sourceLinks = await transaction.linksOf(source.id);
+    const linked = sourceLinks.some((link) => link.kind === "DUPLICATE_OF" && link.fromRequestId === source.id && link.toRequestId === target.id);
+    if (linked) return;
+
+    assertCanLink(source.id, target.id, "DUPLICATE_OF", sourceLinks, await transaction.linksOf(target.id));
+    const now = await transaction.currentTime();
+    await transaction.insertLink({ fromRequestId: source.id, toRequestId: target.id, kind: "DUPLICATE_OF", createdById: actor.id, createdAt: now });
+    await transaction.insertEvent({ fromRequestId: source.id, toRequestId: target.id, kind: "DUPLICATE_OF", action: "LINKED", actorId: actor.id, occurredAt: now });
+  });
 }

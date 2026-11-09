@@ -2852,3 +2852,18 @@ Padrão a replicar nas SF-039 e SF-040:
 - **E2E:** `close-as-duplicate.spec.ts` ganhou o percurso da sugestão: vincular pelo atalho e encerrar como duplicada; a limpeza do arquivo passou a valer para os dois serviços criados.
 - **Resultados:** typecheck, lint e build OK; unitários 1593/1593; integração 700/700; E2E 52/52.
 - **Linhas:** 335 `added` em TS (aplicação 157, testes 178).
+
+## SF-233 — Encerrar como duplicada no lote; fim da parte F (2026-11-09)
+
+- **Lote:** ação "Encerrar como duplicada de" (`duplicate`), com o código da original e a nota iguais para todos. A nota (1 a 1.000 caracteres) e a original (`findDuplicateTarget`: uma solicitação que o atendente lê, não cancelada) são conferidas uma vez, antes de qualquer item; falhando, o lote inteiro é recusado e nada muda. Item a item: `ensureDuplicateLink` cria o vínculo "duplicada de" pelas regras dos vínculos, só se faltar, e depois `closeAsDuplicate` encerra pela regra 8.3.
+- **Comportamento registrado na SPEC:** vínculo e encerramento são duas transações; se o encerramento de um item for recusado (por exemplo, outro responsável), o vínculo criado para ele fica e o resultado diz "recusado". Motivo próprio `invalid_duplicate`; os motivos das outras ações não mudam. As portas novas do lote são opcionais, para os dublês antigos.
+- **Parte F concluída:** CA-DUP-01 a 04 verificados.
+- **Linhas:** 282 `added` em TS (aplicação 77, testes 205).
+
+## Falha intermitente de 404 nos E2E: investigação (2026-11-09)
+
+- **O que aconteceu:** na suíte da SF-233, `comment-files-late-documents.spec.ts` falhou com 404 no download do arquivo do comentário (já tinha acontecido uma vez na SF-183); na rodada seguinte do E2E completo falharam três testes, todos com 404 na primeira chamada a uma rota de API com parâmetros: download do arquivo do comentário, download de documento (`request-documents.spec.ts`) e "assumir" pela API (`api-actions-webhook-sectors.spec.ts`). Cada um, sozinho, passou (o primeiro, 3 vezes seguidas).
+- **Descartado, com prova:** (1) 404 do servidor de desenvolvimento ao compilar a rota: num diagnóstico temporário, as primeiras chamadas a três rotas, com o servidor recém-iniciado, responderam o JSON do próprio sistema nas 3 vezes; (2) reinício do servidor (nenhum aviso no registro); (3) limpeza de órfãos (só apaga objetos com mais de 24 horas); (4) mudança do setor do atendente de demonstração por outro teste; (5) nomes repetidos do setor e dos serviços de demonstração no banco de teste.
+- **Registro temporário:** a origem de cada "não encontrado" foi gravada no servidor (só no E2E, por variável de ambiente); duas rodadas completas passaram inteiras (53/53), sem reproduzir a falha. O registro foi retirado; nada dele entrou no repositório. A falha nunca apareceu no CI.
+- **Decisão da responsável:** fazer o commit e o push da SF-233 e, numa tarefa à parte, fazer os três testes afetados gravarem, quando falharem, a resposta e o estado no banco (setor da solicitação e do atendente, arquivo), sem mudar o sistema.
+- **Resultados da SF-233:** typecheck, lint e build OK; unitários 1598/1598; integração 703/703; E2E: 52/53 e 50/53 nas duas primeiras rodadas (só o 404 acima, em testes sem relação com o lote) e 53/53 nas duas rodadas seguintes.
