@@ -2261,7 +2261,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-216 — Telas das menções e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. "Mencionar" no formulário de comentário da fila (`listMentionableColleagues`), "Menciona: ..." nas notas, mensagem da recusa; E2E `mentions.spec.ts`. CA-MEN-01 a 03 verificados.
 - **Objetivo:** Parte E, parte E.
 - **Arquivos/módulos esperados:** Comentário interno.
 - **Dependências:** SF-215.

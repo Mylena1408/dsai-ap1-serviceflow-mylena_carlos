@@ -21,6 +21,8 @@ export interface CommentRecord {
   author: { id: string; name: string; role: "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER" };
   /** Always loaded from the database; optional so records built before the files stay valid. */
   files?: CommentFileSummary[];
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 3: the names of the colleagues an internal note mentions. */
+  mentions?: string[];
 }
 
 export interface NewComment {
@@ -64,6 +66,8 @@ export interface CommentScopeReader {
 }
 
 export interface CommentRepository extends CommentScopeReader {
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the active attendants of a sector. Optional for older doubles. */
+  listMentionable?(sectorId: string): Promise<Array<{ id: string; name: string }>>;
   /** Chronological, with files; internal notes only when `includeInternal`. */
   listForRequest(requestId: string, includeInternal: boolean): Promise<CommentRecord[]>;
   /** Number of comments per request id, internal notes only when `includeInternal`. */

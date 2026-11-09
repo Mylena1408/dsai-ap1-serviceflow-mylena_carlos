@@ -30,7 +30,7 @@ import { PriorityForm } from "./priority-form";
 import { SectorTransferForm } from "./sector-transfer-form";
 import { SlaPausePanel } from "./sla-pause-panel";
 import { AttendanceFieldsForm } from "./attendance-fields-form";
-import { listComments } from "@/modules/comments";
+import { listComments, listMentionableColleagues } from "@/modules/comments";
 import { RequestConversation } from "@/app/_components/request-conversation";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
 import { RequestTimeline } from "@/app/_components/request-timeline";
@@ -106,6 +106,8 @@ function feedback(error?: string, notice?: string): string | null {
   if (error === "tag-state") return "Não é possível mudar as etiquetas de uma solicitação cancelada, ou ela mudou enquanto você agia.";
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 4; the pending items are listed next to it.
   if (error === "checklist-pending") return "Não foi possível concluir: há itens obrigatórios do checklist por marcar.";
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1.
+  if (error === "mention") return "Menções só em nota interna, até 5 colegas atendentes ativos do setor.";
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3.
   const checklistMessage = checklistFeedback(error) ?? checklistFeedback(notice);
   if (checklistMessage) return checklistMessage;
@@ -137,6 +139,7 @@ export default async function QueueRequestPage({
   let time: Awaited<ReturnType<typeof getRequestTime>> | null = null;
   let followers: Awaited<ReturnType<typeof getRequestFollowers>> | null = null;
   let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
+  let mentionable: Array<{ id: string; name: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
   let attendance: Awaited<ReturnType<typeof getAttendanceFields>> = { fields: [], values: {} };
@@ -151,6 +154,8 @@ export default async function QueueRequestPage({
     satisfaction = await getRequestSatisfaction(request.id);
     // SPEC 2026-11-06-respostas-prontas, 4.4: rendered with what the attendant already sees.
     cannedResponses = await listResponsesForRequest(request.id);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1.
+    mentionable = await listMentionableColleagues(request.id);
     escalations = await listRequestEscalations(request.id);
     links = await listRequestLinks(request.id);
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
@@ -290,6 +295,7 @@ export default async function QueueRequestPage({
         allowInternal
         action={addCommentAction}
         cannedResponses={cannedResponses}
+        mentionable={mentionable}
       />
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} timeEvents={time?.events ?? []} followerEvents={followers?.events ?? []} />
     </main>

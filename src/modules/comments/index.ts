@@ -9,6 +9,8 @@ import {
 } from "./infrastructure/prisma-comment-repository";
 
 export { MAX_COMMENT_LENGTH } from "./domain/comment-policy";
+// SPEC 2026-11-08-atendimento-dia-a-dia, part E.
+export { MAX_MENTIONS, mentionLine, planMentions } from "./domain/mentions";
 export type { CommentFileSummary, CommentRecord } from "./application/ports";
 export type { CommentFileDownload } from "./application/comment-use-cases";
 
@@ -41,4 +43,9 @@ export async function countComments(
   database: PrismaClient = prisma,
 ): Promise<Map<string, number>> {
   return useCases.countComments(requestIds, createPrismaCommentRepository(database));
+}
+
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: whom the attendant may mention in a note on this request. */
+export function listMentionableColleagues(requestId: unknown, database: PrismaClient = prisma) {
+  return useCases.listMentionableColleagues(requestId, createPrismaCommentRepository(database));
 }

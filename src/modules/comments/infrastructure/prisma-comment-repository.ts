@@ -17,6 +17,8 @@ const commentWithAuthor = {
     select: { id: true, originalFilename: true, detectedFormat: true, sizeBytes: true, removedAt: true },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   },
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 3.
+  mentions: { select: { user: { select: { name: true } } }, orderBy: { userId: "asc" } },
 } satisfies Prisma.RequestCommentInclude;
 
 const toDomain = (
@@ -29,6 +31,7 @@ const toDomain = (
   createdAt: row.createdAt,
   author: row.author,
   files: row.files.map(({ removedAt, ...file }) => ({ ...file, removed: removedAt !== null })),
+  mentions: row.mentions.map(({ user }) => user.name).sort((left, right) => left.localeCompare(right, "pt-BR")),
 });
 
 // The request scope is read here, like requests reads document requirements, so the module
@@ -53,6 +56,14 @@ function scopeReader(client: PrismaClient | Prisma.TransactionClient): CommentSc
 export function createPrismaCommentRepository(database: PrismaClient): CommentRepository {
   return {
     ...scopeReader(database),
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1.
+    listMentionable(sectorId: string) {
+      return database.user.findMany({
+        where: { sectorId, role: "ATTENDANT", isActive: true },
+        select: { id: true, name: true },
+        orderBy: [{ name: "asc" }, { id: "asc" }],
+      });
+    },
     async listForRequest(requestId, includeInternal) {
       const rows = await database.requestComment.findMany({
         where: { requestId, ...(includeInternal ? {} : { isInternal: false }) },

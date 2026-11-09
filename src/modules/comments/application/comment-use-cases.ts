@@ -265,3 +265,20 @@ export async function countComments(
 
   return repository.countForRequests(ids, actor.role === "ATTENDANT");
 }
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the colleagues an attendant may mention in a note on this request,
+ * the other active attendants of its sector, by name. Anyone who does not write internal notes on it gets none.
+ */
+export async function listMentionableColleagues(
+  requestId: unknown,
+  repository: CommentRepository,
+): Promise<Array<{ id: string; name: string }>> {
+  const id = validateInput(entityIdSchema, requestId);
+  const actor = await requireCurrentActor();
+  const reader = await repository.findReader(actor.id);
+  const request = await repository.findRequestScope(id);
+  if (!reader || !request || reader.role !== "ATTENDANT" || !reader.isActive || reader.sectorId !== request.sectorId) return [];
+  const colleagues = repository.listMentionable ? await repository.listMentionable(request.sectorId) : [];
+  return colleagues.filter((colleague) => colleague.id !== reader.id);
+}

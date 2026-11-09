@@ -1,4 +1,4 @@
-import { MAX_COMMENT_LENGTH, type CommentRecord } from "@/modules/comments";
+import { MAX_COMMENT_LENGTH, MAX_MENTIONS, mentionLine, type CommentRecord } from "@/modules/comments";
 import { COMMENT_FILES_FIELD } from "./comment-form-data";
 import { CannedResponsePicker, type PickerResponse } from "./canned-response-picker";
 
@@ -12,6 +12,8 @@ type RequestConversationProps = {
   action: (formData: FormData) => Promise<never>;
   /** Canned responses of the attendant's sector, already rendered (SPEC 2026-11-06-respostas-prontas). */
   cannedResponses?: readonly PickerResponse[];
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the colleagues an internal note may mention. */
+  mentionable?: ReadonlyArray<{ id: string; name: string }>;
 };
 
 function fileSize(bytes: number): string {
@@ -34,6 +36,7 @@ export function RequestConversation({
   allowInternal,
   action,
   cannedResponses = [],
+  mentionable = [],
 }: RequestConversationProps) {
   return (
     <section id="conversa" className="surface-card content-section" aria-labelledby="conversation-heading">
@@ -47,6 +50,9 @@ export function RequestConversation({
             <li key={comment.id} className={comment.isInternal ? "is-internal" : undefined}>
               {comment.isInternal ? <p className="comment-badge">Nota interna (só atendentes)</p> : null}
               <p className="comment-body">{comment.body}</p>
+              {comment.isInternal && comment.mentions && comment.mentions.length > 0 ? (
+                <p className="metadata">{mentionLine(comment.mentions)}</p>
+              ) : null}
               {comment.files && comment.files.length > 0 ? (
                 // SPEC 2026-11-03-anexos-comentarios-documentos, 5.2: same visibility as the comment.
                 <ul className="comment-files" aria-label="Arquivos do comentário">
@@ -90,6 +96,17 @@ export function RequestConversation({
               <input type="checkbox" name="isInternal" />
               Nota interna (o solicitante não vê)
             </label>
+          ) : null}
+          {allowInternal && mentionable.length > 0 ? (
+            <fieldset className="search-statuses">
+              <legend>Mencionar (só em nota interna, até {MAX_MENTIONS})</legend>
+              {mentionable.map((colleague) => (
+                <label className="checkbox-label" key={colleague.id}>
+                  <input name="mentionIds" type="checkbox" value={colleague.id} />
+                  {colleague.name}
+                </label>
+              ))}
+            </fieldset>
           ) : null}
           <button type="submit">Enviar comentário</button>
         </form>

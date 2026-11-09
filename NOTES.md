@@ -2768,3 +2768,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Avisos:** tipo `comment.mention` na categoria "Comentários" (a lista exata do teste de categorias foi estendida, como a SPEC prevê); para a pessoa mencionada ele substitui o de nota interna; quem segue recebe o de nota interna; a checagem de repetição dos seguidores passou a ser por pessoa, porque o banco já guarda um aviso por pessoa e evento. O rótulo "Menção em nota interna" entrou na seção "E-mails" da administração.
 - **Resultados:** typecheck, lint e build OK; unitários 1577/1577; integração 688/688; E2E 49/49.
 - **Linhas:** 173 `added` em TS (aplicação 63, testes 109, scripts 1).
+
+## SF-216 — Telas das menções e E2E (2026-11-09)
+
+- **Formulário:** caixas "Mencionar" com os colegas atendentes ativos do setor (sem a própria pessoa), lidos por `listMentionableColleagues`, que devolve uma lista vazia a quem não escreve nota interna na solicitação; a ação envia `mentionIds` só quando há escolha.
+- **Recusa:** o caminho `mentionIds` entrou na lista de caminhos públicos das validações, para a ação reconhecer a recusa e mostrar "Menções só em nota interna, até 5 colegas atendentes ativos do setor."
+- **Exibição:** os comentários passaram a trazer os nomes mencionados (só mostrados em nota interna, em ordem alfabética).
+- **E2E** `mentions.spec.ts`: recusa da menção em comentário público, nota interna com menção, o solicitante sem ver a nota nem o nome; o atendente extra criado para o teste é desativado no fim (a distribuição automática conta os atendentes ativos), e o E2E da distribuição passou junto.
+- **Resultados:** typecheck, lint e build OK; unitários 1579/1579; integração 688/688; E2E 50/50.
+- **Linhas:** 190 `added` em TS (aplicação 57, testes 133).

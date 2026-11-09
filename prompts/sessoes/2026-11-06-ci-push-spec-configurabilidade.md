@@ -452,3 +452,7 @@
 > aprovado,pode prosseguir
 
 113. Push dos 3 commits; CI aprovado. Início da parte E: pergunta à responsável sobre o gestor nas menções (a SPEC supunha acesso que ele não tem); resposta: "Só atendentes". SF-215: migration, regra e avisos das menções; correção registrada na seção 13.10 da SPEC.
+
+> pode prosseguir
+
+114. SF-216: telas das menções e E2E; CA-MEN-01 a 03 verificados.

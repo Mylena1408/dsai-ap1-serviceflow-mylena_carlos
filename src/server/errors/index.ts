@@ -84,6 +84,8 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "sourceServiceId",
   // 13.2 item 1.
   "estimatedHours",
+  // 7.3 item 1.
+  "mentionIds",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1.
   "decimalPlaces",
   "minDecimal",

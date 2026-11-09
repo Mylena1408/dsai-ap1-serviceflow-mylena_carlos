@@ -230,12 +230,13 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 
 - Nova tabela `CommentMention` (`commentId`, `userId`), única pelo par.
 - *Esclarecimentos registrados em 2026-11-09 (SF-215):* a tabela guarda também quando a menção foi feita e quando a pessoa a viu (`seenAt`, para "Minhas menções", 13.4), já nesta migration para a parte E ter um só envio com backup; um `CHECK` impede que seja vista antes de existir. Mencionáveis são os atendentes ativos do setor da solicitação (ver a correção da seção 13.10); o autor que se menciona é ignorado; menção em comentário público, de outra pessoa ou acima de 5 recusa o comentário inteiro. O aviso `comment.mention` (categoria "Comentários") substitui, para a pessoa mencionada, o aviso de nota interna que ela receberia; quem segue a solicitação e não foi mencionado recebe o de nota interna; ninguém recebe dois avisos do mesmo comentário.
+- *Esclarecimentos registrados em 2026-11-09 (SF-216):* o formulário de comentário da fila ganha "Mencionar", com uma caixa para cada colega atendente ativo do setor (sem a própria pessoa), visível só para quem escreve nota interna; escolher alguém sem marcar "Nota interna" recusa o comentário com uma mensagem própria. A nota mostra "Menciona: Fulano, Beltrana" logo abaixo do texto; o solicitante não vê notas internas, então não vê menções.
 
 ### 7.5 Critérios de aceitação
 
-- [ ] **CA-MEN-01** — Comentários sem menção se comportam como hoje.
-- [ ] **CA-MEN-02** — Só colegas ativos do setor podem ser mencionados, até 5, só em comentário interno; cada um recebe um aviso.
-- [ ] **CA-MEN-03** — Migration aditiva; nenhuma dependência nova.
+- [x] **CA-MEN-01** — Comentários sem menção se comportam como hoje. *Verificado em 2026-11-09 (SF-215 e SF-216): sem menção, os avisos são os mesmos (os testes de avisos e de comentários que já existiam passaram sem mudança) e a conversa não muda; o solicitante não vê o campo.*
+- [x] **CA-MEN-02** — Só colegas ativos do setor podem ser mencionados, até 5, só em comentário interno; cada um recebe um aviso. *Verificado em 2026-11-09 (SF-215 e SF-216): só atendentes ativos do setor (correção da seção 13.10), até 5, só em nota interna; um aviso `comment.mention` por pessoa; a nota mostra "Menciona: ..." (unitário, integração e E2E `mentions.spec.ts`).*
+- [x] **CA-MEN-03** — Migration aditiva; nenhuma dependência nova. *Verificado em 2026-11-09 (SF-215): `20261109200000_comment_mentions` só cria uma tabela com chaves, índice e `CHECK`; `package.json` não mudou.*
 
 ## 8. Parte F — Encerrar como duplicada
 

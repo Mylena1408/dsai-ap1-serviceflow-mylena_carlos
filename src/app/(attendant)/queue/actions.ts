@@ -35,6 +35,8 @@ function errorCode(error: ApplicationError, noteCode: string): string {
   if (error instanceof ValidationError && (fieldsReason === "stale_form" || fieldsReason === "invalid")) {
     return fieldsReason === "stale_form" ? "attendance-changed" : "attendance-invalid";
   }
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1.
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("mentionIds"))) return "mention";
   const fileCode = commentFileErrorCode(error);
   if (fileCode) return fileCode;
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("note"))) {
@@ -180,11 +182,20 @@ export async function cancelRequestAction(formData: FormData): Promise<never> {
 export async function addCommentAction(formData: FormData): Promise<never> {
   const body = field(formData, "body");
   const isInternal = formData.get("isInternal") === "on";
+  const mentionIds = formData.getAll("mentionIds").filter((value): value is string => typeof value === "string");
   // SPEC 2026-11-03-anexos-comentarios-documentos, 5.1: files only when the form has them.
   const files = await commentFiles(formData);
   return runOnRequest(
     formData,
-    (requestId) => addComment({ requestId, body, isInternal, ...(files.length > 0 ? { files } : {}) }),
+    (requestId) =>
+      addComment({
+        requestId,
+        body,
+        isInternal,
+        ...(files.length > 0 ? { files } : {}),
+        // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: the colleagues chosen.
+        ...(mentionIds.length > 0 ? { mentionIds } : {}),
+      }),
     "commented",
   );
 }
