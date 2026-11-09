@@ -22,3 +22,21 @@ export function parseSlaHours(raw: unknown): number | null {
 
   return value;
 }
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1 (decision J4): the hours of attendance expected; empty means
+ * none; otherwise a whole number of hours from 1 to 200.
+ */
+export function parseEstimatedHours(raw: unknown): number | null {
+  if (raw === null || raw === undefined || (typeof raw === "string" && raw.trim() === "")) {
+    return null;
+  }
+
+  const value = typeof raw === "number" ? raw : typeof raw === "string" && /^\d+$/.test(raw.trim()) ? Number(raw) : NaN;
+
+  if (!Number.isInteger(value) || value < 1 || value > 200) {
+    throw new ValidationError([{ path: ["estimatedHours"], code: "invalid_value" }]);
+  }
+
+  return value;
+}

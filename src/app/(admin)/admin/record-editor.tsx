@@ -50,6 +50,7 @@ type EditableRecord =
       slaHours: number | null;
       requiresApproval: boolean;
       slaBusinessHours?: boolean;
+      estimatedHours?: number | null;
     };
 
 type RecordEditorProps = {
@@ -168,6 +169,7 @@ function EditorForm({
               requiresApproval={record.requiresApproval}
               slaBusinessHours={record.slaBusinessHours}
               slaHours={record.slaHours}
+              estimatedHours={record.estimatedHours ?? null}
             />
           </>
         ) : null}
@@ -239,6 +241,7 @@ export function AdminRecordEditor({
               : `Prazo-base: ${record.slaHours} h${record.slaBusinessHours ? " (horas úteis)" : ""}`}
           </span>
           <span>{record.requiresApproval ? "Exige aprovação do gestor" : "Sem aprovação"}</span>
+          {record.estimatedHours ? <span>Estimativa de atendimento: {record.estimatedHours} h</span> : null}
         </>
       );
     }

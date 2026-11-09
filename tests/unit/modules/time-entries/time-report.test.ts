@@ -6,6 +6,7 @@ import type { TimeReportReader, TimeReportScope, TimeSumRow } from "@/modules/ti
 import { TimeReportView, timeCsvHref } from "@/app/_components/time-report-view";
 import { csvField, lastDaysPeriod } from "@/modules/reports";
 import { ValidationError } from "@/server/errors";
+import { parseEstimatedHours } from "@/modules/services/domain/sla-config";
 
 // SPEC 2026-11-08-atendimento-dia-a-dia, 5.1 item 3 and 5.3 item 4 (SF-209).
 
@@ -95,5 +96,31 @@ describe("the report's screen", () => {
   it("says when nothing was logged", async () => {
     const report = await buildTimeReport(organization, { period, error: null }, reader([]));
     expect(renderToStaticMarkup(createElement(TimeReportView, { action: "/admin", report }))).toContain("Nenhuma hora lançada no período.");
+  });
+});
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1 (SF-227; decision J4).
+describe("the estimate on the screens", () => {
+  it("compares the average logged on completed requests with each service's estimate", async () => {
+    const withEstimates: TimeReportReader = {
+      ...reader(rows.slice(0, 1)),
+      estimates: async () => [
+        { serviceId: "s2", serviceName: "Rede", estimatedHours: null, completed: 1, averageMinutes: 45 },
+        { serviceId: "s1", serviceName: "Instalação", estimatedHours: 4, completed: 3, averageMinutes: 200 },
+      ],
+    };
+    const report = await buildTimeReport(organization, { period, error: null }, withEstimates);
+    expect(report.estimates.map(({ serviceName }) => serviceName)).toEqual(["Instalação", "Rede"]);
+    const html = renderToStaticMarkup(createElement(TimeReportView, { action: "/admin", report }));
+    expect(html).toContain("Média apontada contra a estimativa");
+    expect(html).toContain("<td>3h 20min</td><td>4h</td>");
+    expect(html).toContain("<td>45min</td><td>—</td>");
+  });
+
+  it("parses the service's estimate as the base SLA: whole hours from 1 to 200, empty for none", () => {
+    expect(parseEstimatedHours("4")).toBe(4);
+    expect(parseEstimatedHours(" ")).toBeNull();
+    expect(parseEstimatedHours(null)).toBeNull();
+    for (const value of ["0", "201", "1.5", -1]) expect(() => parseEstimatedHours(value)).toThrow(ValidationError);
   });
 });

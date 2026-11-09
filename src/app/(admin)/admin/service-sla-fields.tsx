@@ -7,11 +7,14 @@ export function ServiceSlaFields({
   slaHours,
   requiresApproval,
   slaBusinessHours = false,
+  estimatedHours = null,
 }: {
   defaultPriority: PriorityValue;
   slaHours: number | null;
   requiresApproval: boolean;
   slaBusinessHours?: boolean;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1. */
+  estimatedHours?: number | null;
 }) {
   return (
     <>
@@ -45,6 +48,20 @@ export function ServiceSlaFields({
           <option value="calendar">Horas corridas</option>
           <option value="business">Horas úteis (calendário)</option>
         </select>
+      </label>
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1 (decision J4). */}
+      <label>
+        Estimativa de atendimento (horas)
+        <input
+          defaultValue={estimatedHours ?? ""}
+          inputMode="numeric"
+          max={200}
+          min={1}
+          name="estimatedHours"
+          placeholder="Sem estimativa"
+          step={1}
+          type="number"
+        />
       </label>
       {/* SPEC 2026-11-01-aprovacoes, 5.2: the marker tells the server the form has the checkbox. */}
       <input name="requiresApprovalField" type="hidden" value="1" />

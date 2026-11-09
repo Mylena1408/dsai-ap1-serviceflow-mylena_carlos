@@ -56,6 +56,8 @@ async function loadState(
           requiresApproval: true,
           slaBusinessHours: true,
           isActive: true,
+          // SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1.
+          estimatedHours: true,
           // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.
           approvalSectorIds: true,
           approvalConditionFieldId: true,

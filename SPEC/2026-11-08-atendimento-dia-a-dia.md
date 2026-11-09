@@ -375,7 +375,8 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 2. **"Minhas horas" (decisão J5):** o painel do atendente ("Meu painel") ganha as horas que ele apontou no período, por dia e por serviço.
 3. **Horas por etiqueta:** o relatório de horas soma as horas também por etiqueta (uma solicitação com duas etiquetas conta nas duas, como em "Análises").
 
-- **CA-HRS-05** — A estimativa do serviço é configurável com auditoria e aparece na solicitação e no relatório.
+- [x] **CA-HRS-05** — A estimativa do serviço é configurável com auditoria e aparece na solicitação e no relatório. *Verificado em 2026-11-09 (SF-206, SF-208 e SF-227): campo "Estimativa de atendimento (horas)" no cadastro do serviço, de 1 a 200 ou vazio, na auditoria do serviço; "3h de 4h estimadas" na solicitação; média apontada contra a estimativa no relatório (unitário e integração).*
+- *Esclarecimentos registrados em 2026-11-09 (SF-227):* a estimativa fica no formulário do serviço, ao lado do prazo-base, na administração e em "Serviços do setor" (as mesmas telas e regras de quem edita o serviço); campo vazio é "sem estimativa" e formulário sem o campo mantém o valor, como o prazo-base. No relatório de horas, a tabela "Média apontada contra a estimativa" considera as solicitações concluídas no período que têm horas lançadas (as sem horas não entram na média), com a estimativa atual do serviço; serviços sem estimativa aparecem com "—".
 - **CA-HRS-06** — "Meu painel" mostra as horas do atendente no período; o relatório soma também por etiqueta.
 
 ### 13.3 Parte D — Seguidores (acréscimos)

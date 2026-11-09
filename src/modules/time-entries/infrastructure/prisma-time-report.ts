@@ -43,5 +43,27 @@ export function createPrismaTimeReportReader(database: PrismaClient): TimeReport
       `;
       return rows;
     },
+    // 13.2 item 1: requests completed in the period with time logged, by service; the service's current estimate.
+    async estimates(scope, period) {
+      const rows = await database.$queryRaw<
+        Array<{ serviceId: string; serviceName: string; estimatedHours: number | null; completed: bigint; averageMinutes: number }>
+      >`
+        SELECT sv."id" AS "serviceId", sv."name" AS "serviceName", sv."estimatedHours",
+          count(*) AS "completed", round(avg(t."minutes"))::int AS "averageMinutes"
+        FROM (
+          SELECT e."requestId", sum(e."minutes") AS "minutes"
+          FROM "RequestTimeEntry" e
+          WHERE e."deletedAt" IS NULL
+          GROUP BY e."requestId"
+        ) t
+        JOIN "Request" r ON r."id" = t."requestId"
+        JOIN "Service" sv ON sv."id" = r."serviceId"
+        WHERE r."status" = 'COMPLETED'
+          AND r."completedAt" >= ${period.from} AND r."completedAt" < ${period.before}
+          ${sectorFilter(scope.sectorId)}
+        GROUP BY sv."id", sv."name", sv."estimatedHours"
+      `;
+      return rows.map((row) => ({ ...row, completed: Number(row.completed) }));
+    },
   };
 }

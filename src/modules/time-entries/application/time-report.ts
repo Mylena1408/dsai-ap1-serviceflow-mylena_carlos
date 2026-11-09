@@ -39,9 +39,23 @@ export interface TimeCsvRow {
   minutes: number;
 }
 
+/**
+ * 13.2 item 1: for each service, the requests completed in the period that have time, the average logged on them
+ * and the service's estimate (none when it has no estimate).
+ */
+export interface ServiceEstimateRow {
+  serviceId: string;
+  serviceName: string;
+  estimatedHours: number | null;
+  completed: number;
+  averageMinutes: number;
+}
+
 export interface TimeReportReader {
   sums(scope: { sectorId: string | null }, period: { firstDay: string; lastDay: string }): Promise<TimeSumRow[]>;
   entries(scope: { sectorId: string | null }, period: { firstDay: string; lastDay: string }, limit: number): Promise<TimeCsvRow[]>;
+  /** Optional for older doubles: absent = no comparison. */
+  estimates?(scope: { sectorId: string | null }, period: { from: Date; before: Date }): Promise<ServiceEstimateRow[]>;
 }
 
 export interface TimeGroup {
@@ -62,6 +76,8 @@ export interface TimeReport {
   byAttendant: TimeGroup[];
   byService: TimeGroup[];
   bySector: TimeGroup[];
+  /** 13.2 item 1: the average logged on completed requests against each service's estimate. */
+  estimates: ServiceEstimateRow[];
 }
 
 const collator = new Intl.Collator("pt-BR", { sensitivity: "base" });
@@ -92,9 +108,12 @@ export async function buildTimeReport(
     errors: { period: periodResult.error, sector: resolved.sectorError },
   };
   if (!resolved.scope) {
-    return { ...base, withoutSector: true, totalMinutes: 0, byAttendant: [], byService: [], bySector: [] };
+    return { ...base, withoutSector: true, totalMinutes: 0, byAttendant: [], byService: [], bySector: [], estimates: [] };
   }
-  const rows = await reader.sums(resolved.scope, periodResult.period);
+  const [rows, estimates] = await Promise.all([
+    reader.sums(resolved.scope, periodResult.period),
+    reader.estimates ? reader.estimates(resolved.scope, periodResult.period) : Promise.resolve([]),
+  ]);
   // The administrator over every sector sees each person's sector next to the name.
   const showSector = resolved.audience === "organization" && resolved.sector === null;
   return {
@@ -112,6 +131,7 @@ export async function buildTimeReport(
       (row) => (showSector ? `${row.serviceName} (${row.sectorName})` : row.serviceName),
     ),
     bySector: groupTime(rows, (row) => row.sectorId, (row) => row.sectorName),
+    estimates: [...estimates].sort((left, right) => collator.compare(left.serviceName, right.serviceName)),
   };
 }
 

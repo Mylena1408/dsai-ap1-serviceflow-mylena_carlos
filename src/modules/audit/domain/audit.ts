@@ -142,6 +142,8 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   categoryId: "Categoria",
   defaultPriority: "Prioridade padrão",
   slaHours: "Prazo-base (horas)",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1.
+  estimatedHours: "Estimativa de atendimento (horas)",
   requiresApproval: "Exige aprovação",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.
   approvalSectorIds: "Níveis de aprovação",
@@ -295,6 +297,8 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
     "approvalConditionFieldId",
     "approvalConditionValue",
     "approvalDeadlineDays",
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1.
+    "estimatedHours",
   ],
   DOCUMENT_REQUIREMENT: ["name", "isRequired", "acceptedFormats", "position", "isActive"],
   // "audience" and the condition: SPEC 2026-11-03-campos-condicionais-atendimento, 5.7.4.

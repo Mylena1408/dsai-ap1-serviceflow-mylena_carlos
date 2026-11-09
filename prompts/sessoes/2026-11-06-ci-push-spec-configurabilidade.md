@@ -394,3 +394,7 @@
 > quantas linhas temos de codigo passando por cloc --diff
 
 98. Contagem total informada depois do commit do ajuste.
+
+> pode prosseguir
+
+99. SF-227: estimativa de horas por serviço com auditoria e comparação no relatório; CA-HRS-05 verificado.

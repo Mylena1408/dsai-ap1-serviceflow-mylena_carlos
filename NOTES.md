@@ -2673,3 +2673,11 @@ Padrão a replicar nas SF-039 e SF-040:
 
 - A pedido da responsável, `dashboard.spec.ts` passou a localizar o alerta do período recusado pelo texto, porque o anunciador de rotas do Next.js também tem `role="alert"` depois da hidratação. A mensagem conferida é a mesma. Registrado na seção 13.8 da SPEC atendimento no dia a dia.
 - **Verificação:** o teste rodou sozinho três vezes seguidas e passou nas três; lint e typecheck sem erros. Os outros dois `getByRole("alert")` dos E2E procuram dentro de um formulário, onde o anunciador não aparece, e não mudaram.
+
+## SF-227 — Estimativa de horas por serviço (2026-11-09)
+
+- **Cadastro:** a estimativa segue o caminho do prazo-base: campo opcional no formulário do serviço (administração e "Serviços do setor"), enviado só quando o formulário o tem, validado por `parseEstimatedHours` (1 a 200 horas inteiras, vazio é nenhuma) e gravado pelo repositório genérico; entrou nos campos auditados do serviço, com o rótulo "Estimativa de atendimento (horas)". A coluna já existia desde a SF-206.
+- **Relatório:** porta opcional `estimates` do leitor; uma consulta soma as horas não apagadas por solicitação e tira, por serviço, a média nas solicitações concluídas no período que têm horas, com a estimativa atual do serviço.
+- **Primeira suíte completa depois do ajuste do `dashboard.spec.ts`:** E2E 48/48.
+- **Resultados:** typecheck, lint e build OK; unitários 1553/1553; integração 667/667; E2E 48/48.
+- **Linhas:** 188 `added` em TS (aplicação 97, testes 91).

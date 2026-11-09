@@ -83,6 +83,30 @@ export function TimeReportView({ report, action, hidden = {} }: { report: TimeRe
               {report.audience === "organization" && report.sector === null ? (
                 <GroupTable caption="Horas por setor" groups={report.bySector} label="Setor" />
               ) : null}
+              {/* SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1 (decision J4). */}
+              {report.estimates.length > 0 ? (
+                <table className="data-table">
+                  <caption>Média apontada contra a estimativa (solicitações concluídas no período)</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Serviço</th>
+                      <th scope="col">Concluídas com horas</th>
+                      <th scope="col">Média apontada</th>
+                      <th scope="col">Estimativa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {report.estimates.map((row) => (
+                      <tr key={row.serviceId}>
+                        <td>{row.serviceName}</td>
+                        <td>{row.completed}</td>
+                        <td>{formatMinutes(row.averageMinutes)}</td>
+                        <td>{row.estimatedHours === null ? "—" : `${row.estimatedHours}h`}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : null}
             </>
           )}
           <p>

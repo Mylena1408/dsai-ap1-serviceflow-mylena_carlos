@@ -133,6 +133,7 @@ export function ServicesSection({
                 slaHours: service.slaHours,
                 requiresApproval: service.requiresApproval,
                 slaBusinessHours: service.slaBusinessHours,
+                estimatedHours: service.estimatedHours ?? null,
               }}
               categories={categories}
               sectors={sectors}

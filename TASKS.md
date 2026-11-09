@@ -2371,7 +2371,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-227 — Estimativa de horas por serviço
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Campo "Estimativa de atendimento (horas)" no cadastro do serviço (`parseEstimatedHours`, auditoria do serviço) e a tabela "Média apontada contra a estimativa" no relatório de horas. CA-HRS-05 verificado.
 - **Objetivo:** Seção 13.2 (item 1), parte C (aprofundamento).
 - **Arquivos/módulos esperados:** Serviços, detalhe, relatório de horas.
 - **Dependências:** SF-210.
