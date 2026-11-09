@@ -2,7 +2,7 @@ import { z } from "zod";
 import { activeStateAction, type AuditScope } from "@/modules/audit";
 import { assertConditionTarget, type ConditionController } from "@/modules/service-fields";
 import { requireCurrentActor } from "@/server/authorization";
-import { AuthorizationError, ConflictError, NotFoundError } from "@/server/errors";
+import { AuthorizationError, ConflictError, NotFoundError, ValidationError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { planPositionMove } from "@/shared/ordering";
 import { activeStateSchema, entityIdSchema } from "@/shared/validation";
@@ -11,6 +11,7 @@ import {
   canManageServiceChecklist,
   checklistConditionSchema,
   checklistItemTextSchema,
+  planModelCopy,
   type ChecklistActor,
   type ChecklistTemplateItem,
 } from "../domain/checklist";
@@ -178,5 +179,32 @@ export async function setChecklistItemCondition(itemId: unknown, input: unknown,
       assertConditionTarget({ id: null, audience: "REQUESTER" }, controller, condition.conditionValue ?? "");
     }
     return transaction.audited({ actor, action: "UPDATED", entityType: "CHECKLIST_ITEM", entityId: id }, () => transaction.update(id, condition));
+  });
+}
+
+/**
+ * 13.1 item 2 (decision J2): adds another service's active items at the end of this one's model, in their order
+ * and without their conditions, within the limit of 20 active items (over it, nothing is added). The source is a
+ * service the person also manages; each added item has its own audit entry. Returns how many were added.
+ */
+export async function copyChecklistModel(serviceId: unknown, sourceServiceId: unknown, store: ServiceChecklistStore): Promise<{ added: number }> {
+  const actor = await requireCurrentActor();
+  const id = validateInput(entityIdSchema, serviceId);
+  const sourceId = validateInput(entityIdSchema, sourceServiceId);
+
+  return store.run(async (transaction) => {
+    const [service, source] = await Promise.all([transaction.findService(id), transaction.findService(sourceId)]);
+    if (!service || !service.isActive) throw new NotFoundError();
+    if (!canManageServiceChecklist(actor, service.sectorId)) throw new AuthorizationError();
+    // Another service the person manages; anything else reads as a wrong choice.
+    if (!source || source.id === id || !canManageServiceChecklist(actor, source.sectorId)) {
+      throw new ValidationError([{ path: ["sourceServiceId"], code: "invalid_value" }]);
+    }
+    const items = await transaction.listItems(id);
+    const planned = planModelCopy(await transaction.listItems(sourceId), activeCount(items), positionAfter(items));
+    for (const item of planned) {
+      await transaction.audited({ actor, action: "CREATED", entityType: "CHECKLIST_ITEM" }, () => transaction.create({ serviceId: id, ...item }));
+    }
+    return { added: planned.length };
   });
 }

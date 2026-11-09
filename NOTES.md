@@ -2602,3 +2602,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Integridade dos campos:** a porta opcional `findChecklistConditionValues` soma as condições dos itens ativos às das etapas e da aprovação, então o campo não é desativado, não perde a opção usada e não muda de público enquanto um item ativo depende dele. Reativar um item exige o campo da condição ativo.
 - **Resultados:** typecheck, lint e build OK; unitários 1527/1527; integração 648/648; E2E 47/47.
 - **Linhas:** 314 `added` em TS (aplicação 150, testes 164).
+
+## SF-225 — Copiar o modelo de outro serviço (2026-11-08)
+
+- **Regra:** `planModelCopy` (SF-200) decide os itens; o caso de uso grava cada um com sua entrada `CREATED` na auditoria, na mesma transação, então ou entram todos ou nenhum.
+- **Origem:** só um serviço que a pessoa também configura (decisão tomada nesta tarefa e registrada na SPEC): o gestor não lê por aqui o checklist de outro setor. Origem igual ao destino, de outro setor (para o gestor) ou sem itens ativos é recusada com o caminho `sourceServiceId`, que entrou na lista de caminhos públicos das validações.
+- **Tela:** a lista só mostra serviços da própria tela com itens ativos, e o formulário some quando não há origem ou o limite foi atingido.
+- **Resultados:** typecheck, lint e build OK; unitários 1528/1528; integração 650/650; E2E 47/47.
+- **Linhas:** 152 `added` em TS (aplicação 56, testes 96).

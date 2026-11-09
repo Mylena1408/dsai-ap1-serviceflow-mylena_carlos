@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createChecklistItem, moveChecklistItem, setChecklistItemActive, setChecklistItemCondition, updateChecklistItem } from "@/modules/checklists";
+import { copyChecklistModel, createChecklistItem, moveChecklistItem, setChecklistItemActive, setChecklistItemCondition, updateChecklistItem } from "@/modules/checklists";
 import { ApplicationError, ValidationError } from "@/server/errors";
 
 // The services' checklist models from the administration and the manager's area (SPEC
@@ -26,6 +26,7 @@ function errorCode(error: ApplicationError): string {
   if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("conditionFieldId") || path.includes("conditionValue"))) {
     return "checklist-condition";
   }
+  if (error instanceof ValidationError && error.issues.some(({ path }) => path.includes("sourceServiceId"))) return "checklist-source";
   if (error.code === "CONFLICT") return "checklist-conflict";
   if (error.code === "VALIDATION_ERROR") return "checklist-invalid";
   return "checklist-missing";
@@ -77,4 +78,9 @@ export async function setChecklistItemConditionAction(formData: FormData): Promi
         ? { conditionFieldId: choice.slice(0, separator), conditionValue: choice.slice(separator + 1) }
         : { conditionFieldId: choice, conditionValue: null };
   return run(formData, () => setChecklistItemCondition(field(formData, "itemId"), condition), "checklist-condition-saved");
+}
+
+/** 13.1 item 2 (decision J2). */
+export async function copyChecklistModelAction(formData: FormData): Promise<never> {
+  return run(formData, () => copyChecklistModel(field(formData, "serviceId"), field(formData, "sourceServiceId")), "checklist-copied");
 }

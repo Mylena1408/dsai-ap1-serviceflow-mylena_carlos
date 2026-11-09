@@ -6,6 +6,7 @@ import {
   type ServiceChecklist,
 } from "@/modules/checklists";
 import {
+  copyChecklistModelAction,
   createChecklistItemAction,
   moveChecklistItemAction,
   setChecklistItemActiveAction,
@@ -28,6 +29,9 @@ const MESSAGES: Record<string, { text: string; error: boolean }> = {
   "checklist-conflict": { text: "Só itens ativos mudam de ordem, e um item só é reativado com o campo da sua condição ativo.", error: true },
   "checklist-missing": { text: "O serviço ou o item não está disponível para você.", error: true },
   // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1.
+  // 13.1 item 2.
+  "checklist-copied": { text: "Itens copiados para o fim do checklist, sem as condições.", error: false },
+  "checklist-source": { text: "Escolha outro serviço, com itens ativos, que você também configura.", error: true },
   "checklist-condition-saved": { text: "Condição do item salva. Vale para as solicitações que entrarem em atendimento daqui em diante.", error: false },
   "checklist-condition": {
     text: "Escolha um campo ativo do formulário do solicitante, de escolha e sem condição própria, e um dos seus valores.",
@@ -80,6 +84,14 @@ function ConditionSelect({ item, fields }: { item: ChecklistTemplateItem; fields
       )}
     </select>
   );
+}
+
+/** 13.1 item 2: the other services on the screen with active items, as copy sources. */
+function sources(services: readonly ServiceChecklist[], serviceId: string) {
+  return services
+    .filter(({ service }) => service.id !== serviceId)
+    .map(({ service, items }) => ({ service, activeItems: items.filter((item) => item.isActive).length }))
+    .filter(({ activeItems }) => activeItems > 0);
 }
 
 function Hidden({ area, serviceId }: { area: "approvals" | "admin"; serviceId: string }) {
@@ -228,6 +240,25 @@ export function ServiceChecklistsPanel({
             ) : (
               <p className="section-description">Limite de {MAX_ACTIVE_CHECKLIST_ITEMS} itens ativos atingido.</p>
             )}
+            {/* SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 2 (decision J2). */}
+            {sources(services, service.id).length > 0 && active.length < MAX_ACTIVE_CHECKLIST_ITEMS ? (
+              <form action={copyChecklistModelAction} aria-label={`Copiar para ${service.name}`} className="inline-form">
+                <Hidden area={area} serviceId={service.id} />
+                <label>
+                  Copiar de outro serviço
+                  <select name="sourceServiceId" required>
+                    {sources(services, service.id).map((source) => (
+                      <option key={source.service.id} value={source.service.id}>
+                        {source.service.name} ({source.service.sectorName}) — {source.activeItems === 1 ? "1 item" : `${source.activeItems} itens`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button className="button-secondary" type="submit">
+                  Copiar itens
+                </button>
+              </form>
+            ) : null}
           </details>
         );
       })}

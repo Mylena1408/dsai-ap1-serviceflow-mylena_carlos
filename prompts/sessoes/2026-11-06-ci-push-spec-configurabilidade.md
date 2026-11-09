@@ -338,3 +338,11 @@
 > pode prosseguir
 
 84. SF-224: itens condicionais do checklist pela tela, com a regra e a proteção dos campos das etapas.
+
+> quantas linhas temos de codigo passando por cloc --diff
+
+85. Contagem total: 76.718 `added` sobre a baseline (saldo 74.220); sistema com 84.963 linhas.
+
+> pode prosseguir
+
+86. SF-225: copiar o modelo de outro serviço, com a origem limitada aos serviços que a pessoa configura (registrado na SPEC).

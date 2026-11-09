@@ -80,3 +80,24 @@ describe("an item's condition on the screen", () => {
     expect(checklists.setChecklistItemCondition).toHaveBeenLastCalledWith(ITEM, { conditionFieldId: null, conditionValue: null });
   });
 });
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 2 (SF-225; decision J2).
+describe("copying another service's model on the screen", () => {
+  it("offers the other services with active items, and not the service itself", () => {
+    const html = renderToStaticMarkup(
+      createElement(ServiceChecklistsPanel, {
+        area: "approvals",
+        services: [
+          { service: { id: SERVICE, name: "Instalação", sectorName: "TI" }, items: [], conditionFields: [], fieldLabels: {} },
+          { service: { id: "s2", name: "Notebook", sectorName: "TI" }, items: [item(), item({ id: "i2", position: 2 })], conditionFields: [], fieldLabels: {} },
+          { service: { id: "s3", name: "Vazio", sectorName: "TI" }, items: [item({ id: "i3", isActive: false })], conditionFields: [], fieldLabels: {} },
+        ],
+      }),
+    );
+    expect(html).toContain("Copiar para Instalação");
+    expect(html).toContain('<option value="s2">Notebook (TI) — 2 itens</option>');
+    expect(html).not.toContain('<option value="s3">');
+    // The only source has nowhere else to copy from.
+    expect(html).not.toContain("Copiar para Notebook");
+  });
+});

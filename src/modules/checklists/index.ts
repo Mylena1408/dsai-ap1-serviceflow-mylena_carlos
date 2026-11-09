@@ -66,6 +66,10 @@ export function setChecklistItemCondition(itemId: unknown, input: unknown, datab
   return serviceChecklists.setChecklistItemCondition(itemId, input, createPrismaServiceChecklistStore(database));
 }
 
+export function copyChecklistModel(serviceId: unknown, sourceServiceId: unknown, database: PrismaClient = prisma) {
+  return serviceChecklists.copyChecklistModel(serviceId, sourceServiceId, createPrismaServiceChecklistStore(database));
+}
+
 // A request's checklist (SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 and 13.1 item 4).
 export function getRequestChecklist(requestId: unknown, database: PrismaClient = prisma): Promise<requestChecklist.RequestChecklistView> {
   return requestChecklist.getRequestChecklist(requestId, createPrismaRequestChecklistReader(database));

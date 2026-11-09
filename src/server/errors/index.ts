@@ -80,6 +80,8 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   // SPEC 2026-11-03-campos-condicionais-atendimento, 5.2.
   "conditionFieldId",
   "conditionValue",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 2.
+  "sourceServiceId",
   // SPEC 2026-11-06-aprofundamento-configurabilidade, 3.3.1.
   "decimalPlaces",
   "minDecimal",

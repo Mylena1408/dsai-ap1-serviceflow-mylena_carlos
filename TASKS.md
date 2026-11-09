@@ -2351,7 +2351,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-225 — Copiar o modelo de outro serviço
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `copyChecklistModel` (itens ativos ao fim, sem condições, dentro do limite, uma entrada de auditoria por item) e o formulário "Copiar de outro serviço" no painel dos checklists.
 - **Objetivo:** Seção 13.1 (item 2), parte B (aprofundamento).
 - **Arquivos/módulos esperados:** Configuração do checklist, auditoria.
 - **Dependências:** SF-224.
