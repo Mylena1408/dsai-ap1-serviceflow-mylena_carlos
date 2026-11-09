@@ -6,6 +6,7 @@ import { effectiveAssigneeId, getTeamLoad, listBatchChoices, listQueueStageChoic
 import { QueueBatch } from "./queue-batch";
 import { QUEUE_BATCH_FORM_ID } from "./queue-batch-form";
 import { listQueuePageTags, listQueueTags } from "@/modules/tags";
+import { checklistProgressLabel, listQueuePageChecklists } from "@/modules/checklists";
 import { TagChip } from "@/app/_components/sector-tags";
 import { TeamLoad } from "@/app/_components/team-load";
 import { ValidationError } from "@/server/errors";
@@ -56,6 +57,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   // How the batch's result names each request of the page.
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4: the tags of the page's requests.
   const pageTags = await listQueuePageTags(requests.map(({ id }) => id));
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 3: the checklist's progress of the page's requests.
+  const pageChecklists = await listQueuePageChecklists(requests.map(({ id }) => id));
   const batchLabels = Object.fromEntries(requests.map((request) => [request.id, `${request.serviceNameSnapshot} (#${request.id.slice(0, 8)})`]));
 
   return (
@@ -113,6 +116,9 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
                 <RequestApprovalLabel request={request} />
               </p>
               <RequestSla request={request} now={now} />
+              {pageChecklists.get(request.id) ? (
+                <p className="metadata">{checklistProgressLabel(pageChecklists.get(request.id)!)}</p>
+              ) : null}
               {pageTags.get(request.id)?.length ? (
                 <p aria-label="Etiquetas" className="tag-line">
                   {pageTags.get(request.id)!.map((tag) => (

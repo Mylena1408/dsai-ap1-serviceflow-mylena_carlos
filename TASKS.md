@@ -2361,7 +2361,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-226 — Progresso do checklist na fila e observação no item
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `listQueuePageChecklists` (consulta agrupada, só do setor do atendente) e "Checklist 1/2" na lista da fila; a observação já vinha das SF-203 e SF-205. Parte B concluída (CA-CHK-01 a 07).
 - **Objetivo:** Seção 13.1 (itens 3 e 4), parte B (aprofundamento).
 - **Arquivos/módulos esperados:** Fila, detalhe, histórico.
 - **Dependências:** SF-225.

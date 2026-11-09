@@ -3,7 +3,11 @@ import { prisma } from "@/server/db";
 import * as serviceChecklists from "./application/service-checklists";
 import { createPrismaServiceChecklistReader, createPrismaServiceChecklistStore } from "./infrastructure/prisma-service-checklists";
 import * as requestChecklist from "./application/request-checklist";
-import { createPrismaRequestChecklistReader, createPrismaRequestChecklistStore } from "./infrastructure/prisma-request-checklist";
+import {
+  createPrismaChecklistProgressReader,
+  createPrismaRequestChecklistReader,
+  createPrismaRequestChecklistStore,
+} from "./infrastructure/prisma-request-checklist";
 
 // Attendance checklists (SPEC 2026-11-08-atendimento-dia-a-dia, part B): the rules (SF-200) and the services'
 // models (SF-201) and the requests' checklists (SF-203).
@@ -77,4 +81,9 @@ export function getRequestChecklist(requestId: unknown, database: PrismaClient =
 
 export function markChecklistItem(input: unknown, database: PrismaClient = prisma) {
   return requestChecklist.markChecklistItem(input, createPrismaRequestChecklistStore(database));
+}
+
+/** The checklist progress of the queue page's requests, by request (13.1 item 3). */
+export function listQueuePageChecklists(requestIds: readonly string[], database: PrismaClient = prisma) {
+  return requestChecklist.listQueuePageChecklists(requestIds, createPrismaChecklistProgressReader(database));
 }

@@ -346,3 +346,7 @@
 > pode prosseguir
 
 86. SF-225: copiar o modelo de outro serviço, com a origem limitada aos serviços que a pessoa configura (registrado na SPEC).
+
+> pode prosseguir
+
+87. SF-226: progresso do checklist na lista da fila; CA-CHK-06 e 07 verificados; fim da parte B.

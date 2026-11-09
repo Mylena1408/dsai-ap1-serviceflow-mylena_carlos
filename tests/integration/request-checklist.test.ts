@@ -11,7 +11,7 @@ vi.mock("@/server/db", async () => {
   return { prisma };
 });
 
-import { createChecklistItem, getRequestChecklist, markChecklistItem } from "@/modules/checklists";
+import { createChecklistItem, getRequestChecklist, listQueuePageChecklists, markChecklistItem } from "@/modules/checklists";
 import { createService } from "@/modules/services";
 import { assumeRequest, createRequest, transitionRequestStatus } from "@/modules/requests";
 
@@ -122,5 +122,27 @@ describe("marking a request's checklist (4.3 item 3; 13.1 item 4)", () => {
     const { ana, request } = await scenario();
     actAs(ana);
     await expect(getRequestChecklist(request.id)).resolves.toEqual({ items: null, progress: null, pending: [], events: [], canMark: false });
+  });
+});
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 3 (SF-226; CA-CHK-07).
+describe("the checklist's progress in the queue's list", () => {
+  it("marked over total for the attendant's sector's requests that have items; nothing for others", async () => {
+    const { rita, ana, caio, gabi, service, request } = await scenario();
+    await startAs(ana, request.id);
+    const [install] = await itemsOf(request.id);
+    await markChecklistItem({ requestId: request.id, itemId: install.id, done: true });
+    actAs(rita);
+    const waiting = await createRequest({ serviceId: service.id, description: "Ainda aberta", fieldValues: {} }, prisma);
+
+    actAs(ana);
+    const progress = await listQueuePageChecklists([request.id, waiting.id]);
+    expect([...progress.entries()]).toEqual([[request.id, { done: 1, total: 2 }]]);
+
+    // Another sector's attendant and the manager read nothing here.
+    for (const actor of [caio, gabi]) {
+      actAs(actor);
+      expect((await listQueuePageChecklists([request.id])).size).toBe(0);
+    }
   });
 });

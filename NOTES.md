@@ -2610,3 +2610,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Tela:** a lista só mostra serviços da própria tela com itens ativos, e o formulário some quando não há origem ou o limite foi atingido.
 - **Resultados:** typecheck, lint e build OK; unitários 1528/1528; integração 650/650; E2E 47/47.
 - **Linhas:** 152 `added` em TS (aplicação 56, testes 96).
+
+## SF-226 — Progresso do checklist na fila; fim da parte B (2026-11-08)
+
+- **Lista da fila:** "Checklist marcados/total" abaixo da situação do prazo, lido com um `groupBy` por solicitação filtrado pelo setor do atendente, para a página toda; outros perfis recebem um mapa vazio.
+- **Observação no item:** já estava entregue (SF-203 no caso de uso e no histórico, SF-205 no bloco do detalhe).
+- **Parte B concluída:** CA-CHK-01 a 07 verificados. Somou cerca de 2.000 linhas em 10 tarefas (SF-200 a SF-205 e SF-224 a SF-226).
+- **Resultados:** typecheck, lint e build OK; unitários 1528/1528; integração 651/651; E2E 47/47.
+- **Linhas:** 52 `added` em TS (aplicação 32, testes 20).

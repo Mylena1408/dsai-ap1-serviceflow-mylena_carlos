@@ -103,6 +103,10 @@ test("checklist: built by the manager, copied on start, required at completion, 
   await expect(checklist).toContainText("Checklist 1/2");
   await expect(checklist).toContainText("Observação: Licença 2026 ativa");
   await expect(page.locator("ol.history-list")).toContainText('Item do checklist "Conferir a licença" concluído');
+  // The queue's list shows the progress (13.1 item 3).
+  await page.goto(`/queue?q=${encodeURIComponent(unique)}`);
+  await expect(page.locator(".content-list")).toContainText("Checklist 1/2");
+  await page.goto(`/queue/${requestId}`);
   await page.getByRole("button", { name: "Concluir solicitação" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Solicitação concluída." })).toBeVisible();
   // A completed request's checklist only shows.

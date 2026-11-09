@@ -104,3 +104,17 @@ export function createPrismaRequestChecklistStore(database: PrismaClient): Reque
     },
   };
 }
+
+/** 13.1 item 3: marked over total for each request of the sector that has items, in one grouped read. */
+export function createPrismaChecklistProgressReader(database: PrismaClient) {
+  return {
+    async progressOf(requestIds: readonly string[], sectorId: string) {
+      const rows = await database.requestChecklistItem.groupBy({
+        by: ["requestId"],
+        where: { requestId: { in: [...requestIds] }, request: { sectorId } },
+        _count: { _all: true, doneAt: true },
+      });
+      return new Map(rows.map((row) => [row.requestId, { done: row._count.doneAt, total: row._count._all }]));
+    },
+  };
+}

@@ -166,3 +166,16 @@ export async function markChecklistItem(input: unknown, store: RequestChecklistS
     return { changed: true };
   });
 }
+
+/**
+ * 13.1 item 3: the progress of the queue page's requests that have a checklist, by request, for the attendant;
+ * only requests of the attendant's sector are read, so the list never shows another sector's checklist.
+ */
+export async function listQueuePageChecklists(
+  requestIds: readonly string[],
+  reader: { progressOf(requestIds: readonly string[], sectorId: string): Promise<Map<string, { done: number; total: number }>> },
+): Promise<Map<string, { done: number; total: number }>> {
+  const actor = await requireCurrentActor();
+  if (actor.role !== "ATTENDANT" || !actor.sectorId || requestIds.length === 0) return new Map();
+  return reader.progressOf(requestIds, actor.sectorId);
+}
