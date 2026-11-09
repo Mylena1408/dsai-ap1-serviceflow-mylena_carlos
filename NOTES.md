@@ -2777,3 +2777,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **E2E** `mentions.spec.ts`: recusa da menção em comentário público, nota interna com menção, o solicitante sem ver a nota nem o nome; o atendente extra criado para o teste é desativado no fim (a distribuição automática conta os atendentes ativos), e o E2E da distribuição passou junto.
 - **Resultados:** typecheck, lint e build OK; unitários 1579/1579; integração 688/688; E2E 50/50.
 - **Linhas:** 190 `added` em TS (aplicação 57, testes 133).
+
+## SF-231 — "Minhas menções"; fim da parte E (2026-11-09)
+
+- **Lista:** `listMyMentions` lê as menções da pessoa em solicitações do setor atual dela (as de outro setor somem, porque não as lê mais), até 50, da mais recente para a mais antiga; o menu do atendente mostra quantas faltam ver (`countUnseenMentions`, que nunca quebra a página).
+- **Abrir:** uma ação explícita (`openMention`) marca a menção como vista só na primeira vez (`updateMany` com `seenAt` nulo) e leva à conversa; o simples carregamento de uma página não grava nada. A notificação `comment.mention` continua levando à solicitação sem marcar.
+- **Gestor:** fora, pela correção da seção 13.10 (a parte da SF-231 sobre o gestor saiu do escopo).
+- **E2E:** `mentions.spec.ts` passou a abrir uma menção pelo menu e conferir a marca de vista.
+- **Parte E concluída:** CA-MEN-01 a 04 verificados. Somou cerca de 650 linhas em 3 tarefas (SF-215, SF-216 e SF-231).
+- **Resultados:** typecheck, lint e build OK; unitários 1581/1581; integração 689/689; E2E 50/50.
+- **Linhas:** 288 `added` em TS (aplicação 188, testes 100).

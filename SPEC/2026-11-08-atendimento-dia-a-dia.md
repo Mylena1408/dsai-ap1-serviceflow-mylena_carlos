@@ -401,7 +401,8 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 1. **"Minhas menções" (decisão J8):** a área do atendente e a do gestor ganham a lista das menções recebidas (solicitação, quem mencionou, quando, lida ou não), ligada à notificação; abrir a solicitação marca a menção como vista.
 2. **Gestor também menciona:** o gestor do setor, que já escreve comentários internos, pode mencionar os atendentes do setor.
 
-- **CA-MEN-04** — "Minhas menções" lista as menções recebidas, marca como vistas ao abrir e respeita quem pode ler cada solicitação.
+- [x] **CA-MEN-04** — "Minhas menções" lista as menções recebidas, marca como vistas ao abrir e respeita quem pode ler cada solicitação. *Verificado em 2026-11-09 (SF-231): só na área do atendente (correção da seção 13.10), com as menções das solicitações do setor atual dele, da mais recente para a mais antiga; "Abrir" marca como vista uma vez e leva à conversa; o menu mostra quantas faltam ver (unitário, integração e E2E `mentions.spec.ts`).*
+- *Esclarecimentos registrados em 2026-11-09 (SF-231):* "Minhas menções" fica em `/queue/mentions`, com até as 50 menções mais recentes; as de solicitações que foram para outro setor somem da lista, porque o atendente não as lê mais. A menção é marcada como vista ao ser aberta pela lista (uma ação explícita); abrir a solicitação por outro caminho, como a notificação, não a marca. A notificação `comment.mention` continua levando à solicitação, como as demais.
 
 ### 13.5 Parte F — Duplicadas (acréscimos)
 

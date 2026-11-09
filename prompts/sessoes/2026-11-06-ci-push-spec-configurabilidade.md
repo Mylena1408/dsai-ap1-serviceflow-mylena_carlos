@@ -456,3 +456,7 @@
 > pode prosseguir
 
 114. SF-216: telas das menções e E2E; CA-MEN-01 a 03 verificados.
+
+> pode prosseguir
+
+115. SF-231: "Minhas menções" só na área do atendente; CA-MEN-04 verificado; fim da parte E.

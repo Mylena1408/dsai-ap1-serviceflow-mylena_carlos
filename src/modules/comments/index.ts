@@ -2,6 +2,8 @@ import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { getApplicationDocumentStorage, type DocumentStorage } from "@/server/storage";
 import * as useCases from "./application/comment-use-cases";
+import * as myMentions from "./application/my-mentions";
+import { createPrismaMyMentionsReader } from "./infrastructure/prisma-my-mentions";
 import type { CommentRecord } from "./application/ports";
 import {
   createPrismaCommentRepository,
@@ -48,4 +50,19 @@ export async function countComments(
 /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 1: whom the attendant may mention in a note on this request. */
 export function listMentionableColleagues(requestId: unknown, database: PrismaClient = prisma) {
   return useCases.listMentionableColleagues(requestId, createPrismaCommentRepository(database));
+}
+
+// "Minhas menções" (SPEC 2026-11-08-atendimento-dia-a-dia, 13.4 item 1).
+export type { MyMention } from "./application/my-mentions";
+
+export function listMyMentions(database: PrismaClient = prisma) {
+  return myMentions.listMyMentions(createPrismaMyMentionsReader(database));
+}
+
+export function countUnseenMentions(database: PrismaClient = prisma) {
+  return myMentions.countUnseenMentions(createPrismaMyMentionsReader(database));
+}
+
+export function openMention(commentId: unknown, database: PrismaClient = prisma) {
+  return myMentions.openMention(commentId, createPrismaMyMentionsReader(database));
 }

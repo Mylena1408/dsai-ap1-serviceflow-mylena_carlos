@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SignOutButton } from "@/modules/auth";
 import { NotificationsLink } from "@/app/_components/notifications";
 import { SectorServicesLink } from "@/app/_components/sector-services-link";
+import { MyMentionsLink } from "@/app/_components/my-mentions";
 import type { ReactNode } from "react";
 
 export default function AttendantLayout({
@@ -21,6 +22,8 @@ export default function AttendantLayout({
           {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7. */}
           <Link href="/queue/absences">Minhas ausências</Link>
           <NotificationsLink href="/queue/notifications" />
+          {/* SPEC 2026-11-08-atendimento-dia-a-dia, 13.4 item 1. */}
+          <MyMentionsLink />
           <SectorServicesLink />
           <Link href="/account/data">Meus dados</Link>
           <Link href="/account/api-tokens">Acesso à API</Link>

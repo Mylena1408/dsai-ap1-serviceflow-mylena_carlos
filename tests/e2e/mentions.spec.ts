@@ -67,11 +67,26 @@ test("mentions: an internal note mentions a colleague of the sector, never seen 
       },
     });
     requestId = request.id;
+    // The colleague mentions the demo attendant in a note, as the use case would (13.4 item 1).
+    const note = await database.requestComment.create({
+      data: { requestId: request.id, authorId: colleagueId, body: "Nota do colega com menção.", isInternal: true },
+    });
+    await database.commentMention.create({ data: { commentId: note.id, userId: template.id, createdAt: new Date() } });
   } finally {
     await database.$disconnect();
   }
 
   await enterAs(page, "Atendente");
+  // "Minhas menções": the new mention, opened from the list, leads to the conversation and becomes seen.
+  await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: /^Minhas menções/ }).click();
+  const mentions = page.getByRole("list", { name: "Menções recebidas" });
+  await expect(mentions).toContainText(serviceName);
+  await expect(mentions).toContainText("Nova");
+  await mentions.getByRole("button", { name: `Abrir a menção em ${serviceName}` }).click();
+  await expect(page).toHaveURL(new RegExp(`/queue/${requestId}`));
+  await expect(page.getByText("Nota do colega com menção.")).toBeVisible();
+  await page.goto("/queue/mentions");
+  await expect(page.getByRole("list", { name: "Menções recebidas" })).toContainText("vista");
   await page.goto(`/queue/${requestId}`);
   const conversation = page.getByRole("region", { name: "Conversa" });
 

@@ -2411,7 +2411,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-231 — "Minhas menções" e menções do gestor
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. "Minhas menções" em `/queue/mentions` (`listMyMentions`, `openMention`, `countUnseenMentions`) e o link com a contagem no menu do atendente; menções do gestor fora, pela correção da seção 13.10. CA-MEN-04 verificado; parte E concluída.
 - **Objetivo:** Seção 13.4, parte E (aprofundamento).
 - **Arquivos/módulos esperados:** Áreas do atendente e do gestor, notificações.
 - **Dependências:** SF-216.
