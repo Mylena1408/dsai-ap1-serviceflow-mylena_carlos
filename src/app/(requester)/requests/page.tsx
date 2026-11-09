@@ -47,7 +47,11 @@ export default async function RequestListPage({ searchParams }: RequestListPageP
           <p className="eyebrow">Acompanhamento</p>
         <h1>Minhas solicitações</h1>
         </div>
-        <Link href="/catalog">Voltar ao catálogo</Link>
+        <nav aria-label="Listas de solicitações">
+          <Link href="/catalog">Voltar ao catálogo</Link>{" "}
+          {/* SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 2 (decision I14). */}
+          <Link href="/requests/following">Que eu acompanho</Link>
+        </nav>
       </header>
       {/* SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3. */}
       {params.notice === "bundle-opened" ? (

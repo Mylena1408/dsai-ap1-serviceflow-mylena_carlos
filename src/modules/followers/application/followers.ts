@@ -34,6 +34,8 @@ export interface FollowerEventView {
 }
 
 export interface RequestFollowersView {
+  /** Who reads the view, for their own "stop following". */
+  viewerId: string;
   followers: FollowerView[];
   events: FollowerEventView[];
   /** What the reader may do now. */
@@ -131,6 +133,7 @@ export async function getRequestFollowers(requestId: unknown, reader: FollowerRe
 
   const following = ids.includes(actor.id);
   return {
+    viewerId: actor.id,
     followers: all.map(({ userId, name, kind }) => ({ userId, name, kind })),
     events: await reader.events(id),
     canAddColleague: requester && all.filter(({ kind }) => kind === "colleague").length < MAX_COLLEAGUE_FOLLOWERS,

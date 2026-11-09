@@ -31,10 +31,13 @@ import { RequestConversation } from "@/app/_components/request-conversation";
 import { COMMENT_FILE_MESSAGES } from "@/app/_components/comment-form-data";
 import { addOwnCommentAction, rateOwnRequestAction } from "../actions";
 import { RequesterSatisfaction } from "@/app/_components/request-satisfaction";
+import { getRequestFollowers } from "@/modules/followers";
+import { RequestFollowers } from "@/app/_components/request-followers";
 
 type RequestPageProps = {
   params: Promise<{ requestId: string }>;
-  searchParams: Promise<{ notice?: string; error?: string }>;
+  /** `follow`: the result of a follower action (SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 1). */
+  searchParams: Promise<{ notice?: string; error?: string; follow?: string }>;
 };
 
 const statusLabels = REQUEST_STATUS_LABELS;
@@ -68,7 +71,7 @@ export default async function RequestPage({
   searchParams,
 }: RequestPageProps) {
   await requireRequesterPageAccess();
-  const [{ requestId }, { notice, error }] = await Promise.all([params, searchParams]);
+  const [{ requestId }, { notice, error, follow }] = await Promise.all([params, searchParams]);
   let request;
   let attachments;
   let answers;
@@ -78,9 +81,12 @@ export default async function RequestPage({
   let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
   let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
   let scheduleName: string | null = null;
+  let followers: Awaited<ReturnType<typeof getRequestFollowers>> | null = null;
 
   try {
     request = await getRequesterRequest(requestId);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 1: only the request's own requester gets here.
+    followers = await getRequestFollowers(request.id);
     attachments = await listRequestAttachments(request.id);
     answers = await listRequestFieldAnswers(request.id);
     comments = await listComments(request.id);
@@ -163,7 +169,11 @@ export default async function RequestPage({
         allowInternal={false}
         action={addOwnCommentAction}
       />
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} />
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 1. */}
+      {followers ? (
+        <RequestFollowers area="requester" message={follow} requestId={request.id} view={followers} />
+      ) : null}
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} followerEvents={followers?.events ?? []} />
     </main>
   );
 }

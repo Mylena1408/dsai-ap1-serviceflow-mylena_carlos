@@ -422,3 +422,11 @@
 > pode prosseguir
 
 105. SF-213: avisos aos seguidores pela mesma regra dos avisos e anonimização.
+
+> faça os commits
+
+106. Nenhum commit pendente; informados os 3 commits locais da parte D e o ponto de esperar as telas para enviar.
+
+> vamos completar com a sf-214 e depois retomar os commits,para não quebrar o raciocinio de entrega
+
+107. SF-214: telas dos seguidores e E2E da parte D; CA-SEG-01 a 05 verificados. Em seguida, o envio da parte D (backup, migration, push).

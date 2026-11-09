@@ -2241,7 +2241,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-214 — Telas dos seguidores e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Bloco `RequestFollowers` nos detalhes do solicitante, da fila, do gestor e do colega; páginas `/requests/following` e `/requests/following/[requestId]`; histórico dos seguidores; E2E `followers.spec.ts`. CA-SEG-01 a 05 verificados.
 - **Objetivo:** Parte D, parte D.
 - **Arquivos/módulos esperados:** Detalhe do solicitante e da fila.
 - **Dependências:** SF-213.

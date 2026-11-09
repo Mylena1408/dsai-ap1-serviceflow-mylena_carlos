@@ -2718,3 +2718,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Anonimização:** apaga as linhas de seguidor e a preferência de seguir ao comentar da pessoa, junto com as preferências de aviso; o histórico fica com o nome anonimizado.
 - **Resultados:** typecheck, lint e build OK; unitários 1567/1567; integração 679/679; E2E 48/48.
 - **Linhas:** 165 `added` em TS (aplicação 39, testes 126).
+
+## SF-214 — Telas dos seguidores e E2E (2026-11-09)
+
+- **Bloco "Acompanham":** um componente para quatro telas; o caso de uso devolve `viewerId` (quem lê), usado no "deixar de acompanhar", e as permissões de cada botão (`canAddColleague`, `canFollowSelf`, `canStopFollowing`, `removableIds`); só nomes, sem contato. As ações voltam para a página da área com `?follow=...#followers`; o colega que deixa de acompanhar volta para a lista, porque não lê mais a solicitação.
+- **"Que eu acompanho":** página própria (`/requests/following`), aberta por um link em "Minhas solicitações"; a leitura de cada solicitação em `/requests/following/[requestId]`, sem ações além de deixar de acompanhar e sem download dos documentos.
+- **E2E** `followers.spec.ts`: a Ana inclui o Bruno pelo e-mail (com a recusa de um e-mail desconhecido); numa solicitação do Bruno em que a Ana foi incluída (gravada direto no banco, porque o Bruno não tem botão de entrada), ela lê sem a nota interna, recebe 404 na página do solicitante e deixa de acompanhar; o atendente passa a acompanhar. Na primeira rodada, o teste clicou no nome do serviço antes de a página "Que eu acompanho" abrir (a lista da Ana tinha um link igual); passou a esperar o título da página e a procurar o link na lista certa.
+- **Critérios:** CA-SEG-01 a 05 verificados; o CA-SEG-06 segue com as SF-229 e SF-230.
+- **Resultados:** typecheck, lint e build OK; unitários 1570/1570; integração 679/679; E2E 49/49.
+- **Linhas:** 482 `added` em TS (aplicação 325, testes 157).

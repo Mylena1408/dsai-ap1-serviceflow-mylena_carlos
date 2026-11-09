@@ -5,6 +5,7 @@ import { tagEventTitle } from "./request-tags";
 import type { RequestChecklistEventView } from "@/modules/checklists";
 import type { TimeEventView } from "@/modules/time-entries";
 import { timeEventTitle } from "./request-time";
+import { followerEventTitle, type FollowerEventView } from "@/modules/followers";
 import { PRIORITY_LABELS } from "./request-priority";
 import { REQUEST_STATUS_LABELS } from "./request-status";
 
@@ -30,6 +31,8 @@ type RequestTimelineProps = {
   checklistEvents?: readonly RequestChecklistEventView[];
   /** SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 item 3: time logged, changed and removed, for the team. */
   timeEvents?: readonly TimeEventView[];
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 4: who started and stopped following. */
+  followerEvents?: readonly FollowerEventView[];
 };
 
 /** Who made an assignment change: a person or, for a rule's handover, the system (decision G17). */
@@ -83,6 +86,7 @@ export function buildTimeline(
   tagEvents: readonly RequestTagEventView[] = [],
   checklistEvents: readonly RequestChecklistEventView[] = [],
   timeEvents: readonly TimeEventView[] = [],
+  followerEvents: readonly FollowerEventView[] = [],
 ): TimelineEntry[] {
   // A rejection cancels the request with the same note (SPEC 2026-11-01-aprovacoes, 5.3.4); the
   // note is shown once, on the decision.
@@ -232,6 +236,14 @@ export function buildTimeline(
     note: null,
   }));
 
+  const followerEntries = followerEvents.map((event) => ({
+    id: `follower-${event.id}`,
+    occurredAt: event.occurredAt,
+    title: followerEventTitle(event),
+    actor: event.actorName,
+    note: null,
+  }));
+
   return [
     ...statusEntries,
     ...sectorEntries,
@@ -246,6 +258,7 @@ export function buildTimeline(
     ...tagEntries,
     ...checklistEntries,
     ...timeEntries,
+    ...followerEntries,
   ].sort(
     (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime(),
   );
@@ -263,8 +276,9 @@ export function RequestTimeline({
   tagEvents = [],
   checklistEvents = [],
   timeEvents = [],
+  followerEvents = [],
 }: RequestTimelineProps) {
-  const entries = buildTimeline(request, linkEvents, tagEvents, checklistEvents, timeEvents);
+  const entries = buildTimeline(request, linkEvents, tagEvents, checklistEvents, timeEvents, followerEvents);
 
   return (
     <section className="surface-card content-section" aria-labelledby="history-heading">
