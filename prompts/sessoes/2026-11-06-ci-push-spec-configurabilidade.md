@@ -370,3 +370,11 @@
 > pode prosseguir
 
 92. SF-209: relatório de horas por atendente, serviço e setor, com CSV, no gestor e na administração.
+
+> faça todos os commits pendentes
+
+93. Nenhum commit pendente (cada tarefa já tinha o seu); informados os 9 commits ainda não enviados e a ordem do envio.
+
+> siga a ordem sugerida por você
+
+94. Envio feito: backup verificado (seção 17 da SPEC de backup), migration `20261108900000_time_entries` no Neon, push; CI aprovado.

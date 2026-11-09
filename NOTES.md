@@ -2650,3 +2650,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CSV:** um lançamento por linha, colunas fixas, código curto da solicitação, minutos e horas com vírgula decimal; sem a nota e sem a descrição; recusa acima de 10.000 linhas com a mensagem do CSV do painel. `PeriodFilters`, `Alerts` e `periodMessage` de "Análises" passaram a ser exportados para a tela das horas.
 - **Resultados:** typecheck, lint e build OK; unitários 1548/1548; integração 665/665; E2E 47/47.
 - **Linhas:** 522 `added` em TS (aplicação 360, testes 162).
+
+## Deploy de SF-204 a SF-209 (2026-11-08)
+
+- **Ordem seguida:** backup verificado → 1 migration no Neon → push.
+- **Backup:** `serviceflow-2026-11-08-pre-deploy-4.dump`, conferido por restauração local (59 tabelas iguais), cifrado pelo EFS. Detalhes na seção 17 da SPEC de backup.
+- **Migration no Neon:** `prisma migrate deploy` aplicou `20261108900000_time_entries`; `prisma migrate status` confirmou o banco em dia (54).
+- **Push:** 9 commits, de `47c5e6e` (SF-204) a `ad6ef13` (SF-209). O comando passou do tempo limite da ferramenta e foi para segundo plano, mas terminou sem erro; o `git fetch` confirmou `origin/main` em `ad6ef13`.
+- **CI:** aprovado (run 42553573660).
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
