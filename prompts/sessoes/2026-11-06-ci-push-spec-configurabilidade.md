@@ -418,3 +418,7 @@
 > pode prosseguir
 
 104. SF-212: incluir e retirar seguidores e a leitura do colega por consultas próprias; escolha por e-mail e documentos sem download registrados na SPEC.
+
+> pode prosseguir
+
+105. SF-213: avisos aos seguidores pela mesma regra dos avisos e anonimização.

@@ -2710,3 +2710,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Quem acompanha:** visível ao solicitante, aos colegas que seguem e à equipe do setor; o solicitante retira colegas, nunca atendentes.
 - **Resultados:** typecheck, lint e build OK; unitários 1563/1563; integração 676/676; E2E 48/48.
 - **Linhas:** 387 `added` em TS (aplicação 260, testes 127).
+
+## SF-213 — Avisos aos seguidores e anonimização (2026-11-09)
+
+- **Regra:** `plannedNotifications` passou a aplicar `withFollowers` sobre o plano de sempre: o que vai ao solicitante vai também aos colegas que seguem; o que vai à equipe (o responsável efetivo ou o setor nos alertas de prazo) vai também aos atendentes que seguem e são do setor atual. O autor nunca recebe, ninguém recebe repetido, e o e-mail segue a preferência de cada um (o consumidor já decidia por pessoa).
+- **Consumidor:** porta opcional `followers` no armazenamento dos avisos, só com pessoas ativas; sem ela, nada muda (os 30 testes unitários de avisos que já existiam passaram sem mudança).
+- **Anonimização:** apaga as linhas de seguidor e a preferência de seguir ao comentar da pessoa, junto com as preferências de aviso; o histórico fica com o nome anonimizado.
+- **Resultados:** typecheck, lint e build OK; unitários 1567/1567; integração 679/679; E2E 48/48.
+- **Linhas:** 165 `added` em TS (aplicação 39, testes 126).

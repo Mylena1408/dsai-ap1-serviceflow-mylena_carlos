@@ -30,6 +30,11 @@ export interface NotificationContext {
    * sector (SPEC 2026-11-03-transferencia-entre-setores, 5.6).
    */
   receivingAttendantIds?: readonly string[];
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 3 (decision I12): the colleagues who follow the request, and the
+   * active attendants of its current sector who follow it.
+   */
+  followers?: { colleagueIds: readonly string[]; attendantIds: readonly string[] };
 }
 
 export type NotifiableEvent =
@@ -66,7 +71,39 @@ function plan(recipientId: string | null, type: NotificationType, actorId: strin
   return recipientId && recipientId !== actorId ? [{ recipientId, type }] : [];
 }
 
+/** Who made the event, when it says (the author of an action is never notified of it). */
+function actorOf(event: NotifiableEvent): string | null {
+  const payload = (event as { payload?: Record<string, unknown> }).payload ?? {};
+  const actor = payload.actorId ?? payload.authorId;
+  return typeof actor === "string" ? actor : null;
+}
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 3 (decision I12): each notice planned for the requester also
+ * reaches the colleagues who follow; each notice planned for the team (the assignee or the sector's attendants) also
+ * reaches the attendants who follow. Never the author, never twice to the same person.
+ */
+function withFollowers(planned: PlannedNotification[], event: NotifiableEvent, context: NotificationContext): PlannedNotification[] {
+  const followers = context.followers;
+  if (!followers || (followers.colleagueIds.length === 0 && followers.attendantIds.length === 0)) return planned;
+  const actorId = actorOf(event);
+  const team = new Set([context.effectiveAssigneeId, ...(context.slaRecipients?.sectorAttendantIds ?? [])].filter((id): id is string => id !== null));
+  const result = [...planned];
+  const has = (recipientId: string, type: NotificationType) => result.some((item) => item.recipientId === recipientId && item.type === type);
+  for (const item of planned) {
+    const extra = item.recipientId === context.requesterId ? followers.colleagueIds : team.has(item.recipientId) ? followers.attendantIds : [];
+    for (const recipientId of extra) {
+      if (recipientId !== actorId && recipientId !== context.requesterId && !has(recipientId, item.type)) result.push({ recipientId, type: item.type });
+    }
+  }
+  return result;
+}
+
 export function plannedNotifications(event: NotifiableEvent, context: NotificationContext): PlannedNotification[] {
+  return withFollowers(plannedWithoutFollowers(event, context), event, context);
+}
+
+function plannedWithoutFollowers(event: NotifiableEvent, context: NotificationContext): PlannedNotification[] {
   switch (event.type) {
     case "request.opened":
       // SPEC 2026-11-01-aprovacoes, 5.6.3: an opening that requires approval reaches the sector managers.

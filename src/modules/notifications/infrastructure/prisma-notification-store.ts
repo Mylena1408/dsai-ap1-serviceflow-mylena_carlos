@@ -91,6 +91,18 @@ export function createPrismaNotificationStore(database: PrismaClient): Notificat
       });
       return rows.map(({ id }) => id);
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 3.
+    async followers(requestId, sectorId) {
+      const rows = await database.requestFollower.findMany({
+        where: { requestId, user: { isActive: true } },
+        select: { userId: true, user: { select: { role: true, sectorId: true } } },
+        orderBy: { userId: "asc" },
+      });
+      return {
+        colleagueIds: rows.filter(({ user }) => user.role === "REQUESTER").map(({ userId }) => userId),
+        attendantIds: rows.filter(({ user }) => user.role === "ATTENDANT" && user.sectorId === sectorId).map(({ userId }) => userId),
+      };
+    },
     async sectorAttendantIds(sectorId) {
       const rows = await database.user.findMany({
         where: { sectorId, role: "ATTENDANT", isActive: true },

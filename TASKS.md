@@ -2231,7 +2231,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-213 — Avisos aos seguidores e anonimização
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Seguidores na regra dos avisos (`withFollowers` em `recipients.ts`, porta opcional `followers` do consumidor) e a anonimização apagando as linhas de seguidor e a preferência.
 - **Objetivo:** Seção 6.3 (regras 3 e 5), parte D.
 - **Arquivos/módulos esperados:** Notificações, anonimização.
 - **Dependências:** SF-212.

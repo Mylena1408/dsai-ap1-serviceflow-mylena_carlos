@@ -73,6 +73,8 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
         ...(event.type === "request.sector_changed" && typeof event.payload.toSectorId === "string"
           ? { receivingAttendantIds: await store.sectorAttendantIds(event.payload.toSectorId) }
           : {}),
+        // SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 3 (decision I12).
+        ...(store.followers ? { followers: await store.followers(event.requestId, request.sectorId) } : {}),
       });
 
       if (planned.length === 0) {
