@@ -412,7 +412,9 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 1. **Possíveis duplicadas (decisão J9):** o detalhe da fila mostra, para a equipe, até 5 solicitações do mesmo solicitante e do mesmo serviço abertas nos 7 dias anteriores ou posteriores e ainda não encerradas, com atalho para vincular como duplicada.
 2. **Encerrar como duplicada no lote (decisão J10):** o lote ganha "Encerrar como duplicada de", que pede o código da original e a nota; cada item exige o vínculo "duplicada de" com essa original (criado na hora, se ainda não existir, pelas regras dos vínculos) e segue a regra 8.3.
 
+- *Esclarecimentos registrados em 2026-11-09 (SF-232):* "abertas" conta a data de abertura de cada uma, até 7 dias (168 horas) antes ou depois da abertura desta; "ainda não encerradas" quer dizer abertas ou em atendimento (concluídas e canceladas ficam de fora); solicitações sem serviço (serviço removido) não têm sugestões; as já vinculadas a esta, por qualquer tipo de vínculo, saem da lista; a ordem é a mais próxima no tempo primeiro (no empate, a mais antiga). A lista aparece no detalhe da fila só para atendentes que leem a solicitação (o solicitante e o gestor não a recebem); uma sugestão de outro setor aparece sem link. O atalho "Vincular esta como duplicada de #código" usa o formulário de vínculos, com as mesmas regras e recusas, e só aparece com esta aberta ou em atendimento e ainda sem original.
 - **CA-DUP-04** — As possíveis duplicadas aparecem com o critério da regra 1, só para a equipe; o lote encerra como duplicada item a item, com resultado por item.
+  - *Sugestões verificadas em 2026-11-09 (SF-232):* critério da regra 1, só para a equipe (unitário, integração `possible-duplicates.test.ts` e E2E `close-as-duplicate.spec.ts`). O lote fica para a SF-233.
 
 ### 13.6 Decisões (2026-11-08)
 

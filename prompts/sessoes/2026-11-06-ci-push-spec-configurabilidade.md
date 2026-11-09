@@ -508,3 +508,7 @@
 > pode prosseguir
 
 127. SF-219: bloco "Encerrar como duplicada" e E2E; o E2E novo passou a limpar o seguimento que cria; arquivo gerado do Next cortado apagado; CA-DUP-01 marcado.
+
+> pode prosseguir
+
+128. SF-232: "Possíveis duplicadas" no detalhe da fila, com atalho para vincular; CA-DUP-04 (sugestões) verificado; o lote fica para a SF-233.

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   getRequestGroupBlock,
   listRequestLinks,
+  listPossibleDuplicates,
   effectiveAssigneeId,
   getAttendanceFields,
   getAttendantRequest,
@@ -27,6 +28,7 @@ import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
 import { CloseAsDuplicateForm } from "./close-as-duplicate-form";
 import { duplicateOriginal } from "./duplicate-original";
+import { PossibleDuplicates } from "./possible-duplicates";
 import { RequestSla } from "@/app/_components/request-sla";
 import { PriorityForm } from "./priority-form";
 import { SectorTransferForm } from "./sector-transfer-form";
@@ -138,6 +140,7 @@ export default async function QueueRequestPage({
   let satisfaction;
   let escalations: Awaited<ReturnType<typeof listRequestEscalations>> = [];
   let links: Awaited<ReturnType<typeof listRequestLinks>> = { links: [], events: [] };
+  let suggestions: Awaited<ReturnType<typeof listPossibleDuplicates>> = [];
   let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
   let tags: Awaited<ReturnType<typeof getRequestTags>> | null = null;
   let checklist: Awaited<ReturnType<typeof getRequestChecklist>> | null = null;
@@ -163,6 +166,8 @@ export default async function QueueRequestPage({
     mentionable = await listMentionableColleagues(request.id);
     escalations = await listRequestEscalations(request.id);
     links = await listRequestLinks(request.id);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 1.
+    suggestions = await listPossibleDuplicates(request.id);
     // SPEC 2026-11-07-operacao-e-automacao, 3.3 item 4.
     group = await getRequestGroupBlock(request.id);
     // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 2.
@@ -284,6 +289,11 @@ export default async function QueueRequestPage({
         hrefFor={(id) => `/queue/${id}`}
         links={links.links}
         requestId={request.id}
+      />
+      <PossibleDuplicates
+        canLink={(request.status === "OPEN" || request.status === "IN_PROGRESS") && !links.links.some((link) => link.role === "duplicate_of")}
+        requestId={request.id}
+        suggestions={suggestions}
       />
       <RequestGroupBlock block={group} hrefFor={(id) => `/queue/${id}`} />
       {tags ? <RequestTags edit={{ addAction: addRequestTagAction, removeAction: removeRequestTagAction }} requestId={request.id} view={tags} /> : null}

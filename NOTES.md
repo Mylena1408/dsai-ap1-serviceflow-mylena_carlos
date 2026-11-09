@@ -2843,3 +2843,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Falhas na suíte e correções:** (1) o E2E novo deixava a solicitante de demonstração seguindo a original, e o `followers.spec.ts`, que roda depois, espera que ela não siga nada: o teste novo passou a apagar esse seguimento ao terminar (o antigo não mudou); (2) a segunda rodada parou no typecheck por um arquivo gerado pelo servidor de desenvolvimento do Playwright (`.next/dev/types/routes.d.ts`) cortado ao meio quando o servidor foi encerrado; a pasta gerada foi apagada (está no `.gitignore` e é recriada) e a terceira rodada passou inteira.
 - **Resultados:** typecheck, lint e build OK; unitários 1588/1588; integração 696/696; E2E 51/51.
 - **Linhas:** 160 `added` em TS (aplicação 46, testes 114).
+
+## SF-232 — Possíveis duplicadas (2026-11-09)
+
+- **Regra pura** `possibleDuplicates` (domínio `possible-duplicates.ts`): mesmo solicitante e serviço, aberta ou em atendimento, abertura até 7 dias antes ou depois; sem ela mesma e sem as já vinculadas; a mais próxima no tempo primeiro; até 5. O banco só estreita (solicitante, serviço, janela, até 50 linhas) e a regra decide.
+- **Caso de uso** `listPossibleDuplicates`: autoriza a leitura como os vínculos; só atendentes recebem a lista (solicitante e gestor recebem vazio; quem não lê a solicitação recebe "não encontrada"); cada sugestão diz se o atendente pode abri-la. A porta do leitor de vínculos é opcional, para os dublês antigos.
+- **Tela:** "Possíveis duplicadas" no detalhe da fila, logo depois dos vínculos; o atalho "Vincular esta como duplicada de #código" envia o formulário de vínculos que já existe (as regras e as mensagens de recusa são as mesmas) e só aparece com a solicitação aberta ou em atendimento, ainda sem original.
+- **E2E:** `close-as-duplicate.spec.ts` ganhou o percurso da sugestão: vincular pelo atalho e encerrar como duplicada; a limpeza do arquivo passou a valer para os dois serviços criados.
+- **Resultados:** typecheck, lint e build OK; unitários 1593/1593; integração 700/700; E2E 52/52.
+- **Linhas:** 335 `added` em TS (aplicação 157, testes 178).

@@ -454,7 +454,8 @@ export async function listRequestEscalations(
 
 // Links between requests (SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1).
 export { LINK_KINDS, LINK_ROLE_LABELS, MAX_LINKS_PER_REQUEST, type LinkKind, type LinkRole } from "./domain/links";
-export type { RequestLinkEventView, RequestLinkView } from "./application/links";
+export type { PossibleDuplicateView, RequestLinkEventView, RequestLinkView } from "./application/links";
+export { MAX_POSSIBLE_DUPLICATES, POSSIBLE_DUPLICATE_DAYS } from "./domain/possible-duplicates";
 
 export async function linkRequests(input: unknown, database: PrismaClient = prisma): Promise<{ linkId: string }> {
   return links.linkRequests(input, createPrismaLinkStore(database));
@@ -462,6 +463,11 @@ export async function linkRequests(input: unknown, database: PrismaClient = pris
 
 export async function unlinkRequests(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return links.unlinkRequests(input, createPrismaLinkStore(database));
+}
+
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 1: suggestions for the team. */
+export async function listPossibleDuplicates(requestId: unknown, database: PrismaClient = prisma) {
+  return links.listPossibleDuplicates(requestId, createPrismaAttachmentQueryRepository(database), createPrismaLinkReader(database));
 }
 
 /** Links and their history, for whoever reads the request. */

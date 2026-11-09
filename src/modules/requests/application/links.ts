@@ -14,6 +14,7 @@ import {
   type LinkRole,
 } from "../domain/links";
 import type { RequestStatus } from "../domain/request";
+import { possibleDuplicates, type DuplicateCandidate } from "../domain/possible-duplicates";
 import { authorizeRequestRead } from "./attachment-queries";
 import type { AttachmentQueryRepository } from "./ports";
 
@@ -81,9 +82,30 @@ export interface RequestLinkEventView {
   occurredAt: Date;
 }
 
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 1: a suggestion, as the team sees it. */
+export interface PossibleDuplicateView {
+  id: string;
+  serviceName: string;
+  sectorName: string;
+  status: RequestStatus;
+  createdAt: Date;
+  readable: boolean;
+}
+
+export type DuplicateCandidateState = LinkRequestState & DuplicateCandidate;
+
 export interface LinkReader {
   listLinks(requestId: string): Promise<Array<LinkRecord & { other: LinkRequestState }>>;
   listEvents(requestId: string): Promise<Array<Omit<LinkRecord, "id"> & { id: string; action: LinkAction; actor: { id: string; name: string }; occurredAt: Date; otherRequesterId: string }>>;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 1: the request, the requests of its requester and service in the
+   * window, and the ids already linked to it. Optional for older doubles.
+   */
+  duplicateCandidates?(requestId: string): Promise<{
+    base: DuplicateCandidate;
+    candidates: DuplicateCandidateState[];
+    linkedIds: string[];
+  } | null>;
 }
 
 function readable(actor: AuthorizationActor, request: LinkRequestState): boolean {
@@ -194,4 +216,29 @@ export async function listRequestLinks(
         occurredAt: event.occurredAt,
       })),
   };
+}
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 1 (decision J9): the possible duplicates of a request, for the team
+ * only (the attendants who read it); anyone else gets none. Each suggestion opens only for whoever may read it.
+ */
+export async function listPossibleDuplicates(
+  requestId: unknown,
+  scope: Pick<AttachmentQueryRepository, "findRequestScope" | "approvalCoverage">,
+  reader: LinkReader,
+): Promise<PossibleDuplicateView[]> {
+  const id = await authorizeRequestRead(requestId, scope);
+  const actor = await requireCurrentActor();
+  if (actor.role !== "ATTENDANT" || !reader.duplicateCandidates) return [];
+  const found = await reader.duplicateCandidates(id);
+  if (!found) return [];
+
+  return possibleDuplicates(found.base, found.candidates, new Set(found.linkedIds)).map((candidate) => ({
+    id: candidate.id,
+    serviceName: candidate.serviceName,
+    sectorName: candidate.sectorName,
+    status: candidate.status,
+    createdAt: candidate.createdAt,
+    readable: readable(actor, candidate),
+  }));
 }

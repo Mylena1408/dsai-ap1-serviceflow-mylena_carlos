@@ -10,6 +10,7 @@ import { DEMO_ACCOUNTS } from "../../src/modules/auth/domain/demo-accounts";
 
 const unique = `e2e-dup-${Date.now()}`;
 const serviceName = `${unique} Serviço`;
+const repeatedName = `${unique} Repetido`;
 const code = (id: string) => id.slice(0, 8).toUpperCase();
 
 async function enterAs(page: Page, profile: "Atendente" | "Solicitante") {
@@ -29,10 +30,10 @@ async function signOut(page: Page) {
 test.afterEach(async () => {
   const database = new PrismaClient({ datasourceUrl: process.env.TEST_DATABASE_URL, log: [] });
   try {
-    await database.requestFollower.deleteMany({ where: { request: { serviceNameSnapshot: serviceName } } });
-    await database.service.updateMany({ where: { name: serviceName }, data: { isActive: false } });
+    await database.requestFollower.deleteMany({ where: { request: { serviceNameSnapshot: { startsWith: unique } } } });
+    await database.service.updateMany({ where: { name: { startsWith: unique } }, data: { isActive: false } });
     await database.request.updateMany({
-      where: { serviceNameSnapshot: serviceName, status: { not: "CANCELLED" } },
+      where: { serviceNameSnapshot: { startsWith: unique }, status: { not: "CANCELLED" } },
       data: { status: "CANCELLED", cancelledAt: new Date() },
     });
   } finally {
@@ -112,4 +113,55 @@ test("close as duplicate: both histories, no closing on the original, the reques
   await expect(page).toHaveURL(new RegExp(`/requests/following/${originalId}`));
   await expect(page.getByRole("heading", { level: 1, name: serviceName })).toBeVisible();
   await expect(page.getByText("Pedido original.")).toBeVisible();
+});
+
+test("possible duplicates: the same requester's request of the same service, linked by the shortcut, then closed", async ({ page }) => {
+  test.setTimeout(240_000);
+  const database = new PrismaClient({ datasourceUrl: process.env.TEST_DATABASE_URL, log: [] });
+  let olderId = "";
+  let newerId = "";
+  try {
+    await seedDemoData(database);
+    const sector = await database.sector.findFirstOrThrow({ where: { name: "Central de Serviços" } });
+    const category = await database.category.findFirstOrThrow({ where: { isActive: true } });
+    const service = await database.service.create({
+      data: { name: repeatedName, description: "Serviço do teste.", categoryId: category.id, sectorId: sector.id },
+    });
+    const ana = await database.user.findUniqueOrThrow({ where: { email: DEMO_ACCOUNTS.REQUESTER.email } });
+    const open = (description: string, createdAt: Date) =>
+      database.request.create({
+        data: {
+          requesterId: ana.id,
+          serviceId: service.id,
+          sectorId: sector.id,
+          serviceNameSnapshot: service.name,
+          serviceDescriptionSnapshot: service.description,
+          categoryIdSnapshot: category.id,
+          categoryNameSnapshot: category.name,
+          sectorNameSnapshot: sector.name,
+          description,
+          status: "OPEN",
+          createdAt,
+        },
+      });
+    olderId = (await open("Primeiro pedido.", new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))).id;
+    newerId = (await open("Pedido repetido.", new Date())).id;
+  } finally {
+    await database.$disconnect();
+  }
+
+  await enterAs(page, "Atendente");
+  await page.goto(`/queue/${newerId}`);
+  const suggestions = page.getByRole("list", { name: "Possíveis duplicadas" });
+  await expect(suggestions).toContainText(`#${code(olderId)}`);
+  await suggestions.getByRole("button", { name: `Vincular esta como duplicada de #${code(olderId)}` }).click();
+  await expect(page.getByRole("status")).toContainText("Solicitação vinculada.");
+  // Linked now: no longer a suggestion, and the closing is offered.
+  await expect(page.getByRole("list", { name: "Possíveis duplicadas" })).toHaveCount(0);
+  await page.getByText("Encerrar como duplicada", { exact: true }).click();
+  const form = page.locator("details", { hasText: "Encerrar como duplicada" });
+  await form.getByLabel("Nota (obrigatória)").fill("Pedido repetido pela mesma pessoa.");
+  await form.getByRole("button", { name: "Confirmar encerramento como duplicada" }).click();
+  await expect(page.getByRole("status")).toContainText("Solicitação encerrada como duplicada.");
+  await expect(page.getByText(`Encerrada como duplicada de #${code(olderId)}`)).toBeVisible();
 });

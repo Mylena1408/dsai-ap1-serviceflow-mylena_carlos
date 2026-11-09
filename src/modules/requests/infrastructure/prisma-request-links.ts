@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import type { LinkReader, LinkRequestState, LinkStore, LinkTransaction } from "../application/links";
+import { possibleDuplicateWindow } from "../domain/possible-duplicates";
 import type { LinkRecord } from "../domain/links";
 
 // Links between requests in PostgreSQL (SPEC 2026-11-07-operacao-e-automacao, 3.4). The pair and the
@@ -117,6 +118,36 @@ export function createPrismaLinkReader(database: PrismaClient): LinkReader {
         ...event,
         otherRequesterId: event.fromRequestId === requestId ? toRequest.requesterId : fromRequest.requesterId,
       }));
+    },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.5 item 1: the database narrows by requester, service and window; the
+    // domain rule decides.
+    async duplicateCandidates(requestId) {
+      const base = await database.request.findUnique({
+        where: { id: requestId },
+        select: { id: true, requesterId: true, serviceId: true, status: true, createdAt: true },
+      });
+      if (!base || base.serviceId === null) return null;
+      const { from, to } = possibleDuplicateWindow(base.createdAt);
+      const [rows, links] = await Promise.all([
+        database.request.findMany({
+          where: {
+            id: { not: base.id },
+            requesterId: base.requesterId,
+            serviceId: base.serviceId,
+            status: { in: ["OPEN", "IN_PROGRESS"] },
+            createdAt: { gte: from, lte: to },
+          },
+          select: { ...stateColumns, serviceId: true, createdAt: true },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          take: 50,
+        }),
+        linksOf(database, requestId),
+      ]);
+      return {
+        base,
+        candidates: rows.map((row) => ({ ...toState(row), serviceId: row.serviceId, createdAt: row.createdAt })),
+        linkedIds: links.map((link) => (link.fromRequestId === requestId ? link.toRequestId : link.fromRequestId)),
+      };
     },
   };
 }

@@ -2421,7 +2421,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-232 — Possíveis duplicadas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Lista "Possíveis duplicadas" no detalhe da fila, com atalho para vincular; CA-DUP-04 (sugestões) verificado.
 - **Objetivo:** Seção 13.5 (item 1), parte F (aprofundamento).
 - **Arquivos/módulos esperados:** Detalhe da fila.
 - **Dependências:** SF-219.
