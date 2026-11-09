@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { buildTimeCsv, buildTimeCsvRows, buildTimeReport, decimalHours, groupTime, timeCsvFileName } from "@/modules/time-entries/application/time-report";
 import type { TimeReportReader, TimeReportScope, TimeSumRow } from "@/modules/time-entries/application/time-report";
 import { TimeReportView, timeCsvHref } from "@/app/_components/time-report-view";
+import { MyTimeView } from "@/app/_components/my-time-view";
+import { summarizeMyTime } from "@/modules/time-entries/application/my-time";
 import { csvField, lastDaysPeriod } from "@/modules/reports";
 import { ValidationError } from "@/server/errors";
 import { parseEstimatedHours } from "@/modules/services/domain/sla-config";
@@ -122,5 +124,51 @@ describe("the estimate on the screens", () => {
     expect(parseEstimatedHours(" ")).toBeNull();
     expect(parseEstimatedHours(null)).toBeNull();
     for (const value of ["0", "201", "1.5", -1]) expect(() => parseEstimatedHours(value)).toThrow(ValidationError);
+  });
+});
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 items 2 and 3 (SF-228; decision J5).
+describe("hours by tag and the attendant's own hours", () => {
+  it("the report sums by tag, with the sector over every sector", async () => {
+    const withTags: TimeReportReader = {
+      ...reader(rows),
+      tagSums: async () => [
+        { tagId: "t1", tagName: "Rede", sectorName: "TI", minutes: 30, entries: 1 },
+        { tagId: "t2", tagName: "Urgente", sectorName: "TI", minutes: 120, entries: 2 },
+      ],
+    };
+    const report = await buildTimeReport(organization, { period, error: null }, withTags);
+    expect(report.byTag.map(({ label, minutes }) => [label, minutes])).toEqual([
+      ["Urgente (TI)", 120],
+      ["Rede (TI)", 30],
+    ]);
+    expect(renderToStaticMarkup(createElement(TimeReportView, { action: "/admin", report }))).toContain("Horas por etiqueta");
+    // Without tags, no table.
+    const plain = await buildTimeReport(organization, { period, error: null }, reader(rows));
+    expect(renderToStaticMarkup(createElement(TimeReportView, { action: "/admin", report: plain }))).not.toContain("Horas por etiqueta");
+  });
+
+  it("'Minhas horas' adds by day, most recent first, and by service, most hours first", () => {
+    const time = summarizeMyTime([
+      { workedOn: "2026-11-11", serviceName: "Rede", minutes: 30, entries: 1 },
+      { workedOn: "2026-11-12", serviceName: "Instalação", minutes: 90, entries: 2 },
+      { workedOn: "2026-11-11", serviceName: "Instalação", minutes: 60, entries: 1 },
+    ]);
+    expect(time.totalMinutes).toBe(180);
+    expect(time.byDay).toEqual([
+      { day: "2026-11-12", minutes: 90 },
+      { day: "2026-11-11", minutes: 90 },
+    ]);
+    expect(time.byService).toEqual([
+      { label: "Instalação", minutes: 150, entries: 3 },
+      { label: "Rede", minutes: 30, entries: 1 },
+    ]);
+    const html = renderToStaticMarkup(createElement(MyTimeView, { time, period: { firstDay: "2026-11-01", lastDay: "2026-11-12" } }));
+    expect(html).toContain("Total: 3h");
+    expect(html).toContain("Minhas horas por dia");
+    expect(html).toContain("<td>12/11/2026</td><td>1h 30min</td>");
+    expect(renderToStaticMarkup(createElement(MyTimeView, { time: summarizeMyTime([]), period: { firstDay: "2026-11-01", lastDay: "2026-11-12" } }))).toContain(
+      "Nenhuma hora lançada no período.",
+    );
   });
 });

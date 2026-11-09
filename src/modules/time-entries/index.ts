@@ -3,7 +3,8 @@ import { prisma } from "@/server/db";
 import * as timeEntries from "./application/time-entries";
 import * as requestTime from "./application/request-time";
 import * as timeReport from "./application/time-report";
-import { createPrismaTimeReportReader } from "./infrastructure/prisma-time-report";
+import { createPrismaMyTimeReader, createPrismaTimeReportReader } from "./infrastructure/prisma-time-report";
+import * as myTime from "./application/my-time";
 import { csvField, parseReportPeriod, resolveReportScope } from "@/modules/reports";
 import { createPrismaRequestTimeReader, createPrismaTimeEntryStore } from "./infrastructure/prisma-time-entries";
 
@@ -64,4 +65,11 @@ export async function exportTimeCsv(params: RawParams, database: PrismaClient = 
   const periodResult = parseReportPeriod(params, now);
   const rows = await timeReport.buildTimeCsvRows(resolved, periodResult, createPrismaTimeReportReader(database));
   return { content: timeReport.buildTimeCsv(rows, csvField), fileName: timeReport.timeCsvFileName(periodResult.period) };
+}
+
+// "Minhas horas" (13.2 item 2).
+export type { MyTime } from "./application/my-time";
+
+export function getMyTime(params: RawParams, database: PrismaClient = prisma, now = new Date()): Promise<myTime.MyTime> {
+  return myTime.getMyTime(parseReportPeriod(params, now).period, createPrismaMyTimeReader(database));
 }

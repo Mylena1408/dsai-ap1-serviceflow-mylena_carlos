@@ -54,6 +54,11 @@ export interface ServiceEstimateRow {
 export interface TimeReportReader {
   sums(scope: { sectorId: string | null }, period: { firstDay: string; lastDay: string }): Promise<TimeSumRow[]>;
   entries(scope: { sectorId: string | null }, period: { firstDay: string; lastDay: string }, limit: number): Promise<TimeCsvRow[]>;
+  /** 13.2 item 3: by tag. Optional for older doubles: absent = none. */
+  tagSums?(
+    scope: { sectorId: string | null },
+    period: { firstDay: string; lastDay: string },
+  ): Promise<Array<{ tagId: string; tagName: string; sectorName: string; minutes: number; entries: number }>>;
   /** Optional for older doubles: absent = no comparison. */
   estimates?(scope: { sectorId: string | null }, period: { from: Date; before: Date }): Promise<ServiceEstimateRow[]>;
 }
@@ -78,6 +83,8 @@ export interface TimeReport {
   bySector: TimeGroup[];
   /** 13.2 item 1: the average logged on completed requests against each service's estimate. */
   estimates: ServiceEstimateRow[];
+  /** 13.2 item 3: by the requests' tags; a request with two tags counts in both. */
+  byTag: TimeGroup[];
 }
 
 const collator = new Intl.Collator("pt-BR", { sensitivity: "base" });
@@ -108,11 +115,12 @@ export async function buildTimeReport(
     errors: { period: periodResult.error, sector: resolved.sectorError },
   };
   if (!resolved.scope) {
-    return { ...base, withoutSector: true, totalMinutes: 0, byAttendant: [], byService: [], bySector: [], estimates: [] };
+    return { ...base, withoutSector: true, totalMinutes: 0, byAttendant: [], byService: [], bySector: [], estimates: [], byTag: [] };
   }
-  const [rows, estimates] = await Promise.all([
+  const [rows, estimates, tagRows] = await Promise.all([
     reader.sums(resolved.scope, periodResult.period),
     reader.estimates ? reader.estimates(resolved.scope, periodResult.period) : Promise.resolve([]),
+    reader.tagSums ? reader.tagSums(resolved.scope, periodResult.period) : Promise.resolve([]),
   ]);
   // The administrator over every sector sees each person's sector next to the name.
   const showSector = resolved.audience === "organization" && resolved.sector === null;
@@ -132,6 +140,9 @@ export async function buildTimeReport(
     ),
     bySector: groupTime(rows, (row) => row.sectorId, (row) => row.sectorName),
     estimates: [...estimates].sort((left, right) => collator.compare(left.serviceName, right.serviceName)),
+    byTag: tagRows
+      .map((row) => ({ key: row.tagId, label: showSector ? `${row.tagName} (${row.sectorName})` : row.tagName, minutes: row.minutes, entries: row.entries }))
+      .sort((left, right) => right.minutes - left.minutes || collator.compare(left.label, right.label)),
   };
 }
 

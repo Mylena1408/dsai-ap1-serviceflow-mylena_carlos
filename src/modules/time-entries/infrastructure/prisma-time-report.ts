@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import type { TimeReportReader } from "../application/time-report";
+import type { MyTimeReader } from "../application/my-time";
 
 // The time report in PostgreSQL (SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 item 4): entries not removed whose day
 // is in the period, on requests of the sector in scope (the request's current sector), summed in the database.
@@ -43,6 +44,23 @@ export function createPrismaTimeReportReader(database: PrismaClient): TimeReport
       `;
       return rows;
     },
+    // 13.2 item 3: by the request's tags now; a request with two tags counts in both, as in "Análises".
+    async tagSums(scope, period) {
+      const rows = await database.$queryRaw<Array<{ tagId: string; tagName: string; sectorName: string; minutes: bigint; entries: bigint }>>`
+        SELECT t."id" AS "tagId", t."name" AS "tagName", s."name" AS "sectorName",
+          sum(e."minutes") AS "minutes", count(*) AS "entries"
+        FROM "RequestTimeEntry" e
+        JOIN "Request" r ON r."id" = e."requestId"
+        JOIN "RequestTag" rt ON rt."requestId" = r."id"
+        JOIN "SectorTag" t ON t."id" = rt."tagId"
+        JOIN "Sector" s ON s."id" = t."sectorId"
+        WHERE e."deletedAt" IS NULL
+          AND e."workedOn" BETWEEN ${period.firstDay}::date AND ${period.lastDay}::date
+          ${sectorFilter(scope.sectorId)}
+        GROUP BY t."id", t."name", s."name"
+      `;
+      return rows.map((row) => ({ ...row, minutes: Number(row.minutes), entries: Number(row.entries) }));
+    },
     // 13.2 item 1: requests completed in the period with time logged, by service; the service's current estimate.
     async estimates(scope, period) {
       const rows = await database.$queryRaw<
@@ -64,6 +82,25 @@ export function createPrismaTimeReportReader(database: PrismaClient): TimeReport
         GROUP BY sv."id", sv."name", sv."estimatedHours"
       `;
       return rows.map((row) => ({ ...row, completed: Number(row.completed) }));
+    },
+  };
+}
+
+/** 13.2 item 2: the attendant's own entries in the period, by day and service. */
+export function createPrismaMyTimeReader(database: PrismaClient): MyTimeReader {
+  return {
+    async sums(userId, period) {
+      const rows = await database.$queryRaw<Array<{ workedOn: string; serviceName: string; minutes: bigint; entries: bigint }>>`
+        SELECT to_char(e."workedOn", 'YYYY-MM-DD') AS "workedOn", r."serviceNameSnapshot" AS "serviceName",
+          sum(e."minutes") AS "minutes", count(*) AS "entries"
+        FROM "RequestTimeEntry" e
+        JOIN "Request" r ON r."id" = e."requestId"
+        WHERE e."userId" = ${userId}::uuid
+          AND e."deletedAt" IS NULL
+          AND e."workedOn" BETWEEN ${period.firstDay}::date AND ${period.lastDay}::date
+        GROUP BY e."workedOn", r."serviceNameSnapshot"
+      `;
+      return rows.map((row) => ({ ...row, minutes: Number(row.minutes), entries: Number(row.entries) }));
     },
   };
 }

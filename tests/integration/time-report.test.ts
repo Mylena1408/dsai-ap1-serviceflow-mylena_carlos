@@ -12,7 +12,7 @@ vi.mock("@/server/db", async () => {
   return { prisma };
 });
 
-import { exportTimeCsv, getTimeReport, logTime, deleteTimeEntry } from "@/modules/time-entries";
+import { deleteTimeEntry, exportTimeCsv, getMyTime, getTimeReport, logTime } from "@/modules/time-entries";
 
 // SPEC 2026-11-08-atendimento-dia-a-dia, 5.1 item 3 and 5.3 item 4 (SF-209; CA-HRS-03).
 
@@ -81,5 +81,36 @@ describe("the time report (5.3 item 4; CA-HRS-03)", () => {
     expect(lines[1]).toContain(`;${tiRequest.id.slice(0, 8).toUpperCase()};90;1,50`);
     expect(csv.content).not.toContain("Nota interna");
     expect(csv.fileName).toMatch(/^serviceflow-horas-\d{4}-\d{2}-\d{2}-a-\d{4}-\d{2}-\d{2}\.csv$/);
+  });
+});
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 items 2 and 3 (SF-228; CA-HRS-06).
+describe("hours by tag and 'Minhas horas'", () => {
+  it("the report sums by the request's tags; a request with two tags counts in both", async () => {
+    const { ti, gabi, ana, tiRequest } = await scenario();
+    const network = await prisma.sectorTag.create({ data: { sectorId: ti.id, name: "Rede", color: "blue" } });
+    const urgent = await prisma.sectorTag.create({ data: { sectorId: ti.id, name: "Urgente", color: "red" } });
+    for (const tag of [network, urgent]) {
+      await prisma.requestTag.create({ data: { requestId: tiRequest.id, tagId: tag.id, addedById: ana.id, addedAt: new Date() } });
+    }
+    actAs(gabi);
+    const report = await getTimeReport({ period: "7" });
+    expect(report.byTag.map(({ label, minutes }) => [label, minutes]).sort()).toEqual([
+      ["Rede", 90],
+      ["Urgente", 90],
+    ]);
+  });
+
+  it("the attendant sees only their own hours, by day and service; nobody else has the block", async () => {
+    const { gabi, ana, rita } = await scenario();
+    actAs(ana);
+    const mine = await getMyTime({ period: "7" });
+    expect(mine.totalMinutes).toBe(90);
+    expect(mine.byService).toHaveLength(1);
+    expect(mine.byDay).toHaveLength(1);
+    for (const actor of [gabi, rita]) {
+      actAs(actor);
+      await expect(getMyTime({ period: "7" })).rejects.toBeInstanceOf(AuthorizationError);
+    }
   });
 });

@@ -2681,3 +2681,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Primeira suíte completa depois do ajuste do `dashboard.spec.ts`:** E2E 48/48.
 - **Resultados:** typecheck, lint e build OK; unitários 1553/1553; integração 667/667; E2E 48/48.
 - **Linhas:** 188 `added` em TS (aplicação 97, testes 91).
+
+## SF-228 — "Minhas horas" e horas por etiqueta; fim da parte C (2026-11-09)
+
+- **"Minhas horas":** `getMyTime` lê só os lançamentos da própria pessoa no período de "Meu painel" (uma consulta agrupada por dia e serviço) e `summarizeMyTime` monta o total, os dias (mais recente primeiro) e os serviços (mais horas primeiro). Só o atendente tem o bloco.
+- **Horas por etiqueta:** porta opcional `tagSums`, pelas etiquetas atuais da solicitação, no escopo de quem vê; uma solicitação com duas etiquetas conta nas duas, como em "Análises".
+- **Parte C concluída:** CA-HRS-01 a 06 verificados. Somou cerca de 2.000 linhas em 7 tarefas (SF-206 a SF-210, SF-227 e SF-228).
+- **Resultados:** typecheck, lint e build OK; unitários 1555/1555; integração 669/669; E2E 48/48.
+- **Linhas:** 227 `added` em TS (aplicação 152, testes 75).

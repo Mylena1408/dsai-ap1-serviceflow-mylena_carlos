@@ -2381,7 +2381,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-228 — "Minhas horas" no painel e horas por etiqueta
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Bloco "Minhas horas" em "Meu painel" (`getMyTime`, `MyTimeView`) e "Horas por etiqueta" no relatório (`tagSums`). CA-HRS-06 verificado; parte C concluída (CA-HRS-01 a 06).
 - **Objetivo:** Seção 13.2 (itens 2 e 3), parte C (aprofundamento).
 - **Arquivos/módulos esperados:** "Meu painel", relatório de horas.
 - **Dependências:** SF-227.

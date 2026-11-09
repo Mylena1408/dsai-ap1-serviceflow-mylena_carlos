@@ -92,6 +92,11 @@ test("time: logged and changed by the attendant, totalled against the estimate, 
   await log.locator('[name="minutes"]').fill("0");
   await log.getByRole("button", { name: "Lançar horas" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Informe de 1 minuto a 12 horas" })).toBeVisible();
+
+  // "Minhas horas" in "Meu painel" (13.2 item 2).
+  await page.goto("/queue/dashboard");
+  const mine = page.getByRole("region", { name: "Minhas horas" });
+  await expect(mine.getByRole("table", { name: "Minhas horas por serviço" })).toContainText(serviceName);
   await signOut(page);
 
   // The manager's report and CSV count it (CA-HRS-03).

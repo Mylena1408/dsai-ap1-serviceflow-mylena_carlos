@@ -398,3 +398,7 @@
 > pode prosseguir
 
 99. SF-227: estimativa de horas por serviço com auditoria e comparação no relatório; CA-HRS-05 verificado.
+
+> pode prosseguir
+
+100. SF-228: "Minhas horas" em "Meu painel" e horas por etiqueta no relatório; CA-HRS-06 verificado; fim da parte C.
