@@ -2626,3 +2626,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Domínio:** duração em horas (0 a 12) e minutos (0 a 59), guardada em minutos; dia válido entre a abertura e hoje; quem lança (atendente do setor, nunca em cancelada, até 7 dias depois da conclusão); quem altera (quem lançou, até 7 dias, se não apagado); totais por pessoa sem os apagados; "3h de 4h estimadas".
 - **Resultados:** typecheck, lint e build OK; unitários 1537/1537; integração 654/654; E2E 47/47.
 - **Linhas:** 267 `added` em TS (aplicação 114, testes 151, scripts 2).
+
+## SF-207 — Lançar, alterar e apagar horas (2026-11-08)
+
+- **Casos de uso:** `logTime`, `updateTimeEntry`, `deleteTimeEntry`, cada um numa transação serializável que grava o lançamento e o evento do histórico com a hora do banco.
+- **Dias:** o dia de abertura sai do `createdAt` da solicitação no fuso do calendário da organização (`to_char ... AT TIME ZONE`), e o "hoje" de `organizationToday`; as colunas `DATE` são lidas e gravadas como "AAAA-MM-DD".
+- **Alterar e apagar:** além de ser o próprio lançamento em até 7 dias, a pessoa precisa ainda poder lançar na solicitação (mesmo setor, não cancelada, no prazo depois da conclusão).
+- **Resultados:** typecheck, lint e build OK; unitários 1537/1537; integração 659/659; E2E 47/47.
+- **Linhas:** 287 `added` em TS (aplicação 184, testes 103).

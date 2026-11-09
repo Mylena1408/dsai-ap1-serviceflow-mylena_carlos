@@ -2171,7 +2171,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-207 — Lançar, alterar e apagar horas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Casos de uso `logTime`, `updateTimeEntry` e `deleteTimeEntry` com o histórico em `RequestTimeEntryEvent`; dia de abertura e "hoje" no fuso da organização.
 - **Objetivo:** Seção 5.3 (regras 1 a 3), parte C.
 - **Arquivos/módulos esperados:** Módulo de horas.
 - **Dependências:** SF-206.
