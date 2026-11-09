@@ -2618,3 +2618,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Parte B concluída:** CA-CHK-01 a 07 verificados. Somou cerca de 2.000 linhas em 10 tarefas (SF-200 a SF-205 e SF-224 a SF-226).
 - **Resultados:** typecheck, lint e build OK; unitários 1528/1528; integração 651/651; E2E 47/47.
 - **Linhas:** 52 `added` em TS (aplicação 32, testes 20).
+
+## SF-206 — Horas: banco e domínio (2026-11-08)
+
+- **Migration** `20261108900000_time_entries`: `RequestTimeEntry` (1 a 720 minutos, nota de 1 a 200 ou nenhuma, `deletedAt`), `RequestTimeEntryEvent` (dia e minutos depois de cada mudança; o par lançamento e solicitação por chave composta, com índice único `(id, requestId)` criado à mão) e `Service.estimatedHours` (1 a 200 ou nenhuma). A estimativa entrou aqui para a parte C ter um só envio com backup.
+- **`prisma format`:** rodado sem querer, realinhou o `schema.prisma` inteiro (95 linhas alteradas fora do assunto); o arquivo foi restaurado do commit e a mudança reaplicada só com as 53 linhas novas, e o diff de SQL saiu igual.
+- **Domínio:** duração em horas (0 a 12) e minutos (0 a 59), guardada em minutos; dia válido entre a abertura e hoje; quem lança (atendente do setor, nunca em cancelada, até 7 dias depois da conclusão); quem altera (quem lançou, até 7 dias, se não apagado); totais por pessoa sem os apagados; "3h de 4h estimadas".
+- **Resultados:** typecheck, lint e build OK; unitários 1537/1537; integração 654/654; E2E 47/47.
+- **Linhas:** 267 `added` em TS (aplicação 114, testes 151, scripts 2).

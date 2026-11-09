@@ -42,6 +42,8 @@ async function prepareDatabase(): Promise<void> {
       database.requestSectorEvent.deleteMany(),
       database.requestSlaPause.deleteMany(),
       database.recurringRequestRun.deleteMany(),
+      database.requestTimeEntryEvent.deleteMany(),
+      database.requestTimeEntry.deleteMany(),
       database.requestChecklistEvent.deleteMany(),
       database.requestChecklistItem.deleteMany(),
       database.requestChecklist.deleteMany(),

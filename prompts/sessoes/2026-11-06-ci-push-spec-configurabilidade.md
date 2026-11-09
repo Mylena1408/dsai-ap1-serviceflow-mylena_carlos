@@ -350,3 +350,7 @@
 > pode prosseguir
 
 87. SF-226: progresso do checklist na lista da fila; CA-CHK-06 e 07 verificados; fim da parte B.
+
+> pode prosseguir
+
+88. SF-206: migration e domínio das horas (com a coluna da estimativa do serviço, para um só envio na parte C).

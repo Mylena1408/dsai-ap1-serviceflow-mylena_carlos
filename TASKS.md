@@ -2161,7 +2161,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-206 — Horas: migrations e domínio
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. Migration `20261108900000_time_entries` (lançamentos, histórico, estimativa do serviço, `CHECK`s e chave composta) e domínio `src/modules/time-entries` (valores, quem lança, quem altera, totais, estimativa).
 - **Objetivo:** Seção 5.3 (regra 2), parte C.
 - **Arquivos/módulos esperados:** `prisma/`, módulo de horas.
 - **Dependências:** Parte B concluída.

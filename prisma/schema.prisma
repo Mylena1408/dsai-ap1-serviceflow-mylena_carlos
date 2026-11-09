@@ -281,6 +281,9 @@ model User {
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
   checklistItemsDone       RequestChecklistItem[]
   checklistEvents          RequestChecklistEvent[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 5.4.
+  timeEntries              RequestTimeEntry[]
+  timeEntryEvents          RequestTimeEntryEvent[]
 }
 
 model Service {
@@ -292,6 +295,8 @@ model Service {
   isActive                 Boolean         @default(true)
   defaultPriority          RequestPriority @default(NORMAL)
   slaHours                 Int?
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 13.2 item 1 (decision J4): hours of attendance expected, 1 to 200.
+  estimatedHours           Int?
   /// SPEC 2026-11-01-aprovacoes, 5.2: a manager of the sector approves before the attendance.
   requiresApproval         Boolean         @default(false)
   /// SPEC 2026-11-03-pausa-sla-calendario, 5.2: count the SLA only in business hours.
@@ -421,6 +426,9 @@ model Request {
   checklist             RequestChecklist?
   checklistItems        RequestChecklistItem[]
   checklistEvents       RequestChecklistEvent[]
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 5.4.
+  timeEntries           RequestTimeEntry[]
+  timeEntryEvents       RequestTimeEntryEvent[]
 
   @@index([requesterId])
   @@index([sectorId])
@@ -1519,6 +1527,51 @@ model RequestChecklistEvent {
   request Request              @relation(fields: [requestId], references: [id], onDelete: Restrict)
   item    RequestChecklistItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
   actor   User                 @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([requestId, occurredAt])
+}
+
+/// Time an attendant spent on a request (SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 and 5.4; decisions I9 to I11):
+/// a day of the organization's calendar, 1 to 720 minutes and an optional note; removing marks `deletedAt`.
+model RequestTimeEntry {
+  id        String    @id @default(uuid()) @db.Uuid
+  requestId String    @db.Uuid
+  userId    String    @db.Uuid
+  workedOn  DateTime  @db.Date
+  minutes   Int
+  note      String?
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  updatedAt DateTime  @updatedAt @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
+
+  request Request                 @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  user    User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  events  RequestTimeEntryEvent[]
+
+  @@index([requestId])
+  @@index([userId, workedOn])
+}
+
+enum RequestTimeEntryAction {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+/// The history of the time entries (5.3 item 3): each change with the values after it.
+model RequestTimeEntryEvent {
+  id         String                 @id @default(uuid()) @db.Uuid
+  entryId    String                 @db.Uuid
+  requestId  String                 @db.Uuid
+  action     RequestTimeEntryAction
+  workedOn   DateTime               @db.Date
+  minutes    Int
+  actorId    String                 @db.Uuid
+  occurredAt DateTime               @db.Timestamptz
+
+  entry   RequestTimeEntry @relation(fields: [entryId], references: [id], onDelete: Restrict)
+  request Request          @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  actor   User             @relation(fields: [actorId], references: [id], onDelete: Restrict)
 
   @@index([requestId, occurredAt])
 }
