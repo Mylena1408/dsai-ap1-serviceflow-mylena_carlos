@@ -366,3 +366,7 @@
 > pode prosseguir
 
 91. SF-208: totais de horas na solicitação e histórico das horas.
+
+> pode prosseguir
+
+92. SF-209: relatório de horas por atendente, serviço e setor, com CSV, no gestor e na administração.

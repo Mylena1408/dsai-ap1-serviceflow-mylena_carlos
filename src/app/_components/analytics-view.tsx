@@ -24,7 +24,7 @@ function percent(value: number | null): string {
   return value === null ? "—" : `${value}%`;
 }
 
-function PeriodFilters({
+export function PeriodFilters({
   action,
   period,
   hidden = {},
@@ -82,7 +82,7 @@ function PeriodFilters({
   );
 }
 
-function Alerts({ messages }: { messages: string[] }) {
+export function Alerts({ messages }: { messages: string[] }) {
   return (
     <>
       {messages.map((message) => (
@@ -96,7 +96,7 @@ function Alerts({ messages }: { messages: string[] }) {
 
 const WITHOUT_SECTOR = "Você não está ligado a um setor ativo, então não há números para mostrar.";
 
-function periodMessage(error: keyof typeof PERIOD_ERRORS | null): string[] {
+export function periodMessage(error: keyof typeof PERIOD_ERRORS | null): string[] {
   return error ? [`${PERIOD_ERRORS[error]} Mostrando os últimos 30 dias.`] : [];
 }
 

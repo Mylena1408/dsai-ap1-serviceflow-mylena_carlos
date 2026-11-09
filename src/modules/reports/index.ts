@@ -102,3 +102,11 @@ export async function getAnalytics(
 ): Promise<analytics.Analytics> {
   return analytics.getAnalytics(params, createPrismaAnalyticsReader(database), now);
 }
+
+/**
+ * The scope of the sector's reports (SPEC 2026-11-02-painel-relatorios, 5.1), for other reports with the same rules,
+ * such as the time report (SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 item 4).
+ */
+export function resolveReportScope(params: RawParams, database: PrismaClient = prisma) {
+  return dashboard.resolveScope(params, createPrismaDashboardReader(database));
+}

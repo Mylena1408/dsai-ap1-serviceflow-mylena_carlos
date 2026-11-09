@@ -2642,3 +2642,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Histórico:** `RequestTimeline` ganhou `timeEvents` ("Horas lançadas/alteradas/apagadas: 1h 30min em 12/11/2026").
 - **Resultados:** typecheck, lint e build OK; unitários 1540/1540; integração 661/661; E2E 47/47.
 - **Linhas:** 284 `added` em TS (aplicação 194, testes 90).
+
+## SF-209 — Relatório de horas e CSV (2026-11-08)
+
+- **Escopo e período:** os mesmos de "Análises": `resolveReportScope` (novo, exporta o `resolveScope` do painel sem mudá-lo) e `parseReportPeriod`; o gestor fica no próprio setor mesmo com outro setor na URL; atendente e solicitante recebem recusa de autorização.
+- **Soma no banco:** uma consulta agrupada por atendente, serviço (nome guardado na solicitação) e setor atual da solicitação; o caso de uso agrupa por atendente, serviço e setor, com o nome do setor ao lado quando o administrador vê a organização inteira.
+- **CSV:** um lançamento por linha, colunas fixas, código curto da solicitação, minutos e horas com vírgula decimal; sem a nota e sem a descrição; recusa acima de 10.000 linhas com a mensagem do CSV do painel. `PeriodFilters`, `Alerts` e `periodMessage` de "Análises" passaram a ser exportados para a tela das horas.
+- **Resultados:** typecheck, lint e build OK; unitários 1548/1548; integração 665/665; E2E 47/47.
+- **Linhas:** 522 `added` em TS (aplicação 360, testes 162).

@@ -47,6 +47,8 @@ import { listSectorTags } from "@/modules/tags";
 import { SectorTagsPanel } from "@/app/_components/sector-tags";
 import { listServiceChecklists } from "@/modules/checklists";
 import { ServiceChecklistsPanel } from "@/app/_components/service-checklists";
+import { getTimeReport } from "@/modules/time-entries";
+import { TimeReportView } from "@/app/_components/time-report-view";
 import { AbsencesSection, type AbsencesOverview } from "./_sections/absences/absences-section";
 import { CalendarSection } from "./_sections/calendar/calendar-section";
 
@@ -106,6 +108,8 @@ const adminSections = [
   { id: "emails", label: "E-mails" },
   { id: "dashboard", label: "Painel" },
   { id: "analytics", label: "Análises" },
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 item 4.
+  { id: "time", label: "Horas" },
   { id: "audit", label: "Auditoria" },
   { id: "api-tokens", label: "Acesso à API" },
   { id: "webhooks", label: "Webhooks" },
@@ -187,6 +191,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const sectorTags = selectedSection === "tags" ? await listSectorTags() : null;
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.1 item 1: read only when the section is open.
   const serviceChecklists = selectedSection === "checklists" ? await listServiceChecklists() : null;
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 item 4: read only when the section is open.
+  const timeReport = selectedSection === "time" ? await getTimeReport({ period, from, to, sector }) : null;
   const absencesOverview: AbsencesOverview | null =
     selectedSection === "absences"
       ? { ...(await listAbsences()), managers: await listSubstituteCandidates() }
@@ -327,6 +333,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       {configurationCheck ? <ConfigurationSection check={configurationCheck} /> : null}
       {sectorTags ? <SectorTagsPanel area="admin" message={tag} sectors={sectorTags} /> : null}
       {serviceChecklists ? <ServiceChecklistsPanel area="admin" message={checklist} open={open} services={serviceChecklists} /> : null}
+      {timeReport ? (
+        <section className="admin-section" aria-labelledby="admin-time-heading">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Indicadores</p>
+              <h2 id="admin-time-heading">Horas</h2>
+              <p className="section-description">As horas lançadas nas solicitações, da organização inteira ou de um setor.</p>
+            </div>
+          </div>
+          <TimeReportView action="/admin" hidden={{ section: "time" }} report={timeReport} />
+        </section>
+      ) : null}
         </div>
       ) : null}
     </main>

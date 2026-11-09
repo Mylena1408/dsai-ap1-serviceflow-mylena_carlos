@@ -2191,7 +2191,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-209 — Relatório de horas e CSV
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `getTimeReport` e `exportTimeCsv` com o escopo e o período de "Análises", rota `/api/reports/hours.csv`, página `/approvals/time` e seção "Horas" da administração (`TimeReportView`).
 - **Objetivo:** Seção 5.3 (regra 4), parte C.
 - **Arquivos/módulos esperados:** `src/modules/reports/`, rota CSV.
 - **Dependências:** SF-208.

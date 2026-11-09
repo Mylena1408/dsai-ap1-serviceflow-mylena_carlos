@@ -19,6 +19,8 @@ export default function ManagerLayout({
           <Link href="/approvals">Aprovações</Link>
           <Link href="/approvals/dashboard">Painel do setor</Link>
           <Link href="/approvals/analytics">Análises</Link>
+          {/* SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 item 4. */}
+          <Link href="/approvals/time">Horas</Link>
           {/* SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5. */}
           <Link href="/approvals/absences">Ausências</Link>
           {/* SPEC 2026-11-07-operacao-e-automacao, 4.3 item 7. */}
