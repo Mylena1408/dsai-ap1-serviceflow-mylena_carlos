@@ -18,6 +18,8 @@ import { SavedViews } from "@/app/_components/saved-views";
 import { listSavedViews } from "@/modules/saved-views";
 import { requireAttendantPageAccess } from "../page-access";
 import { REQUEST_STATUS_LABELS } from "@/app/_components/request-status";
+import { listFollowedElsewhere } from "@/modules/followers";
+import { requestShortCode } from "@/shared/requests";
 
 const statusLabels = REQUEST_STATUS_LABELS;
 
@@ -57,6 +59,8 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
   // How the batch's result names each request of the page.
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4: the tags of the page's requests.
   const pageTags = await listQueuePageTags(requests.map(({ id }) => id));
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 1: with "Que eu acompanho", the ones now in another sector.
+  const elsewhere = params.following === "1" ? await listFollowedElsewhere() : [];
   // SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 3: the checklist's progress of the page's requests.
   const pageChecklists = await listQueuePageChecklists(requests.map(({ id }) => id));
   const batchLabels = Object.fromEntries(requests.map((request) => [request.id, `${request.serviceNameSnapshot} (#${request.id.slice(0, 8)})`]));
@@ -80,6 +84,19 @@ export default async function AttendantQueuePage({ searchParams }: AttendantQueu
       <SavedViews list="QUEUE" params={params} views={views} />
       {/* Always rendered, so the batch's result stays when it empties the page (SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 5). */}
       {result !== null ? <QueueBatch choices={batchChoices} empty={requests.length === 0} labels={batchLabels} tags={sectorTags} /> : null}
+      {elsewhere.length > 0 ? (
+        <section aria-labelledby="elsewhere-heading" className="surface-card content-section">
+          <h2 id="elsewhere-heading">Acompanho em outros setores</h2>
+          <p className="section-description">Encaminhadas depois que você passou a acompanhar. O detalhe fica com o setor atual.</p>
+          <ul aria-label="Acompanho em outros setores">
+            {elsewhere.map((item) => (
+              <li key={item.requestId}>
+                #{requestShortCode(item.requestId)} · {item.serviceName} · {statusLabels[item.status]} · Setor: {item.sectorName}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {result === null ? (
         <p className="feedback feedback-error" role="alert">
           Critérios de busca inválidos. Use de 2 a 100 caracteres na busca, datas válidas (a inicial antes da final) e as opções oferecidas.

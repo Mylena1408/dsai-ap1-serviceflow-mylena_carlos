@@ -113,5 +113,12 @@ test("followers: a colleague added by e-mail, an attendant who follows, and a co
   await page.goto(`/queue/${ownId}`);
   await page.getByRole("region", { name: "Acompanham" }).getByRole("button", { name: "Acompanhar" }).click();
   await expect(page.getByRole("region", { name: "Acompanham" }).getByRole("status")).toContainText("Você passou a acompanhar");
+  // "Que eu acompanho" in the queue (13.3 item 1).
+  await page.goto(`/queue?q=${encodeURIComponent(unique)}`);
+  await page.getByRole("checkbox", { name: "Que eu acompanho" }).check();
+  await page.getByRole("button", { name: "Buscar" }).click();
+  await expect(page).toHaveURL(/following=1/);
+  await expect(page.locator(".content-list")).toContainText(serviceName);
+  await expect(page.locator(".content-list li")).toHaveCount(1);
   await signOut(page);
 });

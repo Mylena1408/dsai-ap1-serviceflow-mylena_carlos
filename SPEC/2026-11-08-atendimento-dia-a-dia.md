@@ -391,6 +391,7 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 3. **Seguidores na tela da equipe:** o detalhe da fila e do gestor mostra quem acompanha a solicitação (nomes), sem dados de contato.
 
 - **CA-SEG-06** — O filtro "Que eu acompanho" da fila mostra só o que a pessoa segue e pode ler; seguir ao comentar respeita a preferência; a equipe vê quem acompanha.
+- *Esclarecimentos registrados em 2026-11-09 (SF-229):* "Que eu acompanho" é uma caixa da busca da fila (parâmetro `following=1`, guardado nas visões salvas e nos links de página), só para o atendente; filtra as solicitações do setor que ele segue. As que ele segue e foram encaminhadas para outro setor aparecem à parte, em "Acompanho em outros setores", só com o código curto, o serviço, a situação e o setor atual, sem link: o detalhe é do setor atual, e as regras de leitura não mudam. A lista do solicitante ignora o parâmetro. Os nomes de quem acompanha na tela da equipe (13.3 item 3) chegaram com a SF-214.
 
 ### 13.4 Parte E — Menções (acréscimos)
 

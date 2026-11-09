@@ -233,6 +233,11 @@ function searchWhere(
     and.push({ tags: { some: { tagId: { in: criteria.tagIds } } } });
   }
 
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 1: the sector's requests the viewer follows.
+  if ("sectorId" in scope && criteria.following) {
+    and.push({ followers: { some: { userId: viewerId } } });
+  }
+
   return { AND: and };
 }
 

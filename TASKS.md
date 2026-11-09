@@ -2391,7 +2391,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-229 — "Que eu acompanho" na fila e seguidores na tela da equipe
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Critério `following` da busca da fila (URL, visões salvas, formulário, filtro no banco) e "Acompanho em outros setores" (`listFollowedElsewhere`); os nomes na tela da equipe chegaram com a SF-214.
 - **Objetivo:** Seção 13.3 (itens 1 e 3), parte D (aprofundamento).
 - **Arquivos/módulos esperados:** Busca da fila, detalhes.
 - **Dependências:** SF-214.

@@ -116,6 +116,13 @@ export function RequestSearchForm({ basePath, params, showAssignee, showSla = fa
           ))}
         </fieldset>
       ) : null}
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 1 (decision J6): only the queue has it. */}
+      {showAssignee ? (
+        <label className="checkbox-label">
+          <input type="checkbox" name="following" value="1" defaultChecked={first(params.following) === "1"} />
+          Que eu acompanho
+        </label>
+      ) : null}
       <div className="search-field">
         <label htmlFor="search-from">Aberta de</label>
         <input id="search-from" name="from" type="date" defaultValue={first(params.from)} />

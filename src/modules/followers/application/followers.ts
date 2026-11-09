@@ -153,3 +153,20 @@ export async function getFollowerReading(requestId: unknown, reader: FollowerRea
   }
   return reader.reading(id);
 }
+
+/**
+ * 13.3 item 1 (decision J6): the requests an attendant follows that are now in another sector. The attendant no longer
+ * reads them, so only what says where they are: the short code, the service, the status and the current sector.
+ */
+export interface FollowedElsewhere {
+  requestId: string;
+  serviceName: string;
+  status: "OPEN" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+  sectorName: string;
+}
+
+export async function listFollowedElsewhere(reader: { followedElsewhere(userId: string, sectorId: string): Promise<FollowedElsewhere[]> }): Promise<FollowedElsewhere[]> {
+  const actor = await requireCurrentActor();
+  if (actor.role !== "ATTENDANT" || !actor.sectorId) return [];
+  return reader.followedElsewhere(actor.id, actor.sectorId);
+}

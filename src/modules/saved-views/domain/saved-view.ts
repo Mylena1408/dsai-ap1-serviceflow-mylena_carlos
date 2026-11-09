@@ -15,7 +15,8 @@ export const MAX_CRITERIA_LENGTH = 1_000;
 /** The search parameters of each list, in the order they are kept (SPEC 2026-10-31-busca-filtros-paginacao). */
 export const LIST_PARAMETERS: Record<SavedViewList, readonly string[]> = {
   // "tag": SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 4.
-  QUEUE: ["q", "status", "assignee", "sla", "stage", "tag", "from", "to", "order"],
+  // "following": SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 1.
+  QUEUE: ["q", "status", "assignee", "sla", "stage", "tag", "following", "from", "to", "order"],
   MY_REQUESTS: ["q", "status", "from", "to", "order"],
 };
 

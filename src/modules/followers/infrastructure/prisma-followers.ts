@@ -96,3 +96,22 @@ export function createPrismaFollowerReader(database: PrismaClient): FollowerRead
     },
   };
 }
+
+/** 13.3 item 1: the attendant's followed requests now in another sector. */
+export function createPrismaFollowedElsewhereReader(database: PrismaClient) {
+  return {
+    async followedElsewhere(userId: string, sectorId: string) {
+      const rows = await database.requestFollower.findMany({
+        where: { userId, request: { sectorId: { not: sectorId } } },
+        orderBy: [{ createdAt: "desc" }, { requestId: "asc" }],
+        select: { request: { select: { id: true, serviceNameSnapshot: true, status: true, sector: { select: { name: true } } } } },
+      });
+      return rows.map(({ request }) => ({
+        requestId: request.id,
+        serviceName: request.serviceNameSnapshot,
+        status: request.status,
+        sectorName: request.sector.name,
+      }));
+    },
+  };
+}

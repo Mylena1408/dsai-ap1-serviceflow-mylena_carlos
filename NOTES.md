@@ -2737,3 +2737,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **CI:** aprovado (run 42610224840).
 - **Linhas:** 80.141 `added` sobre a baseline (saldo 77.653); sistema com 88.396 linhas.
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+## SF-229 — "Que eu acompanho" na fila (2026-11-09)
+
+- **Busca:** critério `following` ("1" ou ausente, só na fila), seguindo o caminho das etiquetas: parâmetro conhecido da paginação, das visões salvas da fila e dos critérios ativos; o filtro no banco é `followers some userId = quem vê`, dentro do escopo do setor.
+- **Outros setores:** `listFollowedElsewhere` traz as solicitações que o atendente segue e estão noutro setor, só com código, serviço, situação e setor atual, sem link; a leitura delas não muda.
+- **Testes:** os 362 unitários de busca, visões e solicitações passaram sem mudança; E2E de seguidores, busca e visões salvas juntos.
+- **Resultados:** typecheck, lint e build OK; unitários 1570/1570; integração 681/681; E2E 49/49.
+- **Linhas:** 120 `added` em TS (aplicação 63, testes 57).

@@ -51,6 +51,8 @@ export interface SearchCriteria {
    * only when chosen.
    */
   tagIds?: string[];
+  /** Queue only (SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 1): the requests the viewer follows. */
+  following?: true;
 }
 
 /** 3.3 item 4: up to 5 tags in the filter, as many as a request may have. */
@@ -159,6 +161,11 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
   if (tagIds.length > MAX_TAG_FILTERS || tagIds.some((id) => !UUID.test(id))) {
     invalid("invalid_value");
   }
+  // 13.3 item 1 (decision J6): "Que eu acompanho", only in the queue; "1" or absent.
+  const followingRaw = audience === "attendant" ? single(raw.following) || null : null;
+  if (followingRaw !== null && followingRaw !== "1") {
+    invalid("invalid_value");
+  }
 
   return {
     term: parseTerm(single(raw.q)),
@@ -171,6 +178,7 @@ export function parseSearchCriteria(raw: RawSearchParams, audience: SearchAudien
     ...(slaRaw !== null ? { sla: slaRaw as SlaFilter } : {}),
     ...(stage !== null ? { stage } : {}),
     ...(tagIds.length > 0 ? { tagIds } : {}),
+    ...(followingRaw === "1" ? { following: true as const } : {}),
   };
 }
 

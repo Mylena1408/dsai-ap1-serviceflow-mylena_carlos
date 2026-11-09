@@ -436,3 +436,7 @@
 > quantas linhas temos de codigo passando por cloc --diff
 
 109. Contagem total: 80.141 `added` sobre a baseline (saldo 77.653); sistema com 88.396 linhas.
+
+> pode prosseguir
+
+110. SF-229: "Que eu acompanho" na busca da fila e a lista dos acompanhados em outros setores.
