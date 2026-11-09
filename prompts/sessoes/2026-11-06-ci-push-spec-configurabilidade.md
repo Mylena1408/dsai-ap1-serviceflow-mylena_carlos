@@ -492,3 +492,15 @@
 > terminou?
 
 123. CI do `572de96` reprovado no mesmo E2E; a anotação mostrou a página aberta sem menções: diagnóstico corrigido (atendente escolhido sem ordem), menção para a conta de demonstração pelo e-mail, espera retirada; suíte completa e commit; push autorizado pela responsável ("autorizo puch").
+
+> autorizo puch
+
+124. Push `572de96..c2f4850`; CI aprovado (run 42674211131).
+
+> verifique se houve alguma tentativa de desenvolvimento deste projeto pelo Carlos
+
+125. Verificação no Git e no GitHub: só 2 commits do Carlos (04/11, CI), sem pull requests nem forks.
+
+> ao finalizar atualize o diretorio e o repositorio MUDANCAS_NO_PROJETO_DIA ... o objetivo aqui é manter atualizado o repositorio e o diretório para o Carlos
+
+126. Anotações de 03/11 a 09/11 (decisões da responsável e ofertas do Claude, medição por dia), nas duas pastas.

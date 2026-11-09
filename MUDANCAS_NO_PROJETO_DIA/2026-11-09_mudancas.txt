@@ -1,0 +1,416 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 09/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-08_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 09/11 (572042a -> c2f4850), com as duas
+                  correcoes do E2E das mencoes (572de96 e c2f4850)
+Registro detalhado : NOTES.md (secoes de SF-210 a SF-218, "Ajuste do E2E
+                     do painel", "Revisao e registro da SPEC 2" e os envios
+                     de 09/11), TASKS.md,
+                     diario/2026-11-07.md (secoes com data 2026-11-09; o
+                     diario continuou nesse arquivo),
+                     prompts/sessoes/
+                     2026-11-06-ci-push-spec-configurabilidade.md
+                     (itens 96 em diante),
+                     SPEC/2026-11-08-atendimento-dia-a-dia.md (SPEC 1,
+                     secoes 8.4 e 13.8 a 13.10),
+                     SPEC/2026-11-09-comunicacao-e-calendarios.md (SPEC 2,
+                     decisoes K1 a K9),
+                     SPEC/2026-11-02-backup-recuperacao.md (secoes 18 e 19)
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+Todo o trabalho do dia e da SPEC 1 "Atendimento no dia a dia"
+(SPEC/2026-11-08-atendimento-dia-a-dia.md), mais a escrita da SPEC 2.
+
+- APONTAMENTO DE HORAS CONCLUIDO (parte C; SF-210, SF-227, SF-228):
+    * SF-210: no detalhe da fila, "Lancar horas", "Alterar" e "Apagar"; o
+      detalhe do gestor so mostra; E2E time-entries.spec.ts (do lancamento
+      ao CSV do gestor, sem a nota);
+    * SF-227: estimativa de horas por servico (1 a 200 horas inteiras,
+      opcional), com auditoria; o relatorio de horas compara a media
+      apontada com a estimativa;
+    * SF-228: "Minhas horas" em "Meu painel" do atendente (por dia e por
+      servico) e horas por etiqueta no relatorio.
+    CA-HRS-01 a 06 verificados. Cerca de 2.000 linhas em 7 tarefas.
+- AJUSTE DE UM TESTE ANTIGO (pedido da responsavel): dashboard.spec.ts
+  (SF-101) passou a achar o alerta do periodo pelo texto, porque o
+  anunciador de rotas do Next.js tambem tem role="alert". Registrado na
+  secao 13.8 da SPEC 1. Nenhum comportamento do sistema mudou.
+- SEGUIDORES CONCLUIDOS (parte D; SF-211 a SF-214, SF-229, SF-230):
+    * migration 20261109100000_request_followers (seguidores, historico
+      dos seguidores e a preferencia de seguir ao comentar);
+    * o solicitante inclui colegas (perfil Solicitante, ativos, ate 10)
+      pelo e-mail exato e os retira; o atendente do setor segue a si mesmo;
+    * o colega seguidor so LE a solicitacao, por consultas proprias, sem
+      notas internas e sem baixar documentos (decisao I13; nenhuma outra
+      regra de acesso mudou);
+    * avisos: o que vai ao solicitante vai tambem aos colegas que seguem;
+      o que vai a equipe, aos atendentes do setor que seguem; anonimizacao
+      apaga as linhas de seguidor da pessoa;
+    * telas: bloco "Acompanham" e pagina "Que eu acompanho";
+    * SF-229: filtro "Que eu acompanho" na busca da fila e lista das
+      acompanhadas que foram para outro setor (so codigo, servico,
+      situacao e setor);
+    * SF-230: o atendente que comenta passa a acompanhar, salvo se
+      desligar a preferencia.
+    CA-SEG-01 a 06 verificados. Cerca de 1.900 linhas em 6 tarefas.
+- MENCOES EM NOTAS INTERNAS CONCLUIDAS (parte E; SF-215, SF-216, SF-231):
+    * migration 20261109200000_comment_mentions;
+    * so em nota interna, ate 5, so atendentes ativos do setor; mencao
+      invalida recusa o comentario inteiro;
+    * aviso "Mencao em nota interna" (categoria Comentarios);
+    * "Minhas mencoes" no menu do atendente, com quantas faltam ver; abrir
+      uma mencao a marca como vista.
+    * CORRECAO DA SPEC (secao 13.10): o gestor nao le comentarios internos
+      (decisao C3 antiga); por escolha da responsavel, o gestor nao
+      menciona nem e mencionado.
+    CA-MEN-01 a 04 verificados. Cerca de 650 linhas em 3 tarefas.
+- ENCERRAR COMO DUPLICADA EM ANDAMENTO (parte F; SF-217 e SF-218 prontas):
+    * SF-217: migration 20261109300000_close_as_duplicate (coluna opcional
+      "reason" = DUPLICATE no historico da situacao, so em cancelamento, e
+      a acao CLOSED_AS_DUPLICATE nos vinculos); caso de uso closeAsDuplicate
+      sobre o cancelamento pela equipe; o solicitante da duplicada passa a
+      seguir a original;
+    * SF-218: aviso unico status.DUPLICATE ao solicitante no lugar do aviso
+      de cancelamento; atalho na pagina da duplicada para a original.
+    CA-DUP-02 e 03 marcados. Faltam SF-219 (telas e E2E), SF-232 e SF-233.
+- SPEC 2 ESCRITA (SPEC/2026-11-09-comunicacao-e-calendarios.md), revisada
+  com a responsavel: avisos e manutencao programada, importacao de
+  usuarios por CSV, relatorio periodico e calendario por setor, mais
+  complementos (partes A a E, SF-234 a SF-259, decisoes K1 a K9). Nada
+  muda em autenticacao, senhas, sessoes, perfis ou permissoes. Comeca
+  depois das partes F e G da SPEC 1.
+- CI DO ENVIO DA SF-218 FALHOU EM 1 TESTE (E2E das mencoes). A primeira
+  correcao (esperar a pagina) partiu de um diagnostico errado e falhou
+  de novo; a causa real era o teste escolher "um" atendente do setor
+  sem ordem. Corrigido so no teste (c2f4850); CI aprovado (run 42674211131).
+  Ver secoes 2 e 5.
+- VERIFICACAO PEDIDA SOBRE O CARLOS: ver secao 3.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK]  commitado e enviado ao GitHub
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:08 | 572042a | [OK]   | docs: backup do Neon e envio de SF-204 a
+    |       |         |        | SF-209 (trabalho de 08/11).
+ 2  | 00:28 | 51cac21 | [OK]   | SF-210: telas das horas no detalhe; E2E da
+    |       |         |        | parte C.
+ 3  | 00:31 | 9b7c939 | [OK]   | Ajuste do E2E antigo do painel: alerta do
+    |       |         |        | periodo localizado pelo texto.
+ 4  | 00:50 | a278078 | [OK]   | SF-227: estimativa de horas por servico.
+ 5  | 02:08 | cfe03d4 | [OK]   | SF-228: "Minhas horas" e horas por etiqueta;
+    |       |         |        | fim da parte C.
+    |       |         |        | > Envio: so push (sem migration) de 572042a
+    |       |         |        |   a cfe03d4; CI aprovado (run 42565751538).
+ 6  | 03:21 | aa7e6ab | [OK]   | SF-211: seguidores - migration e dominio.
+ 7  | 07:27 | f3bda7a | [OK]   | SF-212: incluir, retirar e leitura do
+    |       |         |        | seguidor.
+ 8  | 07:54 | 1ed1efd | [OK]   | SF-213: avisos aos seguidores e
+    |       |         |        | anonimizacao.
+ 9  | 08:26 | 4c64b05 | [OK]   | SF-214: telas dos seguidores e E2E da
+    |       |         |        | parte D.
+    |       |         |        | > Envio da parte D: backup conferido (secao
+    |       |         |        |   18), migration request_followers no Neon
+    |       |         |        |   (55), push aa7e6ab a 4c64b05; CI aprovado
+    |       |         |        |   (run 42610224840).
+ 10 | 08:48 | 42fdd23 | [OK]   | docs: backup do Neon e envio da parte D.
+ 11 | 09:08 | b864bbb | [OK]   | SF-229: "Que eu acompanho" na fila.
+ 12 | 09:31 | 1bc8507 | [OK]   | SF-230: seguir ao comentar com a
+    |       |         |        | preferencia; fim da parte D.
+    |       |         |        | > Envio: so push de 42fdd23 a 1bc8507; CI
+    |       |         |        |   aprovado (run 42618286364).
+ 13 | 09:57 | 972632d | [OK]   | SF-215: mencoes - migration, regra e avisos.
+ 14 | 10:17 | deb97ed | [OK]   | SF-216: telas das mencoes e E2E.
+ 15 | 11:00 | 217b544 | [OK]   | SF-231: "Minhas mencoes" do atendente; fim
+    |       |         |        | da parte E.
+ 16 | 11:22 | 57d2f67 | [OK]   | SPEC 2: comunicacao, importacao, relatorios
+    |       |         |        | e calendarios (K1 a K9).
+ 17 | 11:46 | c984f03 | [OK]   | SF-217: encerrar como duplicada - migration
+    |       |         |        | e caso de uso.
+    |       |         |        | > Envio: copia conferida (secao 19), 2
+    |       |         |        |   migrations no Neon (55 -> 57), push de
+    |       |         |        |   1bc8507 a c984f03 (5 commits); CI aprovado
+    |       |         |        |   (run 42656076559).
+ 18 | 14:04 | 5bd004c | [OK]   | docs: registro do envio de SF-215 a SF-217.
+ 19 | 14:04 | 66da450 | [OK]   | SF-218: aviso da duplicada e atalho para a
+    |       |         |        | original.
+    |       |         |        | > Envio: so push de c984f03 a 66da450 (sem
+    |       |         |        |   migration). CI FALHOU (run 42662447775):
+    |       |         |        |   1 de 50 E2E (mentions.spec.ts, linha 83).
+ 20 | 14:51 | 572de96 | [OK]   | E2E das mencoes: esperar a pagina antes de
+    |       |         |        | ler a lista (diagnostico errado).
+    |       |         |        | > CI FALHOU de novo (run 42668936510): a
+    |       |         |        |   pagina abriu, mas sem mencoes.
+ 21 | 15:26 | c2f4850 | [OK]   | E2E das mencoes: a mencao vai para o
+    |       |         |        | atendente de demonstracao pelo e-mail;
+    |       |         |        | espera retirada. CI aprovado
+    |       |         |        | (run 42674211131).
+ 22 | (este)|    -    |   -    | Estas anotacoes (03/11 a 09/11).
+
+ Todos os commits de 572042a a 66da450 estao no GitHub (origin/main).
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+ (Frases entre aspas sao as palavras da Mylena, do arquivo de sessao.)
+
+ 1) Autorizou cada tarefa com "pode prosseguir" (SF-210 a SF-218).
+ 2) "corrija o teste antigo": escolheu corrigir o dashboard.spec.ts, que
+    falhou uma vez na rodada da SF-210 (oferta do Claude, ver secao 4).
+ 3) "faca os envios pendentes": push dos 5 commits de 572042a a cfe03d4,
+    sem migration e sem backup.
+ 4) "faca os commits" e, depois de saber que os commits ja existiam e que
+    faltavam as telas: "vamos completar com a sf-214 e depois retomar os
+    commits,para nao quebrar o raciocinio de entrega". A parte D foi
+    enviada inteira depois da SF-214 (backup, migration, push).
+ 5) "aprovado,pode prosseguir": push dos 3 commits de 42fdd23 a 1bc8507.
+ 6) Gestor nas mencoes: perguntada (a SPEC supunha que o gestor escreve
+    notas internas, mas ele nao tem esse acesso), respondeu "So
+    atendentes". Escolheu NAO mexer nas regras de acesso; registrado na
+    secao 13.10 da SPEC 1.
+ 7) "vamos revisar": revisao da SPEC 2, como ela tinha pedido antes ("deixe
+    a spec 2 para quando a spec 1 estiver perto do fim, me avise e
+    revisamos"). Quatro perguntas, todas respondidas com a opcao
+    recomendada:
+      K1 importacao de usuarios SEM senha (entram inativos; o
+         administrador ativa e define a senha pela tela atual), para nao
+         mexer na seguranca das contas;
+      K2 manutencao programada so avisa (nada e bloqueado);
+      K3 relatorio periodico com pagina e e-mail opcional;
+      K4 calendario do setor so para as solicitacoes abertas depois.
+    K5 a K9 foram adotadas como recomendadas e ela pode reve-las antes de
+    cada parte (ver secao 4).
+ 8) "envie os commits": copia do banco, 2 migrations no Neon e push de
+    1bc8507 a c984f03.
+ 9) "envio e push autorizado": push de c984f03 a 66da450 (SF-218 + docs,
+    sem migration).
+ 10) Perguntou o que significava o e-mail do GitHub "CI: All jobs have
+    failed". Resposta do Claude: o CI do ultimo push falhou em 1 dos 50
+    testes E2E (mentions.spec.ts, linha 83: a lista "Mencoes recebidas"
+    nao apareceu em 5 s depois do clique em "Minhas mencoes"); a maquina
+    do CI e mais lenta; o mesmo teste tinha passado no CI anterior e na
+    maquina local; todas as outras etapas passaram (gitleaks, typecheck,
+    lint, build, unitarios, integracao e 49 E2E). Nao e defeito do
+    sistema.
+ 11) "autorizado": suite completa, commit e push da correcao do teste
+    (572de96). O CI falhou de novo; o Claude parou, mostrou o erro e
+    corrigiu o diagnostico. "autorizo puch": novo push (c2f4850);
+    CI aprovado (run 42674211131).
+ 12) Pediu para verificar se o Carlos tentou desenvolver. Resultado:
+    - so 2 commits dele, em 04/11: f575adc (workflow de CI + SPEC) e
+      7b6142d (diario/sessao), ambos "Agent: Claude (Cline)";
+    - rebaseados pela Mylena em 05/11 (66e0b19); esse CI e o que esta em
+      uso ate hoje, estendido depois (banco de desenvolvimento separado,
+      gitleaks, ubuntu-24.04, SF-143);
+    - nenhum pull request, nenhum fork, so a branch main;
+    - os outros autores do historico, "Necy Trindade"/"necita" (24 commits
+      de 01/10 a 20/10), sao anteriores a baseline-ap2.
+ 13) Pediu atualizar MUDANCAS_NO_PROJETO_DIA (no repositorio e na copia
+    fora dele) com todos os dias em que o Claude trabalhou, as decisoes
+    dela e as ofertas do Claude, para o Carlos. Este arquivo faz parte
+    disso.
+ 14) Pediu a contagem de linhas varias vezes ("quantas linhas temos de
+    codigo passando por cloc --diff"); valores na secao 6.
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+ Oferta / aviso                                        | Resultado
+ ------------------------------------------------------+-----------------------
+ Corrigir o dashboard.spec.ts pelo texto do alerta     | ACEITA ("corrija o
+ (falha intermitente achada na SF-210, registrada sem  | teste antigo"); passou
+ mudar o teste, "se a responsavel quiser").            | 3 vezes seguidas.
+ Esperar as telas (SF-214) para enviar a parte D       | ACEITA (decisao 4).
+ inteira, com um so backup.                            |
+ Incluir a preferencia de seguir ao comentar ja na     | Adotada (decisao
+ migration da SF-211, para a parte D ter um so envio   | tecnica do agente,
+ com backup.                                           | registrada no NOTES).
+ Colega seguidor sem baixar documentos (a rota de      | PENDENTE: registrado
+ download tem regra propria); reducao registrada na    | na SPEC para a
+ SPEC.                                                 | responsavel rever se
+                                                       | quiser o download.
+ Pergunta sobre o gestor nas mencoes (dar acesso as    | Escolhido "So
+ notas internas ou deixar so atendentes).              | atendentes".
+ Revisao da SPEC 2 com 4 perguntas e opcoes            | ACEITAS (K1 a K4).
+ recomendadas.                                         |
+ K5 a K9 como recomendadas: dispensar so avisos de     | Adotadas; PENDENTE a
+ "informacao"; um publico por aviso; semana seg-dom e  | revisao dela antes de
+ mes civil; calendario mantem o da abertura no         | cada parte.
+ encaminhamento; administrador e gestor configuram o   |
+ calendario do setor.                                  |
+ Aviso: a SPEC 2 como escrita rende 9.000 a 12.000     | PENDENTE: os
+ linhas; para a meta, precisa ser aprofundada (como a  | acrescimos serao
+ SPEC 1 foi).                                          | propostos quando a
+                                                       | parte A comecar.
+ Aviso unico status.DUPLICATE no lugar do aviso de     | Adotado e registrado
+ cancelamento (nao existe aviso de "passou a           | na SPEC 1 (8.4); sem
+ acompanhar").                                         | objecao registrada.
+ Ordem dos envios: backup/copia, migrations, push.     | ACEITA em todos os
+                                                       | envios com migration.
+ 1a correcao do E2E das mencoes: esperar a pagina     | ACEITA ("autorizado");
+ antes de ler a lista (diagnostico de lentidao).       | NAO resolveu (o
+                                                       | diagnostico estava
+                                                       | errado).
+ 2a correcao: mencao para a conta de demonstracao     | ACEITA ("autorizo
+ pelo e-mail exato; parar e pedir nova autorizacao    | puch"); c2f4850.
+ antes do push.                                        |
+ Lembrete do pooling do Neon ao passar de 99.000       | PENDENTE (ainda nao
+ linhas.                                               | atingido).
+ Aviso: falta a copia do banco fora da maquina, com    | PENDENTE (operacao da
+ cifra propria.                                        | responsavel).
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-209) | Fim (SF-218, 66da450)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 1548/1548              | 1586/1586
+ Integracao     | 665/665                | 696/696
+ E2E            | 47/47                  | 50/50 local; 49/50 no CI
+ Lint/typecheck/build | OK               | OK
+
+ Falhas encontradas e como foram tratadas (registradas no NOTES.md):
+ - SF-210: na rodada completa, dashboard.spec.ts (teste antigo da SF-101)
+   falhou uma vez: alem da mensagem esperada, o anunciador de rotas do
+   Next.js tambem tem role="alert". Sozinho passou 2 vezes. A pedido da
+   responsavel, o teste passou a localizar o alerta pelo texto (secao 13.8
+   da SPEC 1); passou 3 vezes seguidas; na SF-227, E2E 48/48.
+ - SF-214: na primeira rodada, o E2E novo clicou no servico antes de a
+   pagina "Que eu acompanho" abrir; passou a esperar o titulo da pagina.
+ - SF-230: notifications.test.ts (CA-EVT-06) passou a desligar a
+   preferencia de seguir ao comentar da atendente, para continuar
+   conferindo a regra original; assercoes iguais (secao 13.9 da SPEC 1).
+   Um import por caminho interno foi trocado pela entrada publica do
+   modulo (regra de lint).
+ - SF-215 e SF-218: listas exatas de categorias/tipos de aviso nos testes
+   foram estendidas, como a SPEC preve.
+ - CI do push de 66da450 (run 42662447775): FALHOU em 1 de 50 E2E,
+   tests/e2e/mentions.spec.ts linha 83 (a lista "Mencoes recebidas" nao
+   apareceu em 5 s apos o clique em "Minhas mencoes"). Todas as outras
+   etapas passaram. 1a correcao (572de96): esperar a pagina antes de
+   ler a lista; 3 de 3 rodadas locais passaram, mas o CI (run
+   42668936510) falhou de novo: a pagina abriu sem nenhuma mencao.
+   Causa real: o teste mandava a mencao para o "primeiro atendente
+   ativo do setor" (findFirst sem ordem); outros E2E criam atendentes
+   no mesmo setor, e no CI veio outro, nao o de demonstracao (Diego
+   Rocha). 2a correcao (c2f4850): a mencao vai para a conta de
+   demonstracao pelo e-mail; a espera foi retirada. Suite completa:
+   unitarios 1586/1586, integracao 696/696, E2E 50/50. CI aprovado
+   (run 42674211131).
+ - Ao acompanhar o CI, o limite da API publica do GitHub (60 consultas
+   por hora) foi esgotado; a consulta passou a ser feita a cada 90 s.
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA                       |  1.665 |  1.485 |       4 |  3.154
+ (ad6ef13 -> c2f4850)                     |        |        |         |
+   removidas                              |      0 |      0 |       0 |      0
+   saldo liquido                          |        |        |         |  3.154
+ Adicionadas desde a linha de base        | 41.195 | 39.989 |     242 | 81.426
+ (baseline-ap2 -> c2f4850)                |        |        |         |
+   removidas                              |  2.470 |     18 |       0 |  2.488
+   saldo liquido                          |        |        |         | 78.938
+
+ Meta: 100.000 linhas adicionadas -> 81.426 = 81,4% (faltam 18.574).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+ Os registros deste diretorio (MUDANCAS_NO_PROJETO_DIA) vem num commit
+ seguinte, so de texto, sem efeito na contagem.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 09/11)
+-------------------------------------------------------------------------------
+
+ (Use os botoes "Entrar como..." da tela de entrada.)
+
+1) Horas (Atendente): detalhe da solicitacao na fila > "Lancar horas";
+   "Alterar"/"Apagar" nos proprios lancamentos. O Gestor so ve.
+2) Estimativa de horas (Administrador ou Gestor): formulario do servico
+   (administracao ou "Servicos do setor") > "Estimativa de atendimento
+   (horas)". O relatorio de horas mostra a media contra a estimativa e as
+   horas por etiqueta.
+3) Minhas horas (Atendente): "Meu painel" > bloco "Minhas horas".
+4) Seguidores:
+   - Solicitante: na sua solicitacao, bloco "Acompanham" > incluir colega
+     pelo e-mail (so perfil Solicitante) e retirar;
+   - colega incluido: "Minhas solicitacoes" > link "Que eu acompanho"
+     (/requests/following); so leitura, com "deixar de acompanhar";
+   - Atendente: bloco "Acompanham" > acompanhar; na busca da fila, filtro
+     "Que eu acompanho"; preferencia de seguir ao comentar em
+     "Notificacoes > Preferencias";
+   - Gestor: ve quem acompanha.
+5) Mencoes (Atendente): no comentario, marque "Nota interna" e escolha
+   colegas em "Mencionar" (ate 5). "Minhas mencoes" no menu mostra quantas
+   faltam ver (/queue/mentions); abrir uma a marca como vista.
+6) Duplicada: o encerramento ja existe no caso de uso, mas o botao vem na
+   SF-219. Quando uma solicitacao for encerrada como duplicada, o
+   Solicitante recebe o aviso e ve, na pagina dela, o atalho para a
+   original.
+7) Banco local depois de puxar os commits (3 migrations novas):
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+[ ] Parte F da SPEC 1: SF-219 (telas e E2E do encerramento como
+    duplicada), SF-232 (possiveis duplicadas) e SF-233 (encerrar como
+    duplicada no lote); CA-DUP-01 e 04.
+[ ] Parte G da SPEC 1: SF-220 a SF-223 (configuracao portatil versao 2,
+    API com etiquetas/checklist/horas, analises de horas e de checklist).
+[ ] SPEC 2: propor a responsavel os acrescimos (aprofundamento) quando a
+    parte A comecar; depois partes A a E (SF-234 a SF-259).
+[ ] Meta: 81.425 linhas adicionadas desde a baseline em 66da450; faltam
+    18.575 para 100.000.
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- NEON: as 3 migrations do dia foram aplicadas (request_followers no
+  envio da parte D; comment_mentions e close_as_duplicate no envio de
+  SF-215 a SF-217); a producao ficou com 57 migrations. SF-218 e a
+  correcao do teste nao tem migration.
+- BACKUPS: serviceflow-2026-11-09-pre-deploy.dump (61 tabelas) e
+  serviceflow-2026-11-09-pre-deploy-2.dump (64 tabelas), conferidos por
+  restauracao local, cifrados pelo EFS, na pasta de backups da
+  responsavel. Continua faltando a copia fora da maquina.
+- CI: os pushes de 66da450 e 572de96 ficaram com CI vermelho por 1 teste
+  E2E; c2f4850 corrigiu a causa (CI aprovado, run 42674211131). O
+  GitHub manda o e-mail "CI: All jobs have failed" mesmo quando so 1
+  teste falha.
+- SEGURANCA: a URL do Neon foi lida do arquivo da responsavel fora do
+  projeto e passada so ao processo; nada foi gravado no repositorio. A
+  SPEC 2 nao muda autenticacao, senhas, sessoes, perfis nem permissoes.
+- A PARTE D amplia a leitura so para o colega seguidor, so leitura e sem
+  notas internas (decisao I13 da SPEC 1 aprovada); o download de
+  documentos pelo colega ficou de fora, a rever pela responsavel.
+- PARA O CARLOS: o workflow de CI que ele criou em 04/11 continua em uso,
+  estendido (banco de desenvolvimento separado, gitleaks, ubuntu-24.04,
+  SF-143); vale conferir as mudancas no .github/workflows/ci.yml.
+- Lembrar a responsavel da escolha entre conexao direta e pooling do Neon
+  ao passar de 99.000 linhas adicionadas.
+- Publicacao na Vercel depois dos pushes: nao registrado.
+
+===============================================================================

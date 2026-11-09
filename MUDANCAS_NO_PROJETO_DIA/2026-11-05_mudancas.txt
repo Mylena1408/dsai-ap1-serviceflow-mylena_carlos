@@ -1,0 +1,370 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 05/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-04_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits gravados em 05/11 (c290cfa -> abd5c4e), 35 ao
+                  todo: 27 feitos em 03/11 e reescritos pelo rebase sobre
+                  o CI do Carlos, mais 8 novos de 05/11
+Registro detalhado : NOTES.md (secoes "Node 22 fixado pelo Volta e
+                     integracao do CI do Carlos", "Correcao do CI: banco de
+                     desenvolvimento separado", "SF-030 - Armazenamento
+                     real no ambiente nao produtivo", "Producao: regiao das
+                     funcoes da Vercel" e "SF-138 e SF-139"), TASKS.md
+                     (SF-030, SF-033, SF-138 a SF-140), diario/2026-11-05.md,
+                     prompts/sessoes/2026-11-05-rebase-ci-node22.md,
+                     SPEC/2026-11-04-integracao-continua.md (secao 5),
+                     SPEC/2026-11-02-backup-recuperacao.md (secao 8),
+                     SPEC/2026-11-05-mcp-documentos.md
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- CI DO CARLOS INTEGRADO (rebase): "git pull --rebase" trouxe f575adc e
+  7b6142d (workflow do GitHub Actions e registros, SPEC
+  2026-11-04-integracao-continua.md). Nenhum arquivo em comum com os 27
+  commits locais de 03/11 (SF-116 a SF-137); sem conflitos. Por isso os 27
+  ganharam hashes novos (c290cfa .. b469940) e data de gravacao 05/11
+  18:23. O conteudo deles esta descrito no arquivo de 03/11:
+    * acoes pela API e webhooks por setor ........... SF-116 a SF-119
+    * transferencia entre setores ................... SF-120 a SF-123
+    * anexos em comentarios e documento apos abertura SF-124 a SF-127
+    * pausa do prazo e calendario de horas uteis .... SF-128 a SF-132
+    * campos condicionais, selecao multipla e campos
+      do atendimento ................................ SF-133 a SF-137
+  Os 27 foram enviados ao GitHub neste dia, depois do 66e0b19.
+- NODE 22 FIXADO (66e0b19): o Node padrao da maquina (18.20.8) quebra o
+  Vitest (ERR_REQUIRE_ESM). "volta pin node@22" gravou
+  "volta": { "node": "22.23.4" } no package.json. O CI seguiu no Node 24;
+  o "engines" (>= 20.9.0) nao mudou. (Em 06/11 tudo passou para Node 24.)
+- CORRECAO DO CI (4ba4ada, CA-CI-03): o CI falhava na integracao porque
+  DATABASE_URL e TEST_DATABASE_URL apontavam para o mesmo banco, o que a
+  protecao dos testes recusa de proposito. O job agora cria
+  "serviceflow_dev" com createdb. Uma falha seguinte na integracao NAO foi
+  reproduzida localmente; o log do GitHub exigia login e ficou pendente.
+- SF-030 CONCLUIDA (armazenamento real de documentos, CA-DOC-21):
+    * nao produtivo: projeto Supabase "serviceflow-nonprod" (Sao Paulo),
+      buckets serviceflow-documents-test e serviceflow-documents-dev,
+      privados, 2 MiB, PDF/DOCX/TXT, leitura anonima negada;
+    * defeito do adaptador (SF-033, 01080ea): o Supabase hospedado
+      responde HTTP 400 com o codigo real no corpo (404 NoSuchKey, 409
+      KeyAlreadyExists). Corrigido lendo o "statusCode" do corpo, sem
+      expor o corpo; 8 testes unitarios novos;
+    * producao: projeto exclusivo "serviceflow-prod" so com o bucket
+      serviceflow-documents; backup do Neon antes; 6 migrations aplicadas
+      no Neon; variaveis DOCUMENT_STORAGE_* na Vercel (Production,
+      Secret); deploy de 69d2b07; PDF enviado e baixado em producao.
+- CORRECAO EM PRODUCAO (69d2b07): abrir solicitacao com anexo falhava de
+  forma intermitente (transacao passava de 5 s). Causa: funcoes da Vercel
+  em iad1 (EUA) e banco Neon em Sao Paulo (~35 idas e voltas a ~140 ms).
+  Corrigido com "regions": ["gru1"] no vercel.json. Sem migration.
+- LIMPEZA: as 11 solicitacoes de teste criadas nas tentativas foram
+  canceladas por script (fora do Git), com as regras do botao "Cancelar"
+  da solicitante; ensaio com transacao desfeita antes; 11/11, 11 eventos de
+  status no historico. Ficou so a solicitacao do teste final.
+- FERRAMENTAS MCP DE DOCUMENTOS (funcionalidade 2 da lista aprovada em
+  03/11), SPEC SPEC/2026-11-05-mcp-documentos.md (decisoes M1 a M9,
+  CA-MCP-01 a 12, tarefas SF-138 a SF-141):
+    * SF-138/139 (c8cafa4): protocolo MCP (revisao 2026-07-28 e clientes
+      antigos com "initialize", sem sessao), 4 ferramentas so de leitura
+      (find_requests, list_request_documents, read_request_document,
+      read_comment_file) e rota POST /api/mcp com o token da API (READ);
+      implementacao propria, sem dependencia nova;
+    * SF-140 (abd5c4e): 13 casos de integracao com banco real.
+  SF-141 (instrucoes na tela e README, E2E) ficou para 06/11; a SPEC foi
+  dada como concluida em 06/11.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+         (R)  commit feito em 03/11 e reescrito pelo rebase em 05/11 18:23;
+              a hora mostrada e a original de 03/11
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:07R| c290cfa | [OK]   | SPEC de acoes pela API e webhooks por setor
+    |       |         |        | (SF-116 a SF-119).
+ 2  | 00:24R| 413b264 | [OK]   | SF-116: setores nos webhooks e regras do
+    |       |         |        | reenvio.
+ 3  | 00:38R| 4efd3e2 | [OK]   | SF-117: acoes de atendimento pela API.
+ 4  | 00:54R| 51af6e5 | [OK]   | SF-118: webhooks por setor e reenvio.
+ 5  | 01:12R| 2b40d88 | [OK]   | SF-119: E2E das acoes e webhooks por setor.
+ 6  | 08:03R| bb061be | [OK]   | SPEC de transferencia entre setores
+    |       |         |        | (SF-120 a SF-123).
+ 7  | 08:14R| b20cf25 | [OK]   | SF-120: historico de setor, evento e regras.
+ 8  | 08:30R| cd3ac7a | [OK]   | SF-121: encaminhamento pela tela.
+ 9  | 08:37R| b5cf499 | [OK]   | SF-122: encaminhamento pela API e webhooks.
+ 10 | 08:50R| 880ad83 | [OK]   | SF-123: E2E e revisao da SPEC.
+ 11 | 08:55R| afcdaeb | [OK]   | SPEC de anexos em comentarios e documentos
+    |       |         |        | apos a abertura (SF-124 a SF-127).
+ 12 | 09:07R| a3ea89c | [OK]   | SF-124: arquivos de comentario e regras.
+ 13 | 09:35R| 88f145f | [OK]   | SF-125: arquivos em comentarios; correcao do
+    |       |         |        | campo de arquivo vazio.
+ 14 | 09:48R| 2160045 | [OK]   | SF-126: documento que falta apos a abertura.
+ 15 | 09:59R| 1423330 | [OK]   | SF-127: E2E dos anexos.
+ 16 | 13:14R| 9c8d662 | [OK]   | SPEC de pausa do prazo e calendario de horas
+    |       |         |        | uteis (SF-128 a SF-132).
+ 17 | 13:31R| ae075cf | [OK]   | SF-128: migration, relogio e regras da pausa.
+ 18 | 13:49R| ad6fd8c | [OK]   | SF-129: calendario na administracao e no
+    |       |         |        | calculo do prazo.
+ 19 | 14:33R| bd63660 | [OK]   | SF-130: pausa e retomada do prazo.
+ 20 | 14:39R| b4c2248 | [OK]   | SF-131: pausa pela API, OpenAPI e webhooks.
+ 21 | 14:47R| b5296a2 | [OK]   | SF-132: E2E do calendario e da pausa.
+ 22 | 14:51R| 823957d | [OK]   | SPEC de campos condicionais, selecao multipla
+    |       |         |        | e campos do atendimento (SF-133 a SF-137).
+ 23 | 15:03R| e7df26d | [OK]   | SF-133: migrations e regras.
+ 24 | 15:10R| d6e9ef5 | [OK]   | SF-134: publico e condicao na administracao.
+ 25 | 15:19R| d0d872c | [OK]   | SF-135: selecao multipla e condicoes na
+    |       |         |        | abertura.
+ 26 | 15:41R| d5f0837 | [OK]   | SF-136: campos preenchidos pelo atendimento.
+ 27 | 16:14R| b469940 | [OK]   | SF-137: E2E, README e revisao.
+ 28 | 18:48 | 66e0b19 | [OK]   | Node 22 fixado pelo Volta; registro do
+    |       |         |        | rebase do CI. Push dos 27 + este.
+ 29 | 18:53 | 4ba4ada | [OK]   | CI: banco de desenvolvimento separado do
+    |       |         |        | banco de teste.
+ 30 | 20:18 | 01080ea | [OK]   | SF-030/SF-033: respostas 400 do Supabase
+    |       |         |        | Storage hospedado; buckets nao produtivos.
+ 31 | 23:09 | 69d2b07 | [OK]   | Funcoes da Vercel em gru1 (Sao Paulo).
+ 32 | 23:13 | 02a676d | [OK]   | SF-030 concluida em producao; registro do
+    |       |         |        | deploy e do backup de 05/11.
+ 33 | 23:23 | 34e20d1 | [OK]   | Registro do cancelamento das 11 solicitacoes
+    |       |         |        | de teste.
+ 34 | 23:43 | c8cafa4 | [OK]   | SF-138 e SF-139: protocolo, ferramentas MCP
+    |       |         |        | e rota /api/mcp; SPEC do MCP.
+ 35 | 23:49 | abd5c4e | [OK]   | SF-140: integracao do MCP com banco real.
+
+ Antes do rebase, os commits do Carlos (f575adc, 7b6142d, de 04/11) ja
+ estavam no GitHub. Todos os 35 commits acima estao em origin/main
+ (conferido com "git branch -r --contains"). A hora exata do push de
+ 01080ea a abd5c4e nao foi registrada; o deploy de producao foi o de
+ 69d2b07.
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+- Conferir o trabalho do Carlos e integrar:
+  > "verifique se houve modificacoes ... houve alguma mudanca feito pelo
+  > Carlos?"  e depois  > "faca o pull --rebase das mudancas do Carlos"
+  Resposta: 2 commits do Carlos (CI); rebase feito sem conflitos.
+- Regra de contagem (passou a valer sempre):
+  > "sempre na contagem de linhas de codigo, informe quantas linhas vieram
+  > junto com o repositorio e quanto ja foi construido aqui junto com voce"
+- Node: > "se necessario instale os node 22 neste diretorio" e
+  > "fixe o node 22; faca o push dos 27 commits, depois vamos criar um
+  > bucket real com a sf-030 passo a passo explicado por voce"
+  Escolha: fixar pelo Volta (no package.json), em vez de so "volta run".
+- Perguntas de rumo:
+  > "me indique o status do projeto e as proximas etapas previstas junto
+  > com as specs para o crescimento da aplicacao" e
+  > "... proximos passos para crescimento da aplicacao de maneira segura e
+  > o atingimento das 100.000 linhas ... com a colaboracao do carlos e seu
+  > claude"
+  Resposta: pendentes da lista aprovada em 03/11 as funcionalidades 1
+  (multiplas organizacoes) e 2 (MCP de documentos), ainda sem SPEC;
+  depois, SF-030 com bucket real.
+- Link da Vercel (integracao Neon > storage): perguntou se era ali.
+  Resposta: e o banco Neon, nao armazenamento de arquivos; mantido o
+  Supabase Storage da SPEC.
+- Supabase: > "como eu chego ate o supabase? ..." (passo a passo dado);
+  navegador com "RESULT_CODE_HUNG" (o site respondia pela rede; contornado).
+  > "tem habilitar API de DADOS; EXPOR AUTOMATICAMENTE NOVAS TABELAS;
+  > HABILITAR RLS AUTOMATICO; QUAL DEVO MARCAR?"
+  Escolha seguida: API de dados DESLIGADA, exposicao automatica DESLIGADA,
+  RLS automatico LIGADO.
+- Chave secreta do Supabase colada no chat (omitida dos registros).
+  Escolha: "nao mudar e prosseguir, e para fins didaticos" (ciente de que
+  ficou no historico da conversa). A chave publica sb_publishable_ colada
+  antes foi explicada como inutil para o servidor.
+- Producao: > "vamos para a producao, passo a passo". Ela mesma aplicou as
+  6 migrations no Neon com "!" (script que esconde a URL), salvou as
+  variaveis na Vercel, informou "o arquivo continua sendo rejeitado",
+  pediu > "aplique as correcoes" e confirmou > "teste ok, o pdf baixou".
+  Os arquivos da chave e da URL do Neon ficaram fora do repositorio (o da
+  chave foi movido para fora da pasta do projeto).
+- Solicitacoes de teste:
+  > "execute as 11 solicitacoes de testes da fila de RH"
+  Escolhas: "Cancelar" (em vez de outra destinacao) e "Eu, por script"
+  (o agente faz, por script).
+- MCP: > "me indique os proximos passos previstos para incrementar a
+  aplicacao web" e > "faca a ferramentas MCP de documentos" (e
+  > "faca a sf-138", ja concluida quando a mensagem chegou).
+  Decisoes M1 a M9 adotadas como recomendadas (regra de 03/11); ela pode
+  rever qualquer uma. Banco de teste local: escolha "Pode ligar".
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+- Medicao com cloc --diff por pastas extraidas com "git archive" (o
+  "cloc --git --diff" falha no Windows). ACEITO; virou o modo de medir.
+- Fixar o Node 22 pelo Volta no package.json (substitui a decisao antiga
+  de nao versionar a versao). ACEITO (66e0b19).
+- Correcao do CI com banco de desenvolvimento separado, sem mexer na
+  protecao dos testes. FEITO (4ba4ada). Ler o log completo da falha
+  seguinte no GitHub: PENDENTE no fim do dia (exigia login; em 06/11 foi
+  lido pela API publica).
+- Opcoes do projeto Supabase (API de dados e exposicao desligadas, RLS
+  ligado) e teste e desenvolvimento no mesmo projeto nao produtivo, com
+  buckets distintos (SPEC 21.15.7). ACEITO.
+- Revogar a chave secreta colada e gerar outra antes de qualquer dado
+  real. RECUSADO por ora pela responsavel ("fins didaticos"); fica como
+  recomendacao registrada.
+- Correcao do adaptador para respostas 400 do Supabase. ACEITO (01080ea).
+- Backup do Neon antes do deploy, com restauracao de verificacao (28
+  tabelas iguais). FEITO. Copia fora da maquina, com cifra propria:
+  PENDENTE (operacao da responsavel).
+- Ajustes das variaveis na Vercel: tinham ido para Development e com nome
+  terminado em "(1)"; corrigidas para Production e tipo Secret; a chave
+  colada a mao nao comecava com sb_secret_ e foi regravada direto do
+  arquivo por script. ACEITO ("aplique as correcoes").
+- Diagnostico da falha intermitente pelos logs da Vercel e consultas so de
+  leitura no Neon; correcao com regiao gru1. ACEITO (69d2b07).
+- Ordem dos proximos deploys: backup -> migrations no Neon -> push (o push
+  na main publica sozinho; neste dia o codigo novo ficou ~2 h no ar antes
+  das migrations). ACEITO como regra para os proximos deploys.
+- SPEC para a transacao de abertura sensivel a latencia (limite explicito
+  de tempo ou menos consultas). PENDENTE no fim do dia (feita em 06/11,
+  SF-142).
+- Cancelamento das 11 solicitacoes por script com as regras de dominio,
+  com ensaio desfeito antes. ACEITO e executado (11/11).
+- MCP: ordem da lista aprovada em 03/11 (3 e 4 -> 5 -> 6 -> 7 -> 8 -> 2
+  -> 1); o MCP (2) so depois da SF-030. Decisoes M1 a M9: mesmo token da
+  API com escopo READ; so leitura; servidor sem sessao para as duas eras
+  do protocolo; so JSON; arquivo inteiro sem extracao de texto; mesma
+  resposta "Not found." para o que a pessoa nao ve; implementacao propria
+  sem @modelcontextprotocol/sdk; sem auditoria por chamada; instrucoes na
+  tela de tokens. ADOTADAS como recomendadas.
+- Multiplas organizacoes (funcionalidade 1): deixada por ultimo, porque
+  muda todas as tabelas. PENDENTE, sem SPEC.
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio (SF-137/rebase) | Fim do dia (SF-140)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 881/881                | 1066/1066 (177 novos do MCP)
+ Integracao     | 404/404 + 1 pulado     | 418/418, nenhum pulado
+ E2E            | 24/24                  | 24/24 (ultima rodada, apos a
+                |                        | SF-030; nao rodado depois do MCP)
+ Lint/typecheck | OK                     | OK (apos SF-138/139)
+ Build          | OK                     | OK apos a SF-030; depois do MCP
+                |                        | nao registrado (rodou em 06/11)
+ CI no GitHub   | falhando na integracao | ainda falhando na integracao
+                | (7b6142d e 66e0b19)    | por outro motivo, nao reproduzido
+
+ Etapas intermediarias: apos a SF-030 nao produtiva, unitarios 889/889,
+ integracao 405/405 (o teste do adaptador real deixou de ser pulado), E2E
+ 24/24. Todas rodaram com Node 22 e o banco de ../pgtest.
+
+ Falhas encontradas e corrigidas (todas no NOTES.md):
+ - Node 18 quebrava o Vitest (ERR_REQUIRE_ESM): Node 22 fixado.
+ - CI: mesmo banco para desenvolvimento e teste, recusado pela protecao:
+   banco separado no job. A falha seguinte nao foi reproduzida aqui
+   (passa com banco vazio e em UTC). Em 06/11 se viu que era um teste
+   instavel de ordenacao (attendance-fields.test.ts) e o Ubuntu 26.
+ - Adaptador do armazenamento: respostas 400 do Supabase tratadas como
+   falha generica (achado pelo teste real): corrigido, 8 testes novos.
+ - Producao: transacao de abertura passando de 5 s com funcoes nos EUA:
+   regiao gru1. A sensibilidade a latencia continuou (SPEC pendente).
+ - O PostgreSQL de teste local (../pgtest) tinha sido desligado por falta
+   de memoria; religado com autorizacao antes da SF-140.
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA (8 commits novos)     |    717 |  1.294 |       0 |  2.011
+ (b469940 -> abd5c4e)                     |        |        |         |
+   removidas                              |      6 |      0 |       0 |      6
+   saldo liquido                          |        |        |         |  2.005
+ Faixa gravada em 05/11 (com os de 03/11)  |  4.157 |  5.645 |       6 |  9.808
+ (7b6142d -> abd5c4e)                     |        |        |         |
+   removidas                              |     25 |      1 |       0 |     26
+   saldo liquido                          |        |        |         |  9.782
+ Adicionadas desde a linha de base        | 21.747 | 23.506 |     209 | 45.462
+ (baseline-ap2 -> abd5c4e)                |        |        |         |
+   removidas                              |  2.527 |     18 |       0 |  2.545
+   saldo liquido                          |        |        |         | 42.917
+
+ Meta: 100.000 linhas adicionadas -> 45.462 = 45,5% (faltam 54.538).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 05/11)
+-------------------------------------------------------------------------------
+
+1) Node: dentro da pasta do projeto, com o Volta instalado, "node" e "npm"
+   ja usam o Node 22.23.4 (sem "volta run"). Sem o Volta, usar Node 22.
+   (Atencao: em 06/11 isso mudou para Node 24.)
+2) Documentos em producao (site da Vercel): qualquer perfil solicitante
+   abre uma solicitacao de servico que exige documento, anexa o PDF, DOCX
+   ou TXT (ate 2 MiB) e depois baixa o arquivo na pagina da solicitacao.
+   Os arquivos agora ficam no bucket privado real.
+3) Armazenamento real na maquina local: preencher as variaveis
+   DOCUMENT_STORAGE_* no .env.local (e TEST_DOCUMENT_STORAGE_* no
+   .env.test.local) com as credenciais do projeto nao produtivo e rodar
+   "npm run storage:provision" (e "-- test"). Pedir as credenciais a
+   responsavel por canal privado; NUNCA versionar. Sem elas, o teste do
+   adaptador real e pulado e o resto funciona com armazenamento em memoria.
+4) MCP (endpoint pronto, instrucoes na tela so em 06/11): criar um token
+   "Somente leitura" em "Acesso a API" e configurar o assistente de IA com
+   transporte HTTP no endereco <site>/api/mcp, enviando o token como
+   Bearer. So POST; GET e DELETE recebem 405. O assistente le exatamente o
+   que a pessoa le na tela.
+5) Banco local: nenhuma migration nova em 05/11; as 6 de 03/11 vieram com
+   o rebase. Depois de puxar:
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+[ ] SF-141: instrucoes do MCP na tela "Acesso a API" e no README, E2E e
+    revisao (encerra a SPEC do MCP).
+[ ] Ler o log da falha do CI no GitHub e corrigir.
+[ ] SPEC para a transacao de abertura sensivel a latencia.
+[ ] Copia do backup do Neon fora da maquina, com cifra propria.
+[ ] Funcionalidade 1 (multiplas organizacoes): SPEC ainda nao escrita.
+[ ] Seguir para a meta de 100.000 linhas adicionadas com novas SPECs.
+[ ] Avisar o Carlos das mudancas no ci.yml (banco serviceflow_dev).
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- PUBLICACAO: producao no commit 69d2b07 (funcoes em gru1), com as 6
+  migrations de 03/11 aplicadas no Neon (de 20261103100000_webhook_sectors
+  a 20261103500100_conditional_attendant_fields). c8cafa4 e abd5c4e nao
+  tem migration.
+- ORDEM DOS DEPLOYS: o push na main publica sozinho na Vercel. Sempre:
+  backup -> migrations no Neon -> push. Neste dia o codigo ficou ~2 h no
+  ar antes das migrations.
+- BACKUP: copia serviceflow-2026-11-05-pre-deploy.dump na maquina da
+  responsavel, cifrada pelo EFS e verificada. Falta a copia fora da
+  maquina.
+- SEGURANCA: a chave secreta do Supabase nao produtivo foi colada na
+  conversa; a responsavel decidiu mante-la (fins didaticos). Revogar e
+  gerar outra antes de qualquer dado real. A chave de producao esta so na
+  Vercel (Production, Secret) e num arquivo fora do repositorio. A senha
+  do Neon continua a mesma (decisao de 03/11). Modo demonstracao segue
+  ligado; so dados ficticios.
+- CI: continua vermelho no fim do dia (integracao), por causa ainda
+  nao identificada naquele momento.
+- Ficou aberta em producao a solicitacao do teste final da SF-030, com o
+  PDF; as outras 11 de teste foram canceladas.
+
+===============================================================================

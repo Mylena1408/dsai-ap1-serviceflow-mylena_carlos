@@ -1,0 +1,409 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 08/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-07_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 08/11, 00:33 a 23:51 (e6ae3bd -> ad6ef13),
+                  32 commits
+Registro detalhado : NOTES.md (secoes SF-188 a SF-209, SF-224 a SF-226,
+                     os quatro "Deploy de ... (2026-11-08)", "CI: novas
+                     tentativas no download do gitleaks" e as duas secoes
+                     da SPEC "Atendimento no dia a dia"), TASKS.md,
+                     diario/2026-11-07.md (secoes com "2026-11-08" no
+                     titulo; o diario continuou nesse arquivo),
+                     prompts/sessoes/2026-11-06-ci-push-spec-
+                     configurabilidade.md (itens 49 a 94),
+                     SPEC/2026-11-08-atendimento-dia-a-dia.md,
+                     SPEC/2026-11-07-operacao-e-automacao.md (partes D e E),
+                     SPEC/2026-11-04-integracao-continua.md (secao 7),
+                     SPEC/2026-11-02-backup-recuperacao.md (secoes 14 a 17)
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- SPEC "OPERACAO E AUTOMACAO DO ATENDIMENTO" CONCLUIDA (SF-188 a SF-193),
+  SPEC/2026-11-07-operacao-e-automacao.md:
+    * parte D, configuracao portatil (SF-188 a SF-190): o administrador
+      importa um arquivo de configuracao com previa (o que e novo, o que
+      muda, o que fica igual) e depois aplica, tudo ou nada, sem apagar
+      nada, com auditoria; se o arquivo ou o banco mudaram desde a previa,
+      a aplicacao e recusada. Telas de exportar e importar na
+      administracao. CA-CFG-01 a 05 verificados;
+    * parte E, fila em escala (SF-191 a SF-193): visoes salvas na fila e
+      em "Minhas solicitacoes" (ate 20 por lista, cada pessoa so ve as
+      suas); acoes em lote na fila (assumir, transferir, prioridade,
+      encaminhar; ate 50 itens, resultado item por item). CA-LOT-01 a 05
+      verificados.
+- CI: o download do gitleaks falhou duas vezes por erro do GitHub (504 e
+  conexao caida), sem nenhum achado; o passo passou a tentar ate 5 vezes
+  (registrado na secao 7 da SPEC de integracao continua). CI seguinte
+  aprovado inteiro.
+- NOVA SPEC "ATENDIMENTO NO DIA A DIA" (SPEC 1 de 2),
+  SPEC/2026-11-08-atendimento-dia-a-dia.md: partes A a G, decisoes I1 a
+  I24, tarefas SF-194 a SF-223; a tarde ganhou o aprofundamento (secao
+  13, decisoes J1 a J10, tarefas SF-224 a SF-233). No dia:
+    * PARTE A - ETIQUETAS, CONCLUIDA (SF-194 a SF-199): etiquetas por
+      setor (paleta fixa de 8 cores com contraste conferido, ate 30 ativas
+      por setor, ate 5 por solicitacao), cadastro pelo administrador e
+      pelo gestor do setor com auditoria, aplicar e retirar no detalhe
+      (com historico e evento request.tags_changed), filtro na busca da
+      fila, nas visoes salvas e no lote ("Etiquetar" e "Retirar
+      etiqueta"), contagem em "Analises" e etiquetas na lista da fila. O
+      solicitante nao ve etiquetas. CA-ETQ-01 a 05 verificados;
+    * PARTE B - CHECKLIST, CONCLUIDA (SF-200 a SF-205 e SF-224 a SF-226):
+      modelo de checklist por servico (ate 20 itens, obrigatorios ou nao,
+      ordem, desativar e reativar, auditoria), copiado para a solicitacao
+      na primeira entrada em atendimento; marcar e desmarcar com
+      observacao opcional e historico; conclusao recusada com itens
+      obrigatorios pendentes ("Falta marcar: ..."); itens condicionais
+      (mesma regra das etapas); copiar o modelo de outro servico;
+      progresso "Checklist 1/2" na lista da fila. So a equipe do setor ve.
+      CA-CHK-01 a 07 verificados;
+    * PARTE C - APONTAMENTO DE HORAS, EM ANDAMENTO (SF-206 a SF-209
+      prontas; faltam SF-210, SF-227 e SF-228): banco e regras das horas
+      (1 a 720 minutos por lancamento, ate 7 dias depois da conclusao,
+      apagar marca e mantem o historico, coluna da estimativa do servico
+      ja criada); casos de uso de lancar, alterar e apagar; bloco "Horas"
+      no detalhe (total, por pessoa, contra a estimativa) e no historico;
+      relatorio de horas por atendente, servico e setor com CSV, para
+      gestor e administrador. Os formularios de lancar horas na tela
+      ficaram para a SF-210 (dia seguinte), entao CA-HRS-01 a 06 ainda
+      nao estavam marcados no fim do dia.
+- QUATRO ENVIOS PARA PRODUCAO no dia, todos na ordem backup verificado ->
+  migration no Neon -> push, com CI e Vercel acompanhados (secao 9).
+- PERGUNTA RESPONDIDA (seguranca): a SPEC nova nao mexe em autenticacao,
+  senhas, sessoes, perfis ou permissoes (item 11, "seguranca da conta",
+  excluido pela responsavel); os recursos novos seguem as regras de acesso
+  que ja existiam.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub (origin/main contem ad6ef13)
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:33 | e6ae3bd | [OK]   | SF-188: validacao e previa da importacao da
+    |       |         |        | configuracao.
+ 2  | 00:57 | bd7b881 | [OK]   | SF-189: aplicacao da importacao (tudo ou
+    |       |         |        | nada, auditoria, conflito com nova previa).
+ 3  | 01:21 | a1a627d | [OK]   | SF-190: telas da configuracao portatil e E2E;
+    |       |         |        | fim da parte D.
+ 4  | 01:44 | 7a0b212 | [OK]   | SF-191: visoes salvas na fila e em "Minhas
+    |       |         |        | solicitacoes" (migration saved_views).
+ 5  | 02:08 | 0efd120 | [OK]   | SF-192: acoes em lote na fila - casos de uso.
+ 6  | 06:54 | bfa3e21 | [OK]   | SF-193: telas do lote e E2E; fim da parte E
+    |       |         |        | e da SPEC de operacao e automacao.
+ 7  | 07:17 | f50c765 | [OK]   | Registro do 1o deploy (backup e migration das
+    |       |         |        | visoes salvas).
+ 8  | 07:21 | 7d4ce09 | [OK]   | Registro da falha do CI no download do
+    |       |         |        | gitleaks.
+ 9  | 07:42 | 6e99ff1 | [OK]   | CI: novas tentativas (ate 5) no download do
+    |       |         |        | gitleaks.
+ 10 | 07:58 | 7f2efd8 | [OK]   | Registro do CI aprovado depois da mudanca.
+ 11 | 08:10 | c6a1153 | [OK]   | SPEC "Atendimento no dia a dia" (SF-194 a
+    |       |         |        | SF-223), decisoes I1 a I24; TASKS.md.
+ 12 | 08:42 | 03da9bf | [OK]   | SF-194: etiquetas - migration e dominio.
+ 13 | 08:57 | dbb5cea | [OK]   | SF-195: cadastro das etiquetas (admin e
+    |       |         |        | gestor), com auditoria.
+ 14 | 09:17 | 6c61669 | [OK]   | SF-196: etiquetas na solicitacao, historico e
+    |       |         |        | evento (2a migration da lista de eventos).
+ 15 | 11:55 | 7c51812 | [OK]   | Registro do 2o deploy (backup e migrations
+    |       |         |        | das etiquetas).
+ 16 | 12:13 | 55a0b20 | [OK]   | SF-197: etiquetas na busca, nas visoes salvas
+    |       |         |        | e no lote.
+ 17 | 12:29 | 631dbcc | [OK]   | SF-198: etiquetas em "Analises".
+ 18 | 12:59 | 123f665 | [OK]   | SF-199: etiquetas na lista da fila, correcao
+    |       |         |        | do bloco do lote e E2E; fim da parte A.
+ 19 | 13:03 | 2f2b978 | [OK]   | Aprofundamento da SPEC (secao 13, J1 a J10,
+    |       |         |        | SF-224 a SF-233); TASKS.md.
+ 20 | 13:31 | 759ebb5 | [OK]   | SF-200: checklist - migration e dominio.
+ 21 | 13:57 | b67492f | [OK]   | SF-201: modelo de checklist por servico com
+    |       |         |        | auditoria.
+ 22 | 14:59 | 3d4a0da | [OK]   | SF-202: copia do checklist na entrada em
+    |       |         |        | atendimento.
+ 23 | 15:30 | 3c5a0e0 | [OK]   | SF-203: marcar e desmarcar itens, com
+    |       |         |        | observacao e historico.
+ 24 | 16:02 | 47c5e6e | [OK]   | SF-204: conclusao recusada com obrigatorios
+    |       |         |        | pendentes (inclui o registro do 3o deploy).
+ 25 | 16:29 | d88e378 | [OK]   | SF-205: telas do checklist no detalhe e E2E.
+ 26 | 16:53 | 50c9439 | [OK]   | SF-224: itens condicionais do checklist.
+ 27 | 22:05 | 08cb531 | [OK]   | SF-225: copiar o modelo de outro servico.
+ 28 | 22:27 | f670c62 | [OK]   | SF-226: progresso do checklist na fila; fim
+    |       |         |        | da parte B.
+ 29 | 22:45 | dfebd4c | [OK]   | SF-206: horas - migration e dominio (com a
+    |       |         |        | estimativa do servico).
+ 30 | 23:08 | 6bfe406 | [OK]   | SF-207: lancar, alterar e apagar horas.
+ 31 | 23:28 | 35bd6ee | [OK]   | SF-208: totais de horas na solicitacao.
+ 32 | 23:51 | ad6ef13 | [OK]   | SF-209: relatorio de horas e CSV.
+
+ Envios (push) do dia:
+ - 1o: SF-188 a SF-193 + f50c765 (manha). Depois, os pushes do
+   CI (7d4ce09 e 6e99ff1).
+ - 2o: ate 7c51812 (SF-194 a SF-196 e o registro do deploy).
+ - 3o: 8 commits, de 55a0b20 (SF-197) a 3c5a0e0 (SF-203); a SF-204 estava
+   em andamento e foi no envio seguinte.
+ - 4o: 9 commits, de 47c5e6e (SF-204) a ad6ef13 (SF-209), no fim da noite.
+   O push passou do tempo limite da ferramenta e foi para segundo plano,
+   mas terminou sem erro (git fetch confirmou origin/main em ad6ef13). O
+   registro desse envio (572042a) ja e de 09/11, 00:08.
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+Palavras dela entre aspas, tiradas do registro de prompts (itens 49 a 94);
+acentos retirados.
+
+ 1) Seguir a SPEC anterior ate o fim: "pode prosseguir" a cada tarefa de
+    SF-188 a SF-193 (e depois a cada tarefa da SPEC nova).
+ 2) 1o envio: "aprovado as ordens, backup, migrations, push" - aprovou a
+    ordem proposta pelo agente (backup -> migration -> push).
+ 3) CI com falha no gitleaks: pediu "faca o push do commit para rodar o CI
+    de novo"; quando falhou de novo, entre as opcoes explicadas pelo
+    agente escolheu "pode fazer a opcao 2" (novas tentativas no curl do
+    gitleaks). As demais opcoes oferecidas: nao registradas.
+ 4) Meta de linhas: "vamos investigar quais funcionalidades acrescentar
+    para alcancar a meta". Do levantamento de 11 itens, escolheu:
+    "prefiro as funcionalidades 1, 2, 3, 4,5, 6, 7,8,9, 10. Vamos evitar o
+    item 11 pois nao desejo mexer na seguranca e ferir algum pricipio de
+    acesso decidido anteriormente". Item 11 = seguranca da conta
+    (recuperacao de senha por e-mail, duas etapas etc.): RECUSADO.
+ 5) Divisao em duas SPECs: "faca a SPEC 1 com os complementos / deixe a
+    spec 2 para quando a spec 1 estiver perto do fim,me avise e
+    revisamos,ok?". SPEC 1 = itens 1 a 6 (etiquetas, checklist, horas,
+    seguidores, mencoes, duplicadas) + complementos; SPEC 2 = itens 7 a 10
+    (avisos e manutencao programada, importacao de usuarios por CSV,
+    relatorio periodico, calendario por setor), so depois de revisada com
+    ela.
+ 6) Decisoes I1 a I24 da SPEC 1: adotadas como recomendadas pelo agente
+    (ela seguiu com "pode prosseguir"); a SPEC registra que podem ser
+    revistas por ela antes de cada parte.
+ 7) 2o envio: o agente perguntou se "pode fazer os commits" era o envio
+    (os commits ja estavam feitos); resposta: "faca essa envio agora, e
+    depois prossiga para a sf-197".
+ 8) Aprofundamento: com a parte A rendendo menos linhas que o previsto,
+    escolheu "vamos prosseguir pela opcao 2." = aprofundar as partes B a F
+    (secao 13, J1 a J10, SF-224 a SF-233), registrado na SPEC antes de
+    qualquer codigo. A outra opcao oferecida: nao registrada. J1 a J10
+    adotadas como recomendadas.
+ 9) 3o envio: autorizou colando o proprio aviso do agente: "pode fazer
+    Pendente de envio: 8 commits locais sem push, de SF-197 a SF-203. No
+    proximo envio vai a migration nova do checklist
+    (20261108800000_checklists), na ordem backup, migration e push. Faco
+    quando voce pedir."
+10) 4o envio: pediu "faca todos os commits pendentes" (nao havia nenhum;
+    o agente listou os 9 commits nao enviados e a ordem) e decidiu "siga a
+    ordem sugerida por voce".
+11) Perguntas feitas no dia e respostas:
+    - "quando terminar me informe quantas linhas de codigo tem agora o
+      sistema passando com o cloc --diff" (apos SF-188, SF-189 e SF-203):
+      contagens informadas; os numeros dessas tres nao foram registrados.
+    - "quantas linhas temos de codigo passando por cloc --diff" (apos
+      SF-224): 76.718 added sobre a baseline (saldo 74.220); sistema com
+      84.963 linhas.
+    - mesma pergunta apos SF-207: 77.476 added (saldo 74.978); sistema com
+      85.721 linhas.
+    - "terminou?" / "aguardo,me avise quando terminar": andamento da
+      suite ou do CI informado.
+    - "pode prosseguir" apos as quedas por falta de memoria (SF-199 e
+      SF-202): o banco de testes foi religado e a suite rodou de novo.
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+ Oferta / recomendacao / aviso                         | Resultado
+ ------------------------------------------------------+---------------------
+ Ordem de envio backup -> migration -> push (4 vezes)  | ACEITA nas 4 vezes
+ Opcoes para o CI do gitleaks; opcao 2 = curl com      | ACEITA a opcao 2
+ --retry 5 (conferida localmente antes do push)        | (CI 42472539280 ok)
+ Levantamento de 11 funcionalidades com tarefas,       | ACEITO, itens 1 a
+ linhas (media real de 630 por tarefa) e risco;        | 10; item 11
+ proposta de duas SPECs                                | RECUSADO
+ Complementos sugeridos (parte G: configuracao         | ACEITOS ("com os
+ portatil v2, API, analises de horas e checklist)      | complementos")
+ Decisoes I1 a I24 (ex.: etiquetas por setor, so a     | ACEITAS como
+ equipe ve; checklist copiado na entrada em            | recomendadas
+ atendimento; conclusao recusada com obrigatorios;     |
+ horas ate 7 dias depois; apagar so marca)             |
+ Estimativa de 18.900 linhas para a SPEC 1 (+-20%)     | Registrada; revista
+                                                       | a tarde (abaixo)
+ Aviso: parte A rendeu cerca de 270 linhas por tarefa  | ACEITA a "opcao 2"
+ (contra 630); opcoes de seguir, entre elas aprofundar | (aprofundar B a F)
+ Decisoes J1 a J10 (condicao igual a das etapas, copia | ACEITAS como
+ ao fim sem condicoes, observacao opcional, estimativa | recomendadas
+ por servico, "Minhas horas" no "Meu painel" etc.)     |
+ Estimativa revista da SPEC 1: 11.000 a 14.000 linhas; | Registrada; resto
+ o que faltar da meta vai para a revisao da SPEC 2     | fica para a SPEC 2
+ Pergunta se "pode fazer os commits" era o envio       | Respondida: sim
+ Aviso dos 8 commits pendentes e da migration nova do  | ACEITO (3o envio)
+ checklist                                             |
+ Aviso dos 9 commits pendentes e da ordem do envio     | ACEITO (4o envio)
+ SF-200: dados alem da secao 4.4 (RequestChecklist,    | Registrado como
+ historico, observacao, condicao)                      | esclarecimento
+ SF-206: criar a coluna da estimativa do servico ja    | Feito (um so envio
+ na migration das horas                                | com backup na
+                                                       | parte C)
+ SF-225: origem da copia limitada aos servicos que a   | Registrado na SPEC;
+ pessoa tambem configura (gestor nao le checklist de   | sem objecao
+ outro setor)                                          | registrada
+ Esclarecimentos da importacao (secao 6.4 da SPEC de   | Registrados
+ operacao): itens iguais nao conferidos de novo, tipo  |
+ de campo nunca muda                                   |
+ Lembrete: ao passar de 99.000 linhas added, lembrar   | PENDENTE (registrado
+ a escolha conexao direta x pooling do Neon            | na SPEC, secao 12)
+ Copia do backup fora da maquina, com cifra propria    | PENDENTE (repetido
+                                                       | em cada deploy)
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-187) | Fim (SF-209)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 1439/1439              | 1548/1548
+ Integracao     | 596/596                | 665/665
+ E2E            | 42/42                  | 47/47
+ Lint/typecheck/build | OK               | OK
+ CI (GitHub)    | -                      | aprovado (run 42553573660)
+
+ E2E novos do dia: configuration-portable, saved-views, queue-batch,
+ sector-tags e checklists (tests/e2e/*.spec.ts).
+
+ Falhas encontradas e corrigidas (todas registradas no NOTES.md):
+ - SF-188: a regra do prazo (slaHours) aparecia sem o nome do campo; a
+   previa passou a dar o caminho completo de cada regra.
+ - SF-189: teste esperava auditoria do calendario sem mudanca; ajustado
+   para conferir a linha gravada.
+ - SF-190: o formulario enviava quebras CRLF e o resumo do arquivo nao
+   conferia; as duas acoes normalizam para LF. A primeira correcao, por
+   script Python, estragou o "\r\n" do regex e foi refeita com o Edit.
+ - SF-191: defeito antigo revelado pelo E2E - o formulario de busca nao
+   atualizava os campos numa navegacao sem recarregar; corrigido com uma
+   chave nos criterios.
+ - SF-193: o E2E do lote deixava um atendente a mais no setor de
+   demonstracao e quebrava o E2E da distribuicao (44/45); o teste passou a
+   desativar o colega; 45/45 na segunda rodada.
+ - SF-196: o CHECK de tipos de evento do outbox e dos webhooks recusou o
+   tipo novo; migration nova 20261108700000_request_tags_event.
+ - SF-199: o resultado do lote sumia quando a acao esvaziava a fila
+   filtrada; o bloco agora fica sempre na pagina.
+ - SF-199 e SF-202: a suite foi encerrada por falta de memoria no
+   computador (junto com o banco de testes); religado o banco, os testes
+   passaram sozinhos e a suite completa passou.
+ - SF-201 e SF-202: access-roles.spec.ts esgotou 5 min no primeiro teste
+   da rodada (networkidle); passou sozinho em 15 s e 11 s; registrado como
+   falha intermitente do ambiente (o teste nao toca o checklist).
+ - SF-206: "prisma format" rodado sem querer realinhou o schema inteiro;
+   restaurado do commit e reaplicadas so as linhas novas.
+ - CI do 1o envio (run 42470836259) e a repeticao (42472307287): falha no
+   download do gitleaks (codigos 22 e 56), sem achado; varredura local
+   "no leaks found". Corrigido com novas tentativas (run 42472539280 ok).
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA                       |  5.090 |  3.768 |      10 |  8.868
+ (cb20093 -> ad6ef13)                     |        |        |         |
+   removidas                              |      2 |      0 |       0 |      2
+   saldo liquido                          |        |        |         |  8.866
+ Adicionadas desde a linha de base        | 39.532 | 38.504 |     238 | 78.274
+ (baseline-ap2 -> ad6ef13)                |        |        |         |
+   removidas                              |  2.472 |     18 |       0 |  2.490
+   saldo liquido                          |        |        |         | 75.784
+
+ Meta: 100.000 linhas adicionadas -> 78.274 = 78,3% (faltam 21.726).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 08/11)
+-------------------------------------------------------------------------------
+
+1) Configuracao portatil (administrador): /admin > "Configuracao
+   portatil". Exportar baixa o arquivo; Importar envia um arquivo, mostra a
+   previa e so entao oferece "Aplicar a importacao".
+2) Visoes salvas (atendente na fila /queue; solicitante em "Minhas
+   solicitacoes"): bloco "Minhas visoes" abaixo da busca: "Salvar esta
+   busca", abrir com um clique, "Renomear ou apagar".
+3) Acoes em lote (atendente, /queue): marque "Marcar para acao em lote"
+   nas solicitacoes da pagina e use o bloco "Acoes em lote" (assumir,
+   transferir, prioridade, encaminhar, etiquetar, retirar etiqueta). O
+   resultado mostra item por item o que foi feito e o que foi recusado.
+4) Etiquetas: cadastro em /admin > "Etiquetas" (administrador) ou no menu
+   "Etiquetas" do gestor (/approvals/tags). O atendente aplica no bloco
+   "Etiquetas" do detalhe da fila e filtra por "Etiquetas (qualquer uma)"
+   na busca; "Analises" mostra o bloco "Etiquetas".
+5) Checklist: modelo em /admin > "Checklists" ou no menu "Checklists" do
+   gestor (/approvals/checklists), com "Aplica-se" para itens condicionais
+   e "Copiar de outro servico". Na solicitacao em atendimento, bloco
+   "Checklist" no detalhe da fila (marcar com observacao); a lista da fila
+   mostra "Checklist 1/2". O gestor so ve.
+6) Horas: relatorio em /admin > "Horas" ou no menu "Horas" do gestor
+   (/approvals/time), com "Exportar CSV". No detalhe, o bloco "Horas" so
+   mostra os lancamentos; os formularios de lancar, alterar e apagar
+   chegaram so em 09/11 (SF-210).
+7) Banco local depois de puxar os commits (5 migrations novas):
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS (como estavam no fim de 08/11)
+-------------------------------------------------------------------------------
+
+[ ] SF-210: telas das horas (lancar, alterar, apagar) e E2E da parte C.
+[ ] SF-227: estimativa de horas por servico na tela, com auditoria.
+[ ] SF-228: "Minhas horas" em "Meu painel" e horas por etiqueta; fim da
+    parte C (CA-HRS-01 a 06).
+[ ] Parte D - seguidores (SF-211 a SF-214, SF-229, SF-230).
+[ ] Parte E - mencoes (SF-215, SF-216, SF-231).
+[ ] Parte F - duplicadas (SF-217 a SF-219, SF-232, SF-233).
+[ ] Parte G - complementos (SF-220 a SF-223).
+[ ] Perto do fim da SPEC 1: avisar a responsavel e revisar com ela a
+    SPEC 2 (itens 7 a 10) antes de escrever.
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- DEPLOYS NO NEON (todos com backup conferido por restauracao local,
+  cifrado pelo EFS; detalhes nas secoes 14 a 17 da SPEC de backup):
+    1o: serviceflow-2026-11-08-pre-deploy.dump, 51 tabelas iguais;
+        migration 20261108500000_saved_views; banco em dia (50).
+    2o: ...-pre-deploy-2.dump, 52 tabelas; 20261108600000_sector_tags e
+        20261108700000_request_tags_event; banco em dia (52). CI
+        42492220791 aprovado.
+    3o: ...-pre-deploy-3.dump, 55 tabelas; 20261108800000_checklists;
+        banco em dia (53). CI 42511421391 aprovado.
+    4o: ...-pre-deploy-4.dump, 59 tabelas; 20261108900000_time_entries;
+        banco em dia (54). CI 42553573660 aprovado.
+  Fim do dia: nenhum commit local pendente de envio; site e banco em dia
+  com ad6ef13.
+- BACKUP: continua faltando a copia fora da maquina, com cifra propria.
+- URL DO NEON: lida de um arquivo da responsavel fora do projeto e passada
+  so ao processo; nada foi gravado no repositorio. Nenhum segredo nos
+  commits do dia (varredura gitleaks local e do CI sem achados).
+- SEGURANCA: o item 11 (seguranca da conta) ficou fora por decisao da
+  responsavel; recuperacao de senha por e-mail, duas etapas e multiplas
+  organizacoes estao fora da SPEC 1. Modo demonstracao continua valendo
+  no site; so dados ficticios.
+- MEMORIA DO COMPUTADOR: a suite completa foi derrubada duas vezes por
+  falta de memoria; o banco de testes local cai junto e precisa ser
+  religado antes de rodar de novo.
+- E2E INTERMITENTE: access-roles.spec.ts pode esgotar o tempo no primeiro
+  teste da rodada; rodar sozinho para confirmar.
+- LEMBRETE: ao passar de 99.000 linhas added, decidir entre conexao
+  direta e pooling do Neon.
+
+===============================================================================

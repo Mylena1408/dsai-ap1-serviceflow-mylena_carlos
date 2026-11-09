@@ -2826,3 +2826,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **O primeiro diagnóstico estava errado.** Com a espera pela página (`572de96`), o CI (run 42668936510) falhou de novo no mesmo teste: o título "Minhas menções" apareceu, mas a lista não existia, ou seja, a página abriu sem nenhuma menção. Não era tempo.
 - **Causa real:** o teste escolhia quem recebe a menção com `findFirst` do "primeiro atendente ativo do setor", sem ordem. Outros E2E da rodada criam atendentes no mesmo setor; no CI o banco devolveu um deles, e não o atendente de demonstração que entra pelo botão. Na máquina local a ordem devolvia o certo, por isso passava.
 - **Correção (só no teste):** a menção vai para o atendente de demonstração pelo e-mail exato (`DEMO_ACCOUNTS.ATTENDANT`), como o `request-search.spec.ts` já faz; a espera pela página, que não resolvia nada, foi retirada. Suíte completa: typecheck, lint e build OK; unitários 1586/1586; integração 696/696; E2E 50/50.
+
+## Anotações diárias para o Carlos, de 03/11 a 09/11 (2026-11-09)
+
+- **Pedido da responsável:** atualizar `MUDANCAS_NO_PROJETO_DIA` (no repositório e na cópia fora dele, em `ATIVIDADE_AP2`) com todos os dias de trabalho, as decisões dela e o que o Claude ofereceu, para o Carlos acompanhar.
+- **Arquivos novos:** `2026-11-03_mudancas.txt` a `2026-11-09_mudancas.txt`, no formato dos anteriores (ASCII, 79 colunas), com duas seções novas: "Decisões da responsável" e "O que foi oferecido pelo Claude". Onde os registros não dizem, o texto diz "nao registrado".
+- **03/11 e 05/11:** os 27 commits de 03/11 foram reescritos pelo rebase de 05/11 sobre o CI do Carlos; o arquivo de 03/11 os descreve, e o de 05/11 os lista marcados "(R)".
+- **04/11:** o dia foi do Carlos, com o agente dele (CI no GitHub Actions); verificação pedida: só esses 2 commits dele, sem pull requests nem forks, só o ramo `main`.
+- **Medição** (`sh scripts/cloc-diff.sh` por dia): 03/11 7.797; 04/11 0 (YAML e Markdown); 05/11 2.011 (8 commits novos); 06/11 7.880; 07/11 16.170; 08/11 8.868; 09/11 3.154; desde a linha de base em `c2f4850`: 81.426 (faltam 18.574).
+- **Cópia fora do repositório:** recebeu também os arquivos de 31/10, que faltavam lá; as duas pastas ficaram idênticas.

@@ -1,0 +1,178 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 04/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-03_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 04/11 (f575adc -> 7b6142d)
+Registro detalhado : SPEC/2026-11-04-integracao-continua.md,
+                     diario/2026-11-04.md,
+                     prompts/sessoes/2026-11-04-ci-github-actions.md
+                     (o rebase de 05/11 esta em NOTES.md, secao "Node 22
+                     fixado pelo Volta e integracao do CI do Carlos", e
+                     em prompts/sessoes/2026-11-05-rebase-ci-node22.md)
+
+ QUEM FEZ O TRABALHO DESTE DIA
+ - Os dois commits de 04/11 sao do CARLOS PIRES, feitos com o agente
+   dele ("Agent: Claude (Cline)", trailer dos commits). NAO houve sessao
+   do Claude Code da responsavel (Mylena) em 04/11.
+ - Por isso este arquivo so pode relatar o que o Carlos registrou: os
+   commits, a SPEC, o diario e a sessao (curtos). O resto e marcado como
+   "nao registrado".
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- INTEGRACAO CONTINUA NO GITHUB ACTIONS (SF-CI), SPEC
+  SPEC/2026-11-04-integracao-continua.md (CA-CI-01 a 04), descrita como
+  "Parte 0.1 do plano de melhorias para a AP2":
+    * workflow .github/workflows/ci.yml, disparado em push e pull request
+      na main; execucoes repetidas do mesmo ramo cancelam a anterior;
+    * servico PostgreSQL 17 com healthcheck (pg_isready);
+    * etapas: npm ci, prisma generate, typecheck, lint, build, unitarios,
+      integracao, instalacao do Chromium e E2E (Node 24, ubuntu-latest,
+      limite de 45 minutos);
+    * so variaveis de CI nao secretas (banco de teste do proprio job e um
+      AUTH_SECRET marcado como "not-for-production");
+    * fora de escopo: gitleaks (SPEC separada), deploy automatico (ja e
+      da Vercel) e testes de armazenamento real.
+- O "plano de melhorias para a AP2" citado nao esta no repositorio (nao
+  registrado onde esta nem o que contem alem da Parte 0.1 e 0.2).
+- Nenhuma linha de TypeScript/JavaScript mudou: so YAML e Markdown.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 02:36 | f575adc | [OK]   | (Carlos) CI no GitHub Actions: ci.yml e SPEC
+    |       |         |        | de integracao continua.
+ 2  | 02:36 | 7b6142d | [OK]   | (Carlos) Sessao e diario da implementacao do
+    |       |         |        | CI.
+
+ Os dois foram enviados pelo Carlos sobre o 8b94559 (ultimo commit da
+ responsavel no GitHub). Em 05/11 a responsavel fez "git pull --rebase":
+ os commits do Carlos ficaram com os mesmos hashes e os 27 commits locais
+ dela (SF-116 a SF-137, de 03/11) foram reaplicados por cima, sem
+ conflitos (nenhum arquivo em comum). O registro do rebase e o 66e0b19
+ (05/11, ver 2026-11-05_mudancas.txt).
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+ - Em 04/11: nenhuma registrada. A responsavel nao teve sessao nesse dia.
+ - A SPEC do CI diz "Status: Aprovada", mas nao registra quem aprovou nem
+   quando (nao registrado).
+ - Decisoes do Carlos sobre o CI: nao registradas alem do que a SPEC diz
+   (escopo, fora de escopo e criterios). A sessao do Carlos nao traz os
+   prompts dele.
+ - Depois, em 05/11, a responsavel pediu para trazer o trabalho do Carlos:
+   > "faca o pull --rebase das mudancas do Carlos"
+   (detalhado no arquivo de 05/11).
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+ - Pelo Claude Code da responsavel: nada em 04/11 (sem sessao).
+ - Pelo agente do Carlos (Claude via Cline): nao registrado. A sessao
+   registra so o resumo do que foi feito e "Custos/tokens: Nao medido".
+ - Proximos passos anotados no diario do Carlos (sem dizer se foram
+   propostos pelo agente ou por ele): gitleaks (Parte 0.2), SF-030
+   (bucket real) e producao no ultimo commit.
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-137) | Fim (7b6142d)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 881/881                | nao registrado
+ Integracao     | 404/404 + 1 pulado     | nao registrado
+ E2E            | 24/24                  | nao registrado
+ Lint/typecheck/build | OK               | nao registrado
+
+ - O inicio do dia e o fim de 03/11 na maquina da responsavel. O Carlos
+   nao registrou testes locais.
+ - As primeiras execucoes do CI no GitHub (inclusive a de 7b6142d)
+   FALHARAM em "Integration tests"; typecheck, lint, build e unitarios
+   passaram. Causa achada em 05/11: o ci.yml usava o mesmo banco em
+   DATABASE_URL e TEST_DATABASE_URL, e a protecao dos testes recusa isso
+   para nunca apagar o banco de desenvolvimento (o E2E falharia igual).
+   Corrigido em 05/11 (4ba4ada: banco serviceflow_dev criado no job).
+ - Depois do rebase de 05/11, todas as etapas do CI rodadas localmente
+   passaram: 881 unitarios, 404 de integracao + 1 pulado, 24 E2E.
+ - O CI so passou inteiro dias depois (correcoes de 05/11 a 08/11
+   registradas nas secoes 5 a 7 da SPEC do CI).
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA (commits do Carlos)   |      0 |      0 |       0 |      0
+ (8b94559 -> 7b6142d)                     |        |        |         |
+   removidas                              |      0 |      0 |       0 |      0
+   saldo liquido                          |        |        |         |      0
+ Adicionadas desde a linha de base        | 17.617 | 17.862 |     203 | 35.682
+ (baseline-ap2 -> 7b6142d)                |        |        |         |
+   removidas                              |  2.529 |     18 |       0 |  2.547
+   saldo liquido                          |        |        |         | 33.135
+
+ Meta: 100.000 linhas adicionadas -> 35.682 = 35,7% (faltam 64.318).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+ O CI do Carlos e YAML e Markdown: nao entra na contagem de TS/JS.
+ A medida desde a base em 7b6142d nao inclui os 27 commits de 03/11,
+ que naquele momento so existiam na maquina da responsavel.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 04/11)
+-------------------------------------------------------------------------------
+
+1) O CI roda sozinho a cada push ou pull request na main. Resultado na
+   aba "Actions" do repositorio no GitHub (workflow "CI", job
+   "build-and-test").
+2) Nada muda dentro da aplicacao: nenhuma tela ou perfil novo.
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS (como estavam no fim de 04/11)
+-------------------------------------------------------------------------------
+
+ Pelo diario do Carlos:
+[ ] Gitleaks (Parte 0.2): feito depois pela responsavel (SF-143, 06/11).
+[ ] SF-030: bucket real (feito pela responsavel em 05/11).
+[ ] Producao no ultimo commit.
+ Pela responsavel (fim de 03/11, sem mudanca em 04/11):
+[ ] Funcionalidades 2 (MCP de documentos) e 1 (multiplas organizacoes).
+[ ] Push dos 27 commits locais das SF-116 a SF-137.
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- DOIS HISTORICOS SEPARADOS: no fim de 04/11, o GitHub tinha o CI do
+  Carlos e a maquina da responsavel tinha 27 commits sem envio. Juntados
+  em 05/11 por rebase (sem conflito).
+- CI QUEBRADO na integracao ate 05/11 (mesmo banco nas duas variaveis).
+- NODE: o CI usa Node 24; a maquina da responsavel usava Node 18 por
+  padrao, que quebra o Vitest. Em 05/11 ela fixou o Node 22 pelo Volta e,
+  em 06/11, o Node 24 em todos os ambientes.
+- SEGURANCA: o ci.yml so tem a senha do Postgres descartavel do proprio
+  job e um AUTH_SECRET de CI; nenhuma credencial real (CA-CI-04).
+- NEON: continuam pendentes as 6 migrations de 03/11 (ver
+  2026-11-03_mudancas.txt). Nada publicado em 04/11.
+- SF-030 continua pendente (credenciais do Supabase).
+
+===============================================================================

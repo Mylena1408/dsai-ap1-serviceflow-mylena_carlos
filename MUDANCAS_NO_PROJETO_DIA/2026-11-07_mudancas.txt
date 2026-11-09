@@ -1,0 +1,357 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 07/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-06_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 07/11 00:00 a 23:59, 29 commits
+                  (22cfa67 -> cb20093)
+Registro detalhado : NOTES.md (secoes SF-165 a SF-187, os quatro "Deploy"
+                     de 2026-11-07 e a SPEC "Operacao e automacao"),
+                     TASKS.md, diario/2026-11-07.md (secoes de SF-165 ate
+                     "Quarto deploy do dia"),
+                     prompts/sessoes/2026-11-06-ci-push-spec-
+                     configurabilidade.md (itens 13 a 47),
+                     SPEC/2026-11-06-aprofundamento-configurabilidade.md,
+                     SPEC/2026-11-07-operacao-e-automacao.md,
+                     SPEC/2026-11-02-backup-recuperacao.md (secoes 10 a 13)
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- SPEC "APROFUNDAMENTO DA CONFIGURABILIDADE" CONCLUIDA (SF-165 a SF-174;
+  a parte A, SF-161 a SF-163, e a SF-164 eram de 06/11). Decisoes G1 a G20.
+  * Parte B - Aprovacoes (SF-165 a SF-167, CA-APM-01 a 08):
+    - ausencia do gestor com substituto: durante o periodo (ate 90 dias) o
+      substituto tambem ve, decide ("substituindo ...") e e avisado; o
+      ausente continua podendo decidir;
+    - prazo para aprovar cada nivel (1 a 30 dias): "Aprovacao atrasada" nas
+      telas, aviso unico pelo job diario (evento request.approval_overdue)
+      e contagem em "Analises"; nada e aprovado sozinho (G6);
+    - configuracao de niveis, condicao e prazo na tela do servico; secao
+      "Ausencias" na administracao; "Niveis de aprovacao" nos detalhes do
+      gestor, solicitante e atendente; API e OpenAPI.
+  * Parte C - Fluxos/etapas (SF-168 a SF-170, CA-ETP-01 a 07):
+    - etapa com responsavel, prazo em dias e condicao; so entram as etapas
+      cuja condicao as respostas da abertura atendem;
+    - ao entrar na etapa a solicitacao passa ao responsavel dela (ou o
+      historico diz que ele esta indisponivel); aviso de "Etapa atrasada";
+    - filtro "Etapa" na fila (coluna calculada pelo banco; ~13 ms com
+      28 mil solicitacoes em atendimento) e botao "Ajustes" em cada etapa.
+  * Parte D - Permissoes (SF-171 e SF-172, CA-PAP-01 a 06):
+    - papeis de acesso (nome + ate 3 permissoes) atribuidos a usuarios,
+      com auditoria e historico; permissoes e papeis com data de fim
+      (valem ate o fim do dia, sem job); secao "Papeis".
+  * Parte E - Escalonamento (SF-173 e SF-174, CA-ESR-01 a 07):
+    - ate 5 regras por setor ("proxima do vencimento" ou "vencida ha N
+      dias") com subir prioridade, atribuir e avisar pessoas;
+    - o job diario aplica as regras, com o "Sistema" como autor (G17);
+      "Analises" separa escaladas por opcao e por regra.
+- NOVA SPEC "OPERACAO E AUTOMACAO DO ATENDIMENTO" (SF-175 a SF-193),
+  SPEC/2026-11-07-operacao-e-automacao.md, decisoes H1 a H22. No dia
+  foram concluidas as partes A, B e C e iniciada a D:
+  * Parte A - Vinculos e pacotes (SF-175 a SF-179, CA-VNC-01 a 07):
+    - vinculos "relacionada a" e "duplicada de" pelo codigo curto, bloco
+      "Vinculos" no detalhe, linha do tempo e API;
+    - pacotes de servicos (2 a 5 servicos, sem documentos exigidos):
+      um formulario so, uma solicitacao por servico, tudo ou nada;
+      acompanhamento do pacote e cancelamento do que ainda esta aberto.
+  * Parte B - Distribuicao automatica (SF-180 a SF-183, CA-DST-01 a 07):
+    - por setor, rodizio ou menor carga, com limite por atendente; vale na
+      entrada da fila sem responsavel (abertura, aprovacao final,
+      encaminhamento, liberacao), com trava contra aberturas simultaneas;
+    - ausencias de atendente; no primeiro dia o job passa as solicitacoes
+      da pessoa a colegas (se o setor escolheu); carga da equipe na tela.
+  * Parte C - Recorrencia (SF-184 a SF-186, CA-REC-01 a 06):
+    - agendas semanais ou mensais criadas por administrador ou gestor;
+      o job abre a solicitacao no dia previsto, em nome do solicitante,
+      uma vez por dia, sem recuperar dias perdidos (H10); tres falhas
+      seguidas pausam a agenda.
+  * Parte D - Configuracao portatil (SF-187 feita; CA-CFG-01 a 05 ficam
+    para SF-188 a SF-190):
+    - formato do arquivo JSON e exportacao auditada, sem pessoas,
+      segredos nem identificadores internos; nomes repetidos sao
+      avisados porque vao impedir a importacao. Ainda sem tela.
+- QUATRO DEPLOYS NO DIA, sempre na ordem backup verificado -> migrations
+  no Neon -> push: 6 + 6 + 5 + 1 migrations; banco do Neon em dia com
+  49 migrations ao fim do dia.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:43 | 22cfa67 | [OK]   | SF-165: ausencia do gestor com substituto;
+    |       |         |        | lacuna de leitura da SF-164 corrigida.
+ 2  | 01:53 | cf429ff | [OK]   | SF-166: prazo para aprovar cada nivel.
+ 3  | 11:52 | 720f37b | [OK]   | Registro do 1o backup do Neon e das 6
+    |       |         |        | migrations; push de SF-161 a SF-166.
+ 4  | 12:27 | 99dd82a | [OK]   | SF-167: telas, API e E2E dos niveis de
+    |       |         |        | aprovacao e ausencias; fim da parte B.
+ 5  | 12:58 | 92792e4 | [OK]   | SF-168: etapas com responsavel, prazo e
+    |       |         |        | condicao.
+ 6  | 13:20 | ec39a21 | [OK]   | SF-169: responsavel e prazo ao entrar na
+    |       |         |        | etapa; aviso de etapa atrasada.
+ 7  | 13:44 | 3ec76da | [OK]   | SF-170: filtro da fila por etapa e
+    |       |         |        | "Ajustes"; fim da parte C.
+ 8  | 14:11 | 79742e5 | [OK]   | SF-171: papeis de acesso e validade das
+    |       |         |        | permissoes (banco e dominio).
+ 9  | 14:36 | bc5726d | [OK]   | SF-172: telas de papeis e validade; fim da
+    |       |         |        | parte D.
+ 10 | 15:21 | b38e3be | [OK]   | SF-173: regras de escalonamento - banco e
+    |       |         |        | configuracao.
+ 11 | 15:59 | dfb07ef | [OK]   | SF-174: regras aplicadas pelo job diario.
+ 12 | 16:00 | e5c1638 | [OK]   | Registros da SF-174 e fim da SPEC de
+    |       |         |        | configurabilidade.
+ 13 | 16:05 | 9cd5a2d | [OK]   | Registro do 2o backup e das 6 migrations
+    |       |         |        | (SF-168 a SF-174).
+ 14 | 16:39 | 608984f | [OK]   | SPEC de operacao e automacao (SF-175 a
+    |       |         |        | SF-193), decisoes H1 a H22.
+ 15 | 16:51 | 7f4e957 | [OK]   | SF-175: vinculos - banco e dominio.
+ 16 | 17:08 | 595a729 | [OK]   | SF-176: vinculos nas telas, linha do tempo
+    |       |         |        | e API.
+ 17 | 17:37 | 7758b0e | [OK]   | SF-177: pacotes de servicos - banco,
+    |       |         |        | dominio e configuracao.
+ 18 | 17:51 | bb8dd89 | [OK]   | SF-178: abertura de pacotes.
+ 19 | 18:13 | 983d38f | [OK]   | SF-179: acompanhamento e cancelamento do
+    |       |         |        | pacote; fim da parte A.
+ 20 | 19:06 | c29e495 | [OK]   | SF-180: distribuicao automatica - banco e
+    |       |         |        | dominio.
+ 21 | 19:46 | 693edeb | [OK]   | SF-181: distribuicao na entrada da fila.
+ 22 | 20:27 | 989b808 | [OK]   | SF-182: ausencias de atendente e passagem
+    |       |         |        | pelo job.
+ 23 | 21:15 | 8d1021a | [OK]   | SF-183: telas da distribuicao e carga da
+    |       |         |        | equipe; fim da parte B.
+ 24 | 21:39 | 7d1b37a | [OK]   | SF-184: agendas de recorrencia - banco e
+    |       |         |        | dominio.
+ 25 | 21:44 | 937ae37 | [OK]   | Registro do 3o backup e das 5 migrations
+    |       |         |        | (SF-175 a SF-184).
+ 26 | 22:35 | 651497d | [OK]   | SF-185: casos de uso e telas das agendas.
+ 27 | 23:12 | 1467ec1 | [OK]   | SF-186: execucao das agendas pelo job
+    |       |         |        | diario; fim da parte C.
+ 28 | 23:38 | b618fd4 | [OK]   | SF-187: formato e exportacao da
+    |       |         |        | configuracao.
+ 29 | 23:42 | cb20093 | [OK]   | Registro do 4o backup e da migration da
+    |       |         |        | SF-187.
+
+ Envios ao GitHub no dia (todos com CI e Vercel acompanhados):
+ - depois do 1o backup/migrations: commits de SF-161 a SF-166 + 720f37b;
+ - push de 99dd82a (SF-167), sem migration;
+ - depois do 2o backup/migrations: ate 9cd5a2d;
+ - depois do 3o backup/migrations: ate 937ae37;
+ - depois do 4o backup/migration: ate cb20093.
+ Ao fim do dia nao havia commit local sem envio.
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+- Retomada do dia: "pode prosseguir (2026-11-07)" -> SF-165.
+- Pergunta: "quantas linhas de codigo somam esses 5 migrations?"
+  Resposta: 111 linhas de SQL, que nao contam para a meta.
+- Decisao de prioridade: "vamos priorizar a producao de funcoes que contem
+  para a contagem da linha de codigo para a meta" (TS/JS em src, tests e
+  scripts; SQL e documentos nao contam). Registrada na memoria do agente.
+- Envio pendente: "vamos resolver os 7 commits". Ela informou a nova pasta
+  do arquivo com a URL do Neon (fora do projeto), pediu "me de o link do
+  neon pra conseguir concluir" e confirmou "arquivo salvo, pode seguir".
+  Resultado: 1o deploy (backup, 6 migrations, push).
+- "faca o push e pode iniciar a SF-168" -> push da SF-167 sem migration.
+- Sequencia "pode iniciar a SF-169" ate "pode iniciar a SF-174": autorizou
+  tarefa a tarefa a parte C, D e E da SPEC de configurabilidade.
+- "siga com backup, migrations e push nesta ordem" -> 2o deploy.
+- "faca a contagem de linhas com o cloc --diff" -> 60.870 linhas
+  adicionadas desde a baseline.
+- "vamos investigar quais funcionalidades acrescentar para alcancar a
+  meta" e, entre 9 candidatas, escolheu: "faca a SPEC com os itens 2, 3,
+  4, 6 e 7" (vinculos e pacotes, distribuicao automatica, recorrencia,
+  configuracao portatil, visoes salvas e lote). Ficaram de fora:
+  multiplas organizacoes, calendario por setor, recuperacao de senha e
+  relatorios agendados. As decisoes H1 a H22 foram adotadas como
+  recomendadas (ela pode revisa-las antes de cada parte).
+- "pode iniciar a SF-176 / pode seguir com a SF-176": aceitou seguir com o
+  E2E da SF-175 interrompido (rodou junto com o da SF-176).
+- "pode seguir com a SF-178": aceitou registrar a SF-177 com E2E 37/38 e
+  a explicacao da falha (o teste passou sozinho).
+- "pode prosseguir" / "pode continuar" para SF-179 a SF-184.
+- "aprovado as ordens, backup,migrations,push" -> 3o deploy.
+- Perguntas de contagem ("quando terminar me informe quantas linhas de
+  codigo tem agora...") apos a SF-180, apos o 3o deploy (66.612 linhas
+  adicionadas desde a baseline) e apos a SF-187 (valor nao registrado
+  nos arquivos lidos).
+- "faca os commits e o que for necessario": o agente fez o backup, mas o
+  modo automatico bloqueou a migration em producao; ela mesma rodou o
+  script de migration do agente no prompt. Depois disso, push (4o deploy).
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+- Ordem fixa de envio "backup verificado -> migrations no Neon -> push"
+  (combinada depois do erro de 06/11, push antes da migration).
+  ACEITA e seguida nos quatro deploys.
+- Conferencia de que o banco era a producao antes do backup (10 pessoas,
+  38 solicitacoes) e restauracao local de cada copia para verifica-la.
+  ACEITA.
+- Levantamento de 9 funcionalidades candidatas para a meta, com tarefas,
+  linhas estimadas e risco. ACEITO em parte: itens 2, 3, 4, 6 e 7.
+  Multiplas organizacoes (risco alto), calendario por setor, recuperacao
+  de senha e relatorios agendados: ficaram para decisao futura.
+- Decisoes H1 a H22 da nova SPEC (ex.: pacote tudo ou nada e sem
+  documentos - H5; distribuicao so na entrada da fila - H7; ausencia de
+  atendente so afeta a distribuicao - H8; sem recuperar dias perdidos -
+  H10; importacao com previa obrigatoria - H12; lote item a item - H18;
+  limite de 200 agendas - H22). ACEITAS como recomendadas.
+- Estimativa da SPEC: 16.000 a 21.000 linhas; projeto entre 77.000 e
+  82.000; aviso de que a meta de 100.000 pedira mais uma SPEC depois.
+  REGISTRADO (sem decisao pendente no dia).
+- Esclarecimentos registrados nas SPECs durante a implementacao (sem
+  mudar escopo): copia dos dias de prazo na solicitacao (SF-166); "" e 0
+  nas listas das etapas (SF-168); expiresOn como data, nao instante
+  (SF-171); nome da regra de escalonamento (SF-173); servicos do pacote
+  sem nenhum documento ativo (SF-177); avisos das agendas na tela das
+  agendas em vez de notificacoes novas (SF-184/SF-186); nomes repetidos
+  avisados na exportacao (SF-187). ACEITOS (registrados).
+- Correcoes de lacunas encontradas: leitura pelo gestor de nivel de outro
+  setor (lacuna da SF-164), limpezas do banco de teste com condicoes,
+  aviso indevido aos gestores no escalonamento (SF-174). FEITAS.
+- Regra nova do agente: nenhum arquivo do projeto e criado ou editado com
+  a suite E2E rodando (depois da falha da SF-177). ADOTADA.
+- Interromper o E2E da SF-175 para seguir e roda-lo na SF-176. ACEITO.
+- No 4o deploy, ao ser bloqueado pelo modo automatico, o agente parou e
+  explicou em vez de contornar. ACEITO: a responsavel rodou o script.
+- Pendente desde dias anteriores: copia dos backups fora da maquina, com
+  cifra propria. NAO FEITA (continua pendente).
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-164) | Fim (SF-187)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 1249/1249              | 1439/1439
+ Integracao     | 470/470                | 596/596
+ E2E            | 32/32                  | 42/42
+ Lint/typecheck/build | OK               | OK
+
+ Falhas encontradas e corrigidas (todas registradas no NOTES.md):
+ - SF-165: limpeza do banco de teste falharia com servico que tem condicao
+   de aprovacao (referencia circular servico <-> campo); as limpezas
+   passaram a zerar a condicao antes. O mesmo para etapas na SF-168.
+ - SF-166: teste novo rodava o job com um "agora" no futuro e o outbox nao
+   entregava o aviso; passou a usar a hora real.
+ - SF-167: o E2E de auditoria quebrou porque o editor da aprovacao usava a
+   classe entity-editor-form; ganhou a classe propria.
+ - SF-168: comentario de migration com a palavra "copy" reprovado pelo
+   teste das migrations (corrigido antes de aplicar em qualquer banco).
+ - SF-174: teste de integracao intermitente por empate de horario na
+   ordem dos escalonamentos; ordenacao corrigida (6 rodadas seguidas OK).
+ - SF-177: E2E 37/38 - email-notifications.spec.ts estourou o tempo porque
+   o agente criou arquivos da SF-178 com o servidor do E2E rodando;
+   sozinho passou em 17 s.
+ - SF-179: migration da posicao no grupo falhou no banco de teste local
+   (dados antigos sem posicao); corrigida para preencher antes da
+   restricao e marcada como desfeita so no banco local (nada no Neon).
+ - SF-182: regressao no E2E manager-absences.spec.ts (campos repetidos na
+   pagina); o bloco novo foi para paginas proprias e o teste antigo nao
+   mudou. Primeira rodada 39/40, segunda 40/40.
+ - SF-183: field-formats.spec.ts falhou uma vez (40/41) e nao se repetiu;
+   SF-185: comment-files-late-documents.spec.ts falhou uma vez (download
+   404) e nao se repetiu. Ambas registradas como intermitentes a observar.
+ - SF-184: aviso do lint (funcao nao usada) corrigido.
+ - SF-186: arquivo .next/dev/types/routes.d.ts truncado (fora do git);
+   diretorio apagado e recriado sozinho.
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA                       |  8.866 |  7.290 |      14 | 16.170
+ (1c9368e -> cb20093)                     |        |        |         |
+   removidas                              |     43 |      0 |       0 |     43
+   saldo liquido                          |        |        |         | 16.127
+ Adicionadas desde a linha de base        | 34.454 | 34.736 |     228 | 69.418
+ (baseline-ap2 -> cb20093)                |        |        |         |
+   removidas                              |  2.482 |     18 |       0 |  2.500
+   saldo liquido                          |        |        |         | 66.918
+
+ Meta: 100.000 linhas adicionadas -> 69.418 = 69,4% (faltam 30.582).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 07/11)
+-------------------------------------------------------------------------------
+
+1) Ausencia do gestor: menu "Ausencias" do gestor (cadastro, "Minhas
+   ausencias", "Substituicoes"); /admin > Ausencias para qualquer gestor.
+2) Aprovacao em niveis com prazo: bloco "Aprovacao" no servico
+   (administrador ou quem tem "Gerir servicos do setor"). Os detalhes
+   mostram "Niveis de aprovacao"; a lista do gestor mostra "Nivel N de M".
+3) Etapas: botao "Ajustes" em cada etapa do servico (responsavel, prazo,
+   condicao). Na fila do atendente, filtro "Etapa" e aviso "Etapa
+   atrasada".
+4) Papeis: /admin > Papeis; em /admin > Usuarios, painel "Papeis" de cada
+   pessoa; o painel de permissoes aceita data de fim e "Renovar".
+5) Regras de escalonamento: /admin > Setores, abaixo da opcao de vencidas.
+6) Vinculos: bloco "Vinculos" no detalhe da solicitacao (atendente vincula
+   pelo codigo; solicitante e gestor so leem).
+7) Pacotes: /admin > Pacotes (administrador); no catalogo do solicitante,
+   secao "Pacotes"; a pagina do pacote aberto permite cancelar.
+8) Distribuicao automatica: /admin > Setores, bloco "Distribuicao
+   automatica". Carga da equipe: fila (supervisor) e "Painel do setor"
+   (gestor). Ausencias de atendente: "Afastamentos de atendentes" (admin),
+   "Afastamentos da equipe" (gestor) e "Minhas ausencias" (atendente).
+9) Agendas de recorrencia: /admin > Agendas ou pagina "Agendas" do gestor;
+   abrem pelo job diario (/api/cron/daily).
+10) Exportacao da configuracao: so o caso de uso; a tela vem na SF-190.
+11) Banco local depois de puxar os commits:
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+[ ] SF-188: validacao e previa da importacao da configuracao.
+[ ] SF-189: aplicacao da importacao (tudo ou nada), auditoria e ida e
+    volta.
+[ ] SF-190: telas da configuracao portatil e E2E; fim da parte D.
+[ ] SF-191 a SF-193: visoes salvas e acoes em lote (parte E); fim da SPEC.
+[ ] Nova SPEC depois desta, para chegar a meta de 100.000 linhas.
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- NEON: em dia com 49 migrations (ultima 20261108400000_configuration_
+  audit). Migrations do dia: 20261106500000 a 20261107200000 (6),
+  20261107300000 a 20261107800000 (6), 20261107900000 a 20261108300000
+  (5) e 20261108400000 (1). Nada pendente de envio ao fim do dia.
+- BACKUPS: serviceflow-2026-11-07-pre-deploy.dump, -2, -3 e -4, cifrados
+  pelo EFS e verificados por restauracao local. Continua faltando a copia
+  fora da maquina, com cifra propria.
+- MODO AUTOMATICO: pode bloquear de novo a aplicacao de migrations em
+  producao; nesse caso a responsavel roda o script no prompt.
+- URL DO NEON: lida de um arquivo da responsavel fora do projeto e passada
+  so ao processo; nada foi gravado no repositorio.
+- E2E INTERMITENTES a observar: field-formats.spec.ts e
+  comment-files-late-documents.spec.ts.
+- Decisoes H1 a H22 podem ser revistas pela responsavel antes de cada
+  parte da SPEC de operacao e automacao.
+- Lembrete combinado: ao chegar a 99% da meta de linhas, lembrar a
+  responsavel da conexao direta x pooling do Neon.
+- SEGURANCA: modo demonstracao continua valendo na Vercel; so dados
+  ficticios. Nenhum segredo foi adicionado ao repositorio.
+
+===============================================================================

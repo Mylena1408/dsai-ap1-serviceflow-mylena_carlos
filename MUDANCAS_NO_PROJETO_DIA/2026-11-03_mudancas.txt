@@ -1,0 +1,325 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 03/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-02_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits com data de autoria em 03/11 (8b94559, e
+                  c290cfa -> b469940, ver o aviso abaixo)
+Registro detalhado : NOTES.md (secoes "Senha do Neon mantida e primeira
+                     copia de producao", "Aprovacao das funcionalidades
+                     pendentes 1 a 8" e SF-116 a SF-137), TASKS.md,
+                     diario/2026-11-03.md,
+                     prompts/sessoes/2026-11-03-api-acoes-webhooks-setor.md
+                     (e o fim da sessao, na mesma pasta,
+                     2026-10-31-sf034-abertura-com-documentos.md),
+                     SPEC/2026-11-02-backup-recuperacao.md (secao 7),
+                     SPEC/2026-11-03-*.md (cinco SPECs do dia)
+
+ AVISO SOBRE OS COMMITS DESTE DIA
+ - So o commit 8b94559 (00:04) chegou ao GitHub em 03/11.
+ - Os 27 commits das SF-116 a SF-137 foram feitos em 03/11 na maquina da
+   responsavel, mas NAO foram enviados nesse dia. Em 04/11 o Carlos enviou
+   o CI (f575adc, 7b6142d) sobre o 8b94559; em 05/11 a responsavel fez
+   "git pull --rebase" e o push. O rebase reescreveu os 27 commits: os
+   hashes abaixo sao os de DEPOIS do rebase (data de autoria 03/11, data
+   de commit 05/11). No historico, eles aparecem depois dos do Carlos.
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- BACKUP DE PRODUCAO (8b94559): a responsavel decidiu manter a senha do
+  Neon ("fins didaticos"). Primeira copia semanal do banco de producao
+  feita e verificada:
+    * o Neon roda PostgreSQL 18.6 e o pg_dump 17 se recusa a copia-lo;
+      baixados os binarios oficiais do 18.6 (SHA-256 na SPEC de backup);
+    * copia serviceflow-2026-11-03.dump (124 KB) numa pasta da maquina
+      da responsavel, cifrada pelo EFS do Windows;
+    * restaurada num banco local isolado: 28 tabelas com as mesmas linhas
+      (10 pessoas, 26 solicitacoes, 21 migrations); banco apagado depois;
+    * a politica foi corrigida (dizia PostgreSQL 17 para o Neon) e ganhou
+      as notas sobre a extensao citext e sobre o EFS.
+  Falta a copia fora da maquina, com cifra propria.
+- FUNCIONALIDADES PENDENTES 1 A 8 APROVADAS pela responsavel. Ordem
+  adotada: 3 e 4 -> 5 -> 6 -> 7 -> 8 -> 2 -> 1. Cinco SPECs escritas,
+  aprovadas (decisoes recomendadas adotadas) e CONCLUIDAS no dia:
+    * Acoes pela API e webhooks por setor .. SF-116 a SF-119 (CA-ACT-01
+      a 09), decisoes W1 a W4: rotas POST start, complete, assume,
+      release, transfer, cancel, reopen e GET transfer-candidates; filtro
+      opcional de setores no webhook (vazio = todos); botao "Reenviar"
+      para entrega falha ou cancelada.
+    * Transferencia entre setores ........... SF-120 a SF-123 (CA-SET-01
+      a 09), decisoes T1 a T7: "Encaminhar para outro setor" so com a
+      solicitacao aberta, com justificativa; responsavel sai, prazo e
+      prioridade ficam; novo setor ve tudo, inclusive notas internas;
+      evento request.sector_changed; rotas transfer-sector e
+      sector-candidates na API.
+    * Anexos em comentarios e documento depois da abertura .. SF-124 a
+      SF-127 (CA-ANX-01 a 09), decisoes X1 a X7: ate 3 arquivos por
+      comentario (PDF, DOCX, TXT; 2 MiB cada, 4 MiB somados, 30 por
+      solicitacao); o solicitante envia depois um documento que falta;
+      evento request.document_added.
+    * Pausa do prazo e calendario de horas uteis .. SF-128 a SF-132
+      (CA-PSL-01 a 11), decisoes H1 a H9: secao "Calendario" (dias,
+      janela, fuso, feriados); opcao "Contagem do prazo" por servico
+      (horas corridas ou uteis); pausa "aguardando o solicitante" com
+      retomada manual, pela resposta do solicitante e no fim do
+      atendimento; rotas pause-sla e resume-sla.
+    * Campos condicionais, selecao multipla e campos do atendimento ..
+      SF-133 a SF-137 (CA-CND-01 a 10), decisoes K1 a K10.
+- DEFEITO ANTIGO CORRIGIDO (SF-125): o campo de arquivo vazio chega a
+  Server Action com o nome "undefined". Isso quebrava tambem a abertura
+  com documento OPCIONAL em branco, desde a SF-034. Corrigido nos dois.
+- SF-030 (armazenamento real): pedida no primeiro prompt do dia; nao ha
+  registro de trabalho nela em 03/11 (o NOTES diz que o armazenamento
+  real seguia sem credenciais). Foi feita em 05/11.
+- 6 migrations novas, nenhuma aplicada no Neon; nada publicado no dia.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+         [OK*] feito em 03/11, enviado so em 05/11, com hash novo (rebase)
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:04 | 8b94559 | [OK]   | Primeira copia de producao e decisao de
+    |       |         |        | manter a senha do Neon.
+ 2  | 00:07 | c290cfa | [OK*]  | SPEC de acoes pela API e webhooks por setor
+    |       |         |        | (SF-116 a SF-119), decisoes W1 a W4.
+ 3  | 00:24 | 413b264 | [OK*]  | SF-116: setores nos webhooks e regras do
+    |       |         |        | reenvio (migration).
+ 4  | 00:38 | 4efd3e2 | [OK*]  | SF-117: acoes de atendimento pela API.
+ 5  | 00:54 | 51af6e5 | [OK*]  | SF-118: webhooks por setor e reenvio.
+ 6  | 01:12 | 2b40d88 | [OK*]  | SF-119: E2E das acoes e webhooks por setor.
+ 7  | 08:03 | bb061be | [OK*]  | SPEC de transferencia entre setores
+    |       |         |        | (SF-120 a SF-123), decisoes T1 a T7.
+ 8  | 08:14 | b20cf25 | [OK*]  | SF-120: historico de setor, evento e regras
+    |       |         |        | do encaminhamento (migration).
+ 9  | 08:30 | cd3ac7a | [OK*]  | SF-121: encaminhamento pela tela.
+ 10 | 08:37 | b5cf499 | [OK*]  | SF-122: encaminhamento pela API e webhooks.
+ 11 | 08:50 | 880ad83 | [OK*]  | SF-123: E2E e revisao do encaminhamento.
+ 12 | 08:55 | afcdaeb | [OK*]  | SPEC de anexos em comentarios e documentos
+    |       |         |        | apos a abertura (SF-124 a SF-127), X1 a X7.
+ 13 | 09:07 | a3ea89c | [OK*]  | SF-124: arquivos de comentario e regras do
+    |       |         |        | documento apos a abertura (migration).
+ 14 | 09:35 | 88f145f | [OK*]  | SF-125: arquivos em comentarios; correcao do
+    |       |         |        | campo de arquivo vazio.
+ 15 | 09:48 | 2160045 | [OK*]  | SF-126: documento que falta depois da
+    |       |         |        | abertura.
+ 16 | 09:59 | 1423330 | [OK*]  | SF-127: E2E dos anexos.
+ 17 | 13:14 | 9c8d662 | [OK*]  | SPEC de pausa do prazo e calendario de horas
+    |       |         |        | uteis (SF-128 a SF-132), decisoes H1 a H9.
+ 18 | 13:31 | ae075cf | [OK*]  | SF-128: migration, relogio de horas uteis e
+    |       |         |        | regras da pausa.
+ 19 | 13:49 | ad6fd8c | [OK*]  | SF-129: calendario na administracao e no
+    |       |         |        | calculo do prazo.
+ 20 | 14:33 | bd63660 | [OK*]  | SF-130: pausa e retomada do prazo.
+ 21 | 14:39 | b4c2248 | [OK*]  | SF-131: pausa pela API, OpenAPI e webhooks.
+ 22 | 14:47 | b5296a2 | [OK*]  | SF-132: E2E do calendario e da pausa.
+ 23 | 14:51 | 823957d | [OK*]  | SPEC de campos condicionais, selecao
+    |       |         |        | multipla e campos do atendimento (SF-133 a
+    |       |         |        | SF-137), decisoes K1 a K10.
+ 24 | 15:03 | e7df26d | [OK*]  | SF-133: duas migrations e regras.
+ 25 | 15:10 | d6e9ef5 | [OK*]  | SF-134: publico e condicao dos campos na
+    |       |         |        | administracao.
+ 26 | 15:19 | d0d872c | [OK*]  | SF-135: selecao multipla e condicionais na
+    |       |         |        | abertura.
+ 27 | 15:41 | d5f0837 | [OK*]  | SF-136: campos preenchidos pelo atendimento.
+ 28 | 16:14 | b469940 | [OK*]  | SF-137: E2E, README e revisao.
+
+ Hora = hora de autoria. Todos estao no GitHub hoje (origin/main).
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+ 1) Senha do Neon: manter a atual.
+    > "nao desejo trocar a senha do NEON, deixe como esta pois e para fins
+    > didaticos."
+    Efeito: o agente deixa de recomendar a troca (o banco so tem dados
+    ficticios).
+ 2) Backup de producao: pediu a primeira copia semanal ("faca a primeira
+    copia semanal do banco de producao"). Feita pelo agente com a conexao
+    direta do Neon passada so na linha de comando.
+ 3) SF-030: pediu no mesmo prompt ("faca 0 sf-030 configurar o
+    armazenamento do Supabase"). Nao ha registro de trabalho nela em
+    03/11 nem de resposta especifica do agente (nao registrado); o NOTES
+    so diz que o armazenamento real seguia sem credenciais.
+ 4) Pediu a lista de funcionalidades pendentes ("ao final repasse pra mim
+    as funcionalidades pendentes") e aprovou as oito:
+    > "A aprovacao das funcionalidades 1 a 8 estao aprovadas, pode iniciar"
+    As oito: (1) multiplas organizacoes; (2) ferramentas MCP de
+    documentos; (3) status, atribuicao e cancelamento pela API;
+    (4) webhooks por setor e reenvio; (5) transferencia entre setores;
+    (6) anexos em comentarios e documentos apos a abertura; (7) pausa do
+    SLA e calendario de dias uteis; (8) campos condicionais, selecao
+    multipla e campos do atendente.
+ 5) Ordem e decisoes das SPECs: nao escolheu caso a caso. Aceitou a ordem
+    proposta e, a cada SPEC, respondeu "pode prosseguir" (5 vezes no
+    dia); as SPECs registram que as decisoes recomendadas (W, T, X, H e
+    K) foram adotadas e que ela pode rever qualquer uma.
+ 6) Perguntas:
+    > "quantas linhas de codigo temos ao todo passando pelo cloc --diff"
+    Resposta registrada: 37.835 linhas "added" (antes da SF-124).
+    > "ao terminar me avise o que foi construido, aonde se encontra no
+    > escopo, quantas linhas de codigo produzidos hoje e a producao total
+    > de linhas de codigo com o cloc --diff"
+    > "retorno de todas as respostas em portugues (brasil)"
+    O pedido esta registrado; o numero entregue ao final do dia nao foi
+    registrado na sessao (a medicao seguinte registrada e a de 05/11).
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+ - Ordem das oito funcionalidades (3 e 4 -> 5 -> 6 -> 7 -> 8 -> 2 -> 1),
+   com motivos: multiplas organizacoes mexe em todas as tabelas e fica por
+   ultimo; o MCP de documentos depende da SF-030. ACEITA.
+ - Decisoes recomendadas de cada SPEC, com alternativas na secao 11:
+   W1-W4, T1-T7, X1-X7, H1-H9, K1-K10. TODAS ACEITAS como recomendadas.
+   Alternativas recusadas, por exemplo: PATCH generico do status; chave
+   de idempotencia; encaminhar tambem "em atendimento"; mover a
+   aprovacao pendente ao novo setor; PNG/JPEG nos comentarios; upload
+   pela API; calendario por setor; pausar solicitacao vencida; varias
+   condicoes com e/ou; valores no historico.
+ - Dados ficticios (T7, H9, K10): manter a demonstracao como esta; a
+   alternativa de acrescentar um segundo setor e uma pessoa ficticia
+   ficou registrada, NAO adotada (pendente de pedido).
+ - Esclarecimentos de SPEC registrados durante a implementacao (sem
+   mudar escopo): 404 x 403 nas acoes da API (SF-117); a rota
+   transfer-sector responde {id, sectorId} (SF-122); liberar nao muda o
+   status nem encerra a pausa (SF-130); linha do calendario sem INSERT
+   na migration (SF-128); "Meus dados" com a chave "encaminhamentos".
+ - Avisos dados: antes do proximo deploy, aplicar 6 migrations no Neon;
+   a copia de backup precisa de copia fora da maquina; o EFS perde a
+   cifra se o arquivo for copiado para pendrive FAT ou nuvem.
+ - Erros do proprio agente, assumidos e corrigidos: restauracao so do
+   schema public deixou de fora a extensao citext (backup); barra
+   invertida perdida num heredoc na migration da SF-124; CHECK sem
+   IS NOT NULL na SF-133. Memorias criadas para os dois ultimos.
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-115) | Fim (SF-137)
+ ---------------+------------------------+------------------------------------
+ Unitarios      | 784/784                | 881/881
+ Integracao     | 346/346 + 1 pulado     | 404/404 + 1 pulado
+ E2E            | 19/19                  | 24/24
+ Lint/typecheck/build | OK               | OK
+
+ Falhas encontradas e corrigidas (todas registradas no NOTES.md):
+ - SF-116: typecheck acusou .next/dev/types/validator.ts truncado (arquivo
+   gerado, fora do Git); pasta apagada, voltou a passar.
+ - SF-119: o E2E novo deixava tokens ativos e quebrava o E2E da SF-115;
+   corrigido no teste novo (revoga os proprios tokens no afterAll).
+ - SF-122: o teste de integracao simulava a sessao e as rotas da API
+   respondiam 500; o teste passou a gravar direto no banco.
+ - SF-123: primeira abordagem do E2E (mover o Diego de setor) descartada:
+   o "Entrar como Atendente" restaura o setor da demonstracao.
+ - SF-124: barra invertida perdida na migration; pega pelo teste de
+   schema antes de publicar; corrigida nos bancos locais.
+ - SF-125: campo de arquivo vazio com nome "undefined" (ver resumo).
+ - SF-128: o teste de migrations recusou o INSERT da linha padrao do
+   calendario; a linha saiu da migration.
+ - SF-133: CHECK sem IS NOT NULL aceitava condicao sem valor; corrigido
+   antes do commit.
+ - SF-135: um fieldset desnecessario quebrou o E2E antigo de campos;
+   desfeito, o teste antigo passou sem mudanca.
+ - SF-136: historico dos campos do atendimento ia ao solicitante;
+   corrigido. Seis testes antigos de acoes falharam com instanceof; mudou
+   o codigo, nao os testes.
+ - SF-137: "hidden" anulado pelo CSS (display: grid); demo-data.spec.ts
+   passou a buscar a solicitacao por /queue?q=... porque a fila chegou
+   a 21 itens e ela foi para a pagina 2.
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA (27 commits de 03/11) |  3.440 |  4.351 |       6 |  7.797
+ (7b6142d -> b469940, hashes do rebase)   |        |        |         |
+   removidas                              |     19 |      1 |       0 |     20
+   saldo liquido                          |        |        |         |  7.777
+ Adicionadas desde a linha de base        | 21.030 | 22.212 |     209 | 43.451
+ (baseline-ap2 -> b469940)                |        |        |         |
+   removidas                              |  2.521 |     18 |       0 |  2.539
+   saldo liquido                          |        |        |         | 40.912
+
+ Meta: 100.000 linhas adicionadas -> 43.451 = 43,5% (faltam 56.549).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+ O 8b94559 (unico commit de 03/11 enviado no dia) nao tem TS/JS: 0.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 03/11)
+-------------------------------------------------------------------------------
+
+ Atencao: nada disto estava no site publicado em 03/11; so localmente (e
+ no GitHub a partir de 05/11).
+
+1) API (token pessoal): POST /api/v1/requests/{id}/start, complete,
+   assume, release, transfer, cancel, reopen, transfer-sector, pause-sla,
+   resume-sla; GET transfer-candidates e sector-candidates. Exemplos no
+   README, secao da API; documento em /api/v1/openapi.json.
+2) Webhooks por setor e "Reenviar": /admin > Webhooks (administrador).
+   Marque os setores (nenhum = todos); nas entregas falhas ou canceladas
+   aparece "Reenviar".
+3) Encaminhar para outro setor: detalhe da solicitacao na fila
+   (atendente), so com a solicitacao aberta. Para demonstrar, o
+   administrador cria antes um segundo setor com um atendente.
+4) Arquivos em comentarios: formulario de comentario no detalhe
+   (solicitante e atendente). "Enviar documento que falta": detalhe do
+   solicitante, quando falta documento. Em producao depende da SF-030.
+5) Calendario: /admin > Calendario. Contagem do prazo: cadastro do
+   servico. Pausar/Retomar prazo: detalhe da fila (responsavel); filtro
+   "Pausado" na fila.
+6) Campos: no cadastro de campos do servico, tipo "Selecao multipla",
+   "Mostrar so quando" e "Quem preenche". Campos do atendimento aparecem
+   em "Informacoes do atendimento" no detalhe da fila.
+7) Banco local depois de puxar os commits:
+     (set -a; . ./.env.local; set +a; npx prisma migrate deploy)   [Git Bash]
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS (como estavam no fim de 03/11)
+-------------------------------------------------------------------------------
+
+[ ] Funcionalidade 2: ferramentas MCP de documentos (depende da SF-030).
+[ ] Funcionalidade 1: multiplas organizacoes (por ultimo).
+[ ] SF-030: provisionar o armazenamento real (Supabase).
+[ ] Push dos commits do dia e publicacao, quando a responsavel pedir.
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- PUSH: no fim de 03/11, os 27 commits das SF-116 a SF-137 estavam so na
+  maquina da responsavel. Foram enviados em 05/11, depois do rebase sobre
+  o CI do Carlos (ver 2026-11-04_mudancas.txt).
+- NEON: antes do proximo deploy, aplicar 6 migrations:
+  20261103100000_webhook_sectors, 20261103200000_request_sector_events,
+  20261103300000_request_comment_files,
+  20261103400000_sla_pause_calendar,
+  20261103500000_field_type_multi_select e
+  20261103500100_conditional_attendant_fields. Fazer backup antes.
+- BACKUP: falta guardar uma copia fora da maquina, com cifra propria (o
+  EFS nao acompanha o arquivo).
+- WEBHOOKS NO SITE: WEBHOOK_ENCRYPTION_KEY continuava sem cadastro na
+  Vercel; no site, nada e enviado.
+- SEGURANCA: modo demonstracao no site; so dados ficticios. Senha do Neon
+  mantida por decisao da responsavel.
+- SF-030 continua pendente (credenciais do Supabase); anexos em
+  comentarios e documento depois da abertura dependem dela em producao.
+
+===============================================================================

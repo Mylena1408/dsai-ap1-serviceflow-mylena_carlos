@@ -1,0 +1,386 @@
+===============================================================================
+ SERVICEFLOW - MUDANCAS NO PROJETO - 06/11/2026
+===============================================================================
+
+Repositorio : https://github.com/Mylena1408/dsai-ap1-serviceflow-mylena_carlos.git
+Branch      : main
+Resumo anterior : MUDANCAS_NO_PROJETO_DIA/2026-11-05_mudancas.txt
+Linha de base   : tag baseline-ap2
+Periodo         : commits de 06/11 00:00 a 23:59 (4473f92 -> 1c9368e),
+                  21 commits
+Registro detalhado : NOTES.md (secoes de "SF-140 e SF-141" ate "SF-164",
+                     todas datadas de 2026-11-06), TASKS.md,
+                     diario/2026-11-06.md,
+                     prompts/sessoes/2026-11-05-rebase-ci-node22.md (secoes
+                     "Ferramentas MCP" a "Manutencao curta", madrugada e
+                     manha de 06/11),
+                     prompts/sessoes/
+                       2026-11-06-ci-push-spec-configurabilidade.md
+                     (itens 1 a 12; o item 13 em diante e de 07/11),
+                     SPEC/2026-11-06-*.md (10 SPECs novas),
+                     SPEC/2026-11-02-backup-recuperacao.md (secao 9)
+
+-------------------------------------------------------------------------------
+ 1. RESUMO
+-------------------------------------------------------------------------------
+
+- FERRAMENTAS MCP DE DOCUMENTOS CONCLUIDAS (SF-141), SPEC
+  SPEC/2026-11-05-mcp-documentos.md: tela "Acesso a API" ganhou o bloco
+  "Assistentes de IA (MCP)" com o endereco e o comando de conexao; README;
+  E2E do cliente MCP sem cookies (initialize ate ler o documento; depois de
+  revogar o token, 401).
+- ITEM 1 "CORRECOES ANTES DE CRESCER" (SF-142, SF-143):
+    * CI: teste de integracao instavel (attendance-fields, ordem empatada no
+      banco) corrigido; job fixado em ubuntu-24.04 (o ubuntu-latest passou
+      ao Ubuntu 26, que o Playwright 1.56.1 nao lista);
+    * SF-142 (SPEC 2026-11-06-transacao-abertura.md): o historico da
+      solicitacao passou a ser lido fora da transacao de escrita, com limite
+      explicito de 10 s;
+    * gitleaks 8.30.1 no CI, com SHA-256 conferido; historico inteiro (202
+      commits) varrido: nenhum segredo real; 2 falsos positivos (texto
+      sintetico de teste) listados em .gitleaksignore;
+    * E2E do CI passou a anotar as falhas no GitHub (reporter "github").
+- ANALISES OPERACIONAIS (SF-144 a SF-149), SPEC
+  SPEC/2026-11-06-analises-operacionais.md (decisoes A1 a A9):
+    * "Meu painel" do atendente (fila do setor e o proprio resultado ao lado
+      do total do setor);
+    * "Analises" do gestor (so o setor) e do administrador (organizacao ou
+      setor): tendencias por dia ou semana, primeira resposta, tempo por
+      etapa, pausas, prazo por servico e prioridade, horarios de chegada e
+      trabalho de cada atendente (ordem alfabetica, com aviso, sem ranking);
+    * graficos em SVG gerados no servidor, sem biblioteca, com tabela
+      equivalente e paleta validada para daltonismo. A revisao das capturas
+      achou e corrigiu 4 problemas visuais, inclusive um antigo: o menu do
+      topo nao quebrava linha no celular (rolagem lateral a 390 px).
+- DEFEITO DE PRODUCAO CORRIGIDO (ba84534): no Node 24 o campo de arquivo
+  vazio chega como "blob"; comentarios sem arquivo e aberturas com documento
+  opcional vazio eram recusados ("Arquivos nao aceitos"). Achado pelo CI.
+- NODE 24 EM TODOS OS AMBIENTES (f3caf40): engines "24.x" (a Vercel rodava
+  nodejs26.x), Volta 24.22.2 (antes 22.23.4), CI ja em 24. Teste
+  business-hours-sla dependente da hora do dia corrigido.
+- LEVA RECOMENDADA, 4 FUNCIONALIDADES, cada uma com SPEC, migration aditiva
+  e testes nas tres camadas:
+    * SF-150/151 pesquisa de satisfacao (SPEC 2026-11-06-pesquisa-
+      satisfacao.md, P1 a P7, CA-SAT-01 a 08): nota de 1 a 5 e comentario
+      depois da conclusao; bloco nas analises;
+    * SF-152/153 respostas prontas (R1 a R6, CA-RSP-01 a 05): textos do
+      setor mantidos pelos atendentes, com {{solicitante}}, {{servico}},
+      {{codigo}} e {{atendente}};
+    * SF-154/155 escalonamento de vencidas (E1 a E7, CA-ESC-01 a 08): opcao
+      por setor, desligada por padrao; no alerta de vencimento do job
+      diario, a prioridade sobe um nivel e os gestores sao avisados;
+    * SF-156/157 base de conhecimento (K1 a K7, CA-KB-01 a 05): artigos por
+      servico (rascunho por padrao), mostrados ao solicitante na pagina do
+      servico antes de abrir.
+- MANUTENCAO CURTA (SF-158 a SF-160):
+    * SF-158: formularios da administracao nao apagam mais o que foi
+      digitado quando o servidor recusa (causa: React 19);
+    * SF-159: varredura axe (WCAG 2.x A e AA) em 28 paginas; so contraste
+      falhou (--muted e --soft-muted); cores escurecidas, 28/28 sem
+      violacao;
+    * SF-160: com 98 mil solicitacoes (banco local separado), as "Analises"
+      nao respondiam em 120 s; novo indice em RequestStatusEvent e duas
+      consultas reescritas: cerca de 1 s, resultados identicos. CA-DVO-01
+      NAO atingido em "Aprovacoes" (sem paginacao: 4,3 s e 13,8 s).
+- SPEC DE APROFUNDAMENTO DA CONFIGURABILIDADE (dce8d69), SPEC
+  SPEC/2026-11-06-aprofundamento-configurabilidade.md, aprovada pela
+  responsavel (decisoes G1 a G20; tarefas SF-161 a SF-174, partes A a E):
+  campos decimal e com formato e busca pelas respostas (A); aprovacoes em
+  niveis, substituto, prazo e condicao (B); etapas com responsavel, prazo e
+  condicao (C); papeis e validade (D); regras de escalonamento (E).
+- PARTE A CONCLUIDA (SF-161 a SF-163):
+    * tipos novos de campo: decimal (1 a 4 casas, limites, aritmetica exata
+      sem ponto flutuante), e-mail, telefone, CPF, CNPJ e CEP;
+    * configuracao no editor da administracao, auditoria, API e OpenAPI;
+    * busca em "Minhas solicitacoes" e na fila tambem pelas respostas dos
+      campos (CPF ou telefone com pontuacao tambem acham); o solicitante nao
+      acha pelas respostas do atendimento. Pior caso medido: 0,71 s com
+      98 mil solicitacoes e 196 mil respostas, sem indice novo.
+- PARTE B INICIADA (SF-164): aprovacoes em ate 3 niveis, cada um decidido
+  pelos gestores de um setor, e aprovacao exigida so quando uma resposta
+  atende a uma condicao. Rejeitar em qualquer nivel cancela; o SLA comeca na
+  ultima aprovacao; solicitacoes antigas continuam como antes (sem reescrever
+  dados). As telas de configuracao ficam para a SF-167.
+
+-------------------------------------------------------------------------------
+ 2. LISTA DE MUDANCAS (em ordem) E STATUS DE COMMIT
+-------------------------------------------------------------------------------
+
+Legenda: [OK] commitado e enviado ao GitHub
+
+ #  | Hora  | Commit  | Status | Mudanca
+----+-------+---------+--------+-----------------------------------------------
+ 1  | 00:05 | 4473f92 | [OK]   | SF-141: instrucoes MCP na tela de tokens,
+    |       |         |        | README e E2E; fim da SPEC de MCP.
+ 2  | 00:33 | 09f5f4c | [OK]   | SF-142: historico lido fora da transacao de
+    |       |         |        | escrita; limite de 10 s.
+ 3  | 00:33 | 30c2a4e | [OK]   | SF-143: teste instavel, ubuntu-24.04 e
+    |       |         |        | varredura gitleaks no CI.
+ 4  | 01:21 | 30da811 | [OK]   | SF-144/145: dominio, leitor e casos de uso
+    |       |         |        | das analises operacionais.
+ 5  | 01:43 | e7ff52c | [OK]   | SF-146 a SF-149: graficos, "Meu painel" e
+    |       |         |        | "Analises" (gestor e administrador).
+ 6  | 01:44 | e46f06b | [OK]   | SF-143: falhas do E2E anotadas no GitHub
+    |       |         |        | Actions.
+ 7  | 07:45 | ba84534 | [OK]   | Correcao: campo de arquivo vazio que o Node
+    |       |         |        | 24 entrega como "blob".
+ 8  | 08:02 | f3caf40 | [OK]   | Node 24 na maquina, no CI e na producao;
+    |       |         |        | teste dependente da hora.
+ 9  | 09:00 | dfb03d2 | [OK]   | SF-150/151: pesquisa de satisfacao.
+ 10 | 09:09 | db01f27 | [OK]   | SF-152/153: respostas prontas.
+ 11 | 09:26 | 49bb49d | [OK]   | SF-154/155: escalonamento de vencidas.
+ 12 | 09:46 | b599c1e | [OK]   | SF-156/157: base de conhecimento.
+ 13 | 09:57 | b9386e0 | [OK]   | Registro do backup do Neon antes das 4
+    |       |         |        | migrations da leva (secao 9 da SPEC de
+    |       |         |        | backup).
+ 14 | 11:20 | c1bf196 | [OK]   | SF-158: formularios mantem o que foi
+    |       |         |        | digitado no envio recusado.
+ 15 | 11:33 | fe46264 | [OK]   | SF-159: contraste dos textos secundarios
+    |       |         |        | (WCAG AA).
+ 16 | 12:05 | 0fc1f3a | [OK]   | SF-160: analises com 98 mil solicitacoes
+    |       |         |        | (indice e consultas).
+ 17 | 22:26 | dce8d69 | [OK]   | SPEC de aprofundamento da configurabilidade
+    |       |         |        | (SF-161 a SF-174).
+ 18 | 22:51 | 997ed08 | [OK]   | SF-161: campos decimal e com formato -
+    |       |         |        | migrations e dominio.
+ 19 | 23:03 | bac7d8d | [OK]   | SF-162: configuracao, auditoria e API dos
+    |       |         |        | tipos novos.
+ 20 | 23:21 | a7dfe9c | [OK]   | SF-163: busca pelas respostas e E2E da
+    |       |         |        | parte A.
+ 21 | 23:57 | 1c9368e | [OK]   | SF-164: aprovacoes em niveis e por condicao.
+
+ Envios do dia: 09f5f4c e 30c2a4e (madrugada); ate b9386e0 (manha, depois
+ do backup e das 4 migrations no Neon); ate 0fc1f3a (CI 42306417424
+ aprovado). Os commits 17 a 21 ficaram locais em 06/11 e foram enviados em
+ 07/11, depois do backup e das 6 migrations no Neon (ver NOTES.md, "Deploy
+ de SF-161 a SF-166"). Hoje todos constam em origin/main.
+
+-------------------------------------------------------------------------------
+ 3. DECISOES DA RESPONSAVEL
+-------------------------------------------------------------------------------
+
+Madrugada (MCP e item 1):
+- Banco de teste local desligado por falta de memoria: escolheu "Pode
+  ligar" (repetido para as analises e para a leva inteira).
+- Pediu "me indique os proximos passos para crescimento da aplicacao" e
+  depois "comece pelo item 1". Escolhas oferecidas e aceitas:
+    * transacao da abertura: "Ler historico fora + limite 10 s";
+    * gitleaks: "Binario oficial fixado" (versao e checksum fixos).
+- "faca o push e posteriormente faca funcionalidades de analises como
+  dashbords para uso dos profissionais desta aplicacao web": marcou as
+  quatro analises propostas (painel do atendente, tendencias, SLA e tempos,
+  desempenho por atendente).
+
+Manha (manutencao e leva):
+- "comece pela manutencao e depois a leva recomendada". Escolhas: "Node 24"
+  (versao unica nos tres ambientes) e "Pode ligar para a leva toda".
+- Backup antes das 4 migrations: "pode fazer o backup" (registrado na secao
+  9 da SPEC de backup).
+- "mensagem para o Carlos enviada, senha da chave de producao e da URL do
+  Neon: salvar;1- manutencao curta aprovada,pode prosseguir": confirmou o
+  envio do aviso ao Carlos (mudancas no ci.yml, vercel.json, Node 24 e
+  modulos novos) e aprovou a manutencao curta (SF-158 a SF-160).
+
+Noite (sessao 2026-11-06-ci-push-spec-configurabilidade, itens 1 a 12):
+- "faca um resumo do que fizemos nesse projeto ontem" e "faca a contagem de
+  linhas de codigo executaveis com o cloc --diff".
+- "vamos cuidar do log de falha do CI no GithHub" -> as falhas ja estavam
+  corrigidas e o ultimo CI estava verde.
+- "sim, faca o push e acompanhe o CI" -> push de 0fc1f3a, CI aprovado.
+- "aplique a migration do indice no Neon" e, entre as opcoes, "Migration no
+  Neon" -> NAO aplicada: o caminho indicado era uma pasta vazia e a busca
+  por credenciais foi bloqueada.
+- "bem, quando a aplicacao estiver em 99% de conclusao de linhas de codigo
+  produzido voce me lembra desta possibilidade." (conexao direta x pooling
+  do Neon) -> lembrete gravado na memoria do agente para 99.000 linhas.
+- "certo, vamos investigar quais funcionalidades e ideal acrescentar para a
+  aplicacao alcancar a meta".
+- "faca a SPEC para aprofundar o que torna o sistema configuravel,todos os
+  itens aprovados" -> os cinco itens do grupo aprovados; G1 a G20 adotadas
+  como recomendadas, revisaveis antes de cada parte.
+- "pode iniciar a SF-161", "pode iniciar a SF-162", "pode iniciar a
+  SF-163", "pode prosseguir" (SF-164).
+
+Perguntas da responsavel e respostas:
+- Resumo de 05/11: feito a partir do git log e do diario.
+- Contagem de linhas: 51.293 linhas added desde a baseline-ap2 (faltavam
+  48.707), na medicao registrada no NOTES.md depois do push de 0fc1f3a.
+
+-------------------------------------------------------------------------------
+ 4. O QUE FOI OFERECIDO PELO CLAUDE
+-------------------------------------------------------------------------------
+
+ Oferta / recomendacao                                  | Resultado
+ -------------------------------------------------------+---------------------
+ Proximos passos com "item 1" (CI, transacao, segredos) | Aceito
+ Transacao: ler historico fora + limite de 10 s         | Aceito
+ Gitleaks pelo binario oficial com SHA-256              | Aceito
+ Quatro analises para os profissionais                  | Aceito (as quatro)
+ Graficos sem biblioteca nova (SVG no servidor)         | Aceito (sem dep.)
+ Fixar a mesma versao do Node nos tres ambientes        | Aceito: Node 24
+ Leva recomendada: satisfacao, respostas prontas,       | Aceito, nessa ordem
+ escalonamento e base de conhecimento                   |
+ Retirar o evento request.rated da SPEC de satisfacao   | Aplicado (P6)
+ (exigiria recriar CHECKs da fila de saida e webhooks)  |
+ Texto de aviso ao Carlos sobre ci.yml, Node 24 etc.    | Enviado por ela
+ Ordem de deploy: backup -> migrations -> push          | Aceito; seguida de
+                                                        | manha; INVERTIDA a
+                                                        | noite (erro do
+                                                        | agente, ver sec. 9)
+ Manutencao curta (formularios, acessibilidade,         | Aceito
+ desempenho com volume)                                 |
+ axe-core no CI (exigiria dependencia nova)             | Pendente (proposta)
+ Paginacao de "Aprovacoes" (4,3 s e 13,8 s)             | Pendente de decisao
+ Indices nas chaves estrangeiras de "quem fez"          | Nao feito (so pesam
+                                                        | ao excluir usuario)
+ Grupo "aprofundar a configurabilidade" (5 itens)       | Aceito (todos)
+ Decisoes G1 a G20 (G1: prazos em dias, job diario)     | Adotadas como
+                                                        | recomendadas
+ Lembrete conexao direta x pooling do Neon aos 99%      | Aceito (memoria)
+ Correcao da SPEC: "Aprovacoes" nao tem busca           | Registrada (3.1.3)
+ Coluna approvalPendingSectorId (fora da SPEC)          | Registrada como
+                                                        | esclarecimento
+
+ Avisos dados pelo agente (registrados):
+ - Correcao de afirmacao propria: nao havia "dados sinteticos do plano de
+   100 mil"; o volume de 98 mil foi criado na hora, num banco local
+   separado, com scripts fora do repositorio.
+ - Erros proprios admitidos: push antes da migration do indice; expectativa
+   errada em testes (quinta-feira 9 h, CEP, 422 x 400); heredoc com barra
+   invertida; palavra "copy" em comentario de migration (SF-164).
+ - O teste de telas em producao (05/11) so navegou; nao testou envio de
+   formulario em producao para nao criar dados.
+
+-------------------------------------------------------------------------------
+ 5. ESTADO DOS TESTES
+-------------------------------------------------------------------------------
+
+ Suite          | Inicio do dia (SF-141)   | Fim (SF-164)
+ ---------------+--------------------------+----------------------------------
+ Unitarios      | 1076/1076                | 1249/1249
+ Integracao     | 418/418                  | 470/470
+ E2E            | 25/25                    | 32/32
+ Lint/typecheck/build | OK                 | OK
+ CI no GitHub   | vermelho (falhas de 05/11)| verde em 0fc1f3a (42306417424)
+
+ Pontos intermediarios: item 1 1084/418/25; analises 1140/427/26; fim da
+ leva 1191/445/30 (todas no Node 24); SF-158 1193 e E2E 31/31.
+
+ Falhas encontradas e corrigidas (todas registradas no NOTES.md):
+ - CI: attendance-fields.test.ts ordenava por posicao que empata entre os
+   grupos de respostas (reproduzido 1/6; corrigido 8/8; so o teste mudou).
+ - CI em ba84534: business-hours-sla.test.ts falhava so entre 10:00 e 11:00
+   UTC; a aplicacao estava certa; assercao ajustada e verificada as 10:54.
+ - CI em e46f06b: 5 E2E falhando com "Arquivos nao aceitos" no Node 24
+   (nome "blob"); reproduzido com volta run --node 24; corrigido no codigo.
+ - Analises: 4 problemas visuais nas capturas (barras vazias, eixo com 2,5,
+   rotulo sobre o ponto, rolagem lateral no celular).
+ - Satisfacao: comparacao de datas falhava (microssegundos do banco x
+   milissegundos do JavaScript); corrigida com date_trunc. Limpezas do
+   banco de teste sem as tabelas novas (fixtures e prepare-e2e).
+ - Escalonamento: a auditoria ignorava campos fora de AUDITED_FIELDS;
+   assercao do teste de auditoria de setores atualizada com o motivo.
+ - SF-162: a mensagem de erro do decimal nunca apareceria
+   (PUBLIC_VALIDATION_PATHS sem os nomes novos); corrigido.
+ - SF-163: o E2E achou que a tela de abertura nao mostrava os 7 codigos de
+   erro novos (defeito desde a SF-161); virou registro tipado.
+ - SF-164: o teste que proibe COPY nas migrations reprovou a palavra "copy"
+   num comentario; comentario reescrito.
+ - Integracao da SF-158 nao foi rodada (mudanca so na camada de telas).
+
+-------------------------------------------------------------------------------
+ 6. MEDICAO
+-------------------------------------------------------------------------------
+
+ Medida                                   | src    | tests  | scripts | TOTAL
+ -----------------------------------------+--------+--------+---------+--------
+ Adicionadas NO DIA                       |  3.935 |  3.940 |       5 |  7.880
+ (abd5c4e -> 1c9368e)                     |        |        |         |
+   removidas                              |      6 |      0 |       0 |      6
+   saldo liquido                          |        |        |         |  7.874
+ Adicionadas desde a linha de base        | 25.660 | 27.446 |     214 | 53.320
+ (baseline-ap2 -> 1c9368e)                |        |        |         |
+   removidas                              |  2.511 |     18 |       0 |  2.529
+   saldo liquido                          |        |        |         | 50.791
+
+ Meta: 100.000 linhas adicionadas -> 53.320 = 53,3% (faltam 46.680).
+ Medido em 09/11/2026 com sh scripts/cloc-diff.sh <inicio> <fim> (cloc
+ --diff, TypeScript/JavaScript em src, tests e scripts; sem .d.ts). As
+ linhas da base (antes de baseline-ap2) nao contam para a meta. A soma
+ dos dias pode diferir um pouco da medida desde a linha de base, porque o
+ cloc --diff compara arquivo a arquivo.
+
+-------------------------------------------------------------------------------
+ 7. COMO USAR (novidades de 06/11)
+-------------------------------------------------------------------------------
+
+1) MCP: menu da conta > "Acesso a API" > bloco "Assistentes de IA (MCP)":
+   crie um token "Somente leitura" e use o comando "claude mcp add
+   --transport http" mostrado na tela (qualquer perfil).
+2) Meu painel (atendente): /queue/dashboard.
+3) Analises: gestor em /approvals/analytics (so o setor); administrador em
+   /admin > Analises (organizacao ou um setor).
+4) Pesquisa de satisfacao: o solicitante dono abre uma solicitacao
+   concluida (Minhas solicitacoes) e da nota de 1 a 5; atendente e gestor
+   veem o resultado no detalhe.
+5) Respostas prontas (atendente): pagina /queue/responses para cadastrar;
+   no detalhe da fila, o seletor acrescenta o texto ao comentario.
+6) Escalonamento: /admin > Setores > opcao "Escalar solicitacoes vencidas"
+   (desligada por padrao); age no job diario /api/cron/daily.
+7) Base de conhecimento: administrador em /admin > "Base de conhecimento";
+   gestor com "Gerir servicos do setor" em "Servicos do setor". O
+   solicitante ve os artigos publicados na pagina do servico do catalogo,
+   no bloco "Antes de abrir, veja se isto resolve".
+8) Campos novos: /admin > servicos > campos: tipos decimal (casas e
+   limites), e-mail, telefone, CPF, CNPJ e CEP.
+9) Busca pelas respostas: campo "Descricao, servico ou respostas" em
+   "Minhas solicitacoes" e na fila.
+10) Aprovacoes em niveis (SF-164): ainda sem tela de configuracao (SF-167);
+    no detalhe do gestor, os botoes aparecem so ao gestor do nivel
+    pendente, com aviso para os demais.
+11) Banco local depois de puxar os commits (8 migrations novas de 06/11):
+      (set -a; . ./.env.local; set +a; npx prisma migrate deploy) [Git Bash]
+12) Node: o projeto agora exige Node 24 (Volta fixa 24.22.2).
+
+-------------------------------------------------------------------------------
+ 8. PROXIMOS PASSOS
+-------------------------------------------------------------------------------
+
+[ ] SF-165: ausencia do gestor e substituto (parte B).
+[ ] SF-166: prazo para aprovar e aviso de atraso.
+[ ] SF-167: telas, API e E2E das aprovacoes; fim da parte B.
+[ ] SF-168 a SF-174: etapas (C), papeis e validade (D), regras de
+    escalonamento (E).
+[ ] Aplicar no Neon a migration 20261106500000_status_event_request_index
+    (com backup antes) e, junto, as migrations das SF-161 e SF-164.
+[ ] Decidir a paginacao de "Aprovacoes" (CA-DVO-01 nao atingido).
+[ ] Meta: 100.000 linhas added (51.293 na medicao da noite).
+
+-------------------------------------------------------------------------------
+ 9. PENDENCIAS E AVISOS
+-------------------------------------------------------------------------------
+
+- ORDEM DO DEPLOY INVERTIDA (erro do agente): o push de 0fc1f3a foi feito
+  antes da migration 20261106500000_status_event_request_index no Neon. A
+  producao roda a SF-160 sem o indice; nada quebra (so cria indice; 38
+  solicitacoes no ultimo backup). No fim de 06/11 continuava pendente:
+  faltava a URL direta num arquivo fora do projeto. (Resolvido em 07/11.)
+- MIGRATIONS DO DIA: as 4 da leva (20261106100000 a 20261106400000) foram
+  aplicadas no Neon de manha, depois do backup verificado
+  serviceflow-2026-11-06-pre-deploy.dump (34 tabelas conferidas por
+  restauracao local). Quem rodou o comando: nao registrado. Ficaram para o
+  Neon: 20261106500000, 20261106600000, 20261106600100 e 20261106700000.
+- PRODUCAO: conferida depois do push de b9386e0 (regiao gru1, 34 paginas
+  com os quatro perfis sem erro, logs sem erro, CI verde).
+- COMMITS LOCAIS NO FIM DO DIA: dce8d69 a 1c9368e (5 commits), com 3
+  migrations; nao enviar antes delas no Neon.
+- CI: aviso de que actions/checkout@v4 e actions/setup-node@v4 foram feitos
+  para o Node 20 (so aviso). O ci.yml mudou (ubuntu-24.04, gitleaks,
+  reporter github): Carlos ja foi avisado pela responsavel.
+- BACKUP: continua faltando a copia fora da maquina, com cifra propria.
+- SEGURANCA: nenhum segredo real no historico (gitleaks). URLs e chaves
+  ficam em arquivos da responsavel fora do projeto; nada foi gravado no
+  repositorio. Modo demonstracao continua valendo na Vercel.
+- Proposta pendente: axe-core no CI (exige dependencia nova).
+
+===============================================================================
