@@ -2727,3 +2727,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Critérios:** CA-SEG-01 a 05 verificados; o CA-SEG-06 segue com as SF-229 e SF-230.
 - **Resultados:** typecheck, lint e build OK; unitários 1570/1570; integração 679/679; E2E 49/49.
 - **Linhas:** 482 `added` em TS (aplicação 325, testes 157).
+
+## Deploy da parte D, SF-211 a SF-214 (2026-11-09)
+
+- **Ordem seguida:** backup verificado → 1 migration no Neon → push.
+- **Backup:** `serviceflow-2026-11-09-pre-deploy.dump`, conferido por restauração local (61 tabelas iguais), cifrado pelo EFS. Detalhes na seção 18 da SPEC de backup.
+- **Migration no Neon:** `prisma migrate deploy` aplicou `20261109100000_request_followers`; `prisma migrate status` confirmou o banco em dia (55).
+- **Push:** 4 commits, de `aa7e6ab` (SF-211) a `4c64b05` (SF-214), enviados juntos depois das telas, a pedido da responsável, para a parte D chegar inteira.
+- **CI:** aprovado (run 42610224840).
+- **Linhas:** 80.141 `added` sobre a baseline (saldo 77.653); sistema com 88.396 linhas.
+- **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.

@@ -430,3 +430,9 @@
 > vamos completar com a sf-214 e depois retomar os commits,para não quebrar o raciocinio de entrega
 
 107. SF-214: telas dos seguidores e E2E da parte D; CA-SEG-01 a 05 verificados. Em seguida, o envio da parte D (backup, migration, push).
+
+108. Envio da parte D: backup verificado (seção 18 da SPEC de backup), migration `20261109100000_request_followers` no Neon, push; CI aprovado.
+
+> quantas linhas temos de codigo passando por cloc --diff
+
+109. Contagem total: 80.141 `added` sobre a baseline (saldo 77.653); sistema com 88.396 linhas.

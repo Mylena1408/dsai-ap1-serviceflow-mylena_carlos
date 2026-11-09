@@ -150,3 +150,10 @@ Se o banco restaurado não tiver as extensões do original, criar antes `CREATE 
 - Cópia `serviceflow-2026-11-08-pre-deploy-4.dump` (259.670 bytes) em `C:\Users\Mylena Reis\serviceflow-backups\`, com o atributo cifrado do EFS conferido.
 - Verificação: restaurada num banco local isolado, com os mesmos ajustes da seção 10; as 59 tabelas com a mesma contagem de linhas da produção (10 pessoas, 38 solicitações, 53 migrations); o banco de verificação foi apagado.
 - Continua faltando a cópia fora da máquina, com cifra própria.
+
+## 18. Cópia antes do deploy de 2026-11-09
+
+- Feita pelo agente, depois da SF-214, como combinado com a responsável ("vamos completar com a sf-214 e depois retomar os commits"), antes de aplicar 1 migration no Neon (SF-211). URL direta lida do arquivo da responsável fora do projeto, sem aparecer na saída.
+- Cópia `serviceflow-2026-11-09-pre-deploy.dump` (267.638 bytes) em `C:\Users\Mylena Reis\serviceflow-backups\`, com o atributo cifrado do EFS conferido.
+- Verificação: restaurada num banco local isolado, com os mesmos ajustes da seção 10; as 61 tabelas com a mesma contagem de linhas da produção (10 pessoas, 38 solicitações, 54 migrations); o banco de verificação foi apagado.
+- Continua faltando a cópia fora da máquina, com cifra própria.
