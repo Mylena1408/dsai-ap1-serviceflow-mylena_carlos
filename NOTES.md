@@ -2787,3 +2787,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Parte E concluída:** CA-MEN-01 a 04 verificados. Somou cerca de 650 linhas em 3 tarefas (SF-215, SF-216 e SF-231).
 - **Resultados:** typecheck, lint e build OK; unitários 1581/1581; integração 689/689; E2E 50/50.
 - **Linhas:** 288 `added` em TS (aplicação 188, testes 100).
+
+## Revisão e registro da SPEC 2 (2026-11-09)
+
+- **Quando:** perto do fim da SPEC 1 (faltando as partes F e G), como a responsável pediu.
+- **Decisões da revisão:** K1 importação de usuários sem senha (inativos; o administrador ativa e define a senha pela tela atual, sem mudar nada da conta); K2 manutenção só avisa; K3 relatório periódico com página e e-mail opcional; K4 calendário do setor só para as solicitações abertas depois.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`, partes A a E, tarefas SF-234 a SF-259. A conta para a meta: 81.108 linhas adicionadas hoje; faltam 18.892; a SPEC 1 deve render mais 2.500 a 3.500; a SPEC 2, como escrita, de 9.000 a 12.000, então ela será aprofundada (como a SPEC 1 foi) quando a parte A começar, com os acréscimos propostos à responsável antes.

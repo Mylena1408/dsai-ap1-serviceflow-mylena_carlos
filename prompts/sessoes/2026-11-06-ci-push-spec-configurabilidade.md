@@ -460,3 +460,7 @@
 > pode prosseguir
 
 115. SF-231: "Minhas menções" só na área do atendente; CA-MEN-04 verificado; fim da parte E.
+
+> vamos revisar
+
+116. Revisão da SPEC 2: quatro perguntas (importação sem senha, manutenção só avisa, relatório com página e e-mail, calendário só para as novas), todas respondidas com a opção recomendada; SPEC `2026-11-09-comunicacao-e-calendarios.md` escrita, com o aviso de que precisará de aprofundamento para cobrir a meta.
