@@ -25,6 +25,8 @@ import { requireAttendantPageAccess } from "../../page-access";
 import { addCommentAction, completeRequestAction, startRequestAction } from "../actions";
 import { AssignmentPanel } from "./assignment-panel";
 import { CancelRequestForm } from "./cancel-request-form";
+import { CloseAsDuplicateForm } from "./close-as-duplicate-form";
+import { duplicateOriginal } from "./duplicate-original";
 import { RequestSla } from "@/app/_components/request-sla";
 import { PriorityForm } from "./priority-form";
 import { SectorTransferForm } from "./sector-transfer-form";
@@ -73,6 +75,9 @@ function feedback(error?: string, notice?: string): string | null {
   if (notice === "released") return "Você liberou esta solicitação.";
   if (notice === "transferred") return "Solicitação transferida.";
   if (notice === "cancelled") return "Solicitação cancelada.";
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2.
+  if (notice === "duplicate-closed") return "Solicitação encerrada como duplicada. Quem a abriu passa a acompanhar a original.";
+  if (error === "duplicate-note") return "Informe a nota do encerramento como duplicada, com até 1.000 caracteres.";
   if (notice === "commented") return "Comentário enviado.";
   if (notice === "priority") return "Prioridade alterada.";
   if (notice === "stage") return "Etapa alterada.";
@@ -237,6 +242,10 @@ export default async function QueueRequestPage({
         <>
           <PriorityForm requestId={request.id} priority={request.priority} />
           <CancelRequestForm requestId={request.id} />
+          {(() => {
+            const original = duplicateOriginal(links.links);
+            return original ? <CloseAsDuplicateForm requestId={request.id} original={original} /> : null;
+          })()}
         </>
       ) : null}
       {heldByColleague && (request.status === "OPEN" || request.status === "IN_PROGRESS") ? (

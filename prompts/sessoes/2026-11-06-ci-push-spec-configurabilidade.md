@@ -504,3 +504,7 @@
 > ao finalizar atualize o diretorio e o repositorio MUDANCAS_NO_PROJETO_DIA ... o objetivo aqui é manter atualizado o repositorio e o diretório para o Carlos
 
 126. Anotações de 03/11 a 09/11 (decisões da responsável e ofertas do Claude, medição por dia), nas duas pastas.
+
+> pode prosseguir
+
+127. SF-219: bloco "Encerrar como duplicada" e E2E; o E2E novo passou a limpar o seguimento que cria; arquivo gerado do Next cortado apagado; CA-DUP-01 marcado.

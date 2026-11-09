@@ -2835,3 +2835,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **04/11:** o dia foi do Carlos, com o agente dele (CI no GitHub Actions); verificação pedida: só esses 2 commits dele, sem pull requests nem forks, só o ramo `main`.
 - **Medição** (`sh scripts/cloc-diff.sh` por dia): 03/11 7.797; 04/11 0 (YAML e Markdown); 05/11 2.011 (8 commits novos); 06/11 7.880; 07/11 16.170; 08/11 8.868; 09/11 3.154; desde a linha de base em `c2f4850`: 81.426 (faltam 18.574).
 - **Cópia fora do repositório:** recebeu também os arquivos de 31/10, que faltavam lá; as duas pastas ficaram idênticas.
+
+## SF-219 — Telas do encerramento como duplicada e E2E (2026-11-09)
+
+- **Tela:** bloco "Encerrar como duplicada" no detalhe da fila, junto de "Cancelar solicitação" e com as mesmas condições; só aparece quando a solicitação é "duplicada de" uma original não cancelada (`duplicateOriginal`, regra pura testada). Mostra o código da original (com link quando o atendente pode lê-la), o serviço e o setor, e pede a nota obrigatória; a ação `closeAsDuplicateAction` usa o caso de uso da SF-217.
+- **E2E** `close-as-duplicate.spec.ts`: a original não oferece o encerramento; o atendente encerra a duplicada; os dois históricos mostram; a solicitante vai da duplicada à original pela página de quem acompanha.
+- **Falhas na suíte e correções:** (1) o E2E novo deixava a solicitante de demonstração seguindo a original, e o `followers.spec.ts`, que roda depois, espera que ela não siga nada: o teste novo passou a apagar esse seguimento ao terminar (o antigo não mudou); (2) a segunda rodada parou no typecheck por um arquivo gerado pelo servidor de desenvolvimento do Playwright (`.next/dev/types/routes.d.ts`) cortado ao meio quando o servidor foi encerrado; a pasta gerada foi apagada (está no `.gitignore` e é recriada) e a terceira rodada passou inteira.
+- **Resultados:** typecheck, lint e build OK; unitários 1588/1588; integração 696/696; E2E 51/51.
+- **Linhas:** 160 `added` em TS (aplicação 46, testes 114).

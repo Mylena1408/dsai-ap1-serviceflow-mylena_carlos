@@ -2291,7 +2291,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-219 — Telas do encerramento como duplicada e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Bloco "Encerrar como duplicada" no detalhe da fila e E2E `close-as-duplicate.spec.ts`; CA-DUP-01 a 03 verificados.
 - **Objetivo:** Parte F, parte F.
 - **Arquivos/módulos esperados:** Detalhe da fila.
 - **Dependências:** SF-218.

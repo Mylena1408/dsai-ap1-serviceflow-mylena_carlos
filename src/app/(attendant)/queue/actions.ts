@@ -6,6 +6,7 @@ import {
   assumeRequest,
   cancelRequest,
   changeRequestPriority,
+  closeAsDuplicate,
   moveRequestStage,
   pauseRequestSla,
   releaseRequest,
@@ -176,6 +177,12 @@ export async function saveAttendanceFieldsAction(formData: FormData): Promise<ne
 export async function cancelRequestAction(formData: FormData): Promise<never> {
   const note = field(formData, "note");
   return runOnRequest(formData, (requestId) => cancelRequest({ requestId, note }), "cancelled");
+}
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 items 1 and 2: the duplicate closed with a mandatory note.
+export async function closeAsDuplicateAction(formData: FormData): Promise<never> {
+  const note = field(formData, "note");
+  return runOnRequest(formData, (requestId) => closeAsDuplicate({ requestId, note }), "duplicate-closed", "duplicate-note");
 }
 
 // Comments and internal notes (SPEC 2026-10-31-comentarios, decision C3).
