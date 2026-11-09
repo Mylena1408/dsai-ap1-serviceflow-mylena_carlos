@@ -2659,3 +2659,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Push:** 9 commits, de `47c5e6e` (SF-204) a `ad6ef13` (SF-209). O comando passou do tempo limite da ferramenta e foi para segundo plano, mas terminou sem erro; o `git fetch` confirmou `origin/main` em `ad6ef13`.
 - **CI:** aprovado (run 42553573660).
 - **URL do Neon:** lida do arquivo da responsável fora do projeto, passada só ao processo; nada foi gravado no repositório.
+
+## SF-210 — Telas das horas e E2E (2026-11-09)
+
+- **Detalhe da fila:** "Lançar horas" (dia com mínimo e máximo do intervalo, horas, minutos, nota) para quem pode lançar; "Alterar" e "Apagar" só nos lançamentos que a pessoa ainda muda; cada recusa volta com um código próprio para a âncora `#time`. O detalhe do gestor só mostra.
+- **E2E** `time-entries.spec.ts`: lançar com nota, alterar, ver o total contra a estimativa e o histórico, recusa de duração zerada, relatório do gestor e CSV (sem a nota), e o solicitante sem acesso. O serviço do teste é desativado no fim.
+- **Falha intermitente:** na rodada completa, `dashboard.spec.ts` (SF-101) falhou numa asserção `getByRole("alert")` porque, além da mensagem esperada, o anunciador de rotas do Next.js (`__next-route-announcer__`, também `role="alert"`) já estava na página; rodado sozinho duas vezes, passou nas duas. Depende de a hidratação terminar antes da asserção. O teste é antigo e não foi alterado (garantia da seção 2); fica registrado para uma correção com o localizador pelo texto, se a responsável quiser.
+- **Critérios:** CA-HRS-01 a 04 verificados.
+- **Resultados:** typecheck, lint e build OK; unitários 1551/1551; integração 665/665; E2E 47/48 na rodada completa (a falha acima), e `dashboard.spec.ts` 1/1 sozinho duas vezes.
+- **Linhas:** 252 `added` em TS (aplicação 131, testes 121).

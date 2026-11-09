@@ -45,7 +45,8 @@ import { getRequestChecklist } from "@/modules/checklists";
 import { RequestChecklist, checklistFeedback, checklistPendingText } from "@/app/_components/request-checklist";
 import { markChecklistItemAction } from "../checklist-actions";
 import { getRequestTime } from "@/modules/time-entries";
-import { RequestTime } from "@/app/_components/request-time";
+import { RequestTime, timeFeedback } from "@/app/_components/request-time";
+import { deleteTimeEntryAction, logTimeAction, updateTimeEntryAction } from "../time-actions";
 import { addRequestTagAction, removeRequestTagAction } from "../tag-actions";
 import { RequestGroupBlock } from "@/app/_components/request-group";
 import { linkRequestAction, unlinkRequestAction } from "../link-actions";
@@ -106,6 +107,9 @@ function feedback(error?: string, notice?: string): string | null {
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3.
   const checklistMessage = checklistFeedback(error) ?? checklistFeedback(notice);
   if (checklistMessage) return checklistMessage;
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 5.3.
+  const timeMessage = timeFeedback(error) ?? timeFeedback(notice);
+  if (timeMessage) return timeMessage;
   return null;
 }
 
@@ -266,7 +270,13 @@ export default async function QueueRequestPage({
       {tags ? <RequestTags edit={{ addAction: addRequestTagAction, removeAction: removeRequestTagAction }} requestId={request.id} view={tags} /> : null}
       {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 and 13.1 items 3 and 4. */}
       {checklist ? <RequestChecklist markAction={markChecklistItemAction} requestId={request.id} view={checklist} /> : null}
-      {time ? <RequestTime view={time} /> : null}
+      {time ? (
+        <RequestTime
+          edit={{ logAction: logTimeAction, updateAction: updateTimeEntryAction, deleteAction: deleteTimeEntryAction }}
+          requestId={request.id}
+          view={time}
+        />
+      ) : null}
       <RequestConversation
         requestId={request.id}
         comments={comments}

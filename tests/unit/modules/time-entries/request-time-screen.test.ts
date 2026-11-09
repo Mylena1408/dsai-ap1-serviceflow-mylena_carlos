@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { RequestTime, dayLabel, timeEventTitle } from "@/app/_components/request-time";
+import { RequestTime, dayLabel, timeEventTitle, timeFeedback } from "@/app/_components/request-time";
 import { buildTimeline } from "@/app/_components/request-timeline";
 import type { RequestWithHistory } from "@/modules/requests";
 import type { RequestTimeView } from "@/modules/time-entries";
@@ -29,7 +29,7 @@ const view = (overrides: Partial<RequestTimeView> = {}): RequestTimeView => ({
 
 describe("a request's time block", () => {
   it("shows the total against the estimate, by person, and each entry", () => {
-    const html = renderToStaticMarkup(createElement(RequestTime, { view: view() }));
+    const html = renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view() }));
     expect(html).toContain("Total: 2h de 4h estimadas");
     expect(html).toContain("Ana: 1h 30min");
     expect(html).toContain("Bia: 30min");
@@ -38,9 +38,9 @@ describe("a request's time block", () => {
   });
 
   it("without an estimate shows only the total; with nothing logged nor to log, nothing (CA-HRS-01)", () => {
-    expect(renderToStaticMarkup(createElement(RequestTime, { view: view({ estimatedHours: null }) }))).toContain("Total: 2h<");
-    expect(renderToStaticMarkup(createElement(RequestTime, { view: view({ entries: [], byPerson: [], totalMinutes: 0, canLog: false }) }))).toBe("");
-    expect(renderToStaticMarkup(createElement(RequestTime, { view: view({ entries: [], byPerson: [], totalMinutes: 0 }) }))).toContain(
+    expect(renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view({ estimatedHours: null }) }))).toContain("Total: 2h<");
+    expect(renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view({ entries: [], byPerson: [], totalMinutes: 0, canLog: false }) }))).toBe("");
+    expect(renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view({ entries: [], byPerson: [], totalMinutes: 0 }) }))).toContain(
       "Nenhuma hora lançada.",
     );
   });
@@ -59,5 +59,34 @@ describe("the time in the history (5.3 item 3)", () => {
     ]);
     expect(timeEventTitle({ action: "UPDATED", minutes: 45, workedOn: "2026-11-11" })).toBe("Horas alteradas: 45min em 11/11/2026");
     expect(dayLabel("2026-01-05")).toBe("05/01/2026");
+  });
+});
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 (SF-210): the attendant's forms.
+describe("the time forms", () => {
+  const action = async (): Promise<never> => {
+    throw new Error("not called");
+  };
+  const edit = { logAction: action, updateAction: action, deleteAction: action };
+
+  it("logs between the opening and today, and changes or removes only the person's own entries", () => {
+    const html = renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view(), edit }));
+    expect(html).toContain('aria-label="Lançar horas"');
+    expect(html).toContain('min="2026-11-10"');
+    expect(html).toContain('max="2026-11-12"');
+    expect(html).toContain("Alterar o lançamento de 12/11/2026");
+    expect(html).toContain("Apagar o lançamento de 12/11/2026");
+    expect(html).not.toContain("Apagar o lançamento de 11/11/2026");
+  });
+
+  it("without the right to log, or for the manager, only shows", () => {
+    expect(renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view({ canLog: false }), edit }))).not.toContain("Lançar horas");
+    expect(renderToStaticMarkup(createElement(RequestTime, { requestId: "r1", view: view() }))).not.toContain("<form");
+  });
+
+  it("explains each result", () => {
+    expect(timeFeedback("time-logged")).toBe("Horas lançadas.");
+    expect(timeFeedback("time-day")).toContain("entre a abertura");
+    expect(timeFeedback("other")).toBeNull();
   });
 });

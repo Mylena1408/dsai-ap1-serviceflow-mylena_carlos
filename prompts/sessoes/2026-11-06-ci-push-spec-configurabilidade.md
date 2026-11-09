@@ -378,3 +378,11 @@
 > siga a ordem sugerida por você
 
 94. Envio feito: backup verificado (seção 17 da SPEC de backup), migration `20261108900000_time_entries` no Neon, push; CI aprovado.
+
+> quantas linhas temos de codigo passando por cloc --diff
+
+95. Contagem total: 78.274 `added` sobre a baseline (saldo 75.784); sistema com 86.527 linhas.
+
+> pode prosseguir
+
+96. SF-210: formulários das horas e E2E da parte C; CA-HRS-01 a 04 verificados; falha intermitente do `dashboard.spec.ts` investigada e registrada.

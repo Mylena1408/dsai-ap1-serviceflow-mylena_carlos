@@ -167,7 +167,7 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       {tags ? <RequestTags requestId={request.id} view={tags} /> : null}
       {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3: the manager only reads. */}
       {checklist ? <RequestChecklist requestId={request.id} view={checklist} /> : null}
-      {time ? <RequestTime view={time} /> : null}
+      {time ? <RequestTime requestId={request.id} view={time} /> : null}
       <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} timeEvents={time?.events ?? []} />
     </main>
   );

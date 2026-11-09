@@ -2201,7 +2201,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-210 — Telas das horas e E2E
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Formulários de lançar, alterar e apagar horas no detalhe da fila (`time-actions.ts`), E2E `time-entries.spec.ts`. CA-HRS-01 a 04 verificados; CA-HRS-05 e 06 seguem com as SF-227 e SF-228.
 - **Objetivo:** Parte C, parte C.
 - **Arquivos/módulos esperados:** Detalhe da fila, gestor, administração.
 - **Dependências:** SF-209.
