@@ -79,6 +79,9 @@ test("mentions: an internal note mentions a colleague of the sector, never seen 
   await enterAs(page, "Atendente");
   // "Minhas menções": the new mention, opened from the list, leads to the conversation and becomes seen.
   await page.getByRole("navigation", { name: "Navegação principal" }).getByRole("link", { name: /^Minhas menções/ }).click();
+  // Wait for the page itself before reading the list: on a slower machine the click returns before the navigation ends.
+  await expect(page).toHaveURL(/\/queue\/mentions$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Minhas menções" })).toBeVisible();
   const mentions = page.getByRole("list", { name: "Menções recebidas" });
   await expect(mentions).toContainText(serviceName);
   await expect(mentions).toContainText("Nova");

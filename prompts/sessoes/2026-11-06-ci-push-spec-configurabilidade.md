@@ -476,3 +476,15 @@
 > pode prosseguir
 
 119. SF-218: aviso `status.DUPLICATE` ao solicitante da duplicada (no lugar do aviso de cancelamento, por não existir aviso de "passou a acompanhar") e atalho para a original; CA-DUP-02 e 03 marcados.
+
+> envio e push autorizado
+
+120. Push `c984f03..66da450` (SF-218 e registros, sem migration). CI reprovado em 1 E2E (`mentions.spec.ts`, tempo de navegação).
+
+> o que significa isso? / me explique o que significa esta mensagem que chega no meu e-mail
+
+121. Explicação do e-mail do CI e diagnóstico pelas anotações do run 42662447775; ajuste do teste para esperar a página.
+
+> autorizado
+
+122. Suíte completa, commit e push da correção do E2E das menções.

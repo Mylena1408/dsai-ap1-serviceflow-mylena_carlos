@@ -2814,3 +2814,9 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Rótulos:** "Encerrada como duplicada" na seção "E-mails"; a lista exata da categoria de status no teste foi estendida, como a SPEC prevê.
 - **Resultados:** typecheck, lint e build OK; unitários 1586/1586; integração 696/696; E2E 50/50.
 - **Linhas:** 154 `added` em TS (aplicação 50, testes 104).
+
+## Envio de SF-218 e correção do E2E das menções (2026-11-09)
+
+- **Push** `c984f03..66da450` (2 commits, sem migration; sem cópia nem migration no Neon, autorizado pela responsável). O CI (run 42662447775) reprovou: 1 de 50 E2E, `mentions.spec.ts`, não achou a lista "Menções recebidas" em 5 s depois do clique em "Minhas menções"; todos os outros passos passaram. O mesmo teste tinha passado no CI anterior e na suíte local: na máquina do CI o clique volta antes de a navegação terminar.
+- **Correção (só no teste):** esperar o endereço `/queue/mentions` e o título "Minhas menções" antes de ler a lista, como no E2E dos seguidores. Rodado 3 vezes seguidas localmente (3/3), e a suíte completa: typecheck, lint e build OK; unitários 1586/1586; integração 696/696; E2E 50/50.
+- **Acompanhamento do CI:** a espera consultava a API pública do GitHub a cada 30 s e esgotou o limite de 60 consultas por hora; as próximas esperas consultam a cada 90 s.
