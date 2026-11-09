@@ -6,6 +6,7 @@ import { emailSchema, entityIdSchema } from "@/shared/validation";
 import {
   MAX_COLLEAGUE_FOLLOWERS,
   assertCanRemoveFollower,
+  autoFollowsOnComment,
   planAddFollower,
   readsAsFollower,
   type CurrentFollower,
@@ -169,4 +170,23 @@ export async function listFollowedElsewhere(reader: { followedElsewhere(userId: 
   const actor = await requireCurrentActor();
   if (actor.role !== "ATTENDANT" || !actor.sectorId) return [];
   return reader.followedElsewhere(actor.id, actor.sectorId);
+}
+
+/** 13.3 item 2 (decision J7): the attendant's choice; without a saved one, on. */
+export interface FollowPreferenceStore {
+  find(userId: string): Promise<{ autoFollowOnComment: boolean } | null>;
+  save(userId: string, autoFollowOnComment: boolean, at: Date): Promise<void>;
+}
+
+export async function getFollowPreference(store: FollowPreferenceStore): Promise<{ autoFollowOnComment: boolean }> {
+  const actor = await requireCurrentActor();
+  if (actor.role !== "ATTENDANT") throw new NotFoundError();
+  return { autoFollowOnComment: autoFollowsOnComment(await store.find(actor.id)) };
+}
+
+export async function setFollowPreference(input: unknown, store: FollowPreferenceStore): Promise<void> {
+  const actor = await requireCurrentActor();
+  if (actor.role !== "ATTENDANT") throw new NotFoundError();
+  const { autoFollowOnComment } = validateInput(z.object({ autoFollowOnComment: z.boolean() }).strict(), input);
+  await store.save(actor.id, autoFollowOnComment, new Date());
 }

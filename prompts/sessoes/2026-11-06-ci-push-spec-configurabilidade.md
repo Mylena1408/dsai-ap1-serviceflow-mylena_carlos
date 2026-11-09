@@ -440,3 +440,7 @@
 > pode prosseguir
 
 110. SF-229: "Que eu acompanho" na busca da fila e a lista dos acompanhados em outros setores.
+
+> pode prosseguir
+
+111. SF-230: seguir ao comentar com a preferência; ajuste registrado de um teste antigo; CA-SEG-06 verificado; fim da parte D.

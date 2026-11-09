@@ -86,6 +86,12 @@ export interface CommentTransaction extends CommentScopeReader {
    * SLA in this same transaction. Optional so doubles without SLA stay valid.
    */
   resumeSlaOnRequesterReply?(requestId: string, authorId: string): Promise<void>;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 2 (decision J7): an attendant who comments starts following the
+   * request in this same transaction, unless they already follow it or turned the preference off. Optional for
+   * older doubles.
+   */
+  followOnComment?(requestId: string, authorId: string, at: Date): Promise<void>;
 }
 
 export interface CommentTransactionRunner {

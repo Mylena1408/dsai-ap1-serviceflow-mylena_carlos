@@ -115,3 +115,17 @@ export function createPrismaFollowedElsewhereReader(database: PrismaClient) {
     },
   };
 }
+
+/** 13.3 item 2: one row per person, written only when they choose. */
+export function createPrismaFollowPreferenceStore(database: PrismaClient) {
+  return {
+    find: (userId: string) => database.followPreference.findUnique({ where: { userId }, select: { autoFollowOnComment: true } }),
+    async save(userId: string, autoFollowOnComment: boolean, at: Date) {
+      await database.followPreference.upsert({
+        where: { userId },
+        create: { userId, autoFollowOnComment, updatedAt: at },
+        update: { autoFollowOnComment, updatedAt: at },
+      });
+    },
+  };
+}

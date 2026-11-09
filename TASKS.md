@@ -2401,7 +2401,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-230 — Seguir ao comentar, com a preferência
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Seguir ao comentar na transação do comentário (porta opcional `followOnComment`) e a preferência em "Notificações > Preferências" do atendente (`getFollowPreference`, `setFollowPreference`). CA-SEG-06 verificado; parte D concluída.
 - **Objetivo:** Seção 13.3 (item 2), parte D (aprofundamento).
 - **Arquivos/módulos esperados:** Comentários, preferências.
 - **Dependências:** SF-229.

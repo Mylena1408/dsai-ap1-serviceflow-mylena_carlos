@@ -2745,3 +2745,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Testes:** os 362 unitários de busca, visões e solicitações passaram sem mudança; E2E de seguidores, busca e visões salvas juntos.
 - **Resultados:** typecheck, lint e build OK; unitários 1570/1570; integração 681/681; E2E 49/49.
 - **Linhas:** 120 `added` em TS (aplicação 63, testes 57).
+
+## SF-230 — Seguir ao comentar; fim da parte D (2026-11-09)
+
+- **Comentário:** depois de gravar o comentário e o evento, um atendente passa a seguir a solicitação na mesma transação (porta opcional `followOnComment` do armazenamento dos comentários), salvo se já segue ou desligou a preferência; o histórico ganha "passou a acompanhar" feito pela própria pessoa.
+- **Preferência:** tabela `FollowPreference` (SF-211), lida com `autoFollowsOnComment` (sem linha, ligada); formulário em "Notificações > Preferências" do atendente, numa `div` abaixo da página de e-mails (que já tem o seu `main`).
+- **Lint:** o comentário importava o domínio dos seguidores por caminho interno; passou a usar a entrada pública do módulo, como a regra do projeto pede.
+- **Teste antigo:** `notifications.test.ts` (CA-EVT-06) passou a desligar a preferência da atendente que comenta, para seguir conferindo a regra original; as asserções não mudaram. Registrado na seção 13.9 da SPEC; o comportamento novo tem teste próprio.
+- **Parte D concluída:** CA-SEG-01 a 06 verificados. Somou cerca de 1.900 linhas em 6 tarefas (SF-211 a SF-214, SF-229 e SF-230).
+- **Resultados:** typecheck, lint e build OK; unitários 1571/1571; integração 685/685; E2E 49/49.
+- **Linhas:** 196 `added` em TS (aplicação 103, testes 93).

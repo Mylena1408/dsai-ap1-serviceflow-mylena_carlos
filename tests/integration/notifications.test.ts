@@ -28,6 +28,7 @@ import {
   purgeReadNotifications,
 } from "@/modules/notifications";
 import { assumeRequest, cancelRequest, createRequest, transferRequest, transitionRequestStatus } from "@/modules/requests";
+import { setFollowPreference } from "@/modules/followers";
 
 // SPEC 2026-10-31-eventos-outbox-jobs, section 8 (SF-063).
 
@@ -58,6 +59,9 @@ describe("in-app notifications (SF-063)", () => {
     const { rita, ana, bia, request } = await scenario();
 
     actAs(ana);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 2 and 13.9: this test keeps checking the original rule, so Ana does
+    // not start following when she comments (the following attendant's notices are checked in follow-on-comment.test.ts).
+    await setFollowPreference({ autoFollowOnComment: false }, prisma);
     await assumeRequest({ requestId: request.id }, prisma);
     await addComment({ requestId: request.id, body: "Pode descrever melhor?" }, prisma);
     await transferRequest({ requestId: request.id, assigneeId: bia.id }, prisma);

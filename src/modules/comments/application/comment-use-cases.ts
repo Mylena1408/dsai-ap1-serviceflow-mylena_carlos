@@ -113,6 +113,11 @@ async function saveComment(
     await transaction.resumeSlaOnRequesterReply?.(draft.requestId, reader.id);
   }
 
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 2: only attendants (the requester already follows their own).
+  if (reader.role === "ATTENDANT") {
+    await transaction.followOnComment?.(draft.requestId, reader.id, createdAt);
+  }
+
   return {
     ...comment,
     files: files.map(({ id, originalFilename, detectedFormat, sizeBytes }) => ({ id, originalFilename, detectedFormat, sizeBytes, removed: false })),

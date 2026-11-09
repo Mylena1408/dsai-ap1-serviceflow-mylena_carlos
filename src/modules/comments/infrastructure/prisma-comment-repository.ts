@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { recordOutboxEvent } from "@/modules/events";
 import { resumeSlaOnRequesterReply } from "@/modules/requests";
+import { autoFollowsOnComment } from "@/modules/followers";
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import type {
   CommentRecord,
@@ -115,6 +116,16 @@ export function createPrismaCommentTransactionRunner(database: PrismaClient): Co
             },
             resumeSlaOnRequesterReply(requestId, authorId) {
               return resumeSlaOnRequesterReply(transaction, requestId, authorId);
+            },
+            // SPEC 2026-11-08-atendimento-dia-a-dia, 13.3 item 2 (decision J7).
+            async followOnComment(requestId, authorId, at) {
+              const [preference, following] = await Promise.all([
+                transaction.followPreference.findUnique({ where: { userId: authorId }, select: { autoFollowOnComment: true } }),
+                transaction.requestFollower.count({ where: { requestId, userId: authorId } }),
+              ]);
+              if (following > 0 || !autoFollowsOnComment(preference)) return;
+              await transaction.requestFollower.create({ data: { requestId, userId: authorId, addedById: authorId, createdAt: at } });
+              await transaction.requestFollowerEvent.create({ data: { requestId, userId: authorId, action: "ADDED", actorId: authorId, occurredAt: at } });
             },
           }),
         { translate: ["P2003", "P2034"], fallbackMessage: "Comment creation failed." },
