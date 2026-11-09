@@ -105,7 +105,9 @@ test("the dashboard shows consolidated numbers to the administrator and the mana
 
   // A refused period is explained and the default one is shown.
   await page.goto("/admin?section=dashboard&period=custom&from=2026-10-31&to=2026-10-01");
-  await expect(page.getByRole("alert")).toHaveText(
+  // The page's own alert, not Next.js's empty route announcer, which also has role="alert" once the page hydrates
+  // (SPEC 2026-11-08-atendimento-dia-a-dia, 13.8).
+  await expect(page.getByRole("alert").filter({ hasText: "A data de início" })).toHaveText(
     "A data de início precisa ser anterior ou igual à de fim. Mostrando os últimos 30 dias.",
   );
   await signOut(page);

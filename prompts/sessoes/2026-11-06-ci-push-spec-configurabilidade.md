@@ -386,3 +386,11 @@
 > pode prosseguir
 
 96. SF-210: formulários das horas e E2E da parte C; CA-HRS-01 a 04 verificados; falha intermitente do `dashboard.spec.ts` investigada e registrada.
+
+> corrija o teste antigo
+
+97. `dashboard.spec.ts`: localizador do alerta pelo texto; mudança registrada na seção 13.8 da SPEC; teste aprovado três vezes seguidas.
+
+> quantas linhas temos de codigo passando por cloc --diff
+
+98. Contagem total informada depois do commit do ajuste.

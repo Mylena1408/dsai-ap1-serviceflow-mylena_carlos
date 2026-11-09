@@ -2668,3 +2668,8 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Critérios:** CA-HRS-01 a 04 verificados.
 - **Resultados:** typecheck, lint e build OK; unitários 1551/1551; integração 665/665; E2E 47/48 na rodada completa (a falha acima), e `dashboard.spec.ts` 1/1 sozinho duas vezes.
 - **Linhas:** 252 `added` em TS (aplicação 131, testes 121).
+
+## Ajuste do E2E do painel (2026-11-09)
+
+- A pedido da responsável, `dashboard.spec.ts` passou a localizar o alerta do período recusado pelo texto, porque o anunciador de rotas do Next.js também tem `role="alert"` depois da hidratação. A mensagem conferida é a mesma. Registrado na seção 13.8 da SPEC atendimento no dia a dia.
+- **Verificação:** o teste rodou sozinho três vezes seguidas e passou nas três; lint e typecheck sem erros. Os outros dois `getByRole("alert")` dos E2E procuram dentro de um formulário, onde o anunciador não aparece, e não mudaram.

@@ -431,3 +431,7 @@ Cada parte segue o padrão das SPECs anteriores, em três camadas:
 | SF-233 | F | Encerrar como duplicada no lote |
 
 **Ordem:** cada tarefa acrescentada entra no fim da sua parte (por exemplo, SF-224 a SF-226 depois da SF-205 e antes da parte C). **Estimativa revista:** pela média real da parte A (cerca de 270 linhas por tarefa) e com os acréscimos (que têm mais telas e regras próprias), a SPEC 1 deve somar algo entre 11.000 e 14.000 linhas; o que faltar para as 100.000 será tratado na revisão da SPEC 2, perto do fim desta.
+
+### 13.8 Ajuste de um teste antigo (2026-11-09)
+
+**Registro da mudança.** A pedido da responsável ("corrija o teste antigo"), o E2E `tests/e2e/dashboard.spec.ts` (SF-101) passa a localizar o alerta do período recusado pelo próprio texto (`getByRole("alert").filter({ hasText: "A data de início" })`) em vez de qualquer alerta da página. Motivo: depois da hidratação, o Next.js põe na página o anunciador de rotas (`__next-route-announcer__`), que também tem `role="alert"`; quando a página hidratava antes da asserção, o teste encontrava dois alertas e falhava (visto na rodada completa da SF-210; o teste passava sozinho). O que o teste confere não muda: a mesma mensagem, com o mesmo texto completo. É a única exceção à garantia da seção 2 feita nesta SPEC fora das listas exatas que ela estende; nenhum comportamento do sistema muda.
