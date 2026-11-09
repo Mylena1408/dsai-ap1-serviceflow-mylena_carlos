@@ -32,6 +32,28 @@ export async function getRequesterRequest(
 }
 
 /**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 2 (decision I13): a colleague the requester added reads the request
+ * as the requester does, through this separate path; the requester's own paths do not change. Anyone else is told
+ * it does not exist.
+ */
+export async function getFollowedRequest(requestId: unknown, repository: RequestQueryRepository): Promise<RequestWithHistory> {
+  const actor = assertRole(await requireCurrentActor(), "REQUESTER");
+  const id = validateInput(entityIdSchema, requestId);
+  const request = repository.findForColleagueFollower ? await repository.findForColleagueFollower(id, actor.id) : null;
+  if (!request) {
+    throw new NotFoundError();
+  }
+  return withoutAttendanceHistory(request);
+}
+
+/** 6.3 item 2 (decision I14): the requests the requester follows, for "Que eu acompanho". */
+export async function listFollowedRequests(repository: RequestQueryRepository): Promise<RequestWithHistory[]> {
+  const actor = assertRole(await requireCurrentActor(), "REQUESTER");
+  const requests = repository.listForColleagueFollower ? await repository.listForColleagueFollower(actor.id) : [];
+  return requests.map(withoutAttendanceHistory);
+}
+
+/**
  * The saves of the attendance fields are seen only by the team (SPEC 2026-11-03-campos-condicionais-
  * atendimento, 5.6), so the requester's and the manager's details leave them out.
  */

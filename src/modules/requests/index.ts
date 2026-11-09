@@ -171,6 +171,16 @@ export async function getRequesterRequest(
   return queries.getRequesterRequest(requestId, createPrismaRequestQueryRepository(database));
 }
 
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 2: a colleague who follows reads as the requester. */
+export async function getFollowedRequest(requestId: unknown, database: PrismaClient = prisma): Promise<RequestWithHistoryForRequester> {
+  return queries.getFollowedRequest(requestId, createPrismaRequestQueryRepository(database));
+}
+
+/** 6.3 item 2 (decision I14): "Que eu acompanho". */
+export async function listFollowedRequests(database: PrismaClient = prisma): Promise<RequestWithHistoryForRequester[]> {
+  return queries.listFollowedRequests(createPrismaRequestQueryRepository(database));
+}
+
 export async function listAttendantQueue(
   database: PrismaClient = prisma,
 ): Promise<RequestWithHistory[]> {

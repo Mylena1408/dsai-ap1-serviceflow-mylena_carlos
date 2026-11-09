@@ -248,6 +248,22 @@ export function createPrismaRequestQueryRepository(
       });
       return rows.map(toDomain);
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 2: only a requester the request's requester added.
+    async findForColleagueFollower(requestId, userId) {
+      const row = await database.request.findFirst({
+        where: { id: requestId, followers: { some: { userId, user: { role: "REQUESTER", isActive: true } } } },
+        include: requestWithHistory,
+      });
+      return row && toDomain(row);
+    },
+    async listForColleagueFollower(userId) {
+      const rows = await database.request.findMany({
+        where: { followers: { some: { userId, user: { role: "REQUESTER", isActive: true } } } },
+        include: requestWithHistory,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      });
+      return rows.map(toDomain);
+    },
     async findForRequester(requestId, requesterId) {
       const row = await database.request.findFirst({
         where: { id: requestId, requesterId },

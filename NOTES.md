@@ -2701,3 +2701,12 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Acesso:** a parte D amplia quem lê uma solicitação só para o colega seguidor e só para leitura (decisão I13), como está na SPEC aprovada; registrado na SPEC que nenhuma outra regra de acesso nem a segurança da conta mudam.
 - **Resultados:** typecheck, lint e build OK; unitários 1563/1563; integração 670/670; E2E 48/48.
 - **Linhas:** 168 `added` em TS (aplicação 66, testes 99, scripts 3).
+
+## SF-212 — Incluir, retirar e a leitura do seguidor (2026-11-09)
+
+- **Escolha do colega:** pelo e-mail exato (a coluna é `citext`, então maiúsculas não importam); sem lista de pessoas para solicitantes; e-mail desconhecido, de outro perfil ou inativo recebe a mesma recusa.
+- **Leitura por caminho próprio:** `getFollowedRequest` e `listFollowedRequests` são consultas novas no módulo de solicitações, que exigem a pessoa na lista de seguidores como solicitante ativo; `getFollowerReading` traz só comentários públicos, respostas de campos do público do solicitante e nome, formato e tamanho dos documentos. Nenhum leitor existente mudou, e os caminhos do próprio solicitante continuam só dele (o teste confere que o colega recebe "não encontrado" em `getRequesterRequest`).
+- **Documentos:** o colega não baixa os arquivos, porque a rota de download tem regra de acesso própria; redução registrada na SPEC, a ser revista pela responsável se quiser o download.
+- **Quem acompanha:** visível ao solicitante, aos colegas que seguem e à equipe do setor; o solicitante retira colegas, nunca atendentes.
+- **Resultados:** typecheck, lint e build OK; unitários 1563/1563; integração 676/676; E2E 48/48.
+- **Linhas:** 387 `added` em TS (aplicação 260, testes 127).

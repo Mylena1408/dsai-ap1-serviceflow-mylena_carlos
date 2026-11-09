@@ -414,3 +414,7 @@
 > pode prosseguir
 
 103. SF-211: migration e domínio dos seguidores; registrado na SPEC o alcance da leitura do colega seguidor.
+
+> pode prosseguir
+
+104. SF-212: incluir e retirar seguidores e a leitura do colega por consultas próprias; escolha por e-mail e documentos sem download registrados na SPEC.

@@ -2221,7 +2221,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-212 — Incluir, retirar e leitura do seguidor
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. `addFollower`, `removeFollower`, `getRequestFollowers` e `getFollowerReading` (módulo de seguidores) e as consultas novas `getFollowedRequest` e `listFollowedRequests` (módulo de solicitações), sem mudar as regras de acesso existentes.
 - **Objetivo:** Seção 6.3 (regras 1, 2 e 4), parte D.
 - **Arquivos/módulos esperados:** Leitura da solicitação, "Minhas solicitações".
 - **Dependências:** SF-211.

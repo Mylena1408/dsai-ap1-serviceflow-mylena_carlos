@@ -21,6 +21,12 @@ export type ActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";
 export interface RequestQueryRepository {
   listByRequester(requesterId: string): Promise<RequestWithHistory[]>;
   findForRequester(requestId: string, requesterId: string): Promise<RequestWithHistory | null>;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 2 (decision I13): a request the requester follows as a colleague,
+   * and the ones they follow. Optional for older doubles: absent = none.
+   */
+  findForColleagueFollower?(requestId: string, userId: string): Promise<RequestWithHistory | null>;
+  listForColleagueFollower?(userId: string): Promise<RequestWithHistory[]>;
   listBySector(sectorId: string): Promise<RequestWithHistory[]>;
   findInSector(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
   /**
