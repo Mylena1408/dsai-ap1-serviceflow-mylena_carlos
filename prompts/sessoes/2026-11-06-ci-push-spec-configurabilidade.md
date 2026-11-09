@@ -468,3 +468,7 @@
 > pode prosseguir
 
 117. SF-217: migration e caso de uso do encerramento como duplicada (o envio da parte E segue aguardando autorização).
+
+> envie os commits
+
+118. Envio de SF-215 a SF-217: cópia `serviceflow-2026-11-09-pre-deploy-2.dump` conferida, 2 migrations no Neon, push `1bc8507..c984f03`; CI aprovado (run 42656076559).

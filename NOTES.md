@@ -2801,3 +2801,7 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Histórico dos vínculos:** o tipo da ação passou a incluir `CLOSED_AS_DUPLICATE`, e o título do histórico distingue as duas pontas.
 - **Resultados:** typecheck, lint e build OK; unitários 1583/1583; integração 693/693; E2E 50/50.
 - **Linhas:** 163 `added` em TS (aplicação 71, testes 92).
+
+## Envio de SF-215 a SF-217 (2026-11-09)
+
+- Ordem combinada: cópia (seção 19 da SPEC de backup), as 2 migrations no Neon (menções e encerramento como duplicada; 55 para 57) e o push de `1bc8507` a `c984f03` (5 commits: parte E, SPEC 2 e SF-217). CI aprovado (run 42656076559), com a varredura de segredos.
