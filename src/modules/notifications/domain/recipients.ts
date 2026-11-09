@@ -37,6 +37,8 @@ export interface NotificationContext {
   followers?: { colleagueIds: readonly string[]; attendantIds: readonly string[] };
   /** SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2: the people mentioned in an internal note, loaded for it. */
   mentionedIds?: readonly string[];
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 8.4: a cancellation's reason, loaded only for a cancellation. */
+  cancellationReason?: "DUPLICATE" | null;
 }
 
 export type NotifiableEvent =
@@ -118,7 +120,9 @@ function plannedWithoutFollowers(event: NotifiableEvent, context: NotificationCo
       return [];
 
     case "request.status_changed": {
-      const type = STATUS_TYPES[event.payload.toStatus];
+      // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: a duplicate's closing tells the requester they follow the original.
+      const type =
+        event.payload.toStatus === "CANCELLED" && context.cancellationReason === "DUPLICATE" ? "status.DUPLICATE" : STATUS_TYPES[event.payload.toStatus];
       if (!type) return [];
       // A rejection also cancels the request; the requester hears about it once, as a rejection.
       if (event.payload.toStatus === "CANCELLED" && context.approvalState === "REJECTED") return [];

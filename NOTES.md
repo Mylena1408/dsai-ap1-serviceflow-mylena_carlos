@@ -2805,3 +2805,12 @@ Padrão a replicar nas SF-039 e SF-040:
 ## Envio de SF-215 a SF-217 (2026-11-09)
 
 - Ordem combinada: cópia (seção 19 da SPEC de backup), as 2 migrations no Neon (menções e encerramento como duplicada; 55 para 57) e o push de `1bc8507` a `c984f03` (5 commits: parte E, SPEC 2 e SF-217). CI aprovado (run 42656076559), com a varredura de segredos.
+
+## SF-218 — Duplicada: avisos e leitura da original (2026-11-09)
+
+- **Aviso:** não existe aviso de "passou a acompanhar" (a parte D só registra no histórico dos seguidores); então, quando o cancelamento tem o motivo `DUPLICATE`, o solicitante recebe um único aviso `status.DUPLICATE` (categoria de status) no lugar do aviso de cancelamento. Registrado na SPEC (8.4).
+- **Motivo:** lido do histórico da situação (mesmo `occurredAt` do evento) por uma porta opcional do armazenamento de avisos; o conteúdo do evento `request.status_changed` não mudou, e os testes que fixam esse conteúdo seguem como estavam.
+- **Atalho:** `getFollowedDuplicateOriginal` (só solicitante; a duplicada é dele e ele segue a original) mostra na página da duplicada o link para `/requests/following/<id>`; deixa de aparecer quando ele para de seguir.
+- **Rótulos:** "Encerrada como duplicada" na seção "E-mails"; a lista exata da categoria de status no teste foi estendida, como a SPEC prevê.
+- **Resultados:** typecheck, lint e build OK; unitários 1586/1586; integração 696/696; E2E 50/50.
+- **Linhas:** 154 `added` em TS (aplicação 50, testes 104).

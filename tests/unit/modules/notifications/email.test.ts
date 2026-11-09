@@ -18,7 +18,8 @@ describe("notification categories (SF-092)", () => {
     expect(Object.fromEntries(NOTIFICATION_CATEGORIES.map((category) => [category, typesOfCategory(category)]))).toEqual({
       // "sector.*" added by SPEC 2026-11-03-transferencia-entre-setores, 5.6; "sla.paused" by
       // SPEC 2026-11-03-pausa-sla-calendario, 5.6.
-      STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "sector.changed", "sla.paused"],
+      // "status.DUPLICATE" by SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2.
+      STATUS: ["status.IN_PROGRESS", "status.COMPLETED", "status.CANCELLED", "status.OPEN", "status.DUPLICATE", "sector.changed", "sla.paused"],
       ASSIGNMENT: ["assignment.received", "sector.received"],
       // "document.added" added by SPEC 2026-11-03-anexos-comentarios-documentos, 5.3.6; "comment.mention" by
       // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2.

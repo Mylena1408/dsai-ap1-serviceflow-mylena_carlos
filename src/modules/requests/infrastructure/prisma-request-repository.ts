@@ -261,6 +261,20 @@ export function createPrismaRequestQueryRepository(
       });
       return row && toDomain(row);
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: the duplicate is the requester's, and they follow the original.
+    async findFollowedDuplicateOriginal(requestId, userId) {
+      const event = await database.requestLinkEvent.findFirst({
+        where: {
+          fromRequestId: requestId,
+          action: "CLOSED_AS_DUPLICATE",
+          fromRequest: { requesterId: userId },
+          toRequest: { followers: { some: { userId, user: { role: "REQUESTER", isActive: true } } } },
+        },
+        orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+        select: { toRequest: { select: { id: true, serviceNameSnapshot: true } } },
+      });
+      return event ? { id: event.toRequest.id, serviceName: event.toRequest.serviceNameSnapshot } : null;
+    },
     async listForColleagueFollower(userId) {
       const rows = await database.request.findMany({
         where: { followers: { some: { userId, user: { role: "REQUESTER", isActive: true } } } },

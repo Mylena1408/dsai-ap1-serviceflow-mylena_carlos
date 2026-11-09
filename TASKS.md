@@ -2281,7 +2281,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-218 — Duplicada: histórico, avisos e leitura da original
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Aviso próprio `status.DUPLICATE` ao solicitante da duplicada e atalho para a original pela página do colega, enquanto a acompanha.
 - **Objetivo:** Seção 8.3 (regras 2 e 3), parte F.
 - **Arquivos/módulos esperados:** Histórico, notificações, seguidores.
 - **Dependências:** SF-217.

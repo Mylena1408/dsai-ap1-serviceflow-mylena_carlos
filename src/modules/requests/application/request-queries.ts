@@ -6,7 +6,7 @@ import { validateInput } from "@/server/validation";
 import { entityIdSchema } from "@/shared/validation";
 import type { RequestWithHistory } from "../domain/request";
 import { parseSearchCriteria, type RawSearchParams, type SearchCriteria } from "../domain/search-criteria";
-import type { RequestQueryRepository, RequestSearchPage } from "./ports";
+import type { DuplicateOriginalView, RequestQueryRepository, RequestSearchPage } from "./ports";
 
 export async function listRequesterRequests(
   repository: RequestQueryRepository,
@@ -51,6 +51,16 @@ export async function listFollowedRequests(repository: RequestQueryRepository): 
   const actor = assertRole(await requireCurrentActor(), "REQUESTER");
   const requests = repository.listForColleagueFollower ? await repository.listForColleagueFollower(actor.id) : [];
   return requests.map(withoutAttendanceHistory);
+}
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: on the requester's own duplicate closed by the team, the original it
+ * went into, read through the colleague's page; only while they follow it, so nothing new is shown by this path.
+ */
+export async function getFollowedDuplicateOriginal(requestId: unknown, repository: RequestQueryRepository): Promise<DuplicateOriginalView | null> {
+  const actor = assertRole(await requireCurrentActor(), "REQUESTER");
+  const id = validateInput(entityIdSchema, requestId);
+  return repository.findFollowedDuplicateOriginal ? repository.findFollowedDuplicateOriginal(id, actor.id) : null;
 }
 
 /**

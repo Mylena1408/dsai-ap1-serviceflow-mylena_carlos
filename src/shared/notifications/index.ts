@@ -4,6 +4,8 @@ export type NotificationType =
   | "status.COMPLETED"
   | "status.CANCELLED"
   | "status.OPEN"
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2.
+  | "status.DUPLICATE"
   | "assignment.received"
   | "comment.public"
   | "comment.internal"
@@ -35,6 +37,7 @@ const MESSAGES: Record<NotificationType, (service: string, stage?: string) => st
   "status.COMPLETED": (service) => `Solicitação concluída: ${service}`,
   "status.CANCELLED": (service) => `Solicitação cancelada: ${service}`,
   "status.OPEN": (service) => `Solicitação reaberta: ${service}`,
+  "status.DUPLICATE": (service) => `Encerrada como duplicada; você passa a acompanhar a original: ${service}`,
   "assignment.received": (service) => `Uma solicitação foi transferida para você: ${service}`,
   "comment.public": (service) => `Novo comentário em ${service}`,
   "comment.internal": (service) => `Nova nota interna em ${service}`,

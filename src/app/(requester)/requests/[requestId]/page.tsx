@@ -8,6 +8,7 @@ import {
   listRequestAttachments,
   listRequestFieldAnswers,
   listRequestLinks,
+  getFollowedDuplicateOriginal,
   getApprovalLevels,
   getRequestGroupBlock,
   getRequestScheduleName,
@@ -82,6 +83,7 @@ export default async function RequestPage({
   let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
   let scheduleName: string | null = null;
   let followers: Awaited<ReturnType<typeof getRequestFollowers>> | null = null;
+  let duplicateOf: Awaited<ReturnType<typeof getFollowedDuplicateOriginal>> = null;
 
   try {
     request = await getRequesterRequest(requestId);
@@ -98,6 +100,8 @@ export default async function RequestPage({
     group = await getRequestGroupBlock(request.id);
     // SPEC 2026-11-07-operacao-e-automacao, 5.3 item 4.
     scheduleName = await getRequestScheduleName(request.id);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2.
+    if (request.status === "CANCELLED") duplicateOf = await getFollowedDuplicateOriginal(request.id);
   } catch (error) {
     if (error instanceof NotFoundError) notFound();
     throw error;
@@ -154,6 +158,13 @@ export default async function RequestPage({
       <RequestFieldAnswers answers={answers} />
       <RequestAttachments requestId={request.id} attachments={attachments} />
       <RequestLinks hrefFor={(id) => `/requests/${id}`} links={links.links} requestId={request.id} />
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2. */}
+      {duplicateOf ? (
+        <p className="content-section" role="note">
+          Esta solicitação foi encerrada como duplicada. Você acompanha a original:{" "}
+          <Link href={`/requests/following/${duplicateOf.id}`}>{duplicateOf.serviceName}</Link>.
+        </p>
+      ) : null}
       {group ? (
         <p className="content-section">
           Parte do pacote <Link href={`/requests/groups/${group.groupId}`}>{group.bundleName}</Link> ({groupProgressText(group.progress)}).

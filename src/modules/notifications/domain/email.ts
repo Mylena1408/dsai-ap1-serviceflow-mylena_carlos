@@ -16,6 +16,7 @@ const TYPE_CATEGORY: Record<NotificationType, NotificationCategory> = {
   "status.COMPLETED": "STATUS",
   "status.CANCELLED": "STATUS",
   "status.OPEN": "STATUS",
+  "status.DUPLICATE": "STATUS",
   "assignment.received": "ASSIGNMENT",
   "comment.public": "COMMENTS",
   "comment.internal": "COMMENTS",

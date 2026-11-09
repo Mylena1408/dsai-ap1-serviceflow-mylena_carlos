@@ -177,6 +177,11 @@ export async function getFollowedRequest(requestId: unknown, database: PrismaCli
 }
 
 /** 6.3 item 2 (decision I14): "Que eu acompanho". */
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2. */
+export async function getFollowedDuplicateOriginal(requestId: unknown, database: PrismaClient = prisma) {
+  return queries.getFollowedDuplicateOriginal(requestId, createPrismaRequestQueryRepository(database));
+}
+
 export async function listFollowedRequests(database: PrismaClient = prisma): Promise<RequestWithHistoryForRequester[]> {
   return queries.listFollowedRequests(createPrismaRequestQueryRepository(database));
 }

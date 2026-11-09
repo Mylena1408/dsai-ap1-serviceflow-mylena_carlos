@@ -472,3 +472,7 @@
 > envie os commits
 
 118. Envio de SF-215 a SF-217: cópia `serviceflow-2026-11-09-pre-deploy-2.dump` conferida, 2 migrations no Neon, push `1bc8507..c984f03`; CI aprovado (run 42656076559).
+
+> pode prosseguir
+
+119. SF-218: aviso `status.DUPLICATE` ao solicitante da duplicada (no lugar do aviso de cancelamento, por não existir aviso de "passou a acompanhar") e atalho para a original; CA-DUP-02 e 03 marcados.

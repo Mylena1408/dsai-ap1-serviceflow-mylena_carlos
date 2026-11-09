@@ -8,6 +8,8 @@ const TYPE_LABELS: Record<NotificationType, string> = {
   "status.COMPLETED": "Solicitação concluída",
   "status.CANCELLED": "Solicitação cancelada",
   "status.OPEN": "Solicitação reaberta",
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2.
+  "status.DUPLICATE": "Encerrada como duplicada",
   "assignment.received": "Transferência recebida",
   "comment.public": "Comentário",
   "comment.internal": "Nota interna",

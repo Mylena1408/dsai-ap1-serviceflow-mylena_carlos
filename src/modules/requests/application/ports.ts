@@ -27,6 +27,8 @@ export interface RequestQueryRepository {
    */
   findForColleagueFollower?(requestId: string, userId: string): Promise<RequestWithHistory | null>;
   listForColleagueFollower?(userId: string): Promise<RequestWithHistory[]>;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: the original a requester's closed duplicate went into, while they follow it. */
+  findFollowedDuplicateOriginal?(requestId: string, userId: string): Promise<DuplicateOriginalView | null>;
   listBySector(sectorId: string): Promise<RequestWithHistory[]>;
   findInSector(requestId: string, sectorId: string): Promise<RequestWithHistory | null>;
   /**
@@ -537,3 +539,6 @@ export interface RequestTransaction {
 export interface RequestTransactionRunner {
   run<T>(work: (transaction: RequestTransaction) => Promise<T>): Promise<T>;
 }
+
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: what the requester of a closed duplicate sees of the original. */
+export type DuplicateOriginalView = { id: string; serviceName: string };

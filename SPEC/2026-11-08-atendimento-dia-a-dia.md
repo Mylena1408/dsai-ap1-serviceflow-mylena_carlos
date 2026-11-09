@@ -259,12 +259,13 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 
 - Sem tabelas novas: usa o cancelamento, o vínculo e os seguidores. O histórico do cancelamento ganha o motivo `DUPLICATE`.
 - *Esclarecimentos registrados em 2026-11-09 (SF-217):* sem tabelas novas, como previsto; a migration `20261109300000_close_as_duplicate` acrescenta só a coluna opcional `reason` ao histórico de situação (valor `DUPLICATE`, aceito só em cancelamento, por `CHECK`) e a ação `CLOSED_AS_DUPLICATE` ao histórico dos vínculos, que aparece nas duas solicitações ("Encerrada como duplicada de #código" na duplicada; "Duplicada #código encerrada" na original). Encerra quem cancela hoje pelo lado da equipe (atendente do setor; com responsável, só ele); a nota do atendente é obrigatória, como no cancelamento pela equipe, e a justificativa gravada é "Duplicada de #código. <nota>". Sem o vínculo, ou com a original cancelada, é conflito. O solicitante da duplicada passa a seguir a original como colega ("passou a acompanhar" feito pelo atendente), exceto quando é também o solicitante da original.
+- *Esclarecimentos registrados em 2026-11-09 (SF-218):* o sistema não tem aviso próprio de "passou a acompanhar" (a parte D registra a entrada só no histórico dos seguidores); por isso, quando o cancelamento tem o motivo `DUPLICATE`, o solicitante da duplicada recebe, no lugar do aviso do cancelamento, um único aviso `status.DUPLICATE` (categoria de status, "Encerrada como duplicada; você passa a acompanhar a original: <serviço>"), que cobre os dois. O motivo é lido do histórico da situação no momento do evento, sem mudar o conteúdo do evento `request.status_changed`. Na página da duplicada, o solicitante vê um atalho para a original pela página do colega (`/requests/following/<id>`), só enquanto a acompanha; a consulta é separada e não muda o que os caminhos do solicitante já mostram.
 
 ### 8.5 Critérios de aceitação
 
 - [ ] **CA-DUP-01** — Solicitações sem vínculo de duplicada se comportam como hoje.
-- [ ] **CA-DUP-02** — O encerramento segue as regras 1 e 2, numa transação, com histórico nas duas solicitações e os avisos.
-- [ ] **CA-DUP-03** — O solicitante da duplicada acompanha a original sem ver dados internos.
+- [x] **CA-DUP-02** — O encerramento segue as regras 1 e 2, numa transação, com histórico nas duas solicitações e os avisos.
+- [x] **CA-DUP-03** — O solicitante da duplicada acompanha a original sem ver dados internos.
 
 ## 9. Parte G — Complementos
 

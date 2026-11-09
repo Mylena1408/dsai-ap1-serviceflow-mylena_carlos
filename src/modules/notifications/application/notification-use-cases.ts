@@ -75,6 +75,10 @@ export function createNotificationConsumer(store: NotificationStore): EventConsu
           : {}),
         // SPEC 2026-11-08-atendimento-dia-a-dia, 6.3 item 3 (decision I12).
         ...(store.followers ? { followers: await store.followers(event.requestId, request.sectorId) } : {}),
+        // SPEC 2026-11-08-atendimento-dia-a-dia, 8.4: only for a cancellation.
+        ...(event.type === "request.status_changed" && event.payload.toStatus === "CANCELLED" && store.cancellationReason
+          ? { cancellationReason: await store.cancellationReason(event.requestId, event.occurredAt) }
+          : {}),
         // SPEC 2026-11-08-atendimento-dia-a-dia, 7.3 item 2: only for an internal note.
         ...(event.type === "request.comment_added" && event.payload.isInternal === true && typeof event.payload.commentId === "string" && store.mentionedIds
           ? { mentionedIds: await store.mentionedIds(event.payload.commentId) }
