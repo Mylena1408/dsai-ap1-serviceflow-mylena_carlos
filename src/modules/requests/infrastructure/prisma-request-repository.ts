@@ -590,6 +590,26 @@ export function createPrismaRequestTransaction(
         select: { name: true, assigneeId: true, targetDays: true, conditionFieldId: true, conditionValue: true },
       });
     },
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3.
+    async findDuplicateOriginal(requestId) {
+      const link = await transaction.requestLink.findFirst({
+        where: { fromRequestId: requestId, kind: "DUPLICATE_OF" },
+        select: { toRequest: { select: { id: true, status: true, requesterId: true } } },
+      });
+      return link?.toRequest ?? null;
+    },
+    async insertClosedAsDuplicate(duplicateId, originalId, actorId, at) {
+      await transaction.requestLinkEvent.create({
+        data: { fromRequestId: duplicateId, toRequestId: originalId, kind: "DUPLICATE_OF", action: "CLOSED_AS_DUPLICATE", actorId, occurredAt: at },
+      });
+    },
+    async followOriginal(originalId, userId, addedById, at) {
+      const following = await transaction.requestFollower.count({ where: { requestId: originalId, userId } });
+      if (following > 0) return false;
+      await transaction.requestFollower.create({ data: { requestId: originalId, userId, addedById, createdAt: at } });
+      await transaction.requestFollowerEvent.create({ data: { requestId: originalId, userId, action: "ADDED", actorId: addedById, occurredAt: at } });
+      return true;
+    },
     // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 2.
     async hasChecklist(requestId) {
       return (await transaction.requestChecklist.count({ where: { requestId } })) > 0;

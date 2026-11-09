@@ -109,6 +109,8 @@ export interface NewStatusEvent {
   occurredAt: Date;
   /** Cancellation or reopening reason (SPEC 2026-10-31, section 5.9). */
   note?: string | null;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 8.4: why it was cancelled, when it says. */
+  reason?: "DUPLICATE";
 }
 
 export interface StatusUpdate {
@@ -425,6 +427,14 @@ export interface RequestTransaction {
    * checklist.
    */
   hasChecklist?(requestId: string): Promise<boolean>;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 (decision I17): the original a request is linked to as "duplicada de";
+   * the closing's mark on the links' history; and the duplicate's requester following the original. Optional for
+   * older doubles.
+   */
+  findDuplicateOriginal?(requestId: string): Promise<{ id: string; status: RequestStatus; requesterId: string } | null>;
+  insertClosedAsDuplicate?(duplicateId: string, originalId: string, actorId: string, at: Date): Promise<void>;
+  followOriginal?(originalId: string, userId: string, addedById: string, at: Date): Promise<boolean>;
   /** The request's checklist items, for the completion's rule (4.3 item 4). */
   listChecklistItems?(requestId: string): Promise<Array<{ textSnapshot: string; isRequired: boolean; position: number; doneAt: Date | null }>>;
   listChecklistModel?(serviceId: string): Promise<ChecklistTemplateItem[]>;

@@ -15,7 +15,8 @@ import { closePause, resumeColumns } from "./sla-pause";
 import type { SlaClock } from "@/shared/business-clock";
 import { NO_STAGE, NO_STAGE_DETAILS } from "../domain/stages";
 import { requestCancellationInputSchema, requestReopeningInputSchema } from "./request-schemas";
-import type { RequestTransactionRunner, StatusUpdate } from "./ports";
+import { requestShortCode } from "@/shared/requests";
+import type { RequestTransaction, RequestTransactionRunner, StatusUpdate } from "./ports";
 
 // Cancellation and reopening (SPEC 2026-10-31, sections 5.4 and 5.5). Requester and
 // attendant reach the same use case; the domain decides from the reloaded actor and request,
@@ -24,6 +25,12 @@ import type { RequestTransactionRunner, StatusUpdate } from "./ports";
 interface LifecycleChange {
   toStatus: RequestStatus;
   note: string | null;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 8.4. */
+  reason?: "DUPLICATE";
+  /** More writes in the same transaction, after the status changed. */
+  after?: (transaction: RequestTransaction, actor: LifecycleUser, request: LifecycleRequest, at: Date) => Promise<void>;
+  /** Reads needed before the decision (in the same transaction). */
+  prepare?: (transaction: RequestTransaction) => Promise<void>;
   decide: (actor: LifecycleUser, request: LifecycleRequest, now: Date) => void;
   stamps: (
     now: Date,
@@ -54,6 +61,7 @@ async function changeLifecycle(
 
     const occurredAt = await transaction.currentTime();
     change.decide(actor, request, occurredAt);
+    await change.prepare?.(transaction);
     // SPEC 2026-11-03-pausa-sla-calendario, 5.4.3: cancelling ends a running pause.
     const ending = await resumeColumns(transaction, request, occurredAt);
 
@@ -80,6 +88,7 @@ async function changeLifecycle(
       toStatus: change.toStatus,
       occurredAt,
       note: change.note,
+      ...(change.reason ? { reason: change.reason } : {}),
     });
     // The reason stays in the history only; the event carries codes (SPEC de eventos, 6.1).
     await transaction.recordEvent({
@@ -92,6 +101,8 @@ async function changeLifecycle(
     if (ending) {
       await closePause(transaction, requestId, occurredAt, actor.id, "ATTENDANCE_ENDED");
     }
+
+    await change.after?.(transaction, actor, request, occurredAt);
   });
 }
 
@@ -149,4 +160,46 @@ export async function reopenRequest(
       ...NO_STAGE_DETAILS,
     }),
   });
+}
+
+/**
+ * SPEC 2026-11-08-atendimento-dia-a-dia, part F (decisions I17 and I18): closes a request linked as "duplicada de" another.
+ * Who may cancel it today (an attendant of the sector, its holder) cancels it with "Duplicada de #código" and the note;
+ * in the same transaction the links' history marks the closing on both requests, and the duplicate's requester starts
+ * following the original (unless they opened it). The original must not be cancelled; without the link, it is a conflict.
+ */
+export async function closeAsDuplicate(input: unknown, transactions: RequestTransactionRunner): Promise<void> {
+  const parsed = validateInput(requestCancellationInputSchema, input);
+  const note = normalizeNote(parsed.note);
+  let original: { id: string; status: RequestStatus; requesterId: string } | null = null;
+
+  await changeLifecycle(parsed.requestId, transactions, {
+    toStatus: "CANCELLED",
+    reason: "DUPLICATE",
+    // Read when the history is written, after `prepare` found the original.
+    get note() {
+      return original ? duplicateNote(requestShortCode(original.id), note) : note;
+    },
+    decide: (actor, request) => {
+      if (actor.role !== "ATTENDANT") throw new NotFoundError();
+      assertCanCancel(actor, request, note);
+    },
+    prepare: async (transaction) => {
+      original = (await transaction.findDuplicateOriginal?.(parsed.requestId)) ?? null;
+      if (!original || original.status === "CANCELLED") throw new ConflictError();
+    },
+    stamps: async (now) => ({ cancelledAt: now }),
+    after: async (transaction, actor, request, at) => {
+      if (!original) throw new ConflictError();
+      await transaction.insertClosedAsDuplicate?.(parsed.requestId, original.id, actor.id, at);
+      if (original.requesterId !== request.requesterId) {
+        await transaction.followOriginal?.(original.id, request.requesterId, actor.id, at);
+      }
+    },
+  });
+}
+
+/** 8.3 item 2: "Duplicada de #AB12CD34. <nota>". */
+export function duplicateNote(originalCode: string, note: string | null): string {
+  return note ? `Duplicada de #${originalCode}. ${note}` : `Duplicada de #${originalCode}.`;
 }

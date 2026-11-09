@@ -273,6 +273,11 @@ export async function cancelRequest(input: unknown, database: PrismaClient = pri
   return lifecycleActions.cancelRequest(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
 }
 
+/** SPEC 2026-11-08-atendimento-dia-a-dia, part F: closes a request linked as a duplicate of another. */
+export async function closeAsDuplicate(input: unknown, database: PrismaClient = prisma): Promise<void> {
+  return lifecycleActions.closeAsDuplicate(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
+}
+
 export async function reopenRequest(input: unknown, database: PrismaClient = prisma): Promise<void> {
   return lifecycleActions.reopenRequest(input, createPrismaRequestTransactionRunner(database, lifecycleErrors));
 }

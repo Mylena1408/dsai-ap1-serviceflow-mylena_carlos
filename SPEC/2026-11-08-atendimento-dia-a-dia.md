@@ -258,6 +258,7 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 ### 8.4 Dados
 
 - Sem tabelas novas: usa o cancelamento, o vínculo e os seguidores. O histórico do cancelamento ganha o motivo `DUPLICATE`.
+- *Esclarecimentos registrados em 2026-11-09 (SF-217):* sem tabelas novas, como previsto; a migration `20261109300000_close_as_duplicate` acrescenta só a coluna opcional `reason` ao histórico de situação (valor `DUPLICATE`, aceito só em cancelamento, por `CHECK`) e a ação `CLOSED_AS_DUPLICATE` ao histórico dos vínculos, que aparece nas duas solicitações ("Encerrada como duplicada de #código" na duplicada; "Duplicada #código encerrada" na original). Encerra quem cancela hoje pelo lado da equipe (atendente do setor; com responsável, só ele); a nota do atendente é obrigatória, como no cancelamento pela equipe, e a justificativa gravada é "Duplicada de #código. <nota>". Sem o vínculo, ou com a original cancelada, é conflito. O solicitante da duplicada passa a seguir a original como colega ("passou a acompanhar" feito pelo atendente), exceto quando é também o solicitante da original.
 
 ### 8.5 Critérios de aceitação
 

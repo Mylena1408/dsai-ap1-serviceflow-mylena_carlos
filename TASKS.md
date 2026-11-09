@@ -2271,7 +2271,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-217 — Encerrar como duplicada: domínio e caso de uso
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-09. Migration `20261109300000_close_as_duplicate` (motivo `DUPLICATE` e ação `CLOSED_AS_DUPLICATE`) e o caso de uso `closeAsDuplicate`, sobre o mecanismo do cancelamento, com o vínculo nas duas pontas e o solicitante seguindo a original.
 - **Objetivo:** Seção 8.3 (regras 1 e 2), parte F.
 - **Arquivos/módulos esperados:** `src/modules/requests/`.
 - **Dependências:** Parte E concluída.

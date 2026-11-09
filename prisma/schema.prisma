@@ -462,6 +462,8 @@ model RequestStatusEvent {
   toStatus   RequestStatus
   occurredAt DateTime       @default(now()) @db.Timestamptz
   note       String?
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 8.4: why a request was cancelled, when it says (only cancellations).
+  reason     RequestStatusReason?
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor   User    @relation("RequestStatusEventActor", fields: [actorId], references: [id], onDelete: Restrict)
@@ -953,6 +955,13 @@ enum RequestLinkKind {
 enum RequestLinkAction {
   LINKED
   UNLINKED
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: the duplicate was closed; shown on both requests.
+  CLOSED_AS_DUPLICATE
+}
+
+/// SPEC 2026-11-08-atendimento-dia-a-dia, 8.4.
+enum RequestStatusReason {
+  DUPLICATE
 }
 
 /// A link between two requests (3.3 item 1). One per pair, whatever the kind; the shape and the

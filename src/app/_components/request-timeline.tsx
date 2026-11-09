@@ -77,7 +77,14 @@ function assignmentTitle(event: AssignmentEvent): string {
 /** "Vinculada como duplicada de #AB12CD34" or "Vínculo removido: relacionada a #…". */
 export function linkEventTitle(event: Pick<RequestLinkEventView, "role" | "action" | "otherRequestId">): string {
   const target = `${LINK_ROLE_LABELS[event.role].toLowerCase()} #${requestShortCode(event.otherRequestId)}`;
-  return event.action === "LINKED" ? `Vinculada como ${target}` : `Vínculo removido: ${target}`;
+  if (event.action === "LINKED") return `Vinculada como ${target}`;
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: on the duplicate, "duplicada de"; on the original, the duplicate.
+  if (event.action === "CLOSED_AS_DUPLICATE") {
+    return event.role === "duplicate_of"
+      ? `Encerrada como duplicada de #${requestShortCode(event.otherRequestId)}`
+      : `Duplicada #${requestShortCode(event.otherRequestId)} encerrada`;
+  }
+  return `Vínculo removido: ${target}`;
 }
 
 export function buildTimeline(

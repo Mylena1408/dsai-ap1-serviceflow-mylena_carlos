@@ -2793,3 +2793,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Quando:** perto do fim da SPEC 1 (faltando as partes F e G), como a responsável pediu.
 - **Decisões da revisão:** K1 importação de usuários sem senha (inativos; o administrador ativa e define a senha pela tela atual, sem mudar nada da conta); K2 manutenção só avisa; K3 relatório periódico com página e e-mail opcional; K4 calendário do setor só para as solicitações abertas depois.
 - **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`, partes A a E, tarefas SF-234 a SF-259. A conta para a meta: 81.108 linhas adicionadas hoje; faltam 18.892; a SPEC 1 deve render mais 2.500 a 3.500; a SPEC 2, como escrita, de 9.000 a 12.000, então ela será aprofundada (como a SPEC 1 foi) quando a parte A começar, com os acréscimos propostos à responsável antes.
+
+## SF-217 — Encerrar como duplicada: banco e caso de uso (2026-11-09)
+
+- **Migration** `20261109300000_close_as_duplicate`: coluna opcional `RequestStatusEvent.reason` (enum `RequestStatusReason`, só `DUPLICATE`, aceito só em cancelamento por `CHECK`) e a ação `CLOSED_AS_DUPLICATE` em `RequestLinkAction`. Sem tabelas novas.
+- **Caso de uso:** `closeAsDuplicate` usa o `changeLifecycle` do cancelamento, que ganhou três ganchos opcionais (`reason`, `prepare`, `after`): a regra de quem cancela pela equipe, a pausa do prazo, o evento e o histórico são os de sempre; `prepare` encontra a original pelo vínculo "duplicada de" (conflito sem ela ou com ela cancelada); `after` grava o evento do vínculo e torna o solicitante seguidor da original. A nota gravada é "Duplicada de #código. <nota>".
+- **Histórico dos vínculos:** o tipo da ação passou a incluir `CLOSED_AS_DUPLICATE`, e o título do histórico distingue as duas pontas.
+- **Resultados:** typecheck, lint e build OK; unitários 1583/1583; integração 693/693; E2E 50/50.
+- **Linhas:** 163 `added` em TS (aplicação 71, testes 92).

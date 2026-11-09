@@ -464,3 +464,7 @@
 > vamos revisar
 
 116. Revisão da SPEC 2: quatro perguntas (importação sem senha, manutenção só avisa, relatório com página e e-mail, calendário só para as novas), todas respondidas com a opção recomendada; SPEC `2026-11-09-comunicacao-e-calendarios.md` escrita, com o aviso de que precisará de aprofundamento para cobrir a meta.
+
+> pode prosseguir
+
+117. SF-217: migration e caso de uso do encerramento como duplicada (o envio da parte E segue aguardando autorização).

@@ -46,11 +46,14 @@ export interface LinkTransaction {
     fromRequestId: string;
     toRequestId: string;
     kind: LinkKind;
-    action: "LINKED" | "UNLINKED";
+    action: LinkAction;
     actorId: string;
     occurredAt: Date;
   }): Promise<void>;
 }
+
+/** SPEC 2026-11-08-atendimento-dia-a-dia, 8.3 item 2: "CLOSED_AS_DUPLICATE" when the duplicate was closed. */
+export type LinkAction = "LINKED" | "UNLINKED" | "CLOSED_AS_DUPLICATE";
 
 export interface LinkStore {
   run<T>(work: (transaction: LinkTransaction) => Promise<T>): Promise<T>;
@@ -72,7 +75,7 @@ export interface RequestLinkView {
 export interface RequestLinkEventView {
   id: string;
   role: LinkRole;
-  action: "LINKED" | "UNLINKED";
+  action: LinkAction;
   otherRequestId: string;
   actor: { id: string; name: string };
   occurredAt: Date;
@@ -80,7 +83,7 @@ export interface RequestLinkEventView {
 
 export interface LinkReader {
   listLinks(requestId: string): Promise<Array<LinkRecord & { other: LinkRequestState }>>;
-  listEvents(requestId: string): Promise<Array<Omit<LinkRecord, "id"> & { id: string; action: "LINKED" | "UNLINKED"; actor: { id: string; name: string }; occurredAt: Date; otherRequesterId: string }>>;
+  listEvents(requestId: string): Promise<Array<Omit<LinkRecord, "id"> & { id: string; action: LinkAction; actor: { id: string; name: string }; occurredAt: Date; otherRequesterId: string }>>;
 }
 
 function readable(actor: AuthorizationActor, request: LinkRequestState): boolean {
