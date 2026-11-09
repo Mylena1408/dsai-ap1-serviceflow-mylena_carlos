@@ -524,3 +524,7 @@
 > (pergunta) "Registro só nos testes (Recomendado)"
 
 131. Commit e push da SF-233; os testes afetados passam a gravar detalhes quando falharem, numa tarefa à parte.
+
+> pode prosseguir
+
+132. Detalhes do 404 nos três E2E afetados (`failure-details.ts`), conferidos com um 404 forçado; commit local.

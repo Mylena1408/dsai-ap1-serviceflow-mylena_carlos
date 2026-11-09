@@ -4,6 +4,8 @@ import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 import { minimalPdf, syntheticText } from "../unit/modules/attachments/synthetic-files";
 import { ENTRANCE } from "./entrance";
+import { explainUnexpectedStatus } from "./failure-details";
+import { DEMO_ACCOUNTS } from "../../src/modules/auth/domain/demo-accounts";
 
 // SPEC 2026-11-03-anexos-comentarios-documentos, section 8 (SF-127): the requester opens a request
 // leaving the optional document for later (the empty file input fixed in SF-125), sends it later
@@ -83,6 +85,12 @@ test("files in comments and a document sent after the opening", async ({ page })
     const href = await page.getByRole("link", { name: "laudo.pdf" }).getAttribute("href");
     expect(href).toMatch(new RegExp(`^/api/requests/${requestId}/comments/[0-9a-f-]{36}/files/[0-9a-f-]{36}$`));
     const download = await page.request.get(href!);
+    // An intermittent 404 here (NOTES, 2026-11-09): when it happens, the details go to the log.
+    await explainUnexpectedStatus("comment-file-download", download, 200, {
+      requestId,
+      actorEmail: DEMO_ACCOUNTS.ATTENDANT.email,
+      commentFileId: href!.split("/").at(-1),
+    });
     expect(download.status()).toBe(200);
     expect(download.headers()["content-type"]).toBe("application/pdf");
     expect(download.headers()["cache-control"]).toBe("private, no-store");

@@ -4,6 +4,8 @@ import { expect, test, type APIRequestContext, type Page } from "@playwright/tes
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 import { ENTRANCE } from "./entrance";
+import { DEMO_ACCOUNTS } from "../../src/modules/auth/domain/demo-accounts";
+import { explainUnexpectedStatus } from "./failure-details";
 
 // SPEC 2026-11-03-api-acoes-webhooks-setor, section 8 (SF-119): an attendant with a token assumes,
 // starts and completes a request through the API, and the screen shows the history; the
@@ -139,7 +141,10 @@ test("attendance through the API, a webhook filtered by sector and a resent deli
   await enterAs(page, "Atendente");
   const attendantToken = await createToken(page, `${unique} atendente`);
   const headers = { authorization: `Bearer ${attendantToken}` };
-  expect((await api.post(`/api/v1/requests/${inSector}/assume`, { headers })).status()).toBe(200);
+  const assumed = await api.post(`/api/v1/requests/${inSector}/assume`, { headers });
+  // An intermittent 404 here (NOTES, 2026-11-09): when it happens, the details go to the log.
+  await explainUnexpectedStatus("api-assume", assumed, 200, { requestId: inSector, actorEmail: DEMO_ACCOUNTS.ATTENDANT.email });
+  expect(assumed.status()).toBe(200);
   expect((await api.post(`/api/v1/requests/${inSector}/start`, { headers })).status()).toBe(200);
   const completed = await api.post(`/api/v1/requests/${inSector}/complete`, { headers, data: {} });
   expect(completed.status()).toBe(200);

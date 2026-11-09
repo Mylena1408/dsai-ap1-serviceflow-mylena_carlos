@@ -2867,3 +2867,10 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Registro temporário:** a origem de cada "não encontrado" foi gravada no servidor (só no E2E, por variável de ambiente); duas rodadas completas passaram inteiras (53/53), sem reproduzir a falha. O registro foi retirado; nada dele entrou no repositório. A falha nunca apareceu no CI.
 - **Decisão da responsável:** fazer o commit e o push da SF-233 e, numa tarefa à parte, fazer os três testes afetados gravarem, quando falharem, a resposta e o estado no banco (setor da solicitação e do atendente, arquivo), sem mudar o sistema.
 - **Resultados da SF-233:** typecheck, lint e build OK; unitários 1598/1598; integração 703/703; E2E: 52/53 e 50/53 nas duas primeiras rodadas (só o 404 acima, em testes sem relação com o lote) e 53/53 nas duas rodadas seguintes.
+
+## Detalhes do 404 intermitente nos E2E (2026-11-09)
+
+- **Decisão da responsável** ("Registro só nos testes"): sem mudar o sistema, os três testes que já tiveram o 404 gravam detalhes quando a resposta não é a esperada.
+- **Como:** `tests/e2e/failure-details.ts` (`explainUnexpectedStatus`): com a resposta diferente da esperada, escreve no log (linha `E2E-FAILURE-DETAILS`, legível no CI) e anexa ao relatório do teste o endereço, o status, o tipo e o início do corpo da resposta, e o estado no banco naquele momento: a solicitação (situação, setor, solicitante, responsável), a pessoa que fez a chamada (perfil, setor, ativa), se é do mesmo setor ou a dona da solicitação, e o arquivo pedido (dono, comentário, nota interna, removido). Com a resposta esperada, não faz nada. As asserções dos testes não mudaram.
+- **Onde:** `comment-files-late-documents.spec.ts` (download do arquivo do comentário pelo atendente), `request-documents.spec.ts` (os downloads de documento do solicitante e do atendente; no download por clique, a mesma ligação é pedida de novo para registrar a resposta) e `api-actions-webhook-sectors.spec.ts` ("assumir" pela API).
+- **Conferido:** um teste temporário com um 404 forçado mostrou os detalhes no log (apagado depois); os três testes passaram no caminho normal; typecheck e lint OK.

@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { expect, test, type Download, type Page } from "@playwright/test";
 import { ENTRANCE } from "./entrance";
+import { explainUnexpectedStatus } from "./failure-details";
+import { DEMO_ACCOUNTS } from "../../src/modules/auth/domain/demo-accounts";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoData } from "../../scripts/demo-data";
 import { minimalPdf, syntheticText } from "../unit/modules/attachments/synthetic-files";
@@ -43,12 +45,22 @@ async function addRequirement(
   await expect(panel.locator(".requirement-list").getByText(input.name, { exact: true })).toBeVisible();
 }
 
-async function downloadedBytes(page: Page, linkName: string): Promise<Buffer> {
-  const [download]: [Download, void] = await Promise.all([
-    page.waitForEvent("download"),
-    page.getByRole("link", { name: linkName }).click(),
-  ]);
-  return readFile((await download.path())!);
+async function downloadedBytes(page: Page, linkName: string, actorEmail: string): Promise<Buffer> {
+  try {
+    const [download]: [Download, void] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("link", { name: linkName }).click(),
+    ]);
+    return readFile((await download.path())!);
+  } catch (error) {
+    // An intermittent 404 here (NOTES, 2026-11-09): the same link fetched again, with the details in the log.
+    const href = await page.getByRole("link", { name: linkName }).getAttribute("href");
+    if (href) {
+      const [, , , requestId, , attachmentId] = href.split("/");
+      await explainUnexpectedStatus("document-download", await page.request.get(href), 200, { requestId, actorEmail, attachmentId });
+    }
+    throw error;
+  }
 }
 
 test("documents are configured, required, sent, downloaded and protected", async ({ page }) => {
@@ -113,12 +125,17 @@ test("documents are configured, required, sent, downloaded and protected", async
   // Requester lists and downloads the same content (CA-DOC-15, CA-DOC-14).
   const documents = page.getByRole("region", { name: "Documentos enviados" });
   await expect(documents.getByText(`${requiredDocument} (obrigatório)`)).toBeVisible();
-  expect(sha256(await downloadedBytes(page, "Baixar requerimento.pdf"))).toBe(sha256(pdf));
+  expect(sha256(await downloadedBytes(page, "Baixar requerimento.pdf", DEMO_ACCOUNTS.REQUESTER.email))).toBe(sha256(pdf));
   const href = await page.getByRole("link", { name: "Baixar observacao.txt" }).getAttribute("href");
   expect(href).toMatch(new RegExp(`^/api/requests/${requestId}/attachments/[0-9a-f-]{36}$`));
 
   // Response headers and no storage key or public URL (CA-DOC-18).
   const response = await page.request.get(href!);
+  await explainUnexpectedStatus("document-download", response, 200, {
+    requestId,
+    actorEmail: DEMO_ACCOUNTS.REQUESTER.email,
+    attachmentId: href!.split("/").at(-1),
+  });
   expect(response.status()).toBe(200);
   expect(response.headers()).toMatchObject({
     "content-type": "text/plain",
@@ -140,7 +157,7 @@ test("documents are configured, required, sent, downloaded and protected", async
   await enterAs(page, "Atendente");
   await page.goto(`/queue/${requestId}`);
   await expect(page.getByText(description)).toBeVisible();
-  expect(sha256(await downloadedBytes(page, "Baixar requerimento.pdf"))).toBe(sha256(pdf));
+  expect(sha256(await downloadedBytes(page, "Baixar requerimento.pdf", DEMO_ACCOUNTS.ATTENDANT.email))).toBe(sha256(pdf));
   await signOut(page);
 
   // Administrator and anonymous users get the same "not found" (CA-DOC-16).
