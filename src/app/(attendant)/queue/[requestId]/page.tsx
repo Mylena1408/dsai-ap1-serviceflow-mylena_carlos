@@ -44,6 +44,8 @@ import { getRequestTags } from "@/modules/tags";
 import { getRequestChecklist } from "@/modules/checklists";
 import { RequestChecklist, checklistFeedback, checklistPendingText } from "@/app/_components/request-checklist";
 import { markChecklistItemAction } from "../checklist-actions";
+import { getRequestTime } from "@/modules/time-entries";
+import { RequestTime } from "@/app/_components/request-time";
 import { addRequestTagAction, removeRequestTagAction } from "../tag-actions";
 import { RequestGroupBlock } from "@/app/_components/request-group";
 import { linkRequestAction, unlinkRequestAction } from "../link-actions";
@@ -126,6 +128,7 @@ export default async function QueueRequestPage({
   let group: Awaited<ReturnType<typeof getRequestGroupBlock>> = null;
   let tags: Awaited<ReturnType<typeof getRequestTags>> | null = null;
   let checklist: Awaited<ReturnType<typeof getRequestChecklist>> | null = null;
+  let time: Awaited<ReturnType<typeof getRequestTime>> | null = null;
   let cannedResponses: Array<{ id: string; title: string; text: string }> = [];
   let candidates: Array<{ id: string; name: string }> = [];
   let destinations: Array<{ id: string; name: string }> = [];
@@ -149,6 +152,8 @@ export default async function QueueRequestPage({
     tags = await getRequestTags(request.id);
     // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3.
     checklist = await getRequestChecklist(request.id);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 5.1 item 2.
+    time = await getRequestTime(request.id);
     attendance = await getAttendanceFields(request.id);
     const holderId = effectiveAssigneeId(request);
     if (holderId === actor.id || (supervisor && holderId !== null)) {
@@ -261,6 +266,7 @@ export default async function QueueRequestPage({
       {tags ? <RequestTags edit={{ addAction: addRequestTagAction, removeAction: removeRequestTagAction }} requestId={request.id} view={tags} /> : null}
       {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 and 13.1 items 3 and 4. */}
       {checklist ? <RequestChecklist markAction={markChecklistItemAction} requestId={request.id} view={checklist} /> : null}
+      {time ? <RequestTime view={time} /> : null}
       <RequestConversation
         requestId={request.id}
         comments={comments}
@@ -269,7 +275,7 @@ export default async function QueueRequestPage({
         action={addCommentAction}
         cannedResponses={cannedResponses}
       />
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} />
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} timeEvents={time?.events ?? []} />
     </main>
   );
 }

@@ -1,9 +1,10 @@
 import type { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 import * as timeEntries from "./application/time-entries";
-import { createPrismaTimeEntryStore } from "./infrastructure/prisma-time-entries";
+import * as requestTime from "./application/request-time";
+import { createPrismaRequestTimeReader, createPrismaTimeEntryStore } from "./infrastructure/prisma-time-entries";
 
-// Time spent on requests (SPEC 2026-11-08-atendimento-dia-a-dia, part C): the rules (SF-206) and the entries (SF-207).
+// Time spent on requests (SPEC 2026-11-08-atendimento-dia-a-dia, part C): the rules (SF-206) the entries (SF-207) and a request's time (SF-208).
 export {
   MAX_ENTRY_MINUTES,
   MAX_ENTRY_NOTE_LENGTH,
@@ -35,4 +36,11 @@ export function updateTimeEntry(entryId: unknown, input: unknown, database: Pris
 
 export function deleteTimeEntry(entryId: unknown, database: PrismaClient = prisma) {
   return timeEntries.deleteTimeEntry(entryId, createPrismaTimeEntryStore(database));
+}
+
+export type { RequestTimeView, TimeEntryView, TimeEventView } from "./application/request-time";
+
+/** 5.1 item 2: the team reads a request's time. */
+export function getRequestTime(requestId: unknown, database: PrismaClient = prisma): Promise<requestTime.RequestTimeView> {
+  return requestTime.getRequestTime(requestId, createPrismaRequestTimeReader(database));
 }

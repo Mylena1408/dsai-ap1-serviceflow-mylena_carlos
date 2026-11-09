@@ -3,6 +3,7 @@ import { organizationToday } from "@/server/authorization/effective-permissions"
 import { runSerializableTransaction } from "@/server/db/serializable-transaction";
 import { DEFAULT_CALENDAR } from "@/shared/business-clock";
 import type { TimeEntryStore, TimeEntryTransaction } from "../application/time-entries";
+import type { RequestTimeReader } from "../application/request-time";
 import type { TimeEntryRecord, TimedRequest } from "../domain/time-entry";
 
 // Time entries in PostgreSQL (SPEC 2026-11-08-atendimento-dia-a-dia, 5.4): days are DATE columns read and written
@@ -70,6 +71,39 @@ export function createPrismaTimeEntryStore(database: PrismaClient): TimeEntrySto
         translate: ["P2025", "P2034"],
         fallbackMessage: "Time entry change failed.",
       });
+    },
+  };
+}
+
+/** 5.1 item 2: a request's entries, history and the service's estimate, for the team's screens. */
+export function createPrismaRequestTimeReader(database: PrismaClient): RequestTimeReader {
+  return {
+    async findRequest(requestId) {
+      const request = await findTimedRequest(database, requestId);
+      if (!request) return null;
+      const row = await database.request.findUnique({ where: { id: requestId }, select: { service: { select: { estimatedHours: true } } } });
+      return { ...request, estimatedHours: row?.service?.estimatedHours ?? null };
+    },
+    async entries(requestId) {
+      const rows = await database.requestTimeEntry.findMany({
+        where: { requestId },
+        orderBy: [{ workedOn: "desc" }, { createdAt: "desc" }],
+        select: { ...columns, user: { select: { name: true } } },
+      });
+      return rows.map(({ user, ...row }) => ({ ...recordOf(row), userName: user.name }));
+    },
+    async events(requestId) {
+      const rows = await database.requestTimeEntryEvent.findMany({
+        where: { requestId },
+        orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+        select: { id: true, occurredAt: true, action: true, workedOn: true, minutes: true, actor: { select: { name: true } } },
+      });
+      return rows.map(({ actor, workedOn, ...row }) => ({ ...row, workedOn: dayOf(workedOn), actorName: actor.name }));
+    },
+    today: () => organizationToday(database),
+    async now() {
+      const [row] = await database.$queryRaw<Array<{ now: Date }>>`SELECT now() AS "now"`;
+      return row.now;
     },
   };
 }

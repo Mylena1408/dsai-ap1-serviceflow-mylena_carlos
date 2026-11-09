@@ -27,6 +27,8 @@ import { RequestTags } from "@/app/_components/request-tags";
 import { getRequestTags } from "@/modules/tags";
 import { getRequestChecklist } from "@/modules/checklists";
 import { RequestChecklist } from "@/app/_components/request-checklist";
+import { getRequestTime } from "@/modules/time-entries";
+import { RequestTime } from "@/app/_components/request-time";
 import { ApprovalLevels } from "@/app/_components/approval-levels";
 import { requireManagerPageAccess } from "../../page-access";
 import { approveRequestAction, rejectRequestAction } from "../actions";
@@ -84,9 +86,12 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
   let tags: Awaited<ReturnType<typeof getRequestTags>> | null = null;
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3 (decision I6): the same team reads the checklist.
   let checklist: Awaited<ReturnType<typeof getRequestChecklist>> | null = null;
+  let time: Awaited<ReturnType<typeof getRequestTime>> | null = null;
   try {
     tags = await getRequestTags(request.id);
     checklist = await getRequestChecklist(request.id);
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 5.1 item 2: the manager reads the time too.
+    time = await getRequestTime(request.id);
   } catch (caught) {
     if (!(caught instanceof NotFoundError)) throw caught;
   }
@@ -162,7 +167,8 @@ export default async function ApprovalPage({ params, searchParams }: ApprovalPag
       {tags ? <RequestTags requestId={request.id} view={tags} /> : null}
       {/* SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 3: the manager only reads. */}
       {checklist ? <RequestChecklist requestId={request.id} view={checklist} /> : null}
-      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} />
+      {time ? <RequestTime view={time} /> : null}
+      <RequestTimeline request={request} actorLabel="Responsável pelo evento" linkEvents={links.events} tagEvents={tags?.events ?? []} checklistEvents={checklist?.events ?? []} timeEvents={time?.events ?? []} />
     </main>
   );
 }

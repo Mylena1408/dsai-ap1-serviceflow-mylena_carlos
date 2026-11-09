@@ -2181,7 +2181,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-208 — Totais de horas na solicitação
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-08. `getRequestTime` (equipe do setor), bloco `RequestTime` no detalhe da fila e do gestor e as linhas de horas no histórico.
 - **Objetivo:** Seção 5.1 (item 2), parte C.
 - **Arquivos/módulos esperados:** Detalhe da fila.
 - **Dependências:** SF-207.

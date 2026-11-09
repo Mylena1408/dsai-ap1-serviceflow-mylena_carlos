@@ -2634,3 +2634,11 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Alterar e apagar:** além de ser o próprio lançamento em até 7 dias, a pessoa precisa ainda poder lançar na solicitação (mesmo setor, não cancelada, no prazo depois da conclusão).
 - **Resultados:** typecheck, lint e build OK; unitários 1537/1537; integração 659/659; E2E 47/47.
 - **Linhas:** 287 `added` em TS (aplicação 184, testes 103).
+
+## SF-208 — Totais de horas na solicitação (2026-11-08)
+
+- **Leitura:** `getRequestTime` para a mesma equipe do checklist; traz os lançamentos não apagados (com quem lançou e se a pessoa ainda os altera), o total, o total por pessoa, a estimativa do serviço, o histórico e se a pessoa lança agora.
+- **Tela:** bloco "Horas" (total contra a estimativa, por pessoa, tabela de lançamentos) no detalhe da fila e do gestor; aceita um conteúdo filho, onde a SF-210 põe os formulários. Sem horas e sem poder lançar, nada aparece.
+- **Histórico:** `RequestTimeline` ganhou `timeEvents` ("Horas lançadas/alteradas/apagadas: 1h 30min em 12/11/2026").
+- **Resultados:** typecheck, lint e build OK; unitários 1540/1540; integração 661/661; E2E 47/47.
+- **Linhas:** 284 `added` em TS (aplicação 194, testes 90).

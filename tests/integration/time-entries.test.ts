@@ -12,7 +12,7 @@ vi.mock("@/server/db", async () => {
   return { prisma };
 });
 
-import { deleteTimeEntry, logTime, updateTimeEntry } from "@/modules/time-entries";
+import { deleteTimeEntry, getRequestTime, logTime, updateTimeEntry } from "@/modules/time-entries";
 
 // SPEC 2026-11-08-atendimento-dia-a-dia, 5.3 items 1 to 3 (SF-207; the entries of CA-HRS-02).
 
@@ -118,5 +118,44 @@ describe("changing and removing (5.3 item 3; decision I11)", () => {
     await prisma.requestTimeEntry.update({ where: { id: entry.id }, data: { createdAt: new Date(Date.now() - 8 * DAY) } });
     await expect(updateTimeEntry(entry.id, { workedOn: today, hours: 2, minutes: 0 })).rejects.toBeInstanceOf(ConflictError);
     await expect(deleteTimeEntry(entry.id)).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+// SPEC 2026-11-08-atendimento-dia-a-dia, 5.1 item 2 and 13.2 item 1 (SF-208; the totals of CA-HRS-02).
+describe("a request's time for the team (5.1 item 2; decision I9)", () => {
+  it("the total, by person and against the estimate, without the removed entries; the history in order", async () => {
+    const { ana, bia, gabi, request, today } = await scenario();
+    await prisma.service.update({ where: { id: request.serviceId! }, data: { estimatedHours: 4 } });
+    actAs(ana);
+    const first = await logTime({ requestId: request.id, workedOn: today, hours: 1, minutes: 30 });
+    await logTime({ requestId: request.id, workedOn: today, hours: 0, minutes: 15 });
+    actAs(bia);
+    const removed = await logTime({ requestId: request.id, workedOn: today, hours: 2, minutes: 0 });
+    await deleteTimeEntry(removed.id);
+    await logTime({ requestId: request.id, workedOn: today, hours: 0, minutes: 45 });
+
+    const view = await getRequestTime(request.id);
+    expect(view.totalMinutes).toBe(150);
+    expect(view.estimatedHours).toBe(4);
+    expect(view.byPerson.map(({ name, minutes }) => [name, minutes])).toEqual([
+      [ana.name, 105],
+      [bia.name, 45],
+    ]);
+    expect(view.entries).toHaveLength(3);
+    expect(view.entries.find(({ id }) => id === first.id)?.canChange).toBe(false);
+    expect(view.canLog).toBe(true);
+    expect(view.events.map(({ action }) => action)).toEqual(["CREATED", "CREATED", "CREATED", "DELETED", "CREATED"]);
+
+    // The manager reads, without logging.
+    actAs(gabi);
+    await expect(getRequestTime(request.id)).resolves.toMatchObject({ totalMinutes: 150, canLog: false });
+  });
+
+  it("the requester and another sector are told it does not exist", async () => {
+    const { caio, rita, request } = await scenario();
+    for (const actor of [caio, rita]) {
+      actAs(actor);
+      await expect(getRequestTime(request.id)).rejects.toBeInstanceOf(NotFoundError);
+    }
   });
 });

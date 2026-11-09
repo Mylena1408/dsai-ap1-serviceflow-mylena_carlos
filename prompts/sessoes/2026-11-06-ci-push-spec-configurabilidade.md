@@ -358,3 +358,11 @@
 > pode prosseguir
 
 89. SF-207: lançar, alterar e apagar horas, com histórico.
+
+> quantas linhas temos de codigo passando por cloc --diff
+
+90. Contagem total: 77.476 `added` sobre a baseline (saldo 74.978); sistema com 85.721 linhas.
+
+> pode prosseguir
+
+91. SF-208: totais de horas na solicitação e histórico das horas.
