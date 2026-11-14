@@ -1,5 +1,6 @@
 import { unstable_rethrow } from "next/navigation";
 import { ANNOUNCEMENT_LEVEL_LABELS, getAnnouncementStrip, type AnnouncementLevel, type AnnouncementStripItem } from "@/modules/announcements";
+import { dismissAnnouncementAction } from "./announcement-strip-actions";
 
 // The strip of announcements at the top of every screen of a signed-in person (SPEC 2026-11-09-comunicacao-e-
 // calendarios, 3.1 item 2 and 3.3 items 2 to 4; SF-236). Without announcements for the person, nothing is drawn.
@@ -29,6 +30,15 @@ export function AnnouncementStripView({ announcements }: { announcements: readon
               <strong>{ANNOUNCEMENT_LEVEL_LABELS[announcement.level]}:</strong> <strong>{announcement.title}</strong>
             </p>
             <p>{announcement.body}</p>
+            {/* 3.3 item 4 (decision K5): only an information notice is dismissed. */}
+            {announcement.dismissible ? (
+              <form action={dismissAnnouncementAction} className="announcement-strip-dismiss">
+                <input name="announcementId" type="hidden" value={announcement.id} />
+                <button aria-label={`Dispensar o aviso ${announcement.title}`} className="button-secondary" type="submit">
+                  Dispensar
+                </button>
+              </form>
+            ) : null}
           </div>
         );
       })}

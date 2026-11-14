@@ -1882,3 +1882,8 @@ p {
     width: min(100% - 32px, 620px);
   }
 }
+
+/* SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 4: "Dispensar" of an information notice. */
+.announcement-strip-dismiss {
+  margin-top: 6px;
+}

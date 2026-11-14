@@ -66,3 +66,8 @@
 
 16. Commit `41c1083` (sem push).
 17. SF-236: faixa no layout raiz, leitura pelo público e pelo instante do banco, `unstable_rethrow` conforme a documentação do Next desta versão, contraste conferido. Build OK; unitários 1724/1724, integração 738/738, E2E 53/53.
+
+> faça só o commit do SF-236 e comece o SF-237
+
+18. Commit `20eb635` (sem push).
+19. SF-237: dispensa por pessoa (caso de uso, gravação sem duplicar, botão na faixa, recarga da tela). Unitários 1733/1733, integração 742/742.

@@ -111,8 +111,10 @@ describe("the strip on the screen", () => {
 
   it("escapes the texts typed by the administrator", () => {
     const html = renderToStaticMarkup(createElement(AnnouncementStripView, { announcements: [item({ title: "<b>x</b>", body: "<script>1</script>" })] }));
-    expect(html).not.toContain("<script>");
-    expect(html).toContain("&lt;script&gt;");
+    // React adds its own form script next to a server action (the button "Dispensar"); the typed text is escaped.
+    expect(html).not.toContain("<script>1</script>");
+    expect(html).not.toContain("<b>x</b>");
+    expect(html).toContain("&lt;script&gt;1&lt;/script&gt;");
   });
 
   it.each(Object.entries(STRIP_COLORS))("the %s colors pass WCAG AA (4.5:1)", (_level, colors) => {

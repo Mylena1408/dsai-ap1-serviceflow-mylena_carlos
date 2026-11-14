@@ -2471,7 +2471,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-237 — Dispensa por pessoa
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14. Botão "Dispensar" só no aviso de informação da faixa; a dispensa vale para a pessoa, é guardada uma vez (repetida ou simultânea não muda nada) e a tela é recarregada sem o aviso; CA-AVI-03 verificado.
 - **Objetivo:** Seção 3.3 (regra 4), parte A.
 - **Arquivos/módulos esperados:** Módulo de avisos, faixa.
 - **Dependências:** SF-236.

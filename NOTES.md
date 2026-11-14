@@ -2954,3 +2954,13 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1724/1724; `next build` OK; integração 738/738; E2E completo 53/53 (11,3 min), rodados em sequência.
 - **CA-AVI-01** marcado; a CA-AVI-03 fica para depois da dispensa (SF-237).
 - **Linhas:** 372 `added` em TS (aplicação 144, testes 228); fora da meta, 24 de CSS.
+
+## SF-237 — Dispensa de avisos por pessoa (2026-11-14)
+
+- **Regra (esclarecimento na SPEC, 3.3):** só o aviso de "informação" na faixa tem "Dispensar"; a pessoa dispensa um aviso do seu público que está na faixa no instante do banco. Uma linha por pessoa e aviso: dispensar de novo não muda nada nem é erro. A dispensa não entra na auditoria (é uma preferência da pessoa sobre a própria tela) e não muda com a anonimização.
+- **Como:** `dismissAnnouncement` confere pela regra do domínio (`assertCanBeDismissed`) e grava com `createMany(..., skipDuplicates: true)`, que o banco resolve pela chave primária; três dispensas simultâneas guardam uma linha (integração).
+- **Tela:** a ação não redireciona; chama `revalidatePath("/", "layout")` (assinatura conferida na documentação do Next desta versão), porque a faixa está no layout raiz e a mesma tela volta sem o aviso. Uma dispensa recusada (o aviso terminou, foi encerrado ou virou "atenção") só recarrega a tela, sem mensagem.
+- **Teste ajustado:** o teste de escape da faixa procurava qualquer `<script>`; com o formulário de ação de servidor, o próprio React acrescenta um script seu na marcação. O teste passou a conferir o texto digitado, que segue escapado.
+- **Resultados:** typecheck e lint OK; unitários 1733/1733; integração 742/742. O E2E do clique em "Dispensar" fica para a SF-240.
+- **CA-AVI-03** marcado na SPEC.
+- **Linhas:** 274 `added` em TS (aplicação 86, testes 188); fora da meta, 5 de CSS.
