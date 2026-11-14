@@ -48,6 +48,8 @@ export const AUDIT_ENTITY_TYPES = [
   "SECTOR_TAG",
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
   "CHECKLIST_ITEM",
+  // SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 5.
+  "ANNOUNCEMENT",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -87,6 +89,7 @@ export const PERSONAL_FIELDS: Readonly<Record<AuditEntityType, readonly string[]
   CONFIGURATION: [],
   SECTOR_TAG: [],
   CHECKLIST_ITEM: [],
+  ANNOUNCEMENT: [],
 };
 
 /** Passwords, hashes, secrets and tokens never enter a record, whatever the entity. */
@@ -127,6 +130,7 @@ export const AUDIT_ENTITY_LABELS: Record<AuditEntityType, string> = {
   CONFIGURATION: "Configuração da organização",
   SECTOR_TAG: "Etiqueta",
   CHECKLIST_ITEM: "Item de checklist",
+  ANNOUNCEMENT: "Aviso",
 };
 
 /** Names of the recorded fields; an unknown field shows its own name. */
@@ -218,6 +222,16 @@ export const AUDIT_FIELD_LABELS: Readonly<Record<string, string>> = {
   conditionValue: "Condição (valor)",
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1.
   text: "Texto",
+  // SPEC 2026-11-09-comunicacao-e-calendarios, 3.3: "audience" already names who fills a field, so the
+  // announcement's audience is recorded as "target".
+  level: "Nível",
+  kind: "Tipo",
+  target: "Público",
+  targetRole: "Perfil do público",
+  targetSectorId: "Setor do público",
+  startsAt: "Início",
+  endsAt: "Fim",
+  leadHours: "Antecedência (horas)",
 };
 
 function normalize(value: AuditInputValue): AuditValue {
@@ -365,6 +379,8 @@ export const AUDITED_FIELDS: Readonly<Record<AuditEntityType, readonly string[]>
   // SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1 and 13.1 item 1: the service is fixed when the item is
   // created.
   CHECKLIST_ITEM: ["text", "isRequired", "position", "isActive", "conditionFieldId", "conditionValue"],
+  // SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 5: the audience as "target" (see the labels).
+  ANNOUNCEMENT: ["title", "body", "level", "kind", "target", "targetRole", "targetSectorId", "startsAt", "endsAt", "leadHours"],
 };
 
 export type AuditActorRole = "ADMIN" | "REQUESTER" | "ATTENDANT" | "MANAGER";

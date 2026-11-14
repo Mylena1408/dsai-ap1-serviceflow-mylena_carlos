@@ -160,6 +160,8 @@ describe("texts (section 5.2)", () => {
       SECTOR_TAG: true,
       // Added by SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
       CHECKLIST_ITEM: true,
+      // Added by SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 5.
+      ANNOUNCEMENT: true,
     };
 
     expect([...AUDIT_ACTIONS].sort()).toEqual(Object.keys(actions).sort());

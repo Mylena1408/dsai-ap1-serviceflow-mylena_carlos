@@ -96,6 +96,8 @@ enum AuditEntityType {
   SECTOR_TAG
   /// 4.4.
   CHECKLIST_ITEM
+  /// SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 5.
+  ANNOUNCEMENT
 }
 
 /// SPEC 2026-11-02-api-externa-webhooks, 5.2 (decision A2).
@@ -157,11 +159,11 @@ enum ServiceFieldAudience {
 }
 
 model Sector {
-  id              String   @id @default(uuid()) @db.Uuid
-  name            String   @db.Citext
-  isActive        Boolean  @default(true)
+  id                    String           @id @default(uuid()) @db.Uuid
+  name                  String           @db.Citext
+  isActive              Boolean          @default(true)
   /// SPEC 2026-11-06-escalonamento, 2.1: overdue requests raise their priority and warn the managers.
-  escalateOverdue Boolean  @default(false)
+  escalateOverdue       Boolean          @default(false)
   /// SPEC 2026-11-07-operacao-e-automacao, 4.3 (decision H6): how requests entering the queue are assigned.
   distributionMode      DistributionMode @default(NONE)
   /// 1 to 100 active requests per attendant, or no limit.
@@ -170,22 +172,24 @@ model Sector {
   redistributeOnAbsence Boolean          @default(false)
   /// Last attendant who received by distribution (the round-robin's turn).
   lastDistributedToId   String?          @db.Uuid
-  createdAt       DateTime @default(now()) @db.Timestamptz
-  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdAt             DateTime         @default(now()) @db.Timestamptz
+  updatedAt             DateTime         @updatedAt @db.Timestamptz
 
-  users            User[]
-  services         Service[]
-  requests         Request[]
-  requestsSentAway RequestSectorEvent[] @relation("RequestSectorEventFrom")
-  requestsReceived RequestSectorEvent[] @relation("RequestSectorEventTo")
-  cannedResponses  CannedResponse[]
+  users             User[]
+  services          Service[]
+  requests          Request[]
+  requestsSentAway  RequestSectorEvent[]   @relation("RequestSectorEventFrom")
+  requestsReceived  RequestSectorEvent[]   @relation("RequestSectorEventTo")
+  cannedResponses   CannedResponse[]
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.4: requests whose pending level is this sector.
-  pendingApprovals Request[]            @relation("RequestApprovalPendingSector")
+  pendingApprovals  Request[]              @relation("RequestApprovalPendingSector")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.
-  escalationRules  SectorEscalationRule[]
+  escalationRules   SectorEscalationRule[]
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
-  tags             SectorTag[]
-  lastDistributedTo User?                @relation("SectorLastDistributedTo", fields: [lastDistributedToId], references: [id], onDelete: SetNull)
+  tags              SectorTag[]
+  /// SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 2.
+  announcements     Announcement[]
+  lastDistributedTo User?                  @relation("SectorLastDistributedTo", fields: [lastDistributedToId], references: [id], onDelete: SetNull)
 }
 
 model Category {
@@ -211,68 +215,68 @@ model User {
   /// SPEC 2026-11-02-auditoria-lgpd, 5.5: set once, when the person is anonymized.
   anonymizedAt DateTime? @db.Timestamptz
 
-  sector                 Sector?                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
-  requests               Request[]                  @relation("UserRequests")
-  requestStatusEvents    RequestStatusEvent[]       @relation("RequestStatusEventActor")
-  uploadedAttachments    RequestAttachment[]        @relation("RequestAttachmentUploader")
-  assignedRequests       Request[]                  @relation("RequestAssignee")
-  assignmentEventsActed  RequestAssignmentEvent[]   @relation("RequestAssignmentEventActor")
-  assignmentEventsFrom   RequestAssignmentEvent[]   @relation("RequestAssignmentEventFrom")
-  assignmentEventsTo     RequestAssignmentEvent[]   @relation("RequestAssignmentEventTo")
-  comments               RequestComment[]           @relation("RequestCommentAuthor")
-  notifications          RequestNotification[]      @relation("NotificationRecipient")
-  priorityEvents         RequestPriorityEvent[]     @relation("RequestPriorityEventActor")
-  stageEvents            RequestStageEvent[]        @relation("RequestStageEventActor")
-  sectorEvents           RequestSectorEvent[]       @relation("RequestSectorEventActor")
-  commentFiles           RequestCommentFile[]       @relation("RequestCommentFileUploader")
-  approvalsDecided       RequestApproval[]          @relation("RequestApprovalDecider")
-  permissions            UserPermission[]           @relation("UserPermissionHolder")
-  permissionsGranted     UserPermission[]           @relation("UserPermissionGrantor")
-  permissionEvents       UserPermissionEvent[]      @relation("UserPermissionEventUser")
-  permissionEventsActed  UserPermissionEvent[]      @relation("UserPermissionEventActor")
-  notificationPrefs      NotificationPreference[]
-  emailDeliveries        EmailDelivery[]
-  apiTokens              ApiToken[]                 @relation("ApiTokenOwner")
-  apiTokensRevoked       ApiToken[]                 @relation("ApiTokenRevoker")
-  slaPauses              RequestSlaPause[]          @relation("RequestSlaPauseActor")
-  slaResumes             RequestSlaPause[]          @relation("RequestSlaResumeActor")
-  holidaysCreated        BusinessHoliday[]          @relation("BusinessHolidayCreator")
-  calendarUpdates        BusinessCalendar[]         @relation("BusinessCalendarUpdater")
-  fieldValuesUpdated     RequestFieldValue[]        @relation("RequestFieldValueUpdater")
-  fieldUpdateEvents      RequestFieldUpdateEvent[]  @relation("RequestFieldUpdateEventActor")
-  satisfactionRatings    RequestSatisfaction[]      @relation("RequestSatisfactionRequester")
-  satisfactionEvents     RequestSatisfactionEvent[] @relation("RequestSatisfactionEventActor")
-  cannedResponsesCreated CannedResponse[]           @relation("CannedResponseCreator")
-  cannedResponsesUpdated CannedResponse[]           @relation("CannedResponseUpdater")
-  knowledgeCreated       KnowledgeArticle[]         @relation("KnowledgeArticleCreator")
-  knowledgeUpdated       KnowledgeArticle[]         @relation("KnowledgeArticleUpdater")
+  sector                   Sector?                    @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  requests                 Request[]                  @relation("UserRequests")
+  requestStatusEvents      RequestStatusEvent[]       @relation("RequestStatusEventActor")
+  uploadedAttachments      RequestAttachment[]        @relation("RequestAttachmentUploader")
+  assignedRequests         Request[]                  @relation("RequestAssignee")
+  assignmentEventsActed    RequestAssignmentEvent[]   @relation("RequestAssignmentEventActor")
+  assignmentEventsFrom     RequestAssignmentEvent[]   @relation("RequestAssignmentEventFrom")
+  assignmentEventsTo       RequestAssignmentEvent[]   @relation("RequestAssignmentEventTo")
+  comments                 RequestComment[]           @relation("RequestCommentAuthor")
+  notifications            RequestNotification[]      @relation("NotificationRecipient")
+  priorityEvents           RequestPriorityEvent[]     @relation("RequestPriorityEventActor")
+  stageEvents              RequestStageEvent[]        @relation("RequestStageEventActor")
+  sectorEvents             RequestSectorEvent[]       @relation("RequestSectorEventActor")
+  commentFiles             RequestCommentFile[]       @relation("RequestCommentFileUploader")
+  approvalsDecided         RequestApproval[]          @relation("RequestApprovalDecider")
+  permissions              UserPermission[]           @relation("UserPermissionHolder")
+  permissionsGranted       UserPermission[]           @relation("UserPermissionGrantor")
+  permissionEvents         UserPermissionEvent[]      @relation("UserPermissionEventUser")
+  permissionEventsActed    UserPermissionEvent[]      @relation("UserPermissionEventActor")
+  notificationPrefs        NotificationPreference[]
+  emailDeliveries          EmailDelivery[]
+  apiTokens                ApiToken[]                 @relation("ApiTokenOwner")
+  apiTokensRevoked         ApiToken[]                 @relation("ApiTokenRevoker")
+  slaPauses                RequestSlaPause[]          @relation("RequestSlaPauseActor")
+  slaResumes               RequestSlaPause[]          @relation("RequestSlaResumeActor")
+  holidaysCreated          BusinessHoliday[]          @relation("BusinessHolidayCreator")
+  calendarUpdates          BusinessCalendar[]         @relation("BusinessCalendarUpdater")
+  fieldValuesUpdated       RequestFieldValue[]        @relation("RequestFieldValueUpdater")
+  fieldUpdateEvents        RequestFieldUpdateEvent[]  @relation("RequestFieldUpdateEventActor")
+  satisfactionRatings      RequestSatisfaction[]      @relation("RequestSatisfactionRequester")
+  satisfactionEvents       RequestSatisfactionEvent[] @relation("RequestSatisfactionEventActor")
+  cannedResponsesCreated   CannedResponse[]           @relation("CannedResponseCreator")
+  cannedResponsesUpdated   CannedResponse[]           @relation("CannedResponseUpdater")
+  knowledgeCreated         KnowledgeArticle[]         @relation("KnowledgeArticleCreator")
+  knowledgeUpdated         KnowledgeArticle[]         @relation("KnowledgeArticleUpdater")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.5.
-  absences               ManagerAbsence[]           @relation("ManagerAbsenceManager")
-  substitutions          ManagerAbsence[]           @relation("ManagerAbsenceSubstitute")
-  absencesCreated        ManagerAbsence[]           @relation("ManagerAbsenceCreator")
-  approvalsOnBehalf      RequestApproval[]          @relation("RequestApprovalOnBehalfOf")
+  absences                 ManagerAbsence[]           @relation("ManagerAbsenceManager")
+  substitutions            ManagerAbsence[]           @relation("ManagerAbsenceSubstitute")
+  absencesCreated          ManagerAbsence[]           @relation("ManagerAbsenceCreator")
+  approvalsOnBehalf        RequestApproval[]          @relation("RequestApprovalOnBehalfOf")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 5.3.1.
-  stagesAssigned         ServiceStage[]             @relation("ServiceStageAssignee")
+  stagesAssigned           ServiceStage[]             @relation("ServiceStageAssignee")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 6.3.
-  accessRoles            UserAccessRole[]           @relation("UserAccessRoleHolder")
-  accessRolesAssigned    UserAccessRole[]           @relation("UserAccessRoleAssigner")
-  accessRoleEvents       UserAccessRoleEvent[]      @relation("UserAccessRoleEventUser")
-  accessRoleEventsActed  UserAccessRoleEvent[]      @relation("UserAccessRoleEventActor")
+  accessRoles              UserAccessRole[]           @relation("UserAccessRoleHolder")
+  accessRolesAssigned      UserAccessRole[]           @relation("UserAccessRoleAssigner")
+  accessRoleEvents         UserAccessRoleEvent[]      @relation("UserAccessRoleEventUser")
+  accessRoleEventsActed    UserAccessRoleEvent[]      @relation("UserAccessRoleEventActor")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.
-  escalationRulesAssigned SectorEscalationRule[]    @relation("SectorEscalationRuleAssignee")
-  escalationsAssigned     RequestEscalation[]       @relation("RequestEscalationAssignee")
+  escalationRulesAssigned  SectorEscalationRule[]     @relation("SectorEscalationRuleAssignee")
+  escalationsAssigned      RequestEscalation[]        @relation("RequestEscalationAssignee")
   /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 1.
-  requestLinksCreated     RequestLink[]             @relation("RequestLinkCreator")
-  requestLinkEvents       RequestLinkEvent[]        @relation("RequestLinkEventActor")
+  requestLinksCreated      RequestLink[]              @relation("RequestLinkCreator")
+  requestLinkEvents        RequestLinkEvent[]         @relation("RequestLinkEventActor")
   /// SPEC 2026-11-07-operacao-e-automacao, 3.3 item 3.
-  requestGroups           RequestGroup[]
+  requestGroups            RequestGroup[]
   /// SPEC 2026-11-07-operacao-e-automacao, 4.
-  sectorsLastDistributed  Sector[]                  @relation("SectorLastDistributedTo")
-  attendantAbsences       AttendantAbsence[]        @relation("AttendantAbsenceUser")
-  attendantAbsencesCreated AttendantAbsence[]       @relation("AttendantAbsenceCreator")
+  sectorsLastDistributed   Sector[]                   @relation("SectorLastDistributedTo")
+  attendantAbsences        AttendantAbsence[]         @relation("AttendantAbsenceUser")
+  attendantAbsencesCreated AttendantAbsence[]         @relation("AttendantAbsenceCreator")
   /// SPEC 2026-11-07-operacao-e-automacao, 5.
-  recurringRequestsFor    RecurringRequest[]        @relation("RecurringRequestRequester")
-  recurringRequestsCreated RecurringRequest[]       @relation("RecurringRequestCreator")
+  recurringRequestsFor     RecurringRequest[]         @relation("RecurringRequestRequester")
+  recurringRequestsCreated RecurringRequest[]         @relation("RecurringRequestCreator")
   /// SPEC 2026-11-07-operacao-e-automacao, 7.4.
   savedViews               SavedView[]
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 3.4.
@@ -285,13 +289,16 @@ model User {
   timeEntries              RequestTimeEntry[]
   timeEntryEvents          RequestTimeEntryEvent[]
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 6.4 and 13.3.
-  following                RequestFollower[]        @relation("RequestFollowerUser")
-  followersAdded           RequestFollower[]        @relation("RequestFollowerAddedBy")
-  followerEvents           RequestFollowerEvent[]   @relation("RequestFollowerEventUser")
-  followerEventsActed      RequestFollowerEvent[]   @relation("RequestFollowerEventActor")
+  following                RequestFollower[]          @relation("RequestFollowerUser")
+  followersAdded           RequestFollower[]          @relation("RequestFollowerAddedBy")
+  followerEvents           RequestFollowerEvent[]     @relation("RequestFollowerEventUser")
+  followerEventsActed      RequestFollowerEvent[]     @relation("RequestFollowerEventActor")
   followPreference         FollowPreference?
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 7.4.
   mentions                 CommentMention[]
+  /// SPEC 2026-11-09-comunicacao-e-calendarios, 3.3.
+  announcementsCreated     Announcement[]             @relation("AnnouncementCreatedBy")
+  announcementDismissals   AnnouncementDismissal[]
 }
 
 model Service {
@@ -330,7 +337,7 @@ model Service {
   stages                 ServiceStage[]
   knowledgeArticles      KnowledgeArticle[]
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 4.4.
-  checklistItems ServiceChecklistItem[]
+  checklistItems         ServiceChecklistItem[]
 }
 
 model Request {
@@ -455,12 +462,12 @@ model Request {
 }
 
 model RequestStatusEvent {
-  id         String         @id @default(uuid()) @db.Uuid
-  requestId  String         @db.Uuid
-  actorId    String         @db.Uuid
+  id         String               @id @default(uuid()) @db.Uuid
+  requestId  String               @db.Uuid
+  actorId    String               @db.Uuid
   fromStatus RequestStatus?
   toStatus   RequestStatus
-  occurredAt DateTime       @default(now()) @db.Timestamptz
+  occurredAt DateTime             @default(now()) @db.Timestamptz
   note       String?
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 8.4: why a request was cancelled, when it says (only cancellations).
   reason     RequestStatusReason?
@@ -473,16 +480,16 @@ model RequestStatusEvent {
 }
 
 model RequestAssignmentEvent {
-  id             String   @id @default(uuid()) @db.Uuid
-  requestId      String   @db.Uuid
+  id             String            @id @default(uuid()) @db.Uuid
+  requestId      String            @db.Uuid
   /// Null when the system made the change: an escalation rule's handover (SPEC
   /// 2026-11-06-aprofundamento-configurabilidade, 7.3 item 3, decision G17).
-  actorId        String?  @db.Uuid
+  actorId        String?           @db.Uuid
   /// Why the system made the change (SPEC 2026-11-07-operacao-e-automacao, 4.4, decision H19); null for people.
   reason         AssignmentReason?
-  fromAssigneeId String?  @db.Uuid
-  toAssigneeId   String?  @db.Uuid
-  occurredAt     DateTime @default(now()) @db.Timestamptz
+  fromAssigneeId String?           @db.Uuid
+  toAssigneeId   String?           @db.Uuid
+  occurredAt     DateTime          @default(now()) @db.Timestamptz
 
   request      Request @relation(fields: [requestId], references: [id], onDelete: Restrict)
   actor        User?   @relation("RequestAssignmentEventActor", fields: [actorId], references: [id], onDelete: Restrict)
@@ -546,9 +553,9 @@ model RequestComment {
   isInternal Boolean  @default(false)
   createdAt  DateTime @default(now()) @db.Timestamptz
 
-  request Request              @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  author  User                 @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
-  files   RequestCommentFile[]
+  request  Request              @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  author   User                 @relation("RequestCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  files    RequestCommentFile[]
   /// SPEC 2026-11-08-atendimento-dia-a-dia, 7.4.
   mentions CommentMention[]
 
@@ -692,20 +699,20 @@ model ServiceField {
   conditionFieldId String?              @db.Uuid
   conditionValue   String?
 
-  service             Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  service             Service                @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   values              RequestFieldValue[]
-  conditionField      ServiceField?       @relation("ServiceFieldCondition", fields: [conditionFieldId], references: [id], onDelete: Restrict)
-  dependents          ServiceField[]      @relation("ServiceFieldCondition")
+  conditionField      ServiceField?          @relation("ServiceFieldCondition", fields: [conditionFieldId], references: [id], onDelete: Restrict)
+  dependents          ServiceField[]         @relation("ServiceFieldCondition")
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.7.
-  approvalConditionOf Service[]           @relation("ServiceApprovalCondition")
+  approvalConditionOf Service[]              @relation("ServiceApprovalCondition")
   /// 5.3.3.
-  stageConditionOf    ServiceStage[]      @relation("ServiceStageCondition")
+  stageConditionOf    ServiceStage[]         @relation("ServiceStageCondition")
+  /// SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1: checklist items conditioned on this field.
+  checklistConditions ServiceChecklistItem[]
 
   @@unique([id, serviceId])
   @@index([serviceId])
   @@index([conditionFieldId])
-  /// SPEC 2026-11-08-atendimento-dia-a-dia, 13.1 item 1: checklist items conditioned on this field.
-  checklistConditions ServiceChecklistItem[]
 }
 
 /// Answer given on opening, with a snapshot of the field definition; immutable.
@@ -885,11 +892,11 @@ model CannedResponse {
 /// by the daily job with the SLA breach alert; the priorities before and after may be equal
 /// (already urgent).
 model RequestEscalation {
-  id           String          @id @default(uuid()) @db.Uuid
-  requestId    String          @db.Uuid
-  fromPriority RequestPriority
-  toPriority   RequestPriority
-  occurredAt   DateTime        @db.Timestamptz
+  id                String            @id @default(uuid()) @db.Uuid
+  requestId         String            @db.Uuid
+  fromPriority      RequestPriority
+  toPriority        RequestPriority
+  occurredAt        DateTime          @db.Timestamptz
   /// SPEC 2026-11-06-aprofundamento-configurabilidade, 7.4: the existing rows came from the option.
   trigger           EscalationTrigger @default(OVERDUE)
   /// The N of "vencida há N dias", copied from the rule.
@@ -1495,8 +1502,8 @@ model ServiceChecklistItem {
   createdAt        DateTime @default(now()) @db.Timestamptz
   updatedAt        DateTime @updatedAt @db.Timestamptz
 
-  service        Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  conditionField ServiceField? @relation(fields: [conditionFieldId], references: [id], onDelete: Restrict)
+  service        Service                @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  conditionField ServiceField?          @relation(fields: [conditionFieldId], references: [id], onDelete: Restrict)
   copies         RequestChecklistItem[]
 
   @@index([serviceId])
@@ -1523,9 +1530,9 @@ model RequestChecklistItem {
   doneById       String?   @db.Uuid
   note           String?
 
-  request      Request               @relation(fields: [requestId], references: [id], onDelete: Restrict)
-  templateItem ServiceChecklistItem? @relation(fields: [templateItemId], references: [id], onDelete: Restrict)
-  doneBy       User?                 @relation(fields: [doneById], references: [id], onDelete: Restrict)
+  request      Request                 @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  templateItem ServiceChecklistItem?   @relation(fields: [templateItemId], references: [id], onDelete: Restrict)
+  doneBy       User?                   @relation(fields: [doneById], references: [id], onDelete: Restrict)
   events       RequestChecklistEvent[]
 
   @@unique([requestId, position])
@@ -1657,4 +1664,61 @@ model CommentMention {
 
   @@id([commentId, userId])
   @@index([userId, createdAt])
+}
+
+/// SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 (decisions K2, K5 and K6).
+enum AnnouncementLevel {
+  INFO
+  WARNING
+}
+
+enum AnnouncementKind {
+  NOTICE
+  MAINTENANCE
+}
+
+enum AnnouncementAudience {
+  ALL
+  ROLE
+  SECTOR
+}
+
+/// An announcement shown in a strip at the top of the screens of its audience (3.1 and 3.3). For a maintenance,
+/// `startsAt` and `endsAt` are the window and the strip starts `leadHours` before it; a notice has no lead.
+/// The rules 1 and 2 are CHECKs in the migration.
+model Announcement {
+  id               String               @id @default(uuid()) @db.Uuid
+  title            String
+  body             String
+  level            AnnouncementLevel
+  kind             AnnouncementKind
+  audience         AnnouncementAudience
+  audienceRole     Role?
+  audienceSectorId String?              @db.Uuid
+  startsAt         DateTime             @db.Timestamptz
+  endsAt           DateTime             @db.Timestamptz
+  leadHours        Int?
+  createdById      String               @db.Uuid
+  createdAt        DateTime             @default(now()) @db.Timestamptz
+  updatedAt        DateTime             @updatedAt @db.Timestamptz
+
+  audienceSector Sector?                 @relation(fields: [audienceSectorId], references: [id], onDelete: Restrict)
+  createdBy      User                    @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  dismissals     AnnouncementDismissal[]
+
+  @@index([endsAt])
+  @@index([audienceSectorId])
+}
+
+/// A person who dismissed an announcement (3.3 item 4): it does not come back for them.
+model AnnouncementDismissal {
+  announcementId String   @db.Uuid
+  userId         String   @db.Uuid
+  dismissedAt    DateTime @db.Timestamptz
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Restrict)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([announcementId, userId])
+  @@index([userId])
 }

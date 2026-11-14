@@ -2438,3 +2438,263 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 - **Critérios de conclusão:** CA-DUP-04 (lote).
 - **Testes relacionados:** Unitários, integração e E2E da parte.
 - **SPEC:** `SPEC/2026-11-08-atendimento-dia-a-dia.md`.
+
+### SF-234 — Avisos: migrations e domínio
+
+- **Estado:** Concluída em 2026-11-14. Migration `20261114100000_announcements` (avisos, dispensas, `CHECK`s das regras 1 e 2, auditoria `ANNOUNCEMENT`); módulo `src/modules/announcements` com as regras de público, período, faixa, ordem, dispensa, histórico e o que a administração pode fazer; esclarecimentos na SPEC (3.3).
+- **Objetivo:** Seção 3.3 (regras 1, 2 e 4), parte A.
+- **Arquivos/módulos esperados:** `prisma/`, módulo novo `src/modules/announcements`.
+- **Dependências:** SPEC 2026-11-08 concluída.
+- **Critérios de conclusão:** CA-AVI-05 e as regras da CA-AVI-02 pelo banco.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-235 — Cadastro de avisos na administração, com auditoria
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.1 (item 1) e 3.3 (regras 1, 2 e 5), parte A.
+- **Arquivos/módulos esperados:** Módulo de avisos, seção da administração.
+- **Dependências:** SF-234.
+- **Critérios de conclusão:** CA-AVI-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-236 — Faixa dos avisos nas áreas, público e limite
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.1 (item 2) e 3.3 (regras 2 e 3), parte A.
+- **Arquivos/módulos esperados:** Layouts das áreas, componente da faixa.
+- **Dependências:** SF-235.
+- **Critérios de conclusão:** CA-AVI-01 e CA-AVI-03 (público, período, limite e ordem).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-237 — Dispensa por pessoa
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.3 (regra 4), parte A.
+- **Arquivos/módulos esperados:** Módulo de avisos, faixa.
+- **Dependências:** SF-236.
+- **Critérios de conclusão:** CA-AVI-03 (dispensa).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-238 — Manutenção programada e antecedência
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.1 (item 3), parte A (decisão K2).
+- **Arquivos/módulos esperados:** Módulo de avisos, cadastro e faixa.
+- **Dependências:** SF-236.
+- **Critérios de conclusão:** CA-AVI-04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-239 — Página "Avisos" com o histórico
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 3.1 (item 4), parte A.
+- **Arquivos/módulos esperados:** Página nova nas áreas.
+- **Dependências:** SF-236.
+- **Critérios de conclusão:** CA-AVI-03 (histórico).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-240 — Telas e E2E da parte A
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte A.
+- **Arquivos/módulos esperados:** Telas da parte A.
+- **Dependências:** SF-235 a SF-239.
+- **Critérios de conclusão:** Revisão de CA-AVI-01 a 05.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-241 — Formato do CSV e domínio da importação
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3, parte B.
+- **Arquivos/módulos esperados:** Módulo novo de importação de usuários.
+- **Dependências:** Parte A concluída.
+- **Critérios de conclusão:** Regras da CA-IMP-02 (formato e validação).
+- **Testes relacionados:** Unitários com arquivos inválidos.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-242 — Prévia linha a linha
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.1 e 4.3, parte B.
+- **Arquivos/módulos esperados:** Módulo de importação.
+- **Dependências:** SF-241.
+- **Critérios de conclusão:** CA-IMP-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-243 — Aplicação com auditoria, pessoas inativas e sem senha
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.3, parte B (decisão K1).
+- **Arquivos/módulos esperados:** Módulo de importação, auditoria.
+- **Dependências:** SF-242.
+- **Critérios de conclusão:** CA-IMP-03 (aplicação) e CA-IMP-04.
+- **Testes relacionados:** Integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-244 — Histórico das importações e relatório de erros
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 4.1, parte B.
+- **Arquivos/módulos esperados:** Módulo de importação.
+- **Dependências:** SF-243.
+- **Critérios de conclusão:** CA-IMP-03 (histórico e relatório de erros).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-245 — Modelo do CSV, telas e E2E da parte B
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte B.
+- **Arquivos/módulos esperados:** Telas da parte B.
+- **Dependências:** SF-241 a SF-244.
+- **Critérios de conclusão:** Revisão de CA-IMP-01 a 04.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-246 — Relatórios: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3, parte C.
+- **Arquivos/módulos esperados:** `prisma/`, módulo de relatórios periódicos.
+- **Dependências:** Parte B concluída.
+- **Critérios de conclusão:** Regras da CA-REL-02 pelo banco.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-247 — Cálculo dos números do período
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.1 e 5.3, parte C (decisão K7).
+- **Arquivos/módulos esperados:** Módulo de relatórios periódicos.
+- **Dependências:** SF-246.
+- **Critérios de conclusão:** CA-REL-02 (números).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-248 — Geração pelo job, uma vez por período
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.3, parte C.
+- **Arquivos/módulos esperados:** Job e módulo de relatórios periódicos.
+- **Dependências:** SF-247.
+- **Critérios de conclusão:** CA-REL-01 e CA-REL-02.
+- **Testes relacionados:** Integração com concorrência.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-249 — Página "Relatórios" com escopo e histórico
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.1, parte C (decisão K3).
+- **Arquivos/módulos esperados:** Página nova.
+- **Dependências:** SF-248.
+- **Critérios de conclusão:** CA-REL-03.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-250 — Categoria "Relatórios", aviso e e-mail
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 5.1, parte C (decisão K3).
+- **Arquivos/módulos esperados:** Notificações e preferências.
+- **Dependências:** SF-249.
+- **Critérios de conclusão:** CA-REL-04.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-251 — Ativação pelo administrador e E2E da parte C
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte C.
+- **Arquivos/módulos esperados:** Administração.
+- **Dependências:** SF-246 a SF-250.
+- **Critérios de conclusão:** Revisão de CA-REL-01 a 04.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-252 — Calendário do setor: migrations e domínio
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3, parte D.
+- **Arquivos/módulos esperados:** `prisma/`, módulo do calendário.
+- **Dependências:** Parte C concluída.
+- **Critérios de conclusão:** CA-CAL-04.
+- **Testes relacionados:** Unitários e integração do schema.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-253 — Configuração do calendário e dos feriados do setor
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.1 e 6.3, parte D (decisão K9).
+- **Arquivos/módulos esperados:** Administração e área do gestor.
+- **Dependências:** SF-252.
+- **Critérios de conclusão:** CA-CAL-02.
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-254 — Prazo da abertura pelo calendário do setor
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3, parte D (decisão K4).
+- **Arquivos/módulos esperados:** Abertura e prazos.
+- **Dependências:** SF-253.
+- **Critérios de conclusão:** CA-CAL-01 e CA-CAL-03 (abertura).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-255 — Pausas, retomadas e prioridade com o calendário guardado
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 6.3, parte D (decisões K4 e K8).
+- **Arquivos/módulos esperados:** Prazos, pausas e encaminhamento.
+- **Dependências:** SF-254.
+- **Critérios de conclusão:** CA-CAL-03 (pausas e prioridade).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-256 — Telas e E2E da parte D
+
+- **Estado:** Pendente.
+- **Objetivo:** Parte D.
+- **Arquivos/módulos esperados:** Telas da parte D.
+- **Dependências:** SF-252 a SF-255.
+- **Critérios de conclusão:** Revisão de CA-CAL-01 a 04.
+- **Testes relacionados:** Unitários e E2E.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-257 — Configuração portátil versão 3
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7, item 1, parte E.
+- **Arquivos/módulos esperados:** `src/modules/configuration/`.
+- **Dependências:** Parte D concluída.
+- **Critérios de conclusão:** CA-COM-01.
+- **Testes relacionados:** Unitários e integração (ida e volta).
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-258 — API pública: avisos e calendário
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7, item 2, parte E.
+- **Arquivos/módulos esperados:** `src/modules/public-api/`.
+- **Dependências:** SF-257.
+- **Critérios de conclusão:** CA-COM-02 (API).
+- **Testes relacionados:** Unitários e integração.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.
+
+### SF-259 — Relatórios em "Análises" e revisão final
+
+- **Estado:** Pendente.
+- **Objetivo:** Seção 7, item 3, parte E.
+- **Arquivos/módulos esperados:** `src/modules/reports/`.
+- **Dependências:** SF-258.
+- **Critérios de conclusão:** CA-COM-02 ("Análises"); revisão de todos os critérios.
+- **Testes relacionados:** Unitários, integração e E2E.
+- **SPEC:** `SPEC/2026-11-09-comunicacao-e-calendarios.md`.

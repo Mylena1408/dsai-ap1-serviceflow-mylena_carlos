@@ -48,3 +48,11 @@
 > ok, me avisa quando os testes terminarem
 
 11. Suítes completas do SF-223: integração 722/722 e E2E 53/53 (9,8 min); unitários 1645/1645, typecheck e lint OK.
+
+> sim, faça o commit e o push do SF-223
+
+12. Commit `74ca33a` e push; fim da SPEC "Atendimento no dia a dia".
+
+> comece o SF-234
+
+13. SF-234: tarefas da SPEC 2 no `TASKS.md`; migration dos avisos com `CHECK`s; módulo `announcements` com as regras; auditoria `ANNOUNCEMENT`; ajuste do esclarecimento sobre quando a manutenção começa. Unitários 1689/1689, integração 728/728.

@@ -2919,3 +2919,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1645/1645; integração 722/722; E2E completo 53/53 (9,8 min).
 - **CA-CMP-03** marcado na SPEC.
 - **Linhas:** 403 `added` em TS pelo `git diff` (aplicação 114, testes 289).
+
+## SF-234 — Avisos: migrations e domínio (2026-11-14)
+
+- **Início da SPEC 2** (`SPEC/2026-11-09-comunicacao-e-calendarios.md`). As tarefas SF-234 a SF-259 não estavam no `TASKS.md` (a SPEC foi escrita sem elas) e foram acrescentadas agora, com os critérios de cada uma.
+- **Banco:** migration `20261114100000_announcements`, gerada por diff de arquivos do schema (sem banco) e completada à mão com três `CHECK`s: valores (título e texto sem espaços nas pontas, limites, fim depois do início), público (o perfil só em "um perfil", o setor só em "um setor") e tipo (aviso até 90 dias e sem antecedência; manutenção até 24 horas, sempre "atenção", antecedência de 0 a 168). Os ramos que exigem valor têm `IS NOT NULL`, e o teste de schema tenta cada caso com a coluna nula. O teste das migrations passou antes de aplicar.
+- **Decisão (esclarecimento na SPEC, 3.3):** a primeira versão do esclarecimento dizia que a manutenção "começava" com a antecedência; encerrar nessa fase deixaria o fim antes do início da janela e o `CHECK` recusaria. Ficou: o aviso começa no seu início (a manutenção, no início da janela); antes, altera ou apaga (apagar na antecedência é cancelar); durante, altera ou encerra (o fim vira o instante do encerramento); depois, não muda. Como só se dispensa aviso de "informação" já na tela, um aviso que não começou nunca tem dispensas, e apagar não deixa dispensas órfãs.
+- **Auditoria:** entidade `ANNOUNCEMENT` ("Aviso"). O rótulo `audience` já significa "Quem preenche" (campos de serviço) e os rótulos valem por nome de campo; por isso o estado auditado do aviso grava o público como `target`, `targetRole` e `targetSectorId` ("Público", "Perfil do público", "Setor do público"). A formatação dos valores (nomes de enums e setores) na tela da auditoria fica para a SF-235.
+- **Validação:** os campos do aviso entraram em `PUBLIC_VALIDATION_PATHS` (sem isso, a tela não saberia o campo do erro). A data e hora digitadas (`datetime-local`) são lidas no fuso da organização por `parseLocalDateTime` (sobre `zonedInstantOf`); a manutenção ganha nível "atenção" e antecedência padrão de 24 horas; a antecedência de um aviso comum é ignorada.
+- **Domínio:** `src/modules/announcements/domain/announcement.ts` com público, período da faixa, ordem (urgentes, início mais recente, criação, id), limite de três, dispensa, fase da manutenção, histórico de 90 dias e o que a administração pode fazer em cada fase.
+- **Resultados:** typecheck e lint OK; unitários 1689/1689; integração 728/728; E2E `dashboard.spec.ts` 1/1 (para exercitar a limpeza nova do `prepare-e2e`). O E2E completo não foi rodado.
+- **CA-AVI-05** marcado na SPEC.
+- **Linhas:** 766 `added` em TS pelo `git diff` (aplicação 343, testes 419, scripts 2); fora da meta, 102 linhas de SQL.

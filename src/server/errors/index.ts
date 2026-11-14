@@ -115,6 +115,16 @@ const PUBLIC_VALIDATION_PATHS = new Set([
   "requesterId",
   "frequency",
   "monthDay",
+  // SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 items 1 and 2.
+  "title",
+  "level",
+  "kind",
+  "audience",
+  "audienceRole",
+  "audienceSectorId",
+  "startsAt",
+  "endsAt",
+  "leadHours",
 ]);
 
 const PUBLIC_VALIDATION_CODES = new Set([

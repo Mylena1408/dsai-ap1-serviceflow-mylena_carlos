@@ -248,6 +248,27 @@ async function loadState(
       });
       return row && { label: row.text, state: row };
     }
+    // SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 5: the audience as "target", as the audited fields name it.
+    case "ANNOUNCEMENT": {
+      const row = await transaction.announcement.findUnique({
+        where: { id },
+        select: {
+          title: true,
+          body: true,
+          level: true,
+          kind: true,
+          audience: true,
+          audienceRole: true,
+          audienceSectorId: true,
+          startsAt: true,
+          endsAt: true,
+          leadHours: true,
+        },
+      });
+      if (!row) return null;
+      const { audience, audienceRole, audienceSectorId, ...rest } = row;
+      return { label: row.title, state: { ...rest, target: audience, targetRole: audienceRole, targetSectorId: audienceSectorId } };
+    }
     case "HOLIDAY": {
       const row = await transaction.businessHoliday.findUnique({ where: { id }, select: { day: true, name: true, yearly: true } });
       return row && { label: row.name, state: { day: row.day.toISOString().slice(0, 10), name: row.name, yearly: row.yearly } };
