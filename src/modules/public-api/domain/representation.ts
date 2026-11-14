@@ -1,3 +1,4 @@
+import type { RequestChecklistView } from "@/modules/checklists";
 import type { CommentRecord } from "@/modules/comments";
 import type { DocumentRequirementRecord } from "@/modules/document-requirements";
 import {
@@ -14,6 +15,8 @@ import {
 } from "@/modules/requests";
 import type { ServiceFieldRecord } from "@/modules/service-fields";
 import type { PublishedService } from "@/modules/services";
+import type { RequestTagsView } from "@/modules/tags";
+import type { RequestTimeView } from "@/modules/time-entries";
 
 // JSON of the /api/v1 answers (SPEC 2026-11-02-api-externa-webhooks, 5.4; decision A4): field names
 // in English camelCase, dates in ISO 8601 UTC, statuses and priorities by their codes. Built only
@@ -201,6 +204,47 @@ export function groupRepresentation(group: GroupBlock) {
   };
 }
 
+/**
+ * What only the team of the request's sector reads (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 2;
+ * decisions I2, I6, I9 and I20): the views of the screens' blocks "Etiquetas", "Checklist" and "Horas".
+ */
+export interface ApiTeamView {
+  tags: Pick<RequestTagsView, "tags">;
+  checklist: Pick<RequestChecklistView, "items">;
+  time: Pick<RequestTimeView, "totalMinutes">;
+}
+
+export function tagsRepresentation(view: ApiTeamView["tags"]) {
+  return view.tags.map((tag) => ({ id: tag.id, name: tag.name, color: tag.color, active: tag.isActive, fromOtherSector: tag.fromOtherSector }));
+}
+
+/** Null for a request without checklist items (never copied, or copied empty), as the screen hides the block. */
+export function checklistRepresentation(view: ApiTeamView["checklist"]) {
+  if (view.items === null || view.items.length === 0) return null;
+  return {
+    done: view.items.filter((item) => item.doneAt !== null).length,
+    total: view.items.length,
+    items: view.items.map((item) => ({
+      id: item.id,
+      text: item.textSnapshot,
+      required: item.isRequired,
+      done: item.doneAt !== null,
+      doneAt: iso(item.doneAt),
+      doneBy: item.doneById === null ? null : { id: item.doneById, name: item.doneByName ?? "—" },
+    })),
+  };
+}
+
+/** The three fields of the team, or null in each for anyone else (9.1 item 2). */
+export function teamRepresentation(team: ApiTeamView | null) {
+  if (team === null) return { tags: null, checklist: null, minutesLogged: null };
+  return {
+    tags: tagsRepresentation(team.tags),
+    checklist: checklistRepresentation(team.checklist),
+    minutesLogged: team.time.totalMinutes,
+  };
+}
+
 export function requestDetailRepresentation(
   request: RequestWithHistory,
   context: ApiRequestContext,
@@ -212,6 +256,8 @@ export function requestDetailRepresentation(
     links?: readonly RequestLinkView[];
     /** 3.3 item 4; optional for callers without groups. */
     group?: GroupBlock | null;
+    /** SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 2: null (or absent) for anyone outside the team. */
+    team?: ApiTeamView | null;
   },
 ) {
   return {
@@ -236,6 +282,8 @@ export function requestDetailRepresentation(
     comments: extra.comments.map(commentRepresentation),
     links: (extra.links ?? []).map(linkRepresentation),
     group: extra.group ? groupRepresentation(extra.group) : null,
+    // SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 2 (SF-221).
+    ...teamRepresentation(extra.team ?? null),
     history: {
       status: request.events.map((event) => ({
         from: event.fromStatus,

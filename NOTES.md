@@ -2885,3 +2885,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1610/1610 (configuração 42); integração da configuração 17/17; E2E `configuration-portable.spec.ts` 1/1. As suítes completas de integração e E2E não foram rodadas localmente; ficam para o CI. O banco de teste local (`../pgtest`) estava desligado e foi ligado para a integração.
 - **CA-CMP-01** marcado na SPEC.
 - **Linhas:** 752 `added` em TS (aplicação 200, testes 552).
+
+## SF-221 — API pública: etiquetas, checklist e horas (2026-11-14)
+
+- **Regra (esclarecimento na SPEC, 9.1):** o item 2 ("para quem já pode ler a solicitação pela API") vale junto com as decisões I2, I6 e I9: só a equipe do setor (atendentes e gestor do setor) recebe os dados novos. Para quem lê a solicitação sem ser da equipe (solicitante, gestor que só decide uma aprovação de outro setor), os três campos vêm `null`, e não 404, porque a solicitação continua legível.
+- **Como:** `loadDetail` (`public-api/application/endpoints.ts`) chama os casos de uso dos blocos das telas (`getRequestTags`, `getRequestChecklist`, `getRequestTime`); o "não encontrada" deles vira `null`. O solicitante nem chega a chamá-los. Nenhuma regra de acesso nova foi escrita na API.
+- **Campos:** `tags` (id, nome, cor, ativa, de setor anterior), `checklist` (marcados, total, itens com texto, obrigatório, concluído, quando e por quem; `null` sem itens, como a tela que esconde o bloco) e `minutesLogged` (lançamentos não apagados). A observação do item e os lançamentos individuais ficam só na tela, porque o item 2 não os cita.
+- **Sem mudança:** a listagem `GET /api/v1/requests`, os demais campos do detalhe e a lista de operações. O OpenAPI descreve os campos e o README cita a regra.
+- **Teste de integração:** o gestor recém-criado precisa da permissão "Ver todas as solicitações do setor" para ler a solicitação pela API (como na tela); o primeiro teste falhou com 404 por isso, e a fixture passou a concedê-la.
+- **Resultados:** typecheck e lint OK; unitários 1620/1620; integração 714/714; E2E da API 2/2 (`api-actions-webhook-sectors.spec.ts`, `api-webhooks.spec.ts`). O E2E completo não foi rodado localmente.
+- **CA-CMP-02** marcado na SPEC.
+- **Linhas:** 434 `added` em TS (aplicação 115, testes 319).

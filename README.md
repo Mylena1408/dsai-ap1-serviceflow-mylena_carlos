@@ -175,6 +175,7 @@ curl -X POST -H "Authorization: Bearer sf_..." -H "Content-Type: application/jso
 ```
 
 - Rotas: `GET /api/v1/me`, `GET /api/v1/services` (solicitante), `GET /api/v1/requests`, `POST /api/v1/requests` (solicitante, sem anexos), `GET /api/v1/requests/{id}`, `POST /api/v1/requests/{id}/comments`. A descrição completa, com formatos e erros, está em `GET /api/v1/openapi.json` (público).
+- No detalhe da solicitação, a equipe do setor (atendentes e gestor) recebe também `tags`, `checklist` (marcados, total e itens) e `minutesLogged` (minutos apontados); para o solicitante, esses campos vêm `null` (`SPEC/2026-11-08-atendimento-dia-a-dia.md`, seção 9).
 - Ações de atendimento (`SPEC/2026-11-03-api-acoes-webhooks-setor.md`), todas `POST` com token de escopo `WRITE`, com as mesmas regras da tela, o mesmo histórico e os mesmos eventos, e resposta com o detalhe atualizado:
   - `/api/v1/requests/{id}/assume`, `/start` e `/complete` (atendente do setor; corpo vazio ou `{}`);
   - `/release` (o responsável, ou quem supervisiona a fila) e `/transfer` com `{"assigneeId"}`; os colegas aceitos estão em `GET /api/v1/requests/{id}/transfer-candidates`;

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ApiUser } from "@/modules/api-tokens";
+import { getRequestChecklist } from "@/modules/checklists";
 import { addComment, listComments } from "@/modules/comments";
 import { listPublishedServiceRequirements } from "@/modules/document-requirements";
 import {
@@ -31,8 +32,10 @@ import {
 } from "@/modules/requests";
 import { listPublishedServiceFields } from "@/modules/service-fields";
 import { listPublishedServices } from "@/modules/services";
+import { getRequestTags } from "@/modules/tags";
+import { getRequestTime } from "@/modules/time-entries";
 import { actorHasPermission } from "@/server/authorization";
-import { ValidationError } from "@/server/errors";
+import { NotFoundError, ValidationError } from "@/server/errors";
 import { validateInput } from "@/server/validation";
 import { PERMISSIONS } from "@/shared/permissions";
 import type { ApiErrorCode } from "../domain/errors";
@@ -43,6 +46,7 @@ import {
   serviceRepresentation,
   type ApiPage,
   type ApiRequestContext,
+  type ApiTeamView,
 } from "../domain/representation";
 
 // What each /api/v1 route does (SPEC 2026-11-02-api-externa-webhooks, 5.4; decision A4). Every
@@ -167,6 +171,22 @@ export async function listRequests(caller: ApiCaller, query: RawQuery, now: Date
   return { status: 200, body };
 }
 
+/**
+ * The blocks only the team of the request's sector reads (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 2):
+ * read by the screens' use cases, which tell anyone else the request does not exist. The request was already
+ * read, so that answer becomes null here; the requester never reads them (decisions I2, I6 and I9).
+ */
+async function loadTeamView(caller: ApiCaller, requestId: string): Promise<ApiTeamView | null> {
+  if (caller.user.role === "REQUESTER") return null;
+  try {
+    const [tags, checklist, time] = await Promise.all([getRequestTags(requestId), getRequestChecklist(requestId), getRequestTime(requestId)]);
+    return { tags, checklist, time };
+  } catch (error) {
+    if (error instanceof NotFoundError) return null;
+    throw error;
+  }
+}
+
 async function loadDetail(caller: ApiCaller, requestId: string, now: Date) {
   const request =
     caller.user.role === "REQUESTER"
@@ -174,7 +194,7 @@ async function loadDetail(caller: ApiCaller, requestId: string, now: Date) {
       : caller.user.role === "ATTENDANT"
         ? await getAttendantRequest(requestId)
         : await getManagerRequest(requestId);
-  const [answers, attachments, comments, links, group] = await Promise.all([
+  const [answers, attachments, comments, links, group, team] = await Promise.all([
     listRequestFieldAnswers(request.id),
     listRequestAttachments(request.id),
     // The manager screen has no conversation (SPEC 2026-10-31-comentarios, 5.1).
@@ -183,8 +203,9 @@ async function loadDetail(caller: ApiCaller, requestId: string, now: Date) {
     listRequestLinks(request.id),
     // 3.3 item 4: the bundle and its other requests.
     getRequestGroupBlock(request.id),
+    loadTeamView(caller, request.id),
   ]);
-  return requestDetailRepresentation(request, context(request, now), { answers, attachments, comments, links: links.links, group });
+  return requestDetailRepresentation(request, context(request, now), { answers, attachments, comments, links: links.links, group, team });
 }
 
 export async function getRequest(caller: ApiCaller, requestId: string, now: Date): Promise<ApiResult> {

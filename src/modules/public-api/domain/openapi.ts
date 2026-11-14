@@ -170,7 +170,8 @@ export const OPENAPI_DOCUMENT = {
     "/api/v1/requests/{requestId}": {
       get: {
         summary: "Detalhe de uma solicitação",
-        description: "Com respostas, anexos (sem download), comentários visíveis à pessoa e histórico. Escopo: READ.",
+        description:
+          "Com respostas, anexos (sem download), comentários visíveis à pessoa e histórico; para a equipe do setor, também etiquetas, checklist e minutos apontados. Escopo: READ.",
         parameters: [requestIdParameter],
         responses: { "200": { description: "A solicitação", content: json(ref("RequestDetail")) }, ...errors("invalid_request", "forbidden", "not_found") },
       },
@@ -484,6 +485,47 @@ export const OPENAPI_DOCUMENT = {
                   },
                 },
               },
+              // SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 2 (SF-221): only the team of the sector.
+              tags: {
+                type: ["array", "null"],
+                description: "Etiquetas da solicitação. Só a equipe do setor (atendentes e gestor) recebe; para os demais, null.",
+                items: {
+                  type: "object",
+                  properties: {
+                    id: { type: "string", format: "uuid" },
+                    name: { type: "string" },
+                    color: { type: "string", description: "Chave da paleta, como \"blue\"." },
+                    active: { type: "boolean" },
+                    fromOtherSector: { type: "boolean", description: "Etiqueta de um setor anterior, mantida até ser retirada." },
+                  },
+                },
+              },
+              checklist: {
+                type: ["object", "null"],
+                description:
+                  "Checklist da solicitação, com os itens na ordem. Só a equipe do setor recebe; null para os demais e para a solicitação sem itens de checklist.",
+                properties: {
+                  done: { type: "integer" },
+                  total: { type: "integer" },
+                  items: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", format: "uuid" },
+                        text: { type: "string" },
+                        required: { type: "boolean" },
+                        done: { type: "boolean" },
+                        doneAt: nullable("string", { format: "date-time" }),
+                        doneBy: nullable("object", { properties: person.properties }),
+                      },
+                    },
+                  },
+                },
+              },
+              minutesLogged: nullable("integer", {
+                description: "Total de minutos apontados (lançamentos não apagados). Só a equipe do setor recebe; para os demais, null.",
+              }),
               history: {
                 type: "object",
                 description:
