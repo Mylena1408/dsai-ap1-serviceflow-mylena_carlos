@@ -1858,3 +1858,27 @@ p {
   gap: 8px;
   margin-top: 8px;
 }
+
+/* SPEC 2026-11-09-comunicacao-e-calendarios, 3.1 item 2: the strip of announcements; colors come from the component. */
+.announcement-strip {
+  display: grid;
+  width: min(100% - 48px, 1120px);
+  gap: 8px;
+  margin: 12px auto 0;
+}
+
+.announcement-strip-item {
+  padding: 10px 16px;
+  border: 1px solid;
+  border-radius: var(--radius-small);
+}
+
+.announcement-strip-item p {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .announcement-strip {
+    width: min(100% - 32px, 620px);
+  }
+}

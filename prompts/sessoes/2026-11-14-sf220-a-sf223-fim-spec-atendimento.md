@@ -61,3 +61,8 @@
 
 14. Commit `a3b7477` (sem push: a migration nova pede backup e aplicação no Neon antes do envio).
 15. SF-235: casos de uso e seção "Avisos" da administração, mensagens por recusa, auditoria legível. Na integração completa, 5 falhas investigadas (relógio do banco x Node num teste novo; timeouts por suítes em paralelo); depois, unitários 1715/1715 e integração 733/733.
+
+> faça só o commit do SF-235 e comece o SF-236
+
+16. Commit `41c1083` (sem push).
+17. SF-236: faixa no layout raiz, leitura pelo público e pelo instante do banco, `unstable_rethrow` conforme a documentação do Next desta versão, contraste conferido. Build OK; unitários 1724/1724, integração 738/738, E2E 53/53.

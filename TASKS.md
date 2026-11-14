@@ -2461,7 +2461,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-236 — Faixa dos avisos nas áreas, público e limite
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14. Faixa no layout raiz (todas as telas de quem está conectado), com público, momento, ordem e limite de três decididos pelas regras e pelo instante do banco; cores com contraste conferido; CA-AVI-01 verificado e CA-AVI-03 (público, período, limite e ordem).
 - **Objetivo:** Seção 3.1 (item 2) e 3.3 (regras 2 e 3), parte A.
 - **Arquivos/módulos esperados:** Layouts das áreas, componente da faixa.
 - **Dependências:** SF-235.

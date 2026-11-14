@@ -2943,3 +2943,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1715/1715; integração 733/733. O E2E da parte A fica para a SF-240.
 - **CA-AVI-02** marcado na SPEC.
 - **Linhas:** cerca de 1.060 `added` em TS pelo `git diff` (aplicação 647, testes 413).
+
+## SF-236 — Faixa dos avisos (2026-11-14)
+
+- **Onde (esclarecimento na SPEC, 3.3):** no layout raiz, acima do cabeçalho de cada área. Assim a faixa cobre também a administração e as páginas de conta, que não usam os layouts das áreas. Sem sessão (página inicial), a leitura é recusada e nada aparece.
+- **Leitura:** `getAnnouncementStrip` usa a pessoa da sessão (inativa é recusada) e o instante do banco. O banco estreita pelo público e por uma janela que cobre a maior antecedência (168 horas); as regras do domínio escolhem, ordenam e limitam a três. As dispensas são consultadas só para os avisos de "informação".
+- **Next:** o componente apanha qualquer falha para não quebrar a tela, mas chama `unstable_rethrow` antes (a documentação desta versão pede isso em `try/catch` que envolve sessão e cookies). No `next build`, todas as rotas de página saem dinâmicas, inclusive `/_not-found`, que agora lê a sessão pelo layout raiz; o conteúdo dela não muda.
+- **Tela e acessibilidade:** nível, título e texto; o aviso de atenção com `role="alert"` e o de informação com `role="status"`; cores próprias por nível (texto escuro em fundo claro), com contraste de pelo menos 4,5:1 conferido por teste com o `contrastRatio` das etiquetas.
+- **Testes corrigidos durante a tarefa:** um teste de integração criava dois avisos com "início há 2 horas" calculado em instantes diferentes, e a ordem por início mais recente (correta) o reprovou; os inícios passaram a ser bem distintos.
+- **Resultados:** typecheck e lint OK; unitários 1724/1724; `next build` OK; integração 738/738; E2E completo 53/53 (11,3 min), rodados em sequência.
+- **CA-AVI-01** marcado; a CA-AVI-03 fica para depois da dispensa (SF-237).
+- **Linhas:** 372 `added` em TS (aplicação 144, testes 228); fora da meta, 24 de CSS.
