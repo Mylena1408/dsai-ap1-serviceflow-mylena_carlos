@@ -70,6 +70,7 @@ export {
   analyticsIntervals,
   arrivalGrid,
   intensityStep,
+  timeLoggedSummary,
 } from "./domain/analytics";
 export type {
   AnalyticsGranularity,
@@ -79,6 +80,8 @@ export type {
   SatisfactionSummary,
   StageTime,
   TeamMember,
+  TimeLoggedGroup,
+  TimeLoggedSummary,
   TrendPoint,
 } from "./domain/analytics";
 export { PRIORITY_ORDER } from "./application/analytics";

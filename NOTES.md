@@ -2896,3 +2896,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1620/1620; integração 714/714; E2E da API 2/2 (`api-actions-webhook-sectors.spec.ts`, `api-webhooks.spec.ts`). O E2E completo não foi rodado localmente.
 - **CA-CMP-02** marcado na SPEC.
 - **Linhas:** 434 `added` em TS (aplicação 115, testes 319).
+
+## SF-222 — Análises de horas (2026-11-14)
+
+- **Regra (esclarecimento na SPEC, 9.1):** as horas de "Análises" seguem o relatório de horas (SF-209): lançamento não apagado, pelo seu dia, no setor atual da solicitação; escopo de "Análises" (gestor no próprio setor; administrador na organização ou num setor).
+- **Domínio:** `timeLoggedSummary` (`reports/domain/analytics.ts`) soma total, lançamentos, por setor (só com a organização inteira; com um setor repetiria o total) e por serviço (com o nome do setor na organização inteira), das mais horas para as menos.
+- **Leitura:** método opcional `timeLogged` no leitor de "Análises" (dublês antigos seguem válidos), uma consulta agregada por setor e serviço. Não reaproveita o leitor de `time-entries` porque `time-entries` já importa de `reports` (seria ciclo); a consulta repete só o filtro (apagados, dia, setor atual), coberto pelos testes de integração.
+- **Tela:** bloco "Horas apontadas" depois de "Etiquetas", só com horas no período; link "Ver o relatório de horas" com o mesmo período (e setor, para o administrador), onde ficam atendente, etiqueta, estimativa e CSV. A tabela de horas do relatório foi movida para `analytics-view.tsx` (`HoursTable`) e é usada pelas duas telas, sem import circular entre os componentes.
+- **Teste existente ajustado:** a fixture de `tests/unit/analytics-view.test.ts` monta o tipo `Analytics` inteiro e ganhou o campo `time` (sem horas, o bloco não aparece); nenhuma asserção mudou. O E2E `time-entries.spec.ts` ganhou o passo do gestor em "Análises".
+- **Resultados:** typecheck e lint OK; unitários 1634/1634; integração 718/718; E2E `time-entries.spec.ts` e `analytics.spec.ts` 2/2. O E2E completo não foi rodado localmente.
+- **CA-CMP-03:** a parte das horas está pronta; o critério será marcado na SF-223, com a conclusão do checklist.
+- **Linhas:** 480 `added` em TS (aplicação 166, testes 314).

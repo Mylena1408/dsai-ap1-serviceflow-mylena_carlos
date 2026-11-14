@@ -1,4 +1,5 @@
 import type { Analytics, AttendantDashboard, ReportPeriod, ReportSector, WorkSummary } from "@/modules/reports";
+import { formatMinutes } from "@/modules/time-entries";
 import { ArrivalHeatmap, ColumnPairChart, LineChart, PercentBars } from "./charts";
 import { GroupTable, Indicator, PERIOD_ERRORS } from "./dashboard-view";
 
@@ -22,6 +23,43 @@ function day(value: string): string {
 
 function percent(value: number | null): string {
   return value === null ? "—" : `${value}%`;
+}
+
+/** Hours and entries per line, shared by "Análises" and the time report (SPEC 2026-11-08-atendimento-dia-a-dia). */
+export function HoursTable({ caption, label, groups }: { caption: string; label: string; groups: ReadonlyArray<{ key: string; label: string; minutes: number; entries: number }> }) {
+  return (
+    <table className="data-table">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{label}</th>
+          <th scope="col">Horas</th>
+          <th scope="col">Lançamentos</th>
+        </tr>
+      </thead>
+      <tbody>
+        {groups.map((group) => (
+          <tr key={group.key}>
+            <td>{group.label}</td>
+            <td>{formatMinutes(group.minutes)}</td>
+            <td>{group.entries}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** A link to another screen with the same period and, for the administrator, the same sector. */
+export function samePeriodHref(base: { action: string; hidden?: Record<string, string> }, period: ReportPeriod, sectorId: string | null): string {
+  const params = new URLSearchParams(base.hidden ?? {});
+  params.set("period", period.option);
+  if (period.option === "custom") {
+    params.set("from", period.firstDay);
+    params.set("to", period.lastDay);
+  }
+  if (sectorId) params.set("sector", sectorId);
+  return `${base.action}?${params.toString()}`;
 }
 
 export function PeriodFilters({
@@ -162,7 +200,18 @@ export function AttendantDashboardView({ dashboard }: { dashboard: AttendantDash
 }
 
 /** "Análises" of the administrator and the manager (5.4 to 5.6). */
-export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: Analytics; action: string; hidden?: Record<string, string> }) {
+export function AnalyticsView({
+  analytics,
+  action,
+  hidden = {},
+  timeReport,
+}: {
+  analytics: Analytics;
+  action: string;
+  hidden?: Record<string, string>;
+  /** Where the time report of the same viewer is (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3). */
+  timeReport?: { action: string; hidden?: Record<string, string> };
+}) {
   const { period, trend, sla } = analytics;
   const scopeName = analytics.sector?.name ?? (analytics.audience === "organization" ? "Toda a organização" : "Seu setor");
   const intervalNote = analytics.granularity === "day" ? "Por dia." : "Por semana (segunda a domingo).";
@@ -357,6 +406,29 @@ export function AnalyticsView({ analytics, action, hidden = {} }: { analytics: A
           <div className="dashboard-groups">
             <GroupTable title="Solicitações por etiqueta" groups={analytics.tags} />
           </div>
+        </section>
+      ) : null}
+
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: only when some hour was logged in the period. */}
+      {analytics.time.totalMinutes > 0 ? (
+        <section className="surface-card" aria-labelledby="analytics-time">
+          <h2 id="analytics-time">Horas apontadas</h2>
+          <p className="metadata">Lançamentos do período, pelo dia de cada um, no setor atual da solicitação.</p>
+          <p>
+            <strong>
+              Total: {formatMinutes(analytics.time.totalMinutes)} em {analytics.time.totalEntries}{" "}
+              {analytics.time.totalEntries === 1 ? "lançamento" : "lançamentos"}
+            </strong>
+          </p>
+          {analytics.time.bySector.length > 0 ? <HoursTable caption="Horas por setor" groups={analytics.time.bySector} label="Setor" /> : null}
+          <HoursTable caption="Horas por serviço" groups={analytics.time.byService} label="Serviço" />
+          {timeReport ? (
+            <p>
+              <a href={samePeriodHref(timeReport, period, analytics.audience === "organization" ? (analytics.sector?.id ?? null) : null)}>
+                Ver o relatório de horas
+              </a>
+            </p>
+          ) : null}
         </section>
       ) : null}
 

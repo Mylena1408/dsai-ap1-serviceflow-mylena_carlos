@@ -1,5 +1,5 @@
 import type { PriorityValue } from "@/shared/requests";
-import type { DailyCounts, DurationAggregate, SatisfactionRows, StageTimeRow, TeamMemberRow } from "../domain/analytics";
+import type { DailyCounts, DurationAggregate, SatisfactionRows, StageTimeRow, TeamMemberRow, TimeLoggedRow } from "../domain/analytics";
 import type { DashboardRange, DashboardScope, ReportSector } from "./ports";
 
 // Reading port of the operational analytics (SPEC 2026-11-06-analises-operacionais, 5.8): every
@@ -99,6 +99,11 @@ export interface AnalyticsReader {
    * with the tag's sector. Optional for older doubles.
    */
   requestsByTag?(scope: DashboardScope, range: DashboardRange): Promise<Array<{ name: string; sectorName: string; count: number }>>;
+  /**
+   * SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: minutes and entries not removed whose day is in the period, per
+   * current sector and service of the request. Optional for older doubles: absent = no hours.
+   */
+  timeLogged?(scope: DashboardScope, days: { firstDay: string; lastDay: string }): Promise<TimeLoggedRow[]>;
   /**
    * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: approval levels whose deadline fell in
    * the range and that were decided after it or are still pending past it. Optional for older doubles.

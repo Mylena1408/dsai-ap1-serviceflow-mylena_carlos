@@ -326,6 +326,20 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
         GROUP BY t."id", t."name", s."name"`;
     },
 
+    async timeLogged(scope, days) {
+      // SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: as the time report (SF-209), each entry not removed by its
+      // day, on the request's current sector.
+      return database.$queryRaw<Array<{ sectorId: string; sectorName: string; serviceName: string; minutes: number; entries: number }>>`
+        SELECT r."sectorId", s."name"::text AS "sectorName", r."serviceNameSnapshot" AS "serviceName",
+          sum(e."minutes")::int AS "minutes", count(*)::int AS "entries"
+        FROM "RequestTimeEntry" e
+        JOIN "Request" r ON r."id" = e."requestId"
+        JOIN "Sector" s ON s."id" = r."sectorId"
+        WHERE e."deletedAt" IS NULL
+          AND e."workedOn" BETWEEN ${days.firstDay}::date AND ${days.lastDay}::date ${scopeSql(scope)}
+        GROUP BY r."sectorId", s."name", r."serviceNameSnapshot"`;
+    },
+
     async ruleEscalations(scope, range) {
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: requests, per trigger.
       const [row] = await database.$queryRaw<Array<{ dueSoon: number; overdueDays: number }>>`

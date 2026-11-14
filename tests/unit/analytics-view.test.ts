@@ -40,6 +40,8 @@ const analytics: Analytics = {
   withoutSector: false,
   // SPEC 2026-11-08-atendimento-dia-a-dia, 3.1 item 4: without tags, the block does not show.
   tags: [],
+  // SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: without hours, the block does not show.
+  time: { totalMinutes: 0, totalEntries: 0, bySector: [], byService: [] },
   period,
   errors: { period: null, sector: null },
   granularity: "day",

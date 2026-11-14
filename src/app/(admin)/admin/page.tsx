@@ -312,7 +312,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               </p>
             </div>
           </div>
-          <AnalyticsView action="/admin" analytics={analytics} hidden={{ section: "analytics" }} />
+          <AnalyticsView action="/admin" analytics={analytics} hidden={{ section: "analytics" }} timeReport={{ action: "/admin", hidden: { section: "time" } }} />
         </section>
       ) : null}
 

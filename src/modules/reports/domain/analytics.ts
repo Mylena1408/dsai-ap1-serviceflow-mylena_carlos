@@ -301,3 +301,59 @@ export function satisfactionSummary(rows: SatisfactionRows): SatisfactionSummary
       .sort((left, right) => right.count - left.count || collator.compare(left.label, right.label)),
   };
 }
+
+/**
+ * The time logged in the period, per sector and service (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3): the
+ * entries not removed whose day is in the period, on the requests' current sector, as the time report counts them.
+ */
+export interface TimeLoggedRow {
+  sectorId: string;
+  sectorName: string;
+  serviceName: string;
+  minutes: number;
+  entries: number;
+}
+
+/** A line of the hours: the same shape as the time report's groups. */
+export interface TimeLoggedGroup {
+  key: string;
+  label: string;
+  minutes: number;
+  entries: number;
+}
+
+export interface TimeLoggedSummary {
+  totalMinutes: number;
+  totalEntries: number;
+  /** Only when every sector is shown: with one sector it would repeat the total. */
+  bySector: TimeLoggedGroup[];
+  byService: TimeLoggedGroup[];
+}
+
+function timeGroups(rows: readonly TimeLoggedRow[], keyOf: (row: TimeLoggedRow) => string, labelOf: (row: TimeLoggedRow) => string): TimeLoggedGroup[] {
+  const groups = new Map<string, TimeLoggedGroup>();
+  for (const row of rows) {
+    const key = keyOf(row);
+    const group = groups.get(key) ?? { key, label: labelOf(row), minutes: 0, entries: 0 };
+    group.minutes += row.minutes;
+    group.entries += row.entries;
+    groups.set(key, group);
+  }
+  return [...groups.values()]
+    .filter((group) => group.minutes > 0)
+    .sort((left, right) => right.minutes - left.minutes || collator.compare(left.label, right.label));
+}
+
+/** Most hours first, then by name; services take the sector's name when every sector is shown. */
+export function timeLoggedSummary(rows: readonly TimeLoggedRow[], showSector: boolean): TimeLoggedSummary {
+  return {
+    totalMinutes: rows.reduce((sum, row) => sum + row.minutes, 0),
+    totalEntries: rows.reduce((sum, row) => sum + row.entries, 0),
+    bySector: showSector ? timeGroups(rows, (row) => row.sectorId, (row) => row.sectorName) : [],
+    byService: timeGroups(
+      rows,
+      (row) => (showSector ? `${row.sectorId}:${row.serviceName}` : row.serviceName),
+      (row) => (showSector ? `${row.serviceName} (${row.sectorName})` : row.serviceName),
+    ),
+  };
+}

@@ -10,6 +10,7 @@ import {
   satisfactionSummary,
   stageTimes,
   teamTable,
+  timeLoggedSummary,
   trendSeries,
   type AnalyticsGranularity,
   type ArrivalGrid,
@@ -17,6 +18,7 @@ import {
   type SatisfactionSummary,
   type StageTime,
   type TeamMember,
+  type TimeLoggedSummary,
   type TrendPoint,
 } from "../domain/analytics";
 import type { CompletionTimes } from "../domain/metrics";
@@ -94,6 +96,8 @@ export interface Analytics {
    * with the sector's name when the administrator sees every sector. Empty without tags.
    */
   tags: Array<{ label: string; count: number }>;
+  /** SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: the hours logged in the period; zero without entries. */
+  time: TimeLoggedSummary;
   /** The administrator without a sector filter sees each person's sector (5.6). */
   teamShowsSector: boolean;
 }
@@ -199,6 +203,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
       team: [],
       satisfaction: satisfactionSummary({ distribution: [], completed: 0, ratedCompletions: 0, byService: [] }),
       tags: [],
+      time: timeLoggedSummary([], false),
     };
   }
 
@@ -222,7 +227,10 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.ruleEscalations ? reader.ruleEscalations(scope, range) : Promise.resolve({ dueSoon: 0, overdueDays: 0 }),
     reader.automaticAssignments ? reader.automaticAssignments(scope, range) : Promise.resolve(0),
   ]);
-  const byTag = reader.requestsByTag ? await reader.requestsByTag(scope, range) : [];
+  const [byTag, timeRows] = await Promise.all([
+    reader.requestsByTag ? reader.requestsByTag(scope, range) : Promise.resolve([]),
+    reader.timeLogged ? reader.timeLogged(scope, { firstDay: period.firstDay, lastDay: period.lastDay }) : Promise.resolve([]),
+  ]);
 
   return {
     ...base,
@@ -253,6 +261,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     team: teamTable(team),
     satisfaction: satisfactionSummary(ratings),
     tags: tagCounts(byTag, base.teamShowsSector),
+    time: timeLoggedSummary(timeRows, base.teamShowsSector),
   };
 }
 

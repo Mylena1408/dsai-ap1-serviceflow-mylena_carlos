@@ -110,6 +110,13 @@ test("time: logged and changed by the attendant, totalled against the estimate, 
   expect(content).toContain(serviceName);
   expect(content).toContain(`;${requestId.slice(0, 8).toUpperCase()};120;2,00`);
   expect(content).not.toContain("Instalação no local");
+
+  // "Análises" shows the hours of the period, with a link to the report (9.1 item 3; CA-CMP-03).
+  await page.goto("/approvals/analytics");
+  const analyticsTime = page.getByRole("region", { name: "Horas apontadas" });
+  await expect(analyticsTime.getByRole("table", { name: "Horas por serviço" })).toContainText(serviceName);
+  await analyticsTime.getByRole("link", { name: "Ver o relatório de horas" }).click();
+  await expect(page.getByRole("heading", { name: "Horas do setor" })).toBeVisible();
   await signOut(page);
 
   // The requester never sees the time (decision I9).

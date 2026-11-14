@@ -23,7 +23,7 @@ export default async function ManagerAnalyticsPage({ searchParams }: ManagerAnal
           <p>Tendências, tempos de atendimento e a distribuição do trabalho da equipe do seu setor.</p>
         </div>
       </header>
-      <AnalyticsView action="/approvals/analytics" analytics={analytics} />
+      <AnalyticsView action="/approvals/analytics" analytics={analytics} timeReport={{ action: "/approvals/time" }} />
     </main>
   );
 }

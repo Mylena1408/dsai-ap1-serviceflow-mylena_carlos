@@ -1,5 +1,5 @@
-import { formatMinutes, type TimeGroup, type TimeReport } from "@/modules/time-entries";
-import { Alerts, PeriodFilters, periodMessage } from "./analytics-view";
+import { formatMinutes, type TimeReport } from "@/modules/time-entries";
+import { Alerts, HoursTable as GroupTable, PeriodFilters, periodMessage } from "./analytics-view";
 
 // The time report (SPEC 2026-11-08-atendimento-dia-a-dia, 5.1 item 3 and 5.3 item 4), shared by the manager's area
 // (their sector) and the administration (every sector or one): the period's hours by attendant, service and sector,
@@ -8,30 +8,6 @@ import { Alerts, PeriodFilters, periodMessage } from "./analytics-view";
 function day(value: string): string {
   const [year, month, date] = value.split("-");
   return `${date}/${month}/${year}`;
-}
-
-function GroupTable({ caption, label, groups }: { caption: string; label: string; groups: TimeGroup[] }) {
-  return (
-    <table className="data-table">
-      <caption>{caption}</caption>
-      <thead>
-        <tr>
-          <th scope="col">{label}</th>
-          <th scope="col">Horas</th>
-          <th scope="col">Lançamentos</th>
-        </tr>
-      </thead>
-      <tbody>
-        {groups.map((group) => (
-          <tr key={group.key}>
-            <td>{group.label}</td>
-            <td>{formatMinutes(group.minutes)}</td>
-            <td>{group.entries}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
 }
 
 /** The CSV link keeps the same period and sector as the screen. */
