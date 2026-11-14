@@ -88,7 +88,7 @@ describe("getAnnouncementStrip", () => {
 });
 
 describe("the strip on the screen", () => {
-  const item = (overrides: Partial<AnnouncementRecord> = {}) => ({ ...record(overrides), dismissible: true });
+  const item = (overrides: Partial<AnnouncementRecord> = {}) => ({ ...record(overrides), dismissible: true, phase: null });
 
   it("draws nothing without announcements (CA-AVI-01)", () => {
     expect(renderToStaticMarkup(createElement(AnnouncementStripView, { announcements: [] }))).toBe("");

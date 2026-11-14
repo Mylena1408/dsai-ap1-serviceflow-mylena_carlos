@@ -2481,7 +2481,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-238 — Manutenção programada e antecedência
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14. A faixa mostra "Manutenção programada" (com a janela) na antecedência e "Manutenção em andamento" (com o fim) durante a janela, pelo instante do banco; nada é bloqueado (decisão K2); CA-AVI-04 verificado.
 - **Objetivo:** Seção 3.1 (item 3), parte A (decisão K2).
 - **Arquivos/módulos esperados:** Módulo de avisos, cadastro e faixa.
 - **Dependências:** SF-236.

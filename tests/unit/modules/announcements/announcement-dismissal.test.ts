@@ -85,8 +85,8 @@ describe("\"Dispensar\" in the strip", () => {
     const html = renderToStaticMarkup(
       createElement(AnnouncementStripView, {
         announcements: [
-          { ...record({ id: "w", level: "WARNING", title: "Sistema lento" }), dismissible: false },
-          { ...record({ id: "i", title: "Novo catálogo" }), dismissible: true },
+          { ...record({ id: "w", level: "WARNING", title: "Sistema lento" }), dismissible: false, phase: null },
+          { ...record({ id: "i", title: "Novo catálogo" }), dismissible: true, phase: null },
         ],
       }),
     );

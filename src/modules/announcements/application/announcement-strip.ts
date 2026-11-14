@@ -1,5 +1,5 @@
 import { requireCurrentActor } from "@/server/authorization";
-import { canDismiss, visibleAnnouncements, type AnnouncementRecord, type AnnouncementViewer } from "../domain/announcement";
+import { canDismiss, maintenancePhase, visibleAnnouncements, type AnnouncementRecord, type AnnouncementViewer } from "../domain/announcement";
 
 // The strip at the top of the screens (SPEC 2026-11-09-comunicacao-e-calendarios, 3.1 item 2 and 3.3 items 2 to 4;
 // SF-236): the announcements of the signed-in person's audience shown now, urgent first, at most three, without the
@@ -8,6 +8,8 @@ import { canDismiss, visibleAnnouncements, type AnnouncementRecord, type Announc
 export interface AnnouncementStripItem extends AnnouncementRecord {
   /** 3.3 item 4: only an information notice. */
   dismissible: boolean;
+  /** 3.1 item 3 (SF-238): a maintenance before its window or during it, at the database's instant; null for a notice. */
+  phase: "scheduled" | "in_progress" | null;
 }
 
 export interface AnnouncementStripReader {
@@ -28,5 +30,9 @@ export async function getAnnouncementStrip(reader: AnnouncementStripReader): Pro
   const candidates = await reader.candidates(viewer, now);
   if (candidates.length === 0) return [];
   const dismissed = new Set(await reader.dismissedIds(viewer.id, candidates.filter(canDismiss).map(({ id }) => id)));
-  return visibleAnnouncements(candidates, viewer, now, dismissed).map((announcement) => ({ ...announcement, dismissible: canDismiss(announcement) }));
+  return visibleAnnouncements(candidates, viewer, now, dismissed).map((announcement) => ({
+    ...announcement,
+    dismissible: canDismiss(announcement),
+    phase: maintenancePhase(announcement, now),
+  }));
 }

@@ -71,3 +71,12 @@
 
 18. Commit `20eb635` (sem push).
 19. SF-237: dispensa por pessoa (caso de uso, gravação sem duplicar, botão na faixa, recarga da tela). Unitários 1733/1733, integração 742/742.
+
+> faça só o commit do SF-237 e comece o SF-238
+
+20. Commit `a190e26` (sem push).
+21. SF-238: fase da manutenção na faixa ("programada" com a janela, "em andamento" com o fim) e prova de que nada é bloqueado. Unitários 1743/1743, integração 745/745.
+
+> faça a contagem de linhas de código executaveis pelo cloc --diff
+
+22. `sh scripts/cloc-diff.sh` no HEAD `a190e26`: 86.028 linhas `added` (src 42.895, tests 42.889, scripts 244); faltam 13.972 para 100.000.

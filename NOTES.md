@@ -2964,3 +2964,14 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1733/1733; integração 742/742. O E2E do clique em "Dispensar" fica para a SF-240.
 - **CA-AVI-03** marcado na SPEC.
 - **Linhas:** 274 `added` em TS (aplicação 86, testes 188); fora da meta, 5 de CSS.
+
+## SF-238 — Manutenção programada na faixa (2026-11-14)
+
+- **Regra (esclarecimento na SPEC, 3.3):** na antecedência, "Manutenção programada" com a janela ("De … a …."); durante a janela, "Manutenção em andamento" com o fim ("Até …."); depois, o título e o texto. A fase sai do instante do banco (`maintenancePhase`), e as horas são as do fuso da organização. Com antecedência 0, a faixa começa junto com a janela.
+- **K2 (só avisa):** nada fora da faixa e da administração consulta os avisos; a integração abre uma solicitação durante a janela e ela segue normalmente.
+- **O que já vinha das tarefas anteriores:** a antecedência no cadastro (SF-235), a janela da faixa e a ordem (SF-234 e SF-236) e a manutenção sem "Dispensar" (SF-237). Esta tarefa acrescentou a fase na leitura da faixa e o texto da manutenção.
+- **Testes ajustados:** os exemplos das telas da faixa ganharam o campo novo `phase` (aviso comum: `null`), sem mudar asserções.
+- **Resultados:** typecheck e lint OK; unitários 1743/1743; integração 745/745.
+- **CA-AVI-04** marcado na SPEC; com ele, os cinco critérios da parte A estão verificados. A revisão deles com o E2E fica para a SF-240.
+- **Linhas:** 192 `added` em TS (aplicação 35, testes 157).
+- **Contagem (`scripts/cloc-diff.sh`, HEAD `a190e26`, antes do commit da SF-238):** 86.028 linhas `added` sobre a `baseline-ap2` (src 42.895, tests 42.889, scripts 244); faltam 13.972 para 100.000.
