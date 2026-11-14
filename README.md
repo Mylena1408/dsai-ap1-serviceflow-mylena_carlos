@@ -31,7 +31,7 @@ npm run dev
 
 A aplicação fica disponível publicamente em:
 
-**[Acessar o ServiceFlow](https://dsai-ap1-serviceflow-6ae1.vercel.app/)**
+**[Acessar o ServiceFlow](https://serviceflow-sand.vercel.app/)**
 
 Não há tela de login: a página inicial mostra a escolha de perfil (Administrador, Solicitante, Atendente ou Gestor), que entra como uma pessoa fictícia, sem e-mail nem senha (`SPEC/2026-09-30-catalogo-e-solicitacoes.md`, seções 24 e 25):
 
