@@ -118,4 +118,13 @@ test("checklist: built by the manager, copied on start, required at completion, 
   await page.goto(`/requests/${requestId}`);
   await expect(page.getByText("Pedido com checklist.")).toBeVisible();
   await expect(page.getByText("Conferir a licença")).toHaveCount(0);
+  await signOut(page);
+
+  // "Análises" counts the completed request and the optional item left unmarked (9.1 item 3; CA-CMP-03). Earlier
+  // runs leave their own requests in this database, so the block is checked, not the item's place in the ranking.
+  await enterAs(page, "Gestor");
+  await page.goto("/approvals/analytics");
+  const completion = page.getByRole("region", { name: "Checklist", exact: true });
+  await expect(completion.getByText("Checklist completo")).toBeVisible();
+  await expect(completion.getByRole("region", { name: "Itens opcionais mais deixados sem marcar" })).toContainText("Avisar o solicitante");
 });

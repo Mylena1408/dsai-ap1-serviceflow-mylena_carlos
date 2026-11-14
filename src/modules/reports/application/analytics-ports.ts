@@ -1,5 +1,13 @@
 import type { PriorityValue } from "@/shared/requests";
-import type { DailyCounts, DurationAggregate, SatisfactionRows, StageTimeRow, TeamMemberRow, TimeLoggedRow } from "../domain/analytics";
+import type {
+  ChecklistCompletionRows,
+  DailyCounts,
+  DurationAggregate,
+  SatisfactionRows,
+  StageTimeRow,
+  TeamMemberRow,
+  TimeLoggedRow,
+} from "../domain/analytics";
 import type { DashboardRange, DashboardScope, ReportSector } from "./ports";
 
 // Reading port of the operational analytics (SPEC 2026-11-06-analises-operacionais, 5.8): every
@@ -104,6 +112,11 @@ export interface AnalyticsReader {
    * current sector and service of the request. Optional for older doubles: absent = no hours.
    */
   timeLogged?(scope: DashboardScope, days: { firstDay: string; lastDay: string }): Promise<TimeLoggedRow[]>;
+  /**
+   * 9.1 item 3: the requests completed in the range that have checklist items, how many have every item marked,
+   * and the optional items left unmarked on them. Optional for older doubles: absent = no checklist.
+   */
+  checklistCompletion?(scope: DashboardScope, range: DashboardRange): Promise<ChecklistCompletionRows>;
   /**
    * SPEC 2026-11-06-aprofundamento-configurabilidade, 4.3.6: approval levels whose deadline fell in
    * the range and that were decided after it or are still pending past it. Optional for older doubles.

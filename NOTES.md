@@ -2907,3 +2907,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1634/1634; integração 718/718; E2E `time-entries.spec.ts` e `analytics.spec.ts` 2/2. O E2E completo não foi rodado localmente.
 - **CA-CMP-03:** a parte das horas está pronta; o critério será marcado na SF-223, com a conclusão do checklist.
 - **Linhas:** 480 `added` em TS (aplicação 166, testes 314).
+
+## SF-223 — Análises de checklist e fim da SPEC "Atendimento no dia a dia" (2026-11-14)
+
+- **Regra (esclarecimento na SPEC, 9.1):** entram as solicitações concluídas no período como no resto de "Análises" (situação "Concluída", conclusão no período, setor atual, escopo de "Análises") que têm pelo menos um item de checklist. "Completo" é ter todos os itens marcados; como a conclusão já exige os obrigatórios, o que falta é sempre opcional.
+- **Domínio e leitura:** `checklistCompletionSummary` (porcentagem arredondada, até 10 itens opcionais mais deixados sem marcar, por serviço e texto, com o setor na organização inteira); método opcional `checklistCompletion` no leitor, com duas consultas agregadas (totais por solicitação e itens opcionais sem marcar, contando solicitações distintas).
+- **Tela:** bloco "Checklist" depois de "Horas apontadas", só com alguma concluída com checklist no período: indicador "Checklist completo" (porcentagem e "X de Y solicitações") e a tabela dos itens opcionais, ou a frase "Nenhum item opcional ficou sem marcar.".
+- **E2E:** `checklists.spec.ts` ganhou o passo do gestor em "Análises". Como o banco do E2E guarda as execuções anteriores, o teste confere o bloco e o texto do item, não a posição no ranking.
+- **Revisão final da SPEC (seção 14):** 35 critérios marcados; SF-194 a SF-233 concluídas; garantia 7.4 conferida (exceções registradas); 10.892 linhas `added` até a SF-222 mais cerca de 400 da SF-223, contra a estimativa de 18.900.
+- **Registros que estavam faltando:** `TASKS.md` estava com SF-220 a SF-222 como "Pendente" (o agente não tinha atualizado) e foi corrigido; a sessão de hoje foi registrada em `prompts/sessoes/2026-11-14-sf220-a-sf223-fim-spec-atendimento.md`. As sessões de 08/11 e 09/11 continuam sem registro nessa pasta.
+- **Resultados:** typecheck e lint OK; unitários 1645/1645; integração 722/722; E2E completo 53/53 (9,8 min).
+- **CA-CMP-03** marcado na SPEC.
+- **Linhas:** 403 `added` em TS pelo `git diff` (aplicação 114, testes 289).

@@ -69,6 +69,8 @@ export {
   analyticsGranularity,
   analyticsIntervals,
   arrivalGrid,
+  MAX_SKIPPED_CHECKLIST_ITEMS,
+  checklistCompletionSummary,
   intensityStep,
   timeLoggedSummary,
 } from "./domain/analytics";
@@ -76,6 +78,7 @@ export type {
   AnalyticsGranularity,
   AnalyticsInterval,
   ArrivalGrid,
+  ChecklistCompletionSummary,
   OnTimeGroup,
   SatisfactionSummary,
   StageTime,

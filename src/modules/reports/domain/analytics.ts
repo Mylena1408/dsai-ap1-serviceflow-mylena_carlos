@@ -357,3 +357,42 @@ export function timeLoggedSummary(rows: readonly TimeLoggedRow[], showSector: bo
     ),
   };
 }
+
+/** At most this many optional items in the table of the most skipped (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3). */
+export const MAX_SKIPPED_CHECKLIST_ITEMS = 10;
+
+/**
+ * The checklists of the requests completed in the period (9.1 item 3): only the requests that have at least one
+ * item count; "complete" is every item marked. The optional items left unmarked, per service and text.
+ */
+export interface ChecklistCompletionRows {
+  withChecklist: number;
+  complete: number;
+  skipped: ReadonlyArray<{ sectorId: string; sectorName: string; serviceName: string; text: string; count: number }>;
+}
+
+export interface ChecklistCompletionSummary {
+  withChecklist: number;
+  complete: number;
+  /** Null without requests with a checklist. */
+  completePercentage: number | null;
+  /** Most skipped first, then by name; at most MAX_SKIPPED_CHECKLIST_ITEMS. */
+  skippedOptional: Array<{ key: string; label: string; count: number }>;
+}
+
+export function checklistCompletionSummary(rows: ChecklistCompletionRows, showSector: boolean): ChecklistCompletionSummary {
+  return {
+    withChecklist: rows.withChecklist,
+    complete: rows.complete,
+    completePercentage: rows.withChecklist === 0 ? null : Math.round((rows.complete / rows.withChecklist) * 100),
+    skippedOptional: rows.skipped
+      .filter((row) => row.count > 0)
+      .map((row) => ({
+        key: `${row.sectorId}:${row.serviceName}:${row.text}`,
+        label: `${row.text} · ${row.serviceName}${showSector ? ` (${row.sectorName})` : ""}`,
+        count: row.count,
+      }))
+      .sort((left, right) => right.count - left.count || collator.compare(left.label, right.label))
+      .slice(0, MAX_SKIPPED_CHECKLIST_ITEMS),
+  };
+}

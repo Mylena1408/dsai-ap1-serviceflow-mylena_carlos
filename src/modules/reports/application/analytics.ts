@@ -5,6 +5,7 @@ import {
   analyticsGranularity,
   analyticsIntervals,
   arrivalGrid,
+  checklistCompletionSummary,
   durationTimes,
   onTimeGroups,
   satisfactionSummary,
@@ -14,6 +15,7 @@ import {
   trendSeries,
   type AnalyticsGranularity,
   type ArrivalGrid,
+  type ChecklistCompletionSummary,
   type OnTimeGroup,
   type SatisfactionSummary,
   type StageTime,
@@ -98,6 +100,8 @@ export interface Analytics {
   tags: Array<{ label: string; count: number }>;
   /** SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: the hours logged in the period; zero without entries. */
   time: TimeLoggedSummary;
+  /** 9.1 item 3: the checklists of the requests completed in the period; zero without checklists. */
+  checklist: ChecklistCompletionSummary;
   /** The administrator without a sector filter sees each person's sector (5.6). */
   teamShowsSector: boolean;
 }
@@ -166,6 +170,8 @@ export async function getAttendantDashboard(raw: RawParams, reader: AnalyticsRea
   };
 }
 
+const NO_CHECKLISTS = { withChecklist: 0, complete: 0, skipped: [] } as const;
+
 const EMPTY_ANALYTICS_SLA: Analytics["sla"] = {
   firstResponse: { times: null, answered: 0, unanswered: 0 },
   stages: [],
@@ -204,6 +210,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
       satisfaction: satisfactionSummary({ distribution: [], completed: 0, ratedCompletions: 0, byService: [] }),
       tags: [],
       time: timeLoggedSummary([], false),
+      checklist: checklistCompletionSummary(NO_CHECKLISTS, false),
     };
   }
 
@@ -227,9 +234,10 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     reader.ruleEscalations ? reader.ruleEscalations(scope, range) : Promise.resolve({ dueSoon: 0, overdueDays: 0 }),
     reader.automaticAssignments ? reader.automaticAssignments(scope, range) : Promise.resolve(0),
   ]);
-  const [byTag, timeRows] = await Promise.all([
+  const [byTag, timeRows, checklistRows] = await Promise.all([
     reader.requestsByTag ? reader.requestsByTag(scope, range) : Promise.resolve([]),
     reader.timeLogged ? reader.timeLogged(scope, { firstDay: period.firstDay, lastDay: period.lastDay }) : Promise.resolve([]),
+    reader.checklistCompletion ? reader.checklistCompletion(scope, range) : Promise.resolve(NO_CHECKLISTS),
   ]);
 
   return {
@@ -262,6 +270,7 @@ export async function getAnalytics(raw: RawParams, reader: AnalyticsReader, now:
     satisfaction: satisfactionSummary(ratings),
     tags: tagCounts(byTag, base.teamShowsSector),
     time: timeLoggedSummary(timeRows, base.teamShowsSector),
+    checklist: checklistCompletionSummary(checklistRows, base.teamShowsSector),
   };
 }
 

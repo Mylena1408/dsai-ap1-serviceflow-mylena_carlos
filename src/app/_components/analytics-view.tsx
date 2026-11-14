@@ -432,6 +432,28 @@ export function AnalyticsView({
         </section>
       ) : null}
 
+      {/* SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: only when a request completed in the period has a checklist. */}
+      {analytics.checklist.withChecklist > 0 ? (
+        <section className="surface-card" aria-labelledby="analytics-checklist">
+          <h2 id="analytics-checklist">Checklist</h2>
+          <p className="metadata">Solicitações concluídas no período que têm checklist. Completo é ter todos os itens marcados.</p>
+          <dl className="dashboard-indicators">
+            <Indicator
+              label="Checklist completo"
+              value={percent(analytics.checklist.completePercentage)}
+              detail={`${analytics.checklist.complete} de ${analytics.checklist.withChecklist} ${analytics.checklist.withChecklist === 1 ? "solicitação" : "solicitações"}`}
+            />
+          </dl>
+          {analytics.checklist.skippedOptional.length > 0 ? (
+            <div className="dashboard-groups">
+              <GroupTable title="Itens opcionais mais deixados sem marcar" groups={analytics.checklist.skippedOptional} />
+            </div>
+          ) : (
+            <p className="metadata">Nenhum item opcional ficou sem marcar.</p>
+          )}
+        </section>
+      ) : null}
+
       <section className="surface-card" aria-labelledby="analytics-team">
         <h2 id="analytics-team">Desempenho da equipe</h2>
         <p className="analytics-notice">{TEAM_NOTICE}</p>

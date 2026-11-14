@@ -2301,7 +2301,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-220 — Configuração portátil versão 2
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14 (`20b9655`). O arquivo passa à versão 2, com as etiquetas dos setores e o modelo de checklist dos serviços; a importação aceita as versões 1 e 2; nomes repetidos seguem a regra da SF-187; CA-CMP-01 verificado.
 - **Objetivo:** Seção 9.1 (item 1), parte G.
 - **Arquivos/módulos esperados:** `src/modules/configuration/`.
 - **Dependências:** Parte F concluída.
@@ -2311,7 +2311,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-221 — API pública: etiquetas, checklist e horas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14 (`678db34`). O detalhe da API traz `tags`, `checklist` e `minutesLogged` para a equipe do setor e `null` para os demais; OpenAPI e README atualizados; CA-CMP-02 verificado.
 - **Objetivo:** Seção 9.1 (item 2), parte G.
 - **Arquivos/módulos esperados:** `src/modules/public-api/`.
 - **Dependências:** SF-220.
@@ -2321,7 +2321,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-222 — Análises de horas
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14 (`0df7e22`). Bloco "Horas apontadas" em "Análises" (total, por setor e por serviço, só com horas no período), com link para o relatório de horas; CA-CMP-03 (horas).
 - **Objetivo:** Seção 9.1 (item 3), parte G.
 - **Arquivos/módulos esperados:** `src/modules/reports/`.
 - **Dependências:** SF-221.
@@ -2331,7 +2331,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-223 — Análises de checklist e revisão final da SPEC
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14. Bloco "Checklist" em "Análises" (concluídas com checklist completo e os itens opcionais mais deixados sem marcar); CA-CMP-03 verificado; revisão final na seção 14 da SPEC. Parte G concluída e, com ela, a SPEC "Atendimento no dia a dia".
 - **Objetivo:** Seção 9.1 (item 3), parte G.
 - **Arquivos/módulos esperados:** `src/modules/reports/`.
 - **Dependências:** SF-222.

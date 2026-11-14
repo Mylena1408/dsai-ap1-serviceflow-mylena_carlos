@@ -340,6 +340,32 @@ export function createPrismaAnalyticsReader(database: PrismaClient): AnalyticsRe
         GROUP BY r."sectorId", s."name", r."serviceNameSnapshot"`;
     },
 
+    async checklistCompletion(scope, range) {
+      // SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 3: requests completed in the range, as the rest of
+      // "Análises", that have checklist items; the optional ones left unmarked on them.
+      const completedInRange = Prisma.sql`r."status" = 'COMPLETED' AND r."completedAt" >= ${range.from} AND r."completedAt" < ${range.before} ${scopeSql(scope)}`;
+      const [[totals], skipped] = await Promise.all([
+        database.$queryRaw<Array<{ withChecklist: number; complete: number }>>`
+          SELECT count(*)::int AS "withChecklist", (count(*) FILTER (WHERE c."unmarked" = 0))::int AS "complete"
+          FROM (
+            SELECT r."id", count(*) FILTER (WHERE i."doneAt" IS NULL) AS "unmarked"
+            FROM "Request" r
+            JOIN "RequestChecklistItem" i ON i."requestId" = r."id"
+            WHERE ${completedInRange}
+            GROUP BY r."id"
+          ) c`,
+        database.$queryRaw<Array<{ sectorId: string; sectorName: string; serviceName: string; text: string; count: number }>>`
+          SELECT r."sectorId", s."name"::text AS "sectorName", r."serviceNameSnapshot" AS "serviceName",
+            i."textSnapshot" AS "text", count(DISTINCT r."id")::int AS "count"
+          FROM "RequestChecklistItem" i
+          JOIN "Request" r ON r."id" = i."requestId"
+          JOIN "Sector" s ON s."id" = r."sectorId"
+          WHERE i."isRequired" = false AND i."doneAt" IS NULL AND ${completedInRange}
+          GROUP BY r."sectorId", s."name", r."serviceNameSnapshot", i."textSnapshot"`,
+      ]);
+      return { withChecklist: totals?.withChecklist ?? 0, complete: totals?.complete ?? 0, skipped };
+    },
+
     async ruleEscalations(scope, range) {
       // SPEC 2026-11-06-aprofundamento-configurabilidade, 7.3 item 5: requests, per trigger.
       const [row] = await database.$queryRaw<Array<{ dueSoon: number; overdueDays: number }>>`
