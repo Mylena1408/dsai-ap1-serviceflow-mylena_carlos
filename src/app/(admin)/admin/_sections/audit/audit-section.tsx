@@ -13,6 +13,12 @@ import { API_TOKEN_SCOPE_LABELS } from "@/modules/api-tokens";
 import { WEBHOOK_EVENT_LABELS } from "@/modules/webhooks";
 import { DISTRIBUTION_MODE_LABELS } from "@/modules/sectors";
 import { FIELD_TYPE_LABELS, ROLE_LABELS } from "@/shared/admin-labels";
+import {
+  ANNOUNCEMENT_AUDIENCE_LABELS,
+  ANNOUNCEMENT_KIND_LABELS,
+  ANNOUNCEMENT_LEVEL_LABELS,
+  formatAnnouncementInstant,
+} from "@/modules/announcements";
 import { ESCALATION_TRIGGER_LABELS, PRIORITY_LABELS } from "@/shared/requests";
 import { PERIOD_ERRORS } from "@/app/_components/dashboard-view";
 import { PERMISSION_LABELS } from "../../user-permissions-panel";
@@ -74,6 +80,14 @@ export function auditValueFormatter(names: Record<string, string>) {
     // SPEC 2026-11-02-api-externa-webhooks, 5.7: token scope and dates.
     if (field === "scope") return API_TOKEN_SCOPE_LABELS[value as keyof typeof API_TOKEN_SCOPE_LABELS];
     if (field === "expiresAt" || field === "revokedAt") return new Date(value).toLocaleString("pt-BR");
+    // SPEC 2026-11-09-comunicacao-e-calendarios, 3.3 item 5: the announcement by names, its dates in the
+    // organization's time zone and the sector of its audience by name.
+    if (field === "level") return ANNOUNCEMENT_LEVEL_LABELS[value as keyof typeof ANNOUNCEMENT_LEVEL_LABELS] ?? value;
+    if (field === "kind") return ANNOUNCEMENT_KIND_LABELS[value as keyof typeof ANNOUNCEMENT_KIND_LABELS] ?? value;
+    if (field === "target") return ANNOUNCEMENT_AUDIENCE_LABELS[value as keyof typeof ANNOUNCEMENT_AUDIENCE_LABELS] ?? value;
+    if (field === "targetRole") return ROLE_LABELS[value as keyof typeof ROLE_LABELS] ?? value;
+    if (field === "targetSectorId") return names[value] ?? "(removido)";
+    if (field === "startsAt" || field === "endsAt") return formatAnnouncementInstant(new Date(value));
     return undefined;
   };
 }

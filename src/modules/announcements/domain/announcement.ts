@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ConflictError } from "@/server/errors";
-import { calendarDayError, SAO_PAULO_TIME_ZONE, zonedInstantOf } from "@/shared/time";
+import { calendarDayError, SAO_PAULO_TIME_ZONE, zonedDateTimeOf, zonedInstantOf } from "@/shared/time";
 import { entityIdSchema } from "@/shared/validation";
 
 // Announcements and scheduled maintenance (SPEC 2026-11-09-comunicacao-e-calendarios, part A; decisions K2, K5 and
@@ -28,6 +28,15 @@ export const MAX_LEAD_HOURS = 168;
 export const MAX_VISIBLE_ANNOUNCEMENTS = 3;
 /** 3.1 item 4: the page "Avisos" shows the ones that ended in the last 90 days. */
 export const ANNOUNCEMENT_HISTORY_DAYS = 90;
+
+/** Why a change is refused, so each screen message is its own (SF-235). Still a conflict (409). */
+export type AnnouncementConflictReason = "ends_in_past" | "ended" | "not_scheduled" | "not_current" | "start_moved" | "not_dismissable";
+
+export class AnnouncementConflict extends ConflictError {
+  constructor(readonly reason: AnnouncementConflictReason) {
+    super();
+  }
+}
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 24 * HOUR_MS;
@@ -228,26 +237,51 @@ export function announcementHistory<T extends AnnouncementRecord>(announcements:
 
 /** Creating or changing one needs an end still in the future (an announcement entirely past would show nothing). */
 export function assertEndsInFuture(data: Pick<AnnouncementData, "endsAt">, now: Date): void {
-  if (data.endsAt.getTime() <= now.getTime()) throw new ConflictError();
+  if (data.endsAt.getTime() <= now.getTime()) throw new AnnouncementConflict("ends_in_past");
 }
 
 /** 3.3 item 5: an ended announcement does not change any more. */
 export function assertCanChange(announcement: Pick<AnnouncementData, "startsAt" | "endsAt">, now: Date): void {
-  if (announcementStatus(announcement, now) === "ended") throw new ConflictError();
+  if (announcementStatus(announcement, now) === "ended") throw new AnnouncementConflict("ended");
 }
 
 /** 3.3 item 5: only one that has not started is deleted; it has no dismissals yet. */
 export function assertCanDelete(announcement: Pick<AnnouncementData, "startsAt" | "endsAt">, now: Date): void {
-  if (announcementStatus(announcement, now) !== "scheduled") throw new ConflictError();
+  if (announcementStatus(announcement, now) !== "scheduled") throw new AnnouncementConflict("not_scheduled");
 }
 
 /** 3.3 item 5: "encerrar antes do fim" moves the end to now; only one that is going on is closed. */
 export function closingEnd(announcement: Pick<AnnouncementData, "startsAt" | "endsAt">, now: Date): Date {
-  if (announcementStatus(announcement, now) !== "current") throw new ConflictError();
+  if (announcementStatus(announcement, now) !== "current") throw new AnnouncementConflict("not_current");
   return now;
 }
 
 /** 3.3 item 4: a person dismisses an "information" notice shown to them now. */
 export function assertCanBeDismissed(announcement: AnnouncementRecord, viewer: AnnouncementViewer, now: Date): void {
-  if (!canDismiss(announcement) || !reaches(announcement, viewer) || !isShownAt(announcement, now)) throw new ConflictError();
+  if (!canDismiss(announcement) || !reaches(announcement, viewer) || !isShownAt(announcement, now)) throw new AnnouncementConflict("not_dismissable");
+}
+
+/** The value of a `datetime-local` field for an instant, in the organization's time zone ("YYYY-MM-DDTHH:MM"). */
+export function toLocalDateTimeInput(instant: Date, timeZone: string = SAO_PAULO_TIME_ZONE): string {
+  return zonedDateTimeOf(instant, timeZone).replace(" ", "T");
+}
+
+/**
+ * Changing one that is going on (SF-235): its start may not move past the instant of the change, or it would be
+ * "scheduled" again with dismissals, and could then be deleted.
+ */
+export function assertStartedStaysStarted(current: Pick<AnnouncementData, "startsAt" | "endsAt">, next: Pick<AnnouncementData, "startsAt">, now: Date): void {
+  if (announcementStatus(current, now) === "current" && next.startsAt.getTime() > now.getTime()) throw new AnnouncementConflict("start_moved");
+}
+
+/** Names for the screens and the audit trail. */
+export const ANNOUNCEMENT_LEVEL_LABELS: Record<AnnouncementLevel, string> = { INFO: "Informação", WARNING: "Atenção" };
+export const ANNOUNCEMENT_KIND_LABELS: Record<AnnouncementKind, string> = { NOTICE: "Aviso", MAINTENANCE: "Manutenção" };
+export const ANNOUNCEMENT_AUDIENCE_LABELS: Record<AnnouncementAudience, string> = { ALL: "Todos", ROLE: "Um perfil", SECTOR: "Um setor" };
+
+/** "20/11/2026 09:00" in the organization's time zone. */
+export function formatAnnouncementInstant(instant: Date, timeZone: string = SAO_PAULO_TIME_ZONE): string {
+  const [day, time] = zonedDateTimeOf(instant, timeZone).split(" ");
+  const [year, month, date] = day!.split("-");
+  return `${date}/${month}/${year} ${time}`;
 }

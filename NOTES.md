@@ -2931,3 +2931,15 @@ Padrão a replicar nas SF-039 e SF-040:
 - **Resultados:** typecheck e lint OK; unitários 1689/1689; integração 728/728; E2E `dashboard.spec.ts` 1/1 (para exercitar a limpeza nova do `prepare-e2e`). O E2E completo não foi rodado.
 - **CA-AVI-05** marcado na SPEC.
 - **Linhas:** 766 `added` em TS pelo `git diff` (aplicação 343, testes 419, scripts 2); fora da meta, 102 linhas de SQL.
+
+## SF-235 — Cadastro de avisos na administração (2026-11-14)
+
+- **Regra (esclarecimento na SPEC, 3.3):** só o administrador, na seção "Avisos" da administração. Lista em andamento, programados (o mais próximo primeiro) e encerrados nos últimos 90 dias (o mais recente primeiro). O setor do público precisa estar ativo. Ao alterar um aviso em andamento, o início não pode ir para depois de agora (voltaria a "programado" já com dispensas, e poderia ser apagado).
+- **Casos de uso** (`announcements/application/announcement-admin.ts`): listar, criar, alterar, encerrar e apagar, em transação serializável, com o instante do banco (`SELECT now()`) para decidir a fase do aviso. Encerrar entra na auditoria como alteração do fim (`UPDATED`, "Fim: … → …"), sem ação nova no enum do banco; apagar é `DELETED` ("Removeu").
+- **Uma mensagem por recusa:** o domínio passou a lançar `AnnouncementConflict` (subclasse de `ConflictError`, ainda 409) com o motivo (`ends_in_past`, `ended`, `not_scheduled`, `not_current`, `start_moved`); a validação aponta o campo. As ações escolhem a mensagem pelo motivo ou pelo campo (`_sections/announcements/messages.ts`).
+- **Auditoria legível:** o formatador da tela mostra tipo, nível, público e perfil pelos nomes, o setor do público pelo nome (o id entrou na lista de ids que a tela troca por nomes) e as datas no fuso da organização ("dd/mm/aaaa hh:mm"), sem depender do fuso do servidor.
+- **Tela:** sem JavaScript, o formulário traz todos os campos; as regras usam só os do tipo e do público escolhidos. Datas pelo campo `datetime-local`, lidas e mostradas no fuso da organização.
+- **Falha investigada:** na primeira integração completa, falharam 5 testes. (1) O teste novo comparava o fim gravado (relógio do PostgreSQL) com `Date.now()` (relógio do Node), e o banco estava 4 ms adiantado; o teste passou a não misturar os dois relógios. (2) Quatro testes de `demo-data.test.ts` estouraram 5 s porque a suíte unitária rodou ao mesmo tempo que a integração; sozinhos passaram, e a integração completa rodada sem nada em paralelo passou inteira. Daqui em diante, as duas suítes não rodam ao mesmo tempo.
+- **Resultados:** typecheck e lint OK; unitários 1715/1715; integração 733/733. O E2E da parte A fica para a SF-240.
+- **CA-AVI-02** marcado na SPEC.
+- **Linhas:** cerca de 1.060 `added` em TS pelo `git diff` (aplicação 647, testes 413).

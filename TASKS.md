@@ -2451,7 +2451,7 @@ Tarefas derivadas da seção 21 da SPEC principal. Anexos estavam fora do escopo
 
 ### SF-235 — Cadastro de avisos na administração, com auditoria
 
-- **Estado:** Pendente.
+- **Estado:** Concluída em 2026-11-14. Casos de uso do administrador (listar, criar, alterar, encerrar, apagar) com auditoria e o instante do banco; seção "Avisos" da administração com uma mensagem por recusa; auditoria com os nomes do tipo, nível, público, perfil e setor e as datas no fuso da organização; CA-AVI-02 verificado.
 - **Objetivo:** Seção 3.1 (item 1) e 3.3 (regras 1, 2 e 5), parte A.
 - **Arquivos/módulos esperados:** Módulo de avisos, seção da administração.
 - **Dependências:** SF-234.
