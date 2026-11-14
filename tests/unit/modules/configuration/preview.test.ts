@@ -245,6 +245,8 @@ describe("the preview (6.3 item 4; CA-CFG-03)", () => {
     documents: [],
     stages: [],
     articles: [],
+    checklistItems: [],
+    tags: [],
     accessRoles: [],
     calendar: null,
     holidays: [],
@@ -269,7 +271,7 @@ describe("the preview (6.3 item 4; CA-CFG-03)", () => {
     for (const [content, path] of [
       ["não é json", "arquivo"],
       [JSON.stringify({ format: "outro", version: 1, exportedAt: "", data: data() }), "format"],
-      [fileText().replace('"version":1', '"version":2'), "version"],
+      [fileText().replace('"version":1', '"version":3'), "version"],
       [JSON.stringify({ format: "serviceflow-config", version: 1, exportedAt: "", data: { ...data(), users: [] } }), "data"],
       ["x".repeat(2 * 1024 * 1024 + 1), "arquivo"],
     ] as const) {

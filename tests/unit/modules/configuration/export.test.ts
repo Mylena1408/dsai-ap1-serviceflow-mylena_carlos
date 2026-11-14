@@ -119,6 +119,8 @@ const snapshot = (): ConfigurationSnapshot => ({
     { serviceId: ids.access, name: "Liberação", position: 1, isActive: true, assigneeId: ids.diego, targetDays: 2, conditionFieldId: null, conditionValue: null },
   ],
   articles: [{ serviceId: ids.access, title: "Como pedir", body: "Informe o sistema.", isPublished: true, position: 1 }],
+  checklistItems: [],
+  tags: [],
   accessRoles: [{ name: "Supervisão", description: null, permissions: ["QUEUE_SUPERVISION", "SECTOR_REQUESTS_READ"], isActive: true }],
   calendar: { weekdays: [5, 1, 2, 3, 4], startMinute: 480, endMinute: 1080, timeZone: "America/Sao_Paulo" },
   holidays: [
@@ -168,7 +170,7 @@ describe("the exported data (6.3 item 2; CA-CFG-02)", () => {
     const file = buildConfigurationFile(snapshot(), new Date("2026-11-07T15:00:00.000Z"));
     const text = JSON.stringify(file);
     expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-    expect(file).toMatchObject({ format: CONFIGURATION_FORMAT, version: 1, exportedAt: "2026-11-07T15:00:00.000Z" });
+    expect(file).toMatchObject({ format: CONFIGURATION_FORMAT, version: 2, exportedAt: "2026-11-07T15:00:00.000Z" });
     expect(configurationFileSchema.parse(file)).toEqual(file);
     expect(configurationFileName(new Date("2026-11-07T15:00:00.000Z"))).toBe("serviceflow-configuracao-2026-11-07.json");
   });
@@ -176,7 +178,7 @@ describe("the exported data (6.3 item 2; CA-CFG-02)", () => {
   it("the format refuses another format, version or shape", () => {
     const file = buildConfigurationFile(snapshot(), new Date("2026-11-07T15:00:00.000Z"));
     expect(configurationFileSchema.safeParse({ ...file, format: "outro" }).success).toBe(false);
-    expect(configurationFileSchema.safeParse({ ...file, version: 2 }).success).toBe(false);
+    expect(configurationFileSchema.safeParse({ ...file, version: 3 }).success).toBe(false);
     expect(configurationFileSchema.safeParse({ ...file, data: { ...file.data, users: [] } }).success).toBe(false);
     expect(configurationFileSchema.safeParse({ ...file, data: { ...file.data, sectors: [{ name: "TI" }] } }).success).toBe(false);
   });
@@ -211,7 +213,7 @@ describe("exporting (6.3 item 1; CA-CFG-01)", () => {
     const result = await exportConfiguration(allowed);
     expect(allowed.recordExport).toHaveBeenCalledWith(authorization.actor, new Date("2026-11-07T15:00:00.000Z"));
     expect(result).toMatchObject({ fileName: "serviceflow-configuracao-2026-11-07.json", repeated: [], tooLarge: false });
-    expect(JSON.parse(result.content)).toMatchObject({ format: "serviceflow-config", version: 1 });
+    expect(JSON.parse(result.content)).toMatchObject({ format: "serviceflow-config", version: 2 });
     expect(result.bytes).toBe(new TextEncoder().encode(result.content).length);
   });
 

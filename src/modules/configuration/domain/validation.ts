@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import { categoryInputSchema } from "@/modules/categories";
 import { parseCalendarInput, parseHolidayInput } from "@/modules/calendar";
 import { cannedResponseInputSchema } from "@/modules/canned-responses";
+import { MAX_ACTIVE_CHECKLIST_ITEMS, checklistItemInputSchema } from "@/modules/checklists";
 import { documentRequirementInputSchema, MAX_ACTIVE_DOCUMENT_REQUIREMENTS } from "@/modules/document-requirements";
 import { articleInputSchema } from "@/modules/knowledge";
 import { accessRoleInputSchema } from "@/modules/permissions";
@@ -22,6 +23,7 @@ import {
 } from "@/modules/service-fields";
 import { MAX_ACTIVE_SERVICE_STAGES, serviceStageInputSchema, serviceStageSettingsSchema } from "@/modules/service-stages";
 import { assertApprovalLevels, parseSlaHours, serviceApprovalInputSchema, serviceInputSchema } from "@/modules/services";
+import { MAX_ACTIVE_TAGS_PER_SECTOR, tagInputSchema } from "@/modules/tags";
 import { ApplicationError, ValidationError } from "@/server/errors";
 import { keyOf, type ConfigurationData, type FieldItem, type ServiceItem } from "./format";
 import { byKey, classify, pathOf, type PreviewMessage } from "./preview";
@@ -94,6 +96,13 @@ export function validateConfiguration(file: ConfigurationData, destination: Conf
     }
   };
   const changing = <T extends object>(item: T, current: T | undefined) => classify(item, current).status !== "equal";
+  /**
+   * The screens trim a name before saving it and the database refuses spaces at the ends; the import saves the
+   * file's text as it is, so a text with spaces at the ends is refused (a blank text is already the schema's).
+   */
+  const trimmed = (value: string, path: string) => {
+    if (value.trim() !== "" && value !== value.trim()) problem(path, "Não pode ter espaços no início ou no fim.");
+  };
 
   // The state the import would leave.
   const sectors = merge(destination.sectors, file.sectors, (sector) => sector.name);
@@ -108,6 +117,7 @@ export function validateConfiguration(file: ConfigurationData, destination: Conf
       documents: [...merge(current?.documents ?? [], service.documents, (document) => document.name).values()],
       stages: [...merge(current?.stages ?? [], service.stages, (stage) => stage.name).values()],
       articles: [...merge(current?.articles ?? [], service.articles, (article) => article.title).values()],
+      checklist: [...merge(current?.checklist ?? [], service.checklist ?? [], (item) => item.text).values()],
     });
   }
   const activeSector = (name: string) => sectors.get(keyOf(name))?.isActive === true;
@@ -178,6 +188,23 @@ export function validateConfiguration(file: ConfigurationData, destination: Conf
     for (const item of sector.cannedResponses) {
       if (changing(item, currentResponses.get(keyOf(item.title)))) {
         check(cannedResponseInputSchema, { title: item.title, body: item.body }, pathOf(path, "cannedResponses", item.title));
+      }
+    }
+
+    // Version 2: the sector's tags, by the tags' screen (SPEC 2026-11-08-atendimento-dia-a-dia, 3.3 item 1).
+    const currentTags = byKey(current?.tags ?? [], (item) => item.name);
+    let tagsChanged = false;
+    for (const item of sector.tags ?? []) {
+      if (!changing(item, currentTags.get(keyOf(item.name)))) continue;
+      tagsChanged = true;
+      const tagPath = pathOf(path, "tags", item.name);
+      check(tagInputSchema, { name: item.name, color: item.color }, tagPath);
+      trimmed(item.name, pathOf(tagPath, "name"));
+    }
+    if (tagsChanged) {
+      const active = [...merge(current?.tags ?? [], sector.tags ?? [], (item) => item.name).values()].filter((item) => item.isActive);
+      if (active.length > MAX_ACTIVE_TAGS_PER_SECTOR) {
+        problem(pathOf(path, "tags"), `Um setor tem no máximo ${MAX_ACTIVE_TAGS_PER_SECTOR} etiquetas ativas.`);
       }
     }
   }
@@ -340,6 +367,45 @@ export function validateConfiguration(file: ConfigurationData, destination: Conf
       if (changing(article, currentArticles.get(keyOf(article.title)))) {
         check(articleInputSchema, { title: article.title, body: article.body, position: article.position }, pathOf(path, "articles", article.title));
       }
+    }
+
+    // Version 2: the checklist model, by its screen (SPEC 2026-11-08-atendimento-dia-a-dia, 4.3 item 1 and
+    // 13.1 item 1); the condition follows the stages' rule.
+    const currentChecklist = byKey(current?.checklist ?? [], (item) => item.text);
+    let checklistChanged = false;
+    for (const item of service.checklist ?? []) {
+      if (!changing(item, currentChecklist.get(keyOf(item.text)))) continue;
+      checklistChanged = true;
+      const itemPath = pathOf(path, "checklist", item.text);
+      check(
+        checklistItemInputSchema,
+        {
+          text: item.text,
+          isRequired: item.isRequired,
+          conditionFieldId: item.condition ? placeholder(0) : null,
+          conditionValue: item.condition?.value ?? null,
+        },
+        itemPath,
+      );
+      trimmed(item.text, pathOf(itemPath, "text"));
+      if (item.position < 1) problem(pathOf(itemPath, "position"), "A posição começa em 1.");
+      if (item.condition) {
+        const { field, value } = item.condition;
+        const controller = controllerOf(merged, field);
+        if (item.isActive) {
+          rule(
+            () => assertConditionTarget({ id: null, audience: "REQUESTER" }, controller, value),
+            pathOf(itemPath, "condition"),
+            "A condição do item precisa de um campo ativo de escolha do serviço e de um valor entre as opções dele.",
+          );
+        } else if (!controller) {
+          // An inactive item keeps its condition, which still points to a field of the service.
+          problem(pathOf(itemPath, "condition"), "O campo da condição não existe no serviço.");
+        }
+      }
+    }
+    if (checklistChanged && (merged.checklist ?? []).filter((item) => item.isActive).length > MAX_ACTIVE_CHECKLIST_ITEMS) {
+      problem(pathOf(path, "checklist"), `Um serviço tem no máximo ${MAX_ACTIVE_CHECKLIST_ITEMS} itens de checklist ativos.`);
     }
   }
 

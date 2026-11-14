@@ -9,12 +9,14 @@ export type ItemKind =
   | "sector"
   | "escalationRule"
   | "cannedResponse"
+  | "tag"
   | "category"
   | "service"
   | "field"
   | "document"
   | "stage"
   | "article"
+  | "checklistItem"
   | "accessRole"
   | "calendar"
   | "holiday"
@@ -49,12 +51,14 @@ export const ITEM_KIND_LABELS: Record<ItemKind, string> = {
   sector: "Setor",
   escalationRule: "Regra de escalonamento",
   cannedResponse: "Resposta pronta",
+  tag: "Etiqueta",
   category: "Categoria",
   service: "Serviço",
   field: "Campo",
   document: "Documento exigido",
   stage: "Etapa",
   article: "Artigo",
+  checklistItem: "Item de checklist",
   accessRole: "Papel",
   calendar: "Calendário",
   holiday: "Feriado",
@@ -64,7 +68,7 @@ export const ITEM_KIND_LABELS: Record<ItemKind, string> = {
 export const MAX_PREVIEW_PROBLEMS = 50;
 
 /** Nested lists are items of their own, never a field that changes. */
-const NESTED = new Set(["escalationRules", "cannedResponses", "fields", "documents", "stages", "articles"]);
+const NESTED = new Set(["escalationRules", "cannedResponses", "tags", "fields", "documents", "stages", "articles", "checklist"]);
 
 export function changedFields(file: object, destination: object): string[] {
   const left = file as Record<string, unknown>;
@@ -168,6 +172,9 @@ export function classifyItems(data: ConfigurationData, destination: Configuratio
     for (const response of sector.cannedResponses) {
       add("cannedResponse", pathOf(sector.name, response.title), classify(response, responses.get(keyOf(response.title))));
     }
+    // A version 1 file has no tags: nothing to classify.
+    const tags = byKey(current?.tags ?? [], (tag) => tag.name);
+    for (const tag of sector.tags ?? []) add("tag", pathOf(sector.name, tag.name), classify(tag, tags.get(keyOf(tag.name))));
   }
 
   const categories = byKey(destination.categories, (category) => category.name);
@@ -185,6 +192,8 @@ export function classifyItems(data: ConfigurationData, destination: Configuratio
     for (const stage of service.stages) add("stage", pathOf(service.name, stage.name), classify(stage, stages.get(keyOf(stage.name))));
     const articles = byKey(current?.articles ?? [], (article) => article.title);
     for (const article of service.articles) add("article", pathOf(service.name, article.title), classify(article, articles.get(keyOf(article.title))));
+    const checklist = byKey(current?.checklist ?? [], (item) => item.text);
+    for (const item of service.checklist ?? []) add("checklistItem", pathOf(service.name, item.text), classify(item, checklist.get(keyOf(item.text))));
   }
 
   const roles = byKey(destination.accessRoles, (role) => role.name);
@@ -231,12 +240,14 @@ function collectKeys(data: ConfigurationData): string[] {
   for (const sector of data.sectors) {
     push(`${sector.name} › regras de escalonamento`, sector.escalationRules.map((rule) => rule.name));
     push(`${sector.name} › respostas prontas`, sector.cannedResponses.map((response) => response.title));
+    push(`${sector.name} › etiquetas`, (sector.tags ?? []).map((tag) => tag.name));
   }
   for (const service of data.services) {
     push(`${service.name} › campos`, service.fields.map((field) => field.label));
     push(`${service.name} › documentos`, service.documents.map((document) => document.name));
     push(`${service.name} › etapas`, service.stages.map((stage) => stage.name));
     push(`${service.name} › artigos`, service.articles.map((article) => article.title));
+    push(`${service.name} › checklist`, (service.checklist ?? []).map((item) => item.text));
   }
   return keys;
 }

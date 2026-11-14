@@ -41,7 +41,7 @@ test("portable configuration: export, preview, apply and a refused file", async 
     expect(download.suggestedFilename()).toMatch(/^serviceflow-configuracao-\d{4}-\d{2}-\d{2}\.json$/);
     const exported = await readFile((await download.path())!, "utf8");
     const file = JSON.parse(exported);
-    expect(file).toMatchObject({ format: "serviceflow-config", version: 1 });
+    expect(file).toMatchObject({ format: "serviceflow-config", version: 2 });
     expect(file.data.sectors.map((sector: { name: string }) => sector.name)).toContain("Central de Serviços");
     expect(exported).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
     expect(exported).not.toContain("passwordHash");

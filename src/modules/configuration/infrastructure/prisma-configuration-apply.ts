@@ -13,8 +13,9 @@ import { readFacts, readPeople } from "./prisma-configuration-import";
 // transaction; items equal to the destination are not touched; new items are created and changed ones
 // updated, each with its audit entry as its screen writes it (canned responses have no audit entry on their
 // screen either). The order follows the references: sectors and categories, services, their fields (and then
-// the conditions, which point to fields), documents, stages, articles, the sectors' rules and responses,
-// roles, the calendar, holidays and bundles. Nothing is deleted.
+// the conditions, which point to fields), documents, stages, articles, checklist items, the sectors' rules,
+// responses and tags, roles, the calendar, holidays and bundles. Nothing is deleted. A version 1 file has no
+// tags or checklists, so the destination's stay as they are (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 1).
 
 type Tx = Prisma.TransactionClient;
 
@@ -206,9 +207,26 @@ async function writePlan(client: Tx, plan: ImportPlan, actor: AuditActor): Promi
         (existing) => client.knowledgeArticle.update({ where: { id: existing }, data: values, select: { id: true } }),
       );
     }
+
+    // Version 2: the checklist model, matched by the item's text; the condition by the field's label.
+    if (service.checklist) {
+      const checklistIds = idsByKey(
+        (await client.serviceChecklistItem.findMany({ where: { serviceId }, select: { id: true, text: true } })).map(({ id, text }) => ({ id, key: text })),
+      );
+      for (const item of service.checklist) {
+        const values = { text: item.text, isRequired: item.isRequired, position: item.position, isActive: item.isActive, ...conditionOf(item.condition) };
+        await save(
+          "CHECKLIST_ITEM",
+          owner("checklistItem", item.text),
+          checklistIds.get(keyOf(item.text)) ?? null,
+          () => client.serviceChecklistItem.create({ data: { ...values, serviceId }, select: { id: true } }),
+          (existing) => client.serviceChecklistItem.update({ where: { id: existing }, data: values, select: { id: true } }),
+        );
+      }
+    }
   }
 
-  // The sectors' escalation rules and canned responses.
+  // The sectors' escalation rules, canned responses and tags.
   for (const sector of data.sectors) {
     const sectorId = sectorIds.get(keyOf(sector.name))!;
     const ruleIds = idsByKey((await client.sectorEscalationRule.findMany({ where: { sectorId }, select: { id: true, name: true } })).map(({ id, name }) => ({ id, key: name })));
@@ -240,6 +258,21 @@ async function writePlan(client: Tx, plan: ImportPlan, actor: AuditActor): Promi
       const existing = responses.get(keyOf(response.title));
       if (existing) await client.cannedResponse.update({ where: { id: existing }, data: values });
       else await client.cannedResponse.create({ data: { ...values, sectorId, createdById: actor.id, createdAt: now } });
+    }
+
+    // Version 2: the sector's tags, matched by name, audited as on their screen.
+    if (sector.tags) {
+      const tagIds = idsByKey((await client.sectorTag.findMany({ where: { sectorId }, select: { id: true, name: true } })).map(({ id, name }) => ({ id, key: name })));
+      for (const tag of sector.tags) {
+        const values = { name: tag.name, color: tag.color, isActive: tag.isActive };
+        await save(
+          "SECTOR_TAG",
+          statusOf("tag", pathOf(sector.name, tag.name)),
+          tagIds.get(keyOf(tag.name)) ?? null,
+          () => client.sectorTag.create({ data: { ...values, sectorId }, select: { id: true } }),
+          (existing) => client.sectorTag.update({ where: { id: existing }, data: values, select: { id: true } }),
+        );
+      }
     }
   }
 

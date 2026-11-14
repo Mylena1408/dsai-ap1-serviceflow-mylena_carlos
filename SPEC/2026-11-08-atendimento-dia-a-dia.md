@@ -278,7 +278,7 @@ Nenhum destes recursos estava previsto em SPEC anterior; esta SPEC é o registro
 
 ### 9.2 Critérios de aceitação
 
-- [ ] **CA-CMP-01** — A configuração portátil exporta e importa etiquetas e modelos de checklist com as regras da parte D da SPEC anterior; um arquivo da versão 1 continua sendo aceito; ida e volta dá "igual".
+- [x] **CA-CMP-01** — A configuração portátil exporta e importa etiquetas e modelos de checklist com as regras da parte D da SPEC anterior; um arquivo da versão 1 continua sendo aceito; ida e volta dá "igual". *Verificado em 2026-11-14 (SF-220): a exportação escreve a versão 2 com as etiquetas e o checklist; a importação aceita as versões 1 e 2 (a 1 deixa etiquetas e checklists do destino como estão); prévia, regras das telas, tudo ou nada e auditoria valem para os itens novos; reimportar o arquivo exportado dá "igual" em tudo (integração). Nomes de etiqueta e textos de checklist repetidos seguem a regra da SF-187: a exportação os lista e a importação os recusa.*
 - [ ] **CA-CMP-02** — A API traz etiquetas, checklist e total de horas na leitura da solicitação, sem mudar as demais respostas.
 - [ ] **CA-CMP-03** — "Análises" mostra as horas e a conclusão do checklist no período, só quando houver dados.
 

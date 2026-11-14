@@ -12,6 +12,7 @@ import { createPrismaConfigurationApplyStore } from "./infrastructure/prisma-con
 export {
   CONFIGURATION_FORMAT,
   CONFIGURATION_VERSION,
+  CONFIGURATION_VERSIONS,
   MAX_CONFIGURATION_BYTES,
   configurationDataSchema,
   configurationFileSchema,

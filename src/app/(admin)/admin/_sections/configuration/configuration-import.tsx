@@ -12,12 +12,14 @@ const KIND_LABELS: Record<ItemKind, string> = {
   sector: "Setor",
   escalationRule: "Regra de escalonamento",
   cannedResponse: "Resposta pronta",
+  tag: "Etiqueta",
   category: "Categoria",
   service: "Serviço",
   field: "Campo",
   document: "Documento exigido",
   stage: "Etapa",
   article: "Artigo",
+  checklistItem: "Item de checklist",
   accessRole: "Papel",
   calendar: "Calendário",
   holiday: "Feriado",
@@ -67,6 +69,8 @@ const FIELD_LABELS: Record<string, string> = {
   endTime: "fim",
   timeZone: "fuso",
   yearly: "todo ano",
+  color: "cor",
+  text: "texto",
 };
 
 const count = (value: number, one: string, many: string) => `${value} ${value === 1 ? one : many}`;

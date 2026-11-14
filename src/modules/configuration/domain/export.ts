@@ -37,6 +37,8 @@ export interface ConfigurationSnapshot {
     isActive: boolean;
   }>;
   cannedResponses: Array<{ sectorId: string; title: string; body: string; isActive: boolean }>;
+  /** Version 2 (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 1): the sectors' tags. */
+  tags: Array<{ sectorId: string; name: string; color: string; isActive: boolean }>;
   categories: Array<{ id: string; name: string; isActive: boolean }>;
   services: Array<{
     id: string;
@@ -69,6 +71,16 @@ export interface ConfigurationSnapshot {
     conditionValue: string | null;
   }>;
   articles: Array<{ serviceId: string; title: string; body: string; isPublished: boolean; position: number }>;
+  /** Version 2: the services' checklist models. */
+  checklistItems: Array<{
+    serviceId: string;
+    text: string;
+    isRequired: boolean;
+    position: number;
+    isActive: boolean;
+    conditionFieldId: string | null;
+    conditionValue: string | null;
+  }>;
   accessRoles: Array<{ name: string; description: string | null; permissions: ConfigurationData["accessRoles"][number]["permissions"]; isActive: boolean }>;
   calendar: { weekdays: number[]; startMinute: number; endMinute: number; timeZone: string } | null;
   holidays: Array<{ day: string; name: string; yearly: boolean }>;
@@ -121,6 +133,9 @@ export function buildConfigurationData(snapshot: ConfigurationSnapshot): Configu
       cannedResponses: ofSector(snapshot.cannedResponses, sector.id)
         .sort(byKey((response) => response.title))
         .map(({ title, body, isActive }) => ({ title, body, isActive })),
+      tags: ofSector(snapshot.tags, sector.id)
+        .sort(byKey((tag) => tag.name))
+        .map(({ name, color, isActive }) => ({ name, color, isActive })),
     })),
     categories: [...snapshot.categories].sort(byKey((category) => category.name)).map(({ name, isActive }) => ({ name, isActive })),
     services: [...snapshot.services].sort(byKey((service) => service.name)).map((service) => ({
@@ -170,6 +185,15 @@ export function buildConfigurationData(snapshot: ConfigurationSnapshot): Configu
       articles: ofService(snapshot.articles, service.id)
         .sort(byPosition((article) => article.title))
         .map(({ title, body, isPublished, position }) => ({ title, body, isPublished, position })),
+      checklist: ofService(snapshot.checklistItems, service.id)
+        .sort(byPosition((item) => item.text))
+        .map((item) => ({
+          text: item.text,
+          isRequired: item.isRequired,
+          position: item.position,
+          isActive: item.isActive,
+          condition: condition(item.conditionFieldId, item.conditionValue),
+        })),
     })),
     accessRoles: [...snapshot.accessRoles]
       .sort(byKey((role) => role.name))

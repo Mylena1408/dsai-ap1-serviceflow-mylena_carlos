@@ -16,7 +16,7 @@ const order = [{ createdAt: "asc" as const }, { id: "asc" as const }];
 
 /** The configuration read with `client`; inside a transaction, the import's application reads it this way. */
 export async function readSnapshot(client: Prisma.TransactionClient): Promise<ConfigurationSnapshot> {
-  const [sectors, escalationRules, cannedResponses, categories, services, fields, documents, stages, articles, accessRoles, calendar, holidays, bundles] =
+  const [sectors, escalationRules, cannedResponses, categories, services, fields, documents, stages, articles, accessRoles, calendar, holidays, bundles, tags, checklistItems] =
     await Promise.all([
       client.sector.findMany({
         orderBy: order,
@@ -93,6 +93,12 @@ export async function readSnapshot(client: Prisma.TransactionClient): Promise<Co
       client.businessCalendar.findUnique({ where: { id: 1 }, select: { weekdays: true, startMinute: true, endMinute: true, timeZone: true } }),
       client.businessHoliday.findMany({ orderBy: { day: "asc" }, select: { day: true, name: true, yearly: true } }),
       client.serviceBundle.findMany({ orderBy: order, select: { name: true, description: true, serviceIds: true, isActive: true } }),
+      // Version 2 (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 1).
+      client.sectorTag.findMany({ orderBy: order, select: { sectorId: true, name: true, color: true, isActive: true } }),
+      client.serviceChecklistItem.findMany({
+        orderBy: order,
+        select: { serviceId: true, text: true, isRequired: true, position: true, isActive: true, conditionFieldId: true, conditionValue: true },
+      }),
     ]);
 
   const userIds = new Set<string>();
@@ -107,6 +113,7 @@ export async function readSnapshot(client: Prisma.TransactionClient): Promise<Co
     sectors,
     escalationRules,
     cannedResponses,
+    tags,
     categories,
     services,
     fields: fields.map((field) => ({
@@ -117,6 +124,7 @@ export async function readSnapshot(client: Prisma.TransactionClient): Promise<Co
     documents,
     stages,
     articles,
+    checklistItems,
     accessRoles,
     calendar,
     holidays: holidays.map((holiday) => ({ ...holiday, day: holiday.day.toISOString().slice(0, 10) })),

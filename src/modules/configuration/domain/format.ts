@@ -1,13 +1,21 @@
 import { z } from "zod";
 
 // The portable configuration file (SPEC 2026-11-07-operacao-e-automacao, 6.3 items 2 and 3; decisions H13
-// and H14): {"format": "serviceflow-config", "version": 1, "exportedAt": …, "data": {…}}, at most 2 MB,
+// and H14): {"format": "serviceflow-config", "version": 2, "exportedAt": …, "data": {…}}, at most 2 MB,
 // without internal identifiers. Items refer to each other by name (sector, category, service) and, inside a
 // service, by label or name (field, stage); people by e-mail. This schema checks the shape; the rules of each
 // configuration screen are checked by the import's preview (SF-188).
+//
+// Version 2 (SPEC 2026-11-08-atendimento-dia-a-dia, 9.1 item 1; decision I19) also carries each sector's tags
+// and each service's checklist model. The import accepts both versions: a version 1 file has neither list and
+// leaves the destination's tags and checklists as they are; a version 2 file has both lists in every sector
+// and service.
 
 export const CONFIGURATION_FORMAT = "serviceflow-config";
-export const CONFIGURATION_VERSION = 1;
+/** The version the export writes. */
+export const CONFIGURATION_VERSION = 2;
+/** The versions the import accepts. */
+export const CONFIGURATION_VERSIONS = [1, 2] as const;
 export const MAX_CONFIGURATION_BYTES = 2 * 1024 * 1024;
 
 // Generous bounds that only stop abuse; the screens' limits are checked by the preview. Lists also hold the
@@ -35,6 +43,9 @@ const escalationRuleSchema = z
 
 const cannedResponseSchema = z.object({ title: name, body: text(20_000), isActive: z.boolean() }).strict();
 
+/** Version 2: the color by its palette key ("blue"); the screen's palette is checked by the preview. */
+const tagSchema = z.object({ name, color: text(40), isActive: z.boolean() }).strict();
+
 const sectorSchema = z
   .object({
     name,
@@ -45,6 +56,8 @@ const sectorSchema = z
     redistributeOnAbsence: z.boolean(),
     escalationRules: list(escalationRuleSchema, 500),
     cannedResponses: list(cannedResponseSchema, 2_000),
+    /** Version 2 only. */
+    tags: list(tagSchema, 1_000).optional(),
   })
   .strict();
 
@@ -91,6 +104,17 @@ const stageSchema = z
   })
   .strict();
 
+/** Version 2: an item of the checklist model; the condition by the field's label, as the stages'. */
+const checklistItemSchema = z
+  .object({
+    text: text(2_000),
+    isRequired: z.boolean(),
+    position: z.number().int(),
+    isActive: z.boolean(),
+    condition: conditionSchema.nullable(),
+  })
+  .strict();
+
 const articleSchema = z.object({ title: name, body: text(50_000), isPublished: z.boolean(), position: z.number().int() }).strict();
 
 const serviceSchema = z
@@ -112,6 +136,8 @@ const serviceSchema = z
     documents: list(documentSchema, 200),
     stages: list(stageSchema, 200),
     articles: list(articleSchema, 500),
+    /** Version 2 only. */
+    checklist: list(checklistItemSchema, 500).optional(),
   })
   .strict();
 
@@ -155,11 +181,25 @@ export const configurationDataSchema = z
 export const configurationFileSchema = z
   .object({
     format: z.literal(CONFIGURATION_FORMAT),
-    version: z.literal(CONFIGURATION_VERSION),
+    version: z.literal(CONFIGURATION_VERSIONS),
     exportedAt: z.string().max(40),
     data: configurationDataSchema,
   })
-  .strict();
+  .strict()
+  .superRefine((file, context) => {
+    // Version 1 never has the tags and the checklists; version 2 always has them.
+    const v2 = file.version === 2;
+    const expect = (present: boolean, path: Array<string | number>) => {
+      if (present === v2) return;
+      context.addIssue({
+        code: "custom",
+        path: ["data", ...path],
+        message: v2 ? "Version 2 needs this list." : "Version 1 does not have this list.",
+      });
+    };
+    file.data.sectors.forEach((sector, index) => expect(sector.tags !== undefined, ["sectors", index, "tags"]));
+    file.data.services.forEach((service, index) => expect(service.checklist !== undefined, ["services", index, "checklist"]));
+  });
 
 export type ConfigurationFile = z.infer<typeof configurationFileSchema>;
 export type ConfigurationData = ConfigurationFile["data"];
@@ -167,6 +207,8 @@ export type SectorItem = ConfigurationData["sectors"][number];
 export type ServiceItem = ConfigurationData["services"][number];
 export type FieldItem = ServiceItem["fields"][number];
 export type StageItem = ServiceItem["stages"][number];
+export type TagItem = NonNullable<SectorItem["tags"]>[number];
+export type ChecklistItem = NonNullable<ServiceItem["checklist"]>[number];
 
 /** How a key is compared: the database compares these names ignoring case (citext). */
 export const keyOf = (value: string) => value.trim().toLocaleLowerCase("pt-BR");
@@ -199,12 +241,14 @@ export function repeatedKeys(data: ConfigurationData): string[] {
   for (const sector of data.sectors) {
     check(`${sector.name} › regras de escalonamento`, sector.escalationRules.map((rule) => rule.name));
     check(`${sector.name} › respostas prontas`, sector.cannedResponses.map((response) => response.title));
+    check(`${sector.name} › etiquetas`, (sector.tags ?? []).map((tag) => tag.name));
   }
   for (const service of data.services) {
     check(`${service.name} › campos`, service.fields.map((field) => field.label));
     check(`${service.name} › documentos`, service.documents.map((document) => document.name));
     check(`${service.name} › etapas`, service.stages.map((stage) => stage.name));
     check(`${service.name} › artigos`, service.articles.map((article) => article.title));
+    check(`${service.name} › checklist`, (service.checklist ?? []).map((item) => item.text));
   }
   return repeated;
 }

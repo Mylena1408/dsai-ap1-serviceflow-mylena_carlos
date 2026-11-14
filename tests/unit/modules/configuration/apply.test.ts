@@ -26,6 +26,8 @@ const empty: ConfigurationSnapshot = {
   documents: [],
   stages: [],
   articles: [],
+  checklistItems: [],
+  tags: [],
   accessRoles: [],
   calendar: null,
   holidays: [],
